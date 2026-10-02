@@ -1,0 +1,41 @@
+Calabi-Yau Lean formalization
+Copyright 2026 Qiuzhen College, Tsinghua University
+Authors: Jiatong Yang, Jinfeng Xu
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This repository contains files extracted and adapted from the following
+third-party projects, each released under the Apache License, Version 2.0.
+Every extracted file starts with a comment naming its upstream repository,
+commit and original path.
+
+1. differential-geometry
+   https://github.com/qinz1yang/differential-geometry
+   commit 7a48598d35109aa99d1cc678e2724c213cdf4ff3
+   Copyright 2026 The DifferentialGeometry contributors; individual files
+   carry the original author headers (including files by Yury Kudryashov,
+   Heather Macbeth and Jack McCarthy), which are preserved.
+   License: licenses/differential-geometry/LICENSE
+   Upstream NOTICE: licenses/differential-geometry/NOTICE
+
+2. DeGiorgi (vendored inside differential-geometry under
+   DifferentialGeometry/External/DeGiorgi)
+   https://github.com/scottnarmstrong/DeGiorgi, commit 4c1b307
+   Authors: Scott Armstrong, Julia Kempe
+   License: licenses/DeGiorgi/LICENSE
+   Upstream modification log: licenses/DeGiorgi/MODIFICATIONS.md
+   Extracted here to CalabiYau/Analysis/DeGiorgi/.
+
+Modifications made in this repository (Apache-2.0 §4(b)):
+- files were moved to new module paths under CalabiYau/, renamed into the
+  CalabiYau namespace where applicable, and imports among them were
+  rewritten accordingly;
+- files were converted to the Lean module system (`module` header,
+  `public import`, `@[expose] public section`), with a compatibility
+  preamble after the imports (`set_option maxSynthPendingDepth 3`, as in the
+  upstream lakefile, and, in files with private declarations,
+  `backward.privateInPublic`);
+- a one-line provenance comment was prepended to each file;
+- declarations not needed by this development were removed, some files
+  were split, and a few proofs were adapted where the module system hides
+  Mathlib definition bodies.

@@ -1,0 +1,31 @@
+-- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Geometry/Connection/TensorNabla/Regularity/Derivation.lean
+-- Locally modified.
+module
+public import CalabiYau.Geometry.Manifold.Connection.TensorNabla.RawDefs.MCovariant
+public import CalabiYau.Geometry.Manifold.Connection.TensorNabla.RawDefs.Bundled
+public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Coordinates.BundleBasis
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Basis
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Defs
+public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Composition
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Composition
+public import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Smoothness.LinearIsometry
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.Analysis.Normed.Module.Alternating.Basic
+public import Mathlib.RingTheory.Finiteness.Defs
+public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+public import Mathlib.Geometry.Manifold.VectorBundle.Basic
+public import Mathlib.Geometry.Manifold.VectorBundle.ContMDiffSection
+public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+public import Mathlib.Data.Bundle
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.Topology.Algebra.Module.FiniteDimension
+public import CalabiYau.Geometry.Manifold.Bundle.PartialMfderiv.Basic
+public import CalabiYau.Geometry.Manifold.Bundle.PartialMfderiv.ModelMixed
+public import CalabiYau.Geometry.Manifold.Coordinates.Calculus.FixedBaseDerivative
+public import CalabiYau.Geometry.Manifold.Bundle.TangentSpace

@@ -1,0 +1,21 @@
+name = "calabiyau"
+version = "0.1.0"
+defaultTargets = ["CalabiYau", "Comparator"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.33.1"
+
+[[lean_lib]]
+name = "CalabiYau"
+
+[[lean_lib]]
+name = "Comparator"
+roots = ["Comparator.Challenge"]
+globs = ["Comparator.+"]
