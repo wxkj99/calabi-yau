@@ -4,7 +4,7 @@ module
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.Basic
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Lp.Basic
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.FirstOrder
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Subcritical
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.Basic
@@ -16,8 +16,6 @@ public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -28,9 +26,9 @@ namespace Sobolev
 namespace Equivalence
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E]
+
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -46,89 +44,25 @@ open Sobolev.IntrinsicLp
 local notation "EuclN_E" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-private lemma sq_partials_scalarOnE_le_norm_fderiv_scalarOnE_sq
-    (g : CalabiYau.SmoothRiemannianMetric I M)
-    (α : M) (f : M → ℝ) (y : E) :
-    (∑ k : Fin (Module.finrank ℝ E),
-        (CalabiYau.Tensor.Coordinates.partialDeriv
-            (E := E) k
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y)^2) ≤
-      (∑ k : Fin (Module.finrank ℝ E),
-        ‖(CalabiYau.Tensor.Coordinates.chartModelBasis E) k‖^2) *
-          ‖fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y‖^2 := by
-  classical
-  let _ := g
-  have h_each : ∀ k,
-      (CalabiYau.Tensor.Coordinates.partialDeriv
-          (E := E) k
-          (CalabiYau.DivergenceTheorem.scalarOnE
-            (I := I) α f) y)^2 ≤
-        ‖(CalabiYau.Tensor.Coordinates.chartModelBasis E) k‖^2 *
-          ‖fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y‖^2 := by
-    intro k
-    have hop_le := (fderiv ℝ
-        (CalabiYau.DivergenceTheorem.scalarOnE
-          (I := I) α f) y).le_opNorm ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)
-    have hsq_le : (CalabiYau.Tensor.Coordinates.partialDeriv
-            (E := E) k
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y)^2 ≤
-          (‖fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y‖ * ‖(CalabiYau.Tensor.Coordinates.chartModelBasis E) k‖)^2 := by
-      unfold CalabiYau.Tensor.Coordinates.partialDeriv
-      have habs : |(fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)| ≤
-          ‖fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y‖ * ‖(CalabiYau.Tensor.Coordinates.chartModelBasis E) k‖ := by
-        have h_norm_eq : ‖(fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)‖ =
-            |(fderiv ℝ
-              (CalabiYau.DivergenceTheorem.scalarOnE
-                (I := I) α f) y) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)| :=
-          Real.norm_eq_abs _
-        rw [← h_norm_eq]
-        exact hop_le
-      have h_sq_abs :
-          ((fderiv ℝ
-              (CalabiYau.DivergenceTheorem.scalarOnE
-                (I := I) α f) y) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k))^2 =
-          |(fderiv ℝ
-              (CalabiYau.DivergenceTheorem.scalarOnE
-                (I := I) α f) y) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)|^2 := by
-        rw [sq_abs]
-      rw [h_sq_abs]
-      have hABS_nn : 0 ≤ |(fderiv ℝ
-            (CalabiYau.DivergenceTheorem.scalarOnE
-              (I := I) α f) y) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)| := abs_nonneg _
-      have hRHS_nn : 0 ≤ ‖fderiv ℝ
-          (CalabiYau.DivergenceTheorem.scalarOnE
-            (I := I) α f) y‖ * ‖(CalabiYau.Tensor.Coordinates.chartModelBasis E) k‖ :=
-        mul_nonneg (norm_nonneg _) (norm_nonneg _)
-      exact pow_le_pow_left₀ hABS_nn habs 2
-    refine hsq_le.trans ?_
-    rw [mul_pow]
-    rw [mul_comm]
-  refine (Finset.sum_le_sum (s := Finset.univ) (fun k _ => h_each k)).trans ?_
-  rw [← Finset.sum_mul]
-
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 noncomputable def toEuclideanBasisSqSum : ℝ :=
   ∑ k : Fin (Module.finrank ℝ E),
     ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) k)‖^2
 
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma toEuclideanBasisSqSum_nonneg :
     (0 : ℝ) ≤ toEuclideanBasisSqSum (E := E) :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-omit [IsManifold I ∞ M] in
+section
+
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
     (α : M) (f : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -145,7 +79,6 @@ private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
   simp only [hsymm, hy, if_true]
   rfl
 
-omit [IsManifold I ∞ M] in
 lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
     [I.Boundaryless]
     (α : M) {f : M → ℝ}
@@ -303,7 +236,6 @@ lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
   rw [← Finset.mul_sum]
   rw [mul_comm]
 
-omit [IsManifold I ∞ M] in
 lemma chartSmoothExt_eq_zero_off_image_tsupport_local
     (α : M) {f : M → ℝ} {y : EuclN_E}
     (hy_off : y ∉ (toEuclidean (E := E)) ''
@@ -333,7 +265,12 @@ lemma chartSmoothExt_eq_zero_off_image_tsupport_local
             else (0 : ℝ)) = 0
     rw [if_neg hy_target]
 
-omit [FiniteDimensional ℝ E] in
+end
+
+section
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 private lemma euclN_norm_le_sum_components_norms_local (w : EuclN_E) :
     ‖w‖ ≤ ∑ i : Fin (Module.finrank ℝ E), ‖w i‖ := by
   classical
@@ -347,7 +284,6 @@ private lemma euclN_norm_le_sum_components_norms_local (w : EuclN_E) :
   intro i _
   simp
 
-omit [FiniteDimensional ℝ E] in
 private lemma norm_fderiv_le_sum_partials_local_local (ψ : EuclN_E → ℝ)
     (y : EuclN_E) :
     ‖fderiv ℝ ψ y‖ ≤
@@ -379,7 +315,6 @@ private lemma norm_fderiv_le_sum_partials_local_local (ψ : EuclN_E → ℝ)
   intro i _
   simp
 
-omit [FiniteDimensional ℝ E] in
 private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {μ : Measure EuclN_E}
     {ψ : EuclN_E → ℝ} (h_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -431,7 +366,6 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
   intro i _
   rw [eLpNorm_norm]
 
-omit [FiniteDimensional ℝ E] in
 private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)
     {ψ : EuclN_E → ℝ} (h_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -446,15 +380,14 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
       (d := Module.finrank ℝ E) 1 q ψ Ω :=
     Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hΩ_open h_smooth hψ_compact hψ_support hq_one 1
-  have hψ_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) q ψ Ω :=
+  have hψ_W1p : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) q ψ Ω :=
     Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hψ_mem
   have h_classical_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (fun z : EuclN_E => (fderiv ℝ ψ z) (EuclideanSpace.single i 1)) ψ Ω :=
-    DeGiorgi.HasWeakPartialDeriv.of_contDiff (Ω := Ω) (i := i) (f := ψ)
-      hΩ_open (h_smooth.of_le (by norm_cast))
+    Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff (Ω := Ω) (i := i) (f := ψ) (h_smooth.of_le (by norm_cast))
   have h_chosen_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (Sobolev.Euclidean.chosenWeakPartialOrZero
           q i ψ Ω) ψ Ω :=
     Sobolev.Euclidean.chosenWeakPartialOrZero_isWeakPartial_of_mem
@@ -472,10 +405,11 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
       (volume.restrict Ω) :=
     (Sobolev.Euclidean.chosenWeakPartialOrZero_memLp_of_mem
       hψ_W1p i).locallyIntegrable hq_one
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_local h_chosen_local
 
-omit [FiniteDimensional ℝ E] in
+end
+
 lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     [NeZero (Module.finrank ℝ E)]
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)
@@ -584,6 +518,9 @@ lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     (one_mul _).symm]
   gcongr
 
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : CalabiYau.SmoothRiemannianMetric I M)

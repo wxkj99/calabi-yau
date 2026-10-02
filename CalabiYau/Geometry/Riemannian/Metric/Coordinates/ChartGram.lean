@@ -12,8 +12,6 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -160,14 +158,6 @@ lemma chartGramMatrix_entry_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
-private lemma chartGramMatrix_pair_entry_contMDiffOn
-    (g : SmoothRiemannianMetric I M) (x₀ : M)
-    (ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :
-    ContMDiffOn I 𝓘(ℝ) ∞
-      (fun x => chartGramMatrix g x₀ x ij.1 ij.2)
-      (trivializationAt E (TangentSpace I) x₀).baseSet :=
-  chartGramMatrix_entry_contMDiffOn (I := I) g x₀ ij.1 ij.2
-
 lemma chartGramMatrix_det_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffOn I 𝓘(ℝ) ∞
@@ -198,65 +188,5 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-def chartGramOnE (g : SmoothRiemannianMetric I M) (α : M)
-    (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
-  fun y => CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
-
-omit [NeZero (Module.finrank ℝ E)] in
-@[simp] lemma chartGramOnE_def
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i j : Fin (Module.finrank ℝ E)) (y : E) :
-    chartGramOnE (I := I) g α i j y =
-      CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j := rfl
-
-omit [NeZero (Module.finrank ℝ E)] in
-lemma chartGramOnE_symm
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i j : Fin (Module.finrank ℝ E)) (y : E) :
-    chartGramOnE (I := I) g α i j y = chartGramOnE (I := I) g α j i y := by
-  unfold chartGramOnE
-  rw [CalabiYau.Tensor.Coordinates.chartGramMatrix_apply, CalabiYau.Tensor.Coordinates.chartGramMatrix_apply]
-  exact g.symm _ _ _
-
-omit [NeZero (Module.finrank ℝ E)] in
-lemma chartGramOnE_contDiffOn
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i j : Fin (Module.finrank ℝ E)) :
-    ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j) (extChartAt I α).target := by
-  classical
-  have hbase : ContMDiffOn I 𝓘(ℝ) ∞
-      (fun x : M => CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α x i j)
-      (trivializationAt E (TangentSpace I) α).baseSet :=
-    CalabiYau.Tensor.Coordinates.chartGramMatrix_entry_contMDiffOn (I := I) g α i j
-  have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
-      (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
-  have hsubset : (extChartAt I α).target ⊆
-      (extChartAt I α).symm ⁻¹'
-        (trivializationAt E (TangentSpace I) α).baseSet := by
-    intro y hy
-    have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
-      (extChartAt I α).map_target hy
-    rw [extChartAt_source] at hsource
-    exact hsource
-  have hcomp : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
-      ((fun x : M => CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α x i j) ∘
-        (extChartAt I α).symm)
-      (extChartAt I α).target := hbase.comp hsymm hsubset
-  exact hcomp.contDiffOn
-
-omit [NeZero (Module.finrank ℝ E)] in
-lemma chartGramOnE_differentiableAt_interior
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i j : Fin (Module.finrank ℝ E))
-    {y : E} (hy : y ∈ interior (extChartAt I α).target) :
-    DifferentiableAt ℝ (chartGramOnE (I := I) g α i j) y := by
-  have hcd_target : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j)
-      (extChartAt I α).target := chartGramOnE_contDiffOn (I := I) g α i j
-  have hcd_int : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j)
-      (interior (extChartAt I α).target) := hcd_target.mono interior_subset
-  have hop_int : IsOpen (interior (extChartAt I α).target) := isOpen_interior
-  have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
-  exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
 end CalabiYau.Riemannian

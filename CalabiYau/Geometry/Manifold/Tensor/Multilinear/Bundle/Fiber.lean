@@ -142,66 +142,6 @@ theorem ext {s : ℕ} {x : B}
     (h : ∀ m, T₁ m = T₂ m) : T₁ = T₂ :=
   ContinuousMultilinearMap.ext h
 
-theorem triv_zero_apply_eq (x₀ x : B)
-    (T : Bundle.continuousMultilinearMap 𝕜 0 F E x)
-    (w : Fin 0 → F) :
-    (trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
-      (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀ ⟨x, T⟩).2 w = T Fin.elim0 := by
-  change T (fun i : Fin 0 => (trivializationAt F E x₀).symmL 𝕜 x (w i)) = T Fin.elim0
-  exact congrArg T (Subsingleton.elim _ _)
-
-theorem triv_zero_symmL_apply_elim0 (x₀ x : B)
-    (hx : x ∈ (trivializationAt F E x₀).baseSet)
-    (ω₀ : ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜) :
-    ((trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
-        (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀).symmL 𝕜 x ω₀ :
-        Bundle.continuousMultilinearMap 𝕜 0 F E x) Fin.elim0 = ω₀ 0 := by
-  set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
-    (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀ with he_def
-  have hbase : x ∈ e.baseSet := hx
-  have hsymmL : (e.symmL 𝕜 x ω₀ : Bundle.continuousMultilinearMap 𝕜 0 F E x) =
-      e.symm x ω₀ := by
-    exact e.symmL_apply hbase ω₀
-  rw [hsymmL]
-  have h1 := triv_zero_apply_eq (F := F) (E := E) x₀ x (e.symm x ω₀) 0
-  have h2 : (e ⟨x, e.symm x ω₀⟩ : B × _) = (x, ω₀) :=
-    e.apply_mk_symm hbase ω₀
-  rw [show (e ⟨x, e.symm x ω₀⟩ : B × _).2 = ω₀ from congrArg Prod.snd h2] at h1
-  exact h1.symm
-
-theorem triv_symmL_eq_compContinuousLinearMap {s : ℕ} (x₀ x : B)
-    (hx : x ∈ (trivializationAt F E x₀).baseSet)
-    (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :
-    ((trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-        (Bundle.continuousMultilinearMap 𝕜 s F E) x₀).symmL 𝕜 x T :
-        Bundle.continuousMultilinearMap 𝕜 s F E x) =
-      T.compContinuousLinearMap
-        (fun _ : Fin s => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x) := by
-  set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-    (Bundle.continuousMultilinearMap 𝕜 s F E) x₀ with he_def
-  have hbase : x ∈ e.baseSet := hx
-  have hsymmL : (e.symmL 𝕜 x T : Bundle.continuousMultilinearMap 𝕜 s F E x) =
-      e.symm x T := by
-    exact e.symmL_apply hbase T
-  rw [hsymmL]
-  apply Bundle.continuousMultilinearMap.ext
-  intro v
-  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  have h_fwd : ∀ (M : Bundle.continuousMultilinearMap 𝕜 s F E x)
-      (w : Fin s → F),
-      (e ⟨x, M⟩).2 w = M (fun i => (trivializationAt F E x₀).symmL 𝕜 x (w i)) := by
-    intro M w; rfl
-  have h_rt : (e ⟨x, e.symm x T⟩ : B × _) = (x, T) :=
-    e.apply_mk_symm hbase T
-  have h_snd : (e ⟨x, e.symm x T⟩ : B × _).2 = T := congrArg Prod.snd h_rt
-  have h_apply := h_fwd (e.symm x T)
-    (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
-  rw [h_snd] at h_apply
-  conv_rhs at h_apply =>
-    arg 2; ext i
-    rw [(trivializationAt F E x₀).symmL_continuousLinearMapAt hx (v i)]
-  exact h_apply.symm
-
 def toModel {s : ℕ} {x : B}
     (T : Bundle.continuousMultilinearMap 𝕜 s F E x) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=

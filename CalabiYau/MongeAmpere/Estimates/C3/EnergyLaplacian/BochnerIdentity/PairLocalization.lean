@@ -23,23 +23,12 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
 omit [T2Space M] [CompactSpace M] in
-private theorem calabiEnergy_eq_c3Pair_at_centre (ω₀ : KahlerForm n M) (φ : M → ℝ) (x : M) :
-    calabiEnergy ω₀ φ x =
-      (c3Pair (c3PerturbedMetricInChart ω₀ φ x)
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)
-        (c3ConnectionDifferenceInChart ω₀ φ x
-          (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
-        (c3ConnectionDifferenceInChart ω₀ φ x
-          (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))).re := by
-  simp [calabiEnergy, calabiEnergyInChart, c3Pair, c3PerturbedMetricInChart]
-
-omit [T2Space M] [CompactSpace M] in
 private theorem calabiEnergyInChart_eq_c3Pair (ω₀ : KahlerForm n M)
     (φ : M → ℝ) (x : M) (w : EuclideanSpace ℂ (Fin n)) :
     calabiEnergyInChart ω₀ φ x w =
       (c3Pair (c3PerturbedMetricInChart ω₀ φ x) w
-        (c3ConnectionDifferenceInChart ω₀ φ x w)
-        (c3ConnectionDifferenceInChart ω₀ φ x w)).re := by
+        (connectionDifferenceInChart ω₀ φ x w)
+        (connectionDifferenceInChart ω₀ φ x w)).re := by
   simp [calabiEnergyInChart, c3Pair, c3PerturbedMetricInChart]
 
 open Filter Topology in
@@ -60,6 +49,7 @@ private theorem complexHessian_eq_of_eventuallyEq {n : ℕ}
     hDerEq.fderiv_eq
   rw [complexHessian_apply hf i j, complexHessian_apply hg i j, hSecond]
 
+omit [T2Space M] [CompactSpace M] in
 theorem calabiEnergy_laplacian_eq_chart_pair_hessian (ω₀ : KahlerForm n M)
     {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (x : M) :
     (ω₀.perturb φ hφ).laplacian (calabiEnergy ω₀ φ) x =
@@ -67,7 +57,7 @@ theorem calabiEnergy_laplacian_eq_chart_pair_hessian (ω₀ : KahlerForm n M)
   let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
   let z := e x
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   let f : EuclideanSpace ℂ (Fin n) → ℝ := (calabiEnergy ω₀ φ) ∘ e.symm
   let q : EuclideanSpace ℂ (Fin n) → ℝ := fun w => (c3Pair g w (T w) (T w)).re
   have hz : z ∈ e.target := e.map_source (mem_extChartAt_source x)

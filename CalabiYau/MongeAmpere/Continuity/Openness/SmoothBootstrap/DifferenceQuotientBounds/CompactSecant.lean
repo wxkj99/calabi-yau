@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Tactic.Abel

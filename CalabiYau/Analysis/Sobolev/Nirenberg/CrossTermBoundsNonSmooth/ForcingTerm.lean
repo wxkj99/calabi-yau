@@ -1,10 +1,13 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Nirenberg/CrossTermBoundsNonSmooth/ForcingTerm.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBounds
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
 public import CalabiYau.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmooth
 public import CalabiYau.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CoefficientDifferenceQuotient
-public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.TranslatedCutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.CutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
 
 @[expose] public section
 
@@ -19,11 +22,10 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators InnerProductSpace
 
 namespace Sobolev.NirenbergCrossBoundsNonSmooth
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma nirenbergTestFunction_tsupport_subset_of_thickening_nonsmooth_fterm
     {u : E → ℝ}
     {η : E → ℝ}
@@ -38,7 +40,6 @@ private lemma nirenbergTestFunction_tsupport_subset_of_thickening_nonsmooth_fter
   (Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
     (d := d) η u k h).trans (hh_support_in_Ω' hh_le)
 
-omit [NeZero d] in
 private lemma hasCompactSupport_v_test_nonsmooth_fterm
     {η : E → ℝ} (hη_support : HasCompactSupport η)
     {u : E → ℝ} (k : Fin d) (h : ℝ) :
@@ -48,7 +49,6 @@ private lemma hasCompactSupport_v_test_nonsmooth_fterm
   NirenbergTestFunction.hasCompactSupport_nirenbergTestFunction
     hη_support k h
 
-omit [NeZero d] in
 private lemma memLp_eta_sq_diffQuot_u_fterm
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_support : HasCompactSupport η)
@@ -67,7 +67,6 @@ private lemma memLp_eta_sq_diffQuot_u_fterm
     memLp_diffQuot_two k h hu_l2
   exact memLp_bounded_mul hη_sq_cont.aestronglyMeasurable hM h_dq_l2
 
-omit [NeZero d] in
 private lemma memLp_v_test_nonsmooth_fterm
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_support : HasCompactSupport η)
@@ -86,7 +85,6 @@ private lemma memLp_v_test_nonsmooth_fterm
   rw [h_eq]
   exact memLp_diffQuot_two k (-h) h_inner
 
-omit [NeZero d] in
 private lemma pointwise_young_f_v_test
     (f : E → ℝ) (v_test : E → ℝ) {ε : ℝ} (hε : 0 < ε) (x : E) :
     |f x * v_test x| ≤ (ε/2) * (v_test x) ^ 2 + (1/(2*ε)) * (f x) ^ 2 := by
@@ -100,7 +98,6 @@ private lemma pointwise_young_f_v_test
   have h_ε_eq : ε * (v_test x) ^ 2 = 2 * ((ε / 2) * (v_test x) ^ 2) := by ring
   linarith [h_y, h_div_eq, h_ε_eq]
 
-omit [NeZero d] in
 private lemma pointwise_half_sum_f_v_test
     (f v_test : E → ℝ) (x : E) :
     |f x * v_test x| ≤ (1/2) * ((f x) ^ 2 + (v_test x) ^ 2) := by
@@ -109,7 +106,6 @@ private lemma pointwise_half_sum_f_v_test
   have h_abs : |f x * v_test x| = |f x| * |v_test x| := abs_mul _ _
   linarith
 
-omit [NeZero d] in
 theorem forcing_term_bound_nonsmooth_quantitative
     {Ω : Set E}
     {f : E → ℝ} (hf_l2_local : ∀ {Ω' : Set E}, IsCompact (closure Ω') →

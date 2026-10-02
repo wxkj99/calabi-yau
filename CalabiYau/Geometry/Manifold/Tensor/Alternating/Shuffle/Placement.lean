@@ -5,12 +5,10 @@ public import Mathlib.LinearAlgebra.Alternating.DomCoprod
 public import Mathlib.GroupTheory.Coset.Card
 public import Mathlib.Data.Finset.Sort
 public import Mathlib.Tactic.Group
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.FiniteEquivalence
+public import CalabiYau.Mathlib.Logic.Equiv.FinReindexing
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 namespace Equiv.Perm
 
@@ -27,7 +25,7 @@ namespace TwoShuffle
 
 variable {k n : ℕ}
 
-private theorem card_compl (S : Finset (Fin (k + n))) (hS : S.card = k) :
+theorem card_compl (S : Finset (Fin (k + n))) (hS : S.card = k) :
     (Sᶜ : Finset (Fin (k + n))).card = n := by
   rw [Finset.card_compl, hS, Fintype.card_fin]
   omega
@@ -386,7 +384,7 @@ def pBlock (P : ThreeShuffle m n p) : {S : Finset (Fin (m + n + p)) // S.card = 
     rw [Finset.card_compl, P.mnBlock.2, Fintype.card_fin]
     omega⟩
 
-private theorem mBlock_compl_card (P : ThreeShuffle m n p) :
+theorem mBlock_compl_card (P : ThreeShuffle m n p) :
     ((P.mBlock.1)ᶜ : Finset (Fin (m + n + p))).card = n + p := by
   rw [Finset.card_compl, P.mBlock.2, Fintype.card_fin]
   omega

@@ -4,8 +4,8 @@ module
 public import CalabiYau.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkpHigherOrder
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoff
 public import CalabiYau.Analysis.Sobolev.Tools.StrictStrongSupport
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.Rellich
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
+public import CalabiYau.Analysis.Sobolev.Manifold.RiemannianRellich
 
 @[expose] public section
 
@@ -35,21 +35,10 @@ private noncomputable def pou
   ((CalabiYau.RiemannianVolume.chartAtlasPOU I M γ
     : C^∞⟮I, M; ℝ⟯) : M → ℝ)
 
-private lemma pou_smooth
-    [T2Space M] [SigmaCompactSpace M] (γ : M) :
-    ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ (pou (I := I) (M := M) γ) :=
-  (CalabiYau.RiemannianVolume.chartAtlasPOU I M γ
-    : C^∞⟮I, M; ℝ⟯).contMDiff
-
 private lemma pou_tsupport_subset
     [T2Space M] [SigmaCompactSpace M] (γ : M) :
     tsupport (pou (I := I) (M := M) γ) ⊆ (chartAt H γ).source :=
   CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M γ
-
-private lemma pou_hasCompactSupport
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] (γ : M) :
-    HasCompactSupport (pou (I := I) (M := M) γ) :=
-  (isClosed_tsupport _).isCompact
 
 private lemma hasCompactSupport_chartStrictCutoff
     [T2Space M] [CompactSpace M] (α : M) :
@@ -351,14 +340,14 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     intro j hj y _; exact hC_combined_α_bound y j hj
   obtain ⟨K_leib_α, hK_leib_α_pos, hK_leib_α_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-      k hp_one hp_top hΩα_open hη_combined_α_smooth hC_combined_α_nn
+      k hp_one hΩα_open hη_combined_α_smooth hC_combined_α_nn
       hη_combined_α_iter_bound
   have hη_γ_local_iter_bound :
       ∀ j ≤ k, ∀ y ∈ Ωγ_target, ‖iteratedFDeriv ℝ j η_γ_local y‖ ≤ C_η_γ_local := by
     intro j hj y _; exact hC_η_γ_local_bound y j hj
   obtain ⟨K_leib_γ, hK_leib_γ_pos, hK_leib_γ_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-      k hp_one hp_top hΩγ_target_open hη_γ_local_smooth hC_η_γ_local_nn
+      k hp_one hΩγ_target_open hη_γ_local_smooth hC_η_γ_local_nn
       hη_γ_local_iter_bound
   set K_chain : ℝ := Φ.wkpCompositionConstant k p with hK_chain_def
   have hK_chain_pos : 0 < K_chain := by

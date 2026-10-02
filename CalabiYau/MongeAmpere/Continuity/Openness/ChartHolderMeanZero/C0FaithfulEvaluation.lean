@@ -24,6 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- Evaluation faithfully represents the order-zero little-Hölder completion on a compact,
 finite-dimensional manifold. The statement includes `α = 0`, and in particular the flat
 one-dimensional chart. -/

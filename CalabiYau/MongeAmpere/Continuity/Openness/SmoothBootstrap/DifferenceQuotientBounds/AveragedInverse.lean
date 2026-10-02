@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
@@ -18,17 +18,14 @@ open Set MeasureTheory
 /-- An average over the unit interval preserves a uniform entrywise `C^{0,α}` bound. The
 integrability hypothesis is stated pointwise in the spatial variable, as required to interpret the
 interval integral. -/
-@[deprecated "unused hypotheses `hα₁` and `hContinuous`; will be removed" (since := "2026-10-02")]
 theorem exists_holderBoundOn_interval_average
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (α K : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (α K : ℝ≥0) (hα₀ : 0 < α)
     (U : Set E) (F : ℝ → E → ℂ)
     (hHolder : ∀ s ∈ Set.Icc (0 : ℝ) 1,
       HolderBoundOn 0 α K U (F s))
     (hIntegrable : ∀ z ∈ U,
-      IntervalIntegrable (fun s ↦ F s z) MeasureTheory.volume 0 1)
-    (hContinuous : ∀ z ∈ U,
-      ContinuousOn (fun s ↦ F s z) (Set.Icc (0 : ℝ) 1)) :
+      IntervalIntegrable (fun s ↦ F s z) MeasureTheory.volume 0 1) :
     HolderBoundOn 0 α K U (fun z ↦ ∫ s in (0 : ℝ)..1, F s z) := by
   have hpoint (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (z : E) (hz : z ∈ U) :
       ‖F s z‖ ≤ (K : ℝ) := by

@@ -8,8 +8,6 @@ public import Mathlib.LinearAlgebra.Basis.VectorSpace
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

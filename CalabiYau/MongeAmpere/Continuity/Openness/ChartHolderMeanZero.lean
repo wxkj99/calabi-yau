@@ -125,6 +125,7 @@ abbrev MeanZeroLittleHolderC2
     (α : ℝ≥0) (N : SmoothChartHolderNormedData cover 2 α) :=
   LittleHolderMeanZero ω₁ cover 2 α N
 
+omit [IsManifold 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞ M] in
 /-- The mean-zero carrier is closed in the little-Hölder completion. -/
 theorem littleHolderMeanZeroSubmodule_isClosed
     (ω₁ : KahlerForm n M)
@@ -177,6 +178,7 @@ noncomputable def littleHolderMeanZeroEvaluationCLM
   exact (smoothChartHolderContinuousMapExtension cover k α N).comp
     (littleHolderMeanZeroSubmodule ω₁ cover k α N).subtypeL
 
+omit [IsManifold 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞ M] in
 /-- Restriction of completed C⁰ evaluation to the mean-zero carrier remains faithful. -/
 theorem littleHolderMeanZeroEvaluationC0CLM_injective
     (ω₁ : KahlerForm n M)
@@ -197,13 +199,13 @@ theorem littleHolderMeanZeroEvaluationC2CLM_injective
   apply Subtype.ext
   exact smoothChartHolderContinuousMapExtension_C2_injective cover α N hxy
 
+omit [IsManifold 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞ M] in
 /-- Smooth mean-zero core functions are dense in the mean-zero completion. The positive total
 volume hypothesis makes the standard correction `f ↦ f - (∫ f / vol(M))·1` well-defined. -/
-@[deprecated "unused hypotheses `hα₀` and `hα₁`; will be removed" (since := "2026-10-02")]
 theorem closure_smoothMeanZeroChartHolderCore_coe
     (ω₁ : KahlerForm n M)
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (k : ℕ) (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (k : ℕ) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover k α)
     (hvol : 0 < ω₁.volume.real Set.univ) :
     letI : NormedAddCommGroup (SmoothChartHolderCore cover k α) :=

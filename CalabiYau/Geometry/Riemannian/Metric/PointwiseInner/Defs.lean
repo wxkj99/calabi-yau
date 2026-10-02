@@ -55,11 +55,6 @@ noncomputable def tensorInnerPointwise
     (lowerAllUpperIndices (I := I) (M := M) g r s x S)
     (lowerAllUpperIndices (I := I) (M := M) g r s x T)
 
-noncomputable def tensorPointwiseNorm
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S : TensorRSModel r s ℝ E) : ℝ :=
-  Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s x S S)
-
 end CalabiYau.L2
 
 end

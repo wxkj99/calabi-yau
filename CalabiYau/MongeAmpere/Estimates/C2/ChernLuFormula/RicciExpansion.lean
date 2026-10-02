@@ -5,7 +5,7 @@ public import CalabiYau.Geometry.Kahler.Ricci
 public import CalabiYau.Geometry.Complex.Forms.OneOne
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalFrameJets
 import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.LogDetSecondJet
-import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.RelativeDetRicciBridge
+import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.RelativeDeterminantRicci
 
 /-!
 # Ricci and relative-determinant expansion in a normal frame
@@ -66,7 +66,7 @@ theorem normalFrame_ricci_relative_determinant_expansion
         ∑ p, ∑ j, ∑ k,
           ‖normalFrameFirstDerivative F p j k‖ ^ 2 /
             (F.eigenvalue j * F.eigenvalue k) := by
-  rw [normalFrame_relative_determinant_ricci_bridge ω₀ ω₁ x F,
+  rw [neg_relTrace_ricciForm_add_laplacian_log_relDet_eq_sum ω₀ ω₁ x F,
     normalFrame_logdet_second_jet_expansion ω₀ ω₁ x F]
 
 end KahlerForm

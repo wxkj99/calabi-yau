@@ -93,36 +93,6 @@ private theorem separated_core {n : Type} [Fintype n] [DecidableEq n]
           intro b _
           ring_nf
 
-private theorem three_slot_separated_normal_normal_star
-    {n : Type} [Fintype n] [DecidableEq n]
-    (P Q R A B C : Matrix n n ℂ) (T : n → n → n → ℂ)
-    (s p q : n) :
-    (∑ i, ∑ j, P i s * Q j p *
-      (∑ a, ∑ b, A a i * B b j *
-        (∑ k, star (R k q) * ∑ c, star (C c k) * T a b c))) =
-      ∑ a, ∑ b, (A * P) a s * (B * Q) b p *
-        ∑ c, star ((C * R) c q) * T a b c := by
-  calc
-    (∑ i, ∑ j, P i s * Q j p *
-      (∑ a, ∑ b, A a i * B b j *
-        (∑ k, star (R k q) * ∑ c, star (C c k) * T a b c))) =
-      ∑ a, ∑ b, (∑ i, P i s * A a i) * (∑ j, Q j p * B b j) *
-        (∑ k, star (R k q) * ∑ c, star (C c k) * T a b c) := by
-      exact separated_core (fun i => P i s) (fun j => Q j p) A B
-        (fun a b => ∑ k, star (R k q) * ∑ c, star (C c k) * T a b c)
-    _ = ∑ a, ∑ b, (A * P) a s * (B * Q) b p *
-        ∑ c, star ((C * R) c q) * T a b c := by
-      apply Finset.sum_congr rfl
-      intro a _
-      apply Finset.sum_congr rfl
-      intro b _
-      rw [show (∑ i, P i s * A a i) = (A * P) a s by
-        simp [Matrix.mul_apply, mul_comm]]
-      rw [show (∑ j, Q j p * B b j) = (B * Q) b p by
-        simp [Matrix.mul_apply, mul_comm]]
-      rw [sum_contract_nested (fun k => star (R k q))
-        (fun c k => star (C c k)) (fun c => T a b c)]
-      simp [Matrix.mul_apply, mul_comm]
 private theorem two_slot_comp_normal_star {n : Type} [Fintype n] [DecidableEq n]
     (P Q A B : Matrix n n ℂ) (T : n → n → ℂ) (s p : n) :
     (∑ i, P i s * ∑ a, A a i *

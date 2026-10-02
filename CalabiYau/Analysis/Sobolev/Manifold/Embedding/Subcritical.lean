@@ -2,15 +2,20 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Basic
-public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Manifold
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
+public import CalabiYau.Analysis.Sobolev.Chart.Defs
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Normed.Group.NullSubmodule
+public import Mathlib.Analysis.Normed.Group.Uniform
+public import CalabiYau.Analysis.Sobolev.Manifold.RiemannianRellich
+public import CalabiYau.Geometry.Riemannian.Volume.Family.Basic
+public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+public import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
 public import CalabiYau.Analysis.Sobolev.Manifold.Rellich.Compactness
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
-public import CalabiYau.Geometry.Riemannian.Volume.Family.Basic
 public import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator
-public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 public import Mathlib.MeasureTheory.Function.LpSpace.Complete
 public import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 
@@ -39,18 +44,16 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 namespace EuclideanSubcritical
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma eq_zero_off_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN} (hf_support : tsupport f ⊆ Ω)
     {x : EuN} (hx : x ∉ Ω) : f x = 0 := by
   have hx_notsupp : x ∉ tsupport f := fun h => hx (hf_support h)
   exact image_eq_zero_of_notMem_tsupport hx_notsupp
 
-omit [NeZero d] in
 private lemma fderiv_eq_zero_off_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN}
     (hf_support : tsupport f ⊆ Ω)
@@ -65,7 +68,6 @@ private lemma fderiv_eq_zero_off_of_tsupport_subset
   rw [Filter.EventuallyEq.fderiv_eq hf_zero]
   simp
 
-omit [NeZero d] in
 private lemma eLpNorm_eq_eLpNorm_restrict_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN} (hΩ_meas : MeasurableSet Ω)
     (hf_support : tsupport f ⊆ Ω) (p : ℝ≥0∞) :
@@ -81,7 +83,6 @@ private lemma eLpNorm_eq_eLpNorm_restrict_of_tsupport_subset
     _ = eLpNorm f p (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
-omit [NeZero d] in
 private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN}
     (hΩ_meas : MeasurableSet Ω) (hf_support : tsupport f ⊆ Ω) (p : ℝ≥0∞) :
@@ -98,7 +99,6 @@ private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
         eLpNorm_indicator_eq_eLpNorm_restrict
           (μ := volume) (p := p) (f := fderiv ℝ f) (s := Ω) hΩ_meas
 
-omit [NeZero d] in
 private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -109,15 +109,14 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
   have hf_mem : Sobolev.Euclidean.MemWkp (d := d) 1 p f Ω :=
     Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
       (d := d) hΩ_open hf_smooth hf_compact hf_support hp_one 1
-  have hf_W1p : DeGiorgi.MemW1p (d := d) p f Ω :=
+  have hf_W1p : Sobolev.Euclidean.MemW1p (d := d) p f Ω :=
     Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hf_mem
   have h_classical_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := d) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
         (fun x => (fderiv ℝ f x) (EuclideanSpace.single i 1)) f Ω :=
-    DeGiorgi.HasWeakPartialDeriv.of_contDiff (Ω := Ω) (i := i) (f := f)
-      hΩ_open (hf_smooth.of_le (by norm_cast))
+    Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff (Ω := Ω) (i := i) (f := f) (hf_smooth.of_le (by norm_cast))
   have h_chosen_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := d) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
         (Sobolev.Euclidean.chosenWeakPartialOrZero p i f Ω) f Ω :=
     Sobolev.Euclidean.chosenWeakPartialOrZero_isWeakPartial_of_mem
       hf_W1p i
@@ -132,10 +131,9 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
       (volume.restrict Ω) :=
     (Sobolev.Euclidean.chosenWeakPartialOrZero_memLp_of_mem
       hf_W1p i).locallyIntegrable hp_one
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_local h_chosen_local
 
-omit [NeZero d] in
 private lemma norm_fderiv_le_sum_norm_partials
     (f : EuN → ℝ) (x : EuN) :
     ‖fderiv ℝ f x‖ ≤ ∑ i : Fin d, ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖ := by
@@ -166,7 +164,6 @@ private lemma norm_fderiv_le_sum_norm_partials
   intro i _
   simp
 
-omit [NeZero d] in
 private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {μ : Measure EuN}
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f) :
@@ -213,7 +210,6 @@ private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
-omit [NeZero d] in
 private lemma eLpNorm_classical_partial_eq_chosen
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -225,6 +221,10 @@ private lemma eLpNorm_classical_partial_eq_chosen
   eLpNorm_congr_ae
     (classical_partial_ae_eq_chosenWeakPartial_of_smooth
       (d := d) hp_one hΩ_open hf_smooth hf_compact hf_support i)
+section
+
+variable [NeZero d]
+
 
 private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
@@ -330,7 +330,7 @@ private lemma sobolev_smooth_compactSupport_in_Ω
     (hφ_compact : HasCompactSupport φ) (hφ_support : tsupport φ ⊆ Ω) :
     eLpNorm φ
         (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p))) (volume.restrict Ω) ≤
-      ENNReal.ofReal (DeGiorgi.CGns d p) *
+      ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) *
         eLpNorm (fderiv ℝ φ) (ENNReal.ofReal p) (volume.restrict Ω) := by
   have h_lhs_eq :
       eLpNorm φ
@@ -344,7 +344,7 @@ private lemma sobolev_smooth_compactSupport_in_Ω
         eLpNorm (fderiv ℝ φ) (ENNReal.ofReal p) (volume.restrict Ω) :=
     eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset (d := d)
       hΩ_open.measurableSet hφ_support _
-  have h_smooth_sob := DeGiorgi.sobolev_smooth (d := d) hp_one hp_dim
+  have h_smooth_sob := Sobolev.Euclidean.sobolev_smooth (d := d) hp_one hp_dim
     (hφ_smooth.of_le (by norm_cast)) hφ_compact
   rw [← h_lhs_eq, ← h_rhs_eq]
   exact h_smooth_sob
@@ -357,7 +357,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     (hf_compact : HasCompactSupport f) (hf_support : tsupport f ⊆ Ω) :
     eLpNorm f
         (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p))) (volume.restrict Ω) ≤
-      ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) *
+      ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) *
         Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d)
           1 (ENNReal.ofReal p) f Ω := by
   classical
@@ -396,7 +396,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     fun n => (h_pick n).choose_spec.2.2.2
   have h_smooth_sob : ∀ n,
       eLpNorm (φ n) p_star (volume.restrict Ω) ≤
-        ENNReal.ofReal (DeGiorgi.CGns d p) *
+        ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) *
           eLpNorm (fderiv ℝ (φ n)) p_enn (volume.restrict Ω) := fun n =>
     sobolev_smooth_compactSupport_in_Ω (d := d) hp_one hp_dim hΩ_open
       (hφ_smooth n) (hφ_compact n) (hφ_support n)
@@ -503,7 +503,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
   have h_fatou : eLpNorm f p_star (volume.restrict Ω) ≤
       atTop.liminf (fun n => eLpNorm (φ (σ n)) p_star (volume.restrict Ω)) :=
     MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm h_aesm_subseq f hσ_ae
-  set C : ℝ≥0∞ := ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) with hC_def
+  set C : ℝ≥0∞ := ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) with hC_def
   set N : ℝ≥0∞ := Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := d) 1 p_enn f Ω with hN_def
   have h_per_n : ∀ n,
@@ -515,9 +515,9 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     have h1 := h_smooth_sob (σ n)
     have h2 := h_grad_bound (σ n)
     calc eLpNorm (φ (σ n)) p_star (volume.restrict Ω)
-        ≤ ENNReal.ofReal (DeGiorgi.CGns d p) *
+        ≤ ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) *
             eLpNorm (fderiv ℝ (φ (σ n))) p_enn (volume.restrict Ω) := h1
-      _ ≤ ENNReal.ofReal (DeGiorgi.CGns d p) *
+      _ ≤ ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) *
             ((d : ℝ≥0∞) *
               Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := d) 1 p_enn (φ (σ n)) Ω) := by gcongr
@@ -588,6 +588,8 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     simp
   rw [h_liminf_const_add] at h_liminf_le_C_lim
   exact h_fatou.trans h_liminf_le_C_lim
+
+end
 
 end EuclideanSubcritical
 
@@ -810,7 +812,7 @@ private theorem perChart_eLpNorm_pStar_le
   obtain ⟨C_α, hC_α_pos, hbridge⟩ :=
     eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_star_one hp_star_top
-  set C_d : ℝ≥0∞ := ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) with hC_d_def
+  set C_d : ℝ≥0∞ := ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) with hC_d_def
   have hC_d_ne_top : C_d ≠ ⊤ := by
     rw [hC_d_def]
     exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top (ENNReal.natCast_ne_top _)
@@ -939,129 +941,6 @@ private lemma perChartConst_pStar_bound
         wkpNormChart (I := I) (M := M) 1 (ENNReal.ofReal p) u :=
   (Classical.choose_spec (perChart_eLpNorm_pStar_le
     (I := I) (M := M) g hp_one hp_dim α)).2 hu_meas hu
-
-private theorem sobolev_embedding_chart_subcritical_measurable
-    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    [NeZero (Module.finrank ℝ E)]
-    (g : CalabiYau.SmoothRiemannianMetric I M)
-    {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (Module.finrank ℝ E : ℝ)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {u : M → ℝ}, Measurable u →
-        MemWkpChart (I := I) (M := M) 1 (ENNReal.ofReal p) u →
-      eLpNorm u
-        (ENNReal.ofReal
-          ((Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p)))
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M))
-      ≤ ENNReal.ofReal C *
-          wkpNormChart (I := I) (M := M) 1 (ENNReal.ofReal p) u := by
-  classical
-  set p_real_star : ℝ := (Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p)
-    with hp_real_star_def
-  set p_star : ℝ≥0∞ := ENNReal.ofReal p_real_star with hp_star_def
-  set d : ℕ := Module.finrank ℝ E with hd_def
-  have hd_pos : 0 < d := NeZero.pos d
-  have hp_pos : 0 < p := by linarith
-  have hp_star_real_pos : 0 < p_real_star := by
-    rw [hp_real_star_def]
-    apply div_pos (mul_pos (by exact_mod_cast hd_pos) hp_pos)
-    linarith
-  have hp_star_real_ge_p : p ≤ p_real_star := by
-    rw [hp_real_star_def, le_div_iff₀ (by linarith : 0 < (d : ℝ) - p)]
-    nlinarith [hp_pos]
-  have hp_star_real_one : 1 ≤ p_real_star := le_trans hp_one hp_star_real_ge_p
-  have hp_star_one : (1 : ℝ≥0∞) ≤ p_star := by
-    rw [hp_star_def, ← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp_star_real_one
-  set S : Finset M := CalabiYau.RiemannianVolume.chartAtlasPOUFinset
-    (I := I) (M := M) with hS_def
-  set D : ℝ≥0∞ :=
-    ∑ α ∈ S, perChartConst_pStar (I := I) (M := M) g hp_one hp_dim α
-    with hD_def
-  have hD_ne_top : D ≠ ⊤ := by
-    rw [hD_def]
-    apply ENNReal.sum_ne_top.mpr
-    intro α _
-    exact perChartConst_pStar_ne_top (I := I) (M := M) g hp_one hp_dim α
-  refine ⟨max 1 D.toReal, ?_, ?_⟩
-  · exact le_trans zero_le_one (le_max_left _ _)
-  intro u hu_meas hu
-  have h_eLpNorm_eq :
-      eLpNorm u p_star (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) =
-        eLpNorm (∑ α ∈ S, fun x : M =>
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
-          (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) := by
-    refine eLpNorm_congr_ae ?_
-    refine Filter.Eventually.of_forall (fun x => ?_)
-    rw [Finset.sum_apply]
-    change u x = ∑ α ∈ S,
-      (CalabiYau.RiemannianVolume.chartAtlasPOU I M α : M → ℝ) x * u x
-    exact chartAtlasPOU_pou_decomp_subcritical (I := I) (M := M) u x
-  rw [h_eLpNorm_eq]
-  have h_aesm : ∀ α ∈ S,
-      AEStronglyMeasurable
-        (fun x : M =>
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-            : C^∞⟮I, M; ℝ⟯) x * u x)
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) := by
-    intro α _
-    have h_meas : Measurable (fun x : M =>
-        (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-          : C^∞⟮I, M; ℝ⟯) x * u x) :=
-      measurable_pou_mul_subcrit (I := I) (M := M)
-        (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α hu_meas
-    exact h_meas.aestronglyMeasurable
-  have h_minkowski :
-      eLpNorm (∑ α ∈ S, fun x : M =>
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-            : C^∞⟮I, M; ℝ⟯) x * u x) p_star
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) ≤
-        ∑ α ∈ S, eLpNorm
-          (fun x : M =>
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
-          (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) :=
-    eLpNorm_sum_le h_aesm hp_star_one
-  refine h_minkowski.trans ?_
-  have h_each : ∀ α ∈ S,
-      eLpNorm
-          (fun x : M =>
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
-          (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) ≤
-        perChartConst_pStar (I := I) (M := M) g hp_one hp_dim α *
-          wkpNormChart (I := I) (M := M) 1 (ENNReal.ofReal p) u := by
-    intro α _
-    exact perChartConst_pStar_bound (I := I) (M := M) g hp_one hp_dim α hu_meas hu
-  have h_sum_le :
-      (∑ α ∈ S, eLpNorm
-          (fun x : M =>
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
-          (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M))) ≤
-        ∑ α ∈ S,
-          perChartConst_pStar (I := I) (M := M) g hp_one hp_dim α *
-            wkpNormChart (I := I) (M := M) 1 (ENNReal.ofReal p) u :=
-    Finset.sum_le_sum h_each
-  refine h_sum_le.trans ?_
-  rw [← Finset.sum_mul]
-  change D * wkpNormChart (I := I) (M := M) 1 (ENNReal.ofReal p) u ≤
-    ENNReal.ofReal (max 1 D.toReal) *
-      wkpNormChart (I := I) (M := M) 1 (ENNReal.ofReal p) u
-  gcongr
-  have hD_eq : ENNReal.ofReal D.toReal = D := ENNReal.ofReal_toReal hD_ne_top
-  have h_max_le :
-      ENNReal.ofReal D.toReal ≤ ENNReal.ofReal (max 1 D.toReal) :=
-    ENNReal.ofReal_le_ofReal (le_max_right _ _)
-  rw [hD_eq] at h_max_le
-  exact h_max_le
 
 theorem sobolev_closed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

@@ -39,8 +39,7 @@ theorem exists_centeredResidualProjection (ω₀ : KahlerForm n M) (F : M → �
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
     (t : ℝ) (φ : M → ℝ)
     (hsol : ω₀.SolvesMongeAmpere (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
-    [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
+    (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
     (radius : ℝ)
     (Q : LittleHolderUncenteredResidualData ω₀ F hF t φ hsol α radius) :
     ∃ residual : P.C2 × ℝ → P.C0,
@@ -48,8 +47,6 @@ theorem exists_centeredResidualProjection (ω₀ : KahlerForm n M) (F : M → �
         P.evalC0 (residual (u, δ)) x =
           centeredContinuityPathResidual ω₀ F t φ hsol (P.evalC2 u) δ x) ∧
       residual (0, 0) = 0 := by
-  have := hα₀
-  have := hα₁
   by_cases hM : Nonempty M
   · let : Nonempty M := hM
     let ω₁ := ω₀.perturb φ hsol.1
@@ -63,9 +60,9 @@ theorem exists_centeredResidualProjection (ω₀ : KahlerForm n M) (F : M → �
     let T := littleHolderMeanFunctional ω₁ cover 0 α N
     have hvol : 0 < V := by
       have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₁.volume := by
-        simpa using (integrable_const (1 : ℝ) : Integrable (fun _ : M ↦ (1 : ℝ)) ω₁.volume)
+        simp
       have h := integral_exp_pos (μ := ω₁.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
-      simpa [V] using h
+      simp [V]
     let oneCore : SmoothChartHolderCore cover 0 α :=
       ⟨ContMDiffMap.const (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n)))
         (I' := modelWithCornersSelf ℝ ℝ) (M := M) (M' := ℝ) (n := ∞) 1⟩
@@ -127,13 +124,10 @@ theorem exists_centeredResidualProjection (ω₀ : KahlerForm n M) (F : M → �
       simp [div_eq_mul_inv]
       ring
     · apply Subtype.ext
-      simpa [residual, Q.uncentered_base] using (zero_smul ℝ oneComp)
+      simp [residual, Q.uncentered_base]
   · let : IsEmpty M := not_nonempty_iff.mp hM
     refine ⟨fun _ => 0, ?_, by simp⟩
     intro u δ hu x
     exact False.elim (hM ⟨x⟩)
-
-attribute [deprecated "unused hypotheses `hα₀` and `hα₁`; will be removed" (since := "2026-10-02")]
-  KahlerForm.exists_centeredResidualProjection
 
 end KahlerForm

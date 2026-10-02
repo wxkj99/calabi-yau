@@ -1,11 +1,6 @@
 module
 
-public import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.Analysis.Calculus.FDeriv.Mul
-import Mathlib.Analysis.Calculus.FDeriv.CompCLM
-import Mathlib.Analysis.Calculus.FDeriv.Prod
-import Mathlib.Analysis.Calculus.FDeriv.Add
+public import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 
 /-!
 # The second jet of a matrix inverse in a normalized frame

@@ -4,15 +4,13 @@ module
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatKernel.Duhamel.LowerOrder
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatKernel.Schauder.SecondDerivative
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatPotential.Regularity
-public import CalabiYau.Analysis.Holder.Basic
+public import CalabiYau.Mathlib.Analysis.Holder.Basic
 public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -555,36 +553,6 @@ theorem heatDuhamel_iteratedFDeriv_two_apply
       hmeas1 hmeas2 x).fderiv]
   exact heatDuhamelHessian_apply halpha0 halpha1 ht f hbound hf hmeas1 hmeas2
     x (m 0) (m 1)
-
-theorem heatDuhamel_hessianCurryEquiv_iteratedFDeriv_two
-    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
-    {t : Real} (ht : 0 < t)
-    (f : Real → BoundedContinuousFunction V F)
-    (hbound : ∀ s ∈ Icc (0 : Real) t, ‖f s‖ ≤ B)
-    (hf : ∀ s ∈ Icc (0 : Real) t, HolderWith K alpha (f s))
-    (hmeas0 : ∀ z : V, AEStronglyMeasurable
-      (fun s : Real ↦ heatSup (t - s) (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (hmeas1 : ∀ z : V, AEStronglyMeasurable
-      (fun s : Real ↦ heatSupGradient (t - s) (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (hmeas2 : ∀ z : V, AEStronglyMeasurable
-      (fun s : Real ↦ heatSupHessian (t - s) (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (x : V) :
-    hessianCurryEquiv V F (iteratedFDeriv Real 2 (heatDuhamel t f) x) =
-      heatDuhamelHessian t f x := by
-  have hgrad : fderiv Real (heatDuhamel t f) = heatDuhamelGradientMap t f := by
-    funext z
-    exact (heatDuhamel_hasFDerivAt ht f hbound hmeas0 hmeas1 z).fderiv
-  ext v w
-  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
-    continuousMultilinearCurryFin1_apply,
-    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
-  rw [hgrad,
-    (heatDuhamelGradientMap_hasFDerivAt halpha0 halpha1 ht f hbound hf
-      hmeas1 hmeas2 x).fderiv]
-  rfl
 
 theorem heatDuhamel_parabolicSpatialJet_two
     {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)

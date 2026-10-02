@@ -87,7 +87,7 @@ theorem exists_centeredPathResidualCarrierData (ω₀ : KahlerForm n M) (F : M �
     exists_littleHolderUncenteredResidual ω₀ F hF t φ hsol α hα₀ hα₁
       radius hradius hpositive
   obtain ⟨residual, heval, hbase⟩ :=
-    exists_centeredResidualProjection ω₀ F hF t φ hsol α hα₀ hα₁ radius Q
+    exists_centeredResidualProjection ω₀ F hF t φ hsol α radius Q
   refine ⟨{
     radius := radius
     radius_pos := hradius

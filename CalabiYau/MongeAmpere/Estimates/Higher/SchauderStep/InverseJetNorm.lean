@@ -5,7 +5,7 @@ public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
-import CalabiYau.Geometry.Kahler.MatrixInverse
+import CalabiYau.Mathlib.Analysis.Matrix.EntrywiseSmoothness
 
 /-!
 # Uniform norms of inverse matrix coefficient jets

@@ -11,9 +11,9 @@ namespace KahlerForm.ChartInvariance
 theorem calabiEnergy_c3PartialZ_mul {m : ℕ}
     {u v : EuclideanSpace ℂ (Fin m) → ℂ} {z : EuclideanSpace ℂ (Fin m)}
     (hu : DifferentiableAt ℝ u z) (hv : DifferentiableAt ℝ v z) (j : Fin m) :
-    c3PartialZ (fun w ↦ u w * v w) z j =
-      c3PartialZ u z j * v z + u z * c3PartialZ v z j := by
-  unfold c3PartialZ
+    wirtingerDerivInChart (fun w ↦ u w * v w) z j =
+      wirtingerDerivInChart u z j * v z + u z * wirtingerDerivInChart v z j := by
+  unfold wirtingerDerivInChart
   rw [fderiv_fun_mul hu hv]
   simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
   ring
@@ -22,7 +22,7 @@ theorem wirtinger_star_zero {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hf : DifferentiableAt ℂ f z) :
-    c3PartialZ (fun w ↦ star (f w)) z p = 0 := by
+    wirtingerDerivInChart (fun w ↦ star (f w)) z p = 0 := by
   have hreal : HasFDerivAt f ((fderiv ℂ f z).restrictScalars ℝ) z :=
     hf.hasFDerivAt.restrictScalars ℝ
   have hconj : HasFDerivAt (Complex.conjCLE : ℂ → ℂ)
@@ -38,7 +38,7 @@ theorem wirtinger_star_zero {n : ℕ}
         (EuclideanSpace.single p (1 : ℂ)) := by
     change fderiv ℂ f z (Complex.I • EuclideanSpace.single p (1 : ℂ)) = _
     exact (fderiv ℂ f z).map_smul Complex.I _
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hstar]
   simp only [ContinuousLinearMap.comp_apply]
   rw [hI]
@@ -80,14 +80,14 @@ theorem wirtinger_directional_smul {n : ℕ}
   push_cast
   linear_combination
 
-theorem c3PartialZ_comp {n : ℕ}
+theorem wirtingerDerivInChart_comp {n : ℕ}
     (F : EuclideanSpace ℂ (Fin n) → ℂ)
     (ψ : EuclideanSpace ℂ (Fin n) → EuclideanSpace ℂ (Fin n))
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hF : DifferentiableAt ℝ F (ψ z)) (hψ : DifferentiableAt ℂ ψ z) :
-    c3PartialZ (fun w ↦ F (ψ w)) z p =
+    wirtingerDerivInChart (fun w ↦ F (ψ w)) z p =
       ∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p *
-        c3PartialZ F (ψ z) a := by
+        wirtingerDerivInChart F (ψ z) a := by
   have hψR : HasFDerivAt ψ ((fderiv ℂ ψ z).restrictScalars ℝ) z :=
     hψ.hasFDerivAt.restrictScalars ℝ
   have hψreal : fderiv ℝ ψ z = (fderiv ℂ ψ z).restrictScalars ℝ := by
@@ -103,7 +103,7 @@ theorem c3PartialZ_comp {n : ℕ}
   have hvec : L e = ∑ a, (A a p) • EuclideanSpace.single a (1 : ℂ) := by
     ext a
     simp [A, e, EuclideanSpace.clmMatrix, Pi.single_apply]
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hcomp', hψreal]
   simp only [ContinuousLinearMap.comp_apply]
   change (D (L e) - Complex.I * D (L (Complex.I • e))) / 2 = _
@@ -122,13 +122,13 @@ theorem c3PartialZ_comp {n : ℕ}
   intro a ha
   ring
 
-theorem c3PartialZ_sum {n : ℕ} {ι : Type*} [Fintype ι]
+theorem wirtingerDerivInChart_sum {n : ℕ} {ι : Type*} [Fintype ι]
     (F : ι → EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hF : ∀ i, DifferentiableAt ℝ (F i) z) :
-    c3PartialZ (fun w ↦ ∑ i, F i w) z p =
-      ∑ i, c3PartialZ (F i) z p := by
-  unfold c3PartialZ
+    wirtingerDerivInChart (fun w ↦ ∑ i, F i w) z p =
+      ∑ i, wirtingerDerivInChart (F i) z p := by
+  unfold wirtingerDerivInChart
   have hfd : fderiv ℝ (fun w ↦ ∑ i, F i w) z = ∑ i, fderiv ℝ (F i) z := by
     simpa using fderiv_fun_sum (u := Finset.univ) (fun i hi ↦ hF i)
   rw [hfd]
@@ -149,10 +149,10 @@ theorem pullback_summand {n : ℕ}
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hu : DifferentiableAt ℂ u z) (hv : DifferentiableAt ℂ v z)
     (hF : DifferentiableAt ℝ F (ψ z)) (hψ : DifferentiableAt ℂ ψ z) :
-    c3PartialZ (fun w ↦ u w * F (ψ w) * star (v w)) z p =
-      c3PartialZ u z p * F (ψ z) * star (v z) +
+    wirtingerDerivInChart (fun w ↦ u w * F (ψ w) * star (v w)) z p =
+      wirtingerDerivInChart u z p * F (ψ z) * star (v z) +
         u z * (∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p *
-          c3PartialZ F (ψ z) a) * star (v z) := by
+          wirtingerDerivInChart F (ψ z) a) * star (v z) := by
   have hψR : HasFDerivAt ψ ((fderiv ℂ ψ z).restrictScalars ℝ) z :=
     hψ.hasFDerivAt.restrictScalars ℝ
   have hcompDiff : DifferentiableAt ℝ (fun w ↦ F (ψ w)) z :=
@@ -166,7 +166,7 @@ theorem pullback_summand {n : ℕ}
   rw [calabiEnergy_c3PartialZ_mul hleft hvStar p,
     calabiEnergy_c3PartialZ_mul huR hcompDiff p,
     wirtinger_star_zero v z p hv,
-    c3PartialZ_comp F ψ z p hF hψ]
+    wirtingerDerivInChart_comp F ψ z p hF hψ]
   ring
 
 end KahlerForm.ChartInvariance

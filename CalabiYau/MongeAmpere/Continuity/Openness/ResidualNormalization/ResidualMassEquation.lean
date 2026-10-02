@@ -22,15 +22,14 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
   [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
+omit [ConnectedSpace M] in
 /-- A zero of the centered residual in its positive ball satisfies the exact finite-regularity
 Monge–Ampère equation along the continuity path. -/
-@[deprecated "unused hypotheses `hα₀` and `hα₁`; will be removed" (since := "2026-10-02")]
 theorem centeredResidual_zero_implies_path_equation (ω₀ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
     (t : ℝ) (φ : M → ℝ)
     (hsol : ω₀.SolvesMongeAmpere (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
-    [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
+    (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
     (D : CenteredPathResidualCarrierData ω₀ F hF t φ hsol α)
     (u : P.C2) (δ : ℝ) (hu : ‖u‖ < D.radius)
     (hzero : D.residual (u, δ) = 0) :
@@ -41,7 +40,7 @@ theorem centeredResidual_zero_implies_path_equation (ω₀ : KahlerForm n M) (F 
   refine ⟨hφu, ?_⟩
   intro x
   by_cases hM : Nonempty M
-  · letI : Nonempty M := hM
+  · let : Nonempty M := hM
     let q := uncenteredContinuityPathResidual ω₀ F t φ hsol (P.evalC2 u) δ
     let ω₁ := ω₀.perturb φ hsol.1
     let c : ℝ := (∫ y, q y ∂ω₁.volume) / ω₁.volume.real Set.univ
@@ -92,11 +91,7 @@ theorem centeredResidual_zero_implies_path_equation (ω₀ : KahlerForm n M) (F 
       (Classical.choice (exists_smoothC2Potential_approximation ω₀ hφu))
     have hpath := ω₀.integral_exp_path hF (t + δ)
     have hvol : 0 < ω₀.volume.real Set.univ := by
-      have hint : Integrable (fun _ : M ↦ Real.exp (0 : ℝ)) ω₀.volume := by
-        simpa using (integrable_const (1 : ℝ) :
-          Integrable (fun _ : M ↦ (1 : ℝ)) ω₀.volume)
-      simpa using integral_exp_pos (μ := ω₀.volume)
-        (f := fun _ : M ↦ (0 : ℝ)) hint
+      simp
     have hc : Real.exp c = 1 := by
       have hi : ∫ y, ω₀.mongeAmpere (φ + P.evalC2 u) y ∂ω₀.volume =
           Real.exp c * ∫ y, Real.exp ((t + δ) * F y + ω₀.pathConstant F (t + δ))

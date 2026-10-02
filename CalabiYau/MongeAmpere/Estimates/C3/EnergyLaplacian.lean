@@ -1,7 +1,6 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.CalabiEnergy
-import CalabiYau.Geometry.Complex.Forms.Positive
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.BochnerIdentity
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.DerivativeSquares
@@ -97,295 +96,6 @@ private theorem c3_tensor5_frame_sum_bound
     _ = (n : ℝ) ^ 5 * L ^ 5 * D := by
       simp [Finset.sum_const, nsmul_eq_mul]
       ring
-
-private theorem c3_frame_entry_bound_of_inverse_diagonal
-    {n : ℕ} (A P : Matrix (Fin n) (Fin n) ℂ) (Q : ℝ) (hQ : 0 ≤ Q)
-    (hAinv : A⁻¹ = P.map star * P.transpose)
-    (hdiag : ∀ i, RCLike.re (A⁻¹ i i) ≤ Q) :
-    ∀ i j, ‖P i j‖ ≤ Real.sqrt Q := by
-  intro i j
-  have hz (z : ℂ) : ‖z‖ ^ 2 = RCLike.re (star z * z) := by
-    calc
-      ‖z‖ ^ 2 = Complex.normSq z := (Complex.normSq_eq_norm_sq z).symm
-      _ = RCLike.re (star z * z) := by
-        have hc : (Complex.normSq z : ℂ) = star z * z := by
-          simpa using Complex.normSq_eq_conj_mul_self (z := z)
-        rw [← hc]
-        simp
-  have hsum : ∑ b : Fin n, ‖P i b‖ ^ 2 = RCLike.re ((P.map star * P.transpose) i i) := by
-    calc
-      ∑ b : Fin n, ‖P i b‖ ^ 2 =
-          ∑ b : Fin n, RCLike.re (star (P i b) * P i b) := by
-        apply Finset.sum_congr rfl
-        intro b hb
-        exact hz (P i b)
-      _ = RCLike.re (∑ b : Fin n, star (P i b) * P i b) := by simp
-      _ = RCLike.re ((P.map star * P.transpose) i i) := by
-        simp [Matrix.mul_apply, Matrix.map_apply, Matrix.transpose_apply]
-  have hrow : ∑ b : Fin n, ‖P i b‖ ^ 2 ≤ Q := by
-    rw [hsum, ← hAinv]
-    exact hdiag i
-  have hentry : ‖P i j‖ ^ 2 ≤ Q := by
-    exact (Finset.single_le_sum (fun b hb => sq_nonneg ‖P i b‖)
-      (Finset.mem_univ j)).trans hrow
-  have hsqrt : 0 ≤ Real.sqrt Q := Real.sqrt_nonneg _
-  have hnorm : 0 ≤ ‖P i j‖ := norm_nonneg _
-  nlinarith [Real.sq_sqrt hQ]
-
-private theorem c3_inverse_frame_metric {n : ℕ}
-    (A Q : Matrix (Fin n) (Fin n) ℂ)
-    (hQ : Q.transpose * A * Q.map star = 1)
-    (hQR : Q * Q⁻¹ = 1) :
-    Q⁻¹.transpose * (Q⁻¹).map star = A := by
-  have hTranspose : Q⁻¹.transpose * Q.transpose = 1 := by
-    rw [← Matrix.transpose_mul, hQR]
-    simp
-  have hMap : Q.map star * (Q⁻¹).map star = 1 := by
-    have hm : (Q * Q⁻¹).map star = Q.map star * (Q⁻¹).map star := by
-      ext i j
-      simp [Matrix.map, Matrix.mul_apply]
-    rw [← hm, hQR]
-    ext i j
-    simp [Matrix.map, Matrix.one_apply]
-  calc
-    Q⁻¹.transpose * (Q⁻¹).map star = Q⁻¹.transpose * 1 * (Q⁻¹).map star := by simp
-    _ = Q⁻¹.transpose * (Q.transpose * A * Q.map star) * (Q⁻¹).map star := by rw [hQ]
-    _ = Q⁻¹.transpose * Q.transpose * A * (Q.map star * (Q⁻¹).map star) := by
-      simp [Matrix.mul_assoc]
-    _ = 1 * A * 1 := by rw [hTranspose, hMap]
-    _ = A := by simp
-
-private theorem c3_chart_frame_entry_bound_of_inverse_diagonal
-    {n : ℕ} (A P : Matrix (Fin n) (Fin n) ℂ) (Q : ℝ) (hQ : 0 ≤ Q)
-    (hP : P.transpose * A * P.map star = 1)
-    (hdiag : ∀ i, RCLike.re (A⁻¹ i i) ≤ Q) :
-    ∀ i j, ‖P i j‖ ≤ Real.sqrt Q := by
-  have hdet := congrArg Matrix.det hP
-  have hdet' : P.det * (A.det * (P.map star).det) = 1 := by
-    simpa [Matrix.det_mul, Matrix.det_transpose, Matrix.mul_assoc] using hdet
-  have hPdet : IsUnit P.det := IsUnit.of_mul_eq_one _ hdet'
-  have hQR : P * P⁻¹ = 1 := Matrix.mul_nonsing_inv P hPdet
-  have hRP : P⁻¹ * P = 1 := Matrix.nonsing_inv_mul P hPdet
-  have hA : P⁻¹.transpose * (P⁻¹).map star = A :=
-    c3_inverse_frame_metric A P hP hQR
-  have hTranspose : P.transpose * P⁻¹.transpose = 1 := by
-    rw [← Matrix.transpose_mul, hRP]
-    simp
-  have hMap : P.map star * (P⁻¹).map star = 1 := by
-    have hm : (P * P⁻¹).map star = P.map star * (P⁻¹).map star := by
-      ext i j
-      simp [Matrix.map, Matrix.mul_apply]
-    rw [← hm, hQR]
-    ext i j
-    simp [Matrix.map, Matrix.one_apply]
-  have hAleft : (P.map star * P.transpose) * A = 1 := by
-    rw [← hA]
-    calc
-      (P.map star * P.transpose) * (P⁻¹.transpose * (P⁻¹).map star) =
-          P.map star * (P.transpose * P⁻¹.transpose) * (P⁻¹).map star := by
-            simp [Matrix.mul_assoc]
-      _ = P.map star * 1 * (P⁻¹).map star := by rw [hTranspose]
-      _ = P.map star * (P⁻¹).map star := by simp
-      _ = 1 := hMap
-  have hAinv : A⁻¹ = P.map star * P.transpose := by
-    apply Matrix.inv_eq_left_inv
-    exact hAleft
-  exact c3_frame_entry_bound_of_inverse_diagonal A P Q hQ hAinv hdiag
-
-private theorem c3_norm_sum_mul_le {ι : Type*} [Fintype ι] (f g : ι → ℂ)
-    (C : ℝ) (hg : ∀ i, ‖g i‖ ≤ C) :
-    ‖∑ i, f i * g i‖ ≤ C * ∑ i, ‖f i‖ := by
-  calc
-    ‖∑ i, f i * g i‖ ≤ ∑ i, ‖f i * g i‖ := norm_sum_le _ _
-    _ ≤ ∑ i, C * ‖f i‖ := Finset.sum_le_sum fun i hi => by
-      rw [norm_mul, mul_comm (‖f i‖) (‖g i‖)]
-      exact mul_le_mul_of_nonneg_right (hg i) (norm_nonneg (f i))
-    _ = C * ∑ i, ‖f i‖ := by rw [Finset.mul_sum]
-
-private theorem c3_norm_sum_component_product_le {ι : Type*} [Fintype ι]
-    (f g : ι → ℂ) (C D : ℝ) (hC : 0 ≤ C)
-    (hf : ∀ i, ‖f i‖ ≤ C) (hg : ∀ i, ‖g i‖ ≤ D) :
-    ‖∑ i, f i * g i‖ ≤ (Fintype.card ι : ℝ) * (C * D) := by
-  calc
-    ‖∑ i, f i * g i‖ ≤ ∑ i, ‖f i * g i‖ := norm_sum_le _ _
-    _ ≤ ∑ i, C * D := Finset.sum_le_sum fun i hi => by
-      rw [norm_mul]
-      exact mul_le_mul (hf i) (hg i) (norm_nonneg (g i)) hC
-    _ = (Fintype.card ι : ℝ) * (C * D) := by simp
-
-private theorem c3_triple_contraction_bound_of_chart_frame_entry_bound {n : ℕ}
-    (P : Matrix (Fin n) (Fin n) ℂ) (T : Fin n → Fin n → Fin n → ℂ)
-    (Pbound B : ℝ) (hPbound : 0 ≤ Pbound)
-    (hP : ∀ a b, ‖P a b‖ ≤ Pbound)
-    (hT : ∀ a b c, ‖T a b c‖ ≤ B) (i j k : Fin n) :
-    ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n,
-      P a i * P b j * star (P c k) * T a b c‖ ≤
-        (n : ℝ)^3 * Pbound^3 * B := by
-  have hterm (a b c : Fin n) :
-      ‖P a i * P b j * star (P c k) * T a b c‖ ≤ Pbound^3 * B := by
-    rw [norm_mul, norm_mul, norm_mul, norm_star]
-    have h1 : ‖P a i‖ * ‖P b j‖ ≤ Pbound * Pbound :=
-      mul_le_mul (hP a i) (hP b j) (norm_nonneg _) hPbound
-    have h2 : (‖P a i‖ * ‖P b j‖) * ‖P c k‖ ≤ Pbound * Pbound * Pbound :=
-      mul_le_mul h1 (hP c k) (norm_nonneg _) (mul_nonneg hPbound hPbound)
-    have h3 : ‖P a i‖ * ‖P b j‖ * ‖P c k‖ ≤ Pbound^3 := by
-      nlinarith [h2]
-    calc
-      (‖P a i‖ * ‖P b j‖ * ‖P c k‖) * ‖T a b c‖ ≤
-          Pbound^3 * ‖T a b c‖ :=
-        mul_le_mul_of_nonneg_right h3 (norm_nonneg _)
-      _ ≤ Pbound^3 * B :=
-        mul_le_mul_of_nonneg_left (hT a b c) (by positivity)
-  calc
-    ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n,
-        P a i * P b j * star (P c k) * T a b c‖ ≤
-      ∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n,
-        ‖P a i * P b j * star (P c k) * T a b c‖ := by
-      apply le_trans (norm_sum_le _ _)
-      apply Finset.sum_le_sum
-      intro a ha
-      apply le_trans (norm_sum_le _ _)
-      apply Finset.sum_le_sum
-      intro b hb
-      exact norm_sum_le _ _
-    _ ≤ ∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, Pbound^3 * B := by
-      apply Finset.sum_le_sum
-      intro a ha
-      apply Finset.sum_le_sum
-      intro b hb
-      apply Finset.sum_le_sum
-      intro c hc
-      exact hterm a b c
-    _ = (n : ℝ)^3 * Pbound^3 * B := by simp [Finset.sum_const, nsmul_eq_mul]; ring
-
-private theorem c3_quintuple_contraction_bound_of_chart_frame_entry_bound {n : ℕ}
-    (P : Matrix (Fin n) (Fin n) ℂ)
-    (T : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ)
-    (Pbound B : ℝ) (hPbound : 0 ≤ Pbound)
-    (hP : ∀ a b, ‖P a b‖ ≤ Pbound)
-    (hT : ∀ a b c d e, ‖T a b c d e‖ ≤ B)
-    (s p q j k : Fin n) :
-    ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, ∑ d : Fin n, ∑ e : Fin n,
-      P a s * P b p * star (P c q) * P d j * star (P e k) * T a b c d e‖ ≤
-        (n : ℝ)^5 * Pbound^5 * B := by
-  have hterm (a b c d e : Fin n) :
-      ‖P a s * P b p * star (P c q) * P d j * star (P e k) * T a b c d e‖ ≤
-        Pbound^5 * B := by
-    rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_mul, norm_star, norm_star]
-    have h1 : ‖P a s‖ * ‖P b p‖ ≤ Pbound * Pbound :=
-      mul_le_mul (hP a s) (hP b p) (norm_nonneg _) hPbound
-    have h2 : (‖P a s‖ * ‖P b p‖) * ‖P c q‖ ≤ Pbound^3 := by
-      have h := mul_le_mul h1 (hP c q) (norm_nonneg _) (mul_nonneg hPbound hPbound)
-      nlinarith [h]
-    have h3 : ((‖P a s‖ * ‖P b p‖) * ‖P c q‖) * ‖P d j‖ ≤ Pbound^4 := by
-      have h := mul_le_mul h2 (hP d j) (norm_nonneg _) (by positivity : 0 ≤ Pbound^3)
-      nlinarith [h]
-    have h4 : (((‖P a s‖ * ‖P b p‖) * ‖P c q‖) * ‖P d j‖) * ‖P e k‖ ≤
-        Pbound^5 := by
-      have h := mul_le_mul h3 (hP e k) (norm_nonneg _) (by positivity : 0 ≤ Pbound^4)
-      nlinarith [h]
-    calc
-      (((‖P a s‖ * ‖P b p‖) * ‖P c q‖) * ‖P d j‖) * ‖P e k‖ *
-          ‖T a b c d e‖ ≤ Pbound^5 * ‖T a b c d e‖ :=
-        mul_le_mul_of_nonneg_right h4 (norm_nonneg _)
-      _ ≤ Pbound^5 * B :=
-        mul_le_mul_of_nonneg_left (hT a b c d e) (by positivity)
-  calc
-    ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, ∑ d : Fin n, ∑ e : Fin n,
-        P a s * P b p * star (P c q) * P d j * star (P e k) * T a b c d e‖ ≤
-      ∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, ∑ d : Fin n, ∑ e : Fin n,
-        ‖P a s * P b p * star (P c q) * P d j * star (P e k) * T a b c d e‖ := by
-      apply le_trans (norm_sum_le _ _)
-      apply Finset.sum_le_sum
-      intro a ha
-      apply le_trans (norm_sum_le _ _)
-      apply Finset.sum_le_sum
-      intro b hb
-      apply le_trans (norm_sum_le _ _)
-      apply Finset.sum_le_sum
-      intro c hc
-      apply le_trans (norm_sum_le _ _)
-      apply Finset.sum_le_sum
-      intro d hd
-      exact norm_sum_le _ _
-    _ ≤ ∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, ∑ d : Fin n, ∑ e : Fin n,
-        Pbound^5 * B := by
-      apply Finset.sum_le_sum
-      intro a ha
-      apply Finset.sum_le_sum
-      intro b hb
-      apply Finset.sum_le_sum
-      intro c hc
-      apply Finset.sum_le_sum
-      intro d hd
-      apply Finset.sum_le_sum
-      intro e he
-      exact hterm a b c d e
-    _ = (n : ℝ)^5 * Pbound^5 * B := by simp [Finset.sum_const, nsmul_eq_mul]; ring
-
-private theorem c3_chart_orthonormal_quintuple_contraction_bound {n : ℕ}
-    (A P : Matrix (Fin n) (Fin n) ℂ)
-    (T : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ)
-    (Pbound B : ℝ) (hPbound : 0 ≤ Pbound)
-    (hP : P.transpose * A * P.map star = 1)
-    (hInvDiag : ∀ i, RCLike.re (A⁻¹ i i) ≤ Pbound)
-    (hT : ∀ a b c d e, ‖T a b c d e‖ ≤ B)
-    (s p q j k : Fin n) :
-    ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, ∑ d : Fin n, ∑ e : Fin n,
-      P a s * P b p * star (P c q) * P d j * star (P e k) * T a b c d e‖ ≤
-        (n : ℝ)^5 * (Real.sqrt Pbound)^5 * B := by
-  have hPentry : ∀ a b, ‖P a b‖ ≤ Real.sqrt Pbound :=
-    c3_chart_frame_entry_bound_of_inverse_diagonal A P Pbound hPbound hP hInvDiag
-  exact c3_quintuple_contraction_bound_of_chart_frame_entry_bound P T
-    (Real.sqrt Pbound) B (Real.sqrt_nonneg Pbound) hPentry hT s p q j k
-
-private theorem c3_frame_connection_curvature_action_bound {n : ℕ}
-    (T : Fin n → Fin n → Fin n → ℂ)
-    (R : Fin n → Fin n → Fin n → Fin n → ℂ)
-    (E Tbound K : ℝ) (hTnonneg : 0 ≤ Tbound)
-    (hT : ∀ i j k, ‖T i j k‖ ≤ Tbound * Real.sqrt E)
-    (hR : ∀ i j k l, ‖R i j k l‖ ≤ K)
-    (j k l : Fin n) :
-    ‖∑ i : Fin n, T i j k * R i k l j‖ ≤
-      (n : ℝ) * Tbound * K * Real.sqrt E := by
-  have hC : 0 ≤ Tbound * Real.sqrt E :=
-    mul_nonneg hTnonneg (Real.sqrt_nonneg E)
-  have h := c3_norm_sum_component_product_le
-    (fun i : Fin n ↦ T i j k) (fun i : Fin n ↦ R i k l j)
-    (Tbound * Real.sqrt E) K hC
-    (fun i ↦ hT i j k) (fun i ↦ hR i k l j)
-  calc
-    ‖∑ i : Fin n, T i j k * R i k l j‖ ≤
-        (Fintype.card (Fin n) : ℝ) * ((Tbound * Real.sqrt E) * K) := h
-    _ = (n : ℝ) * Tbound * K * Real.sqrt E := by
-      simp only [Fintype.card_fin]
-      ring
-
-private theorem c3_frame_ricci_derivative_action_bound {n : ℕ}
-    (T V : Fin n → ℂ) (E Tbound D : ℝ) (hE : 0 ≤ E)
-    (hTnonneg : 0 ≤ Tbound)
-    (hT : ∀ i, ‖T i‖ ≤ Tbound * Real.sqrt E)
-    (hV : ∀ i, ‖V i‖ ≤ D * (1 + Real.sqrt E)) :
-    ‖∑ i : Fin n, T i * V i‖ ≤
-      (n : ℝ) * Tbound * D * (Real.sqrt E + E) := by
-  have hC : 0 ≤ Tbound * Real.sqrt E :=
-    mul_nonneg hTnonneg (Real.sqrt_nonneg E)
-  have h := c3_norm_sum_component_product_le T V
-    (Tbound * Real.sqrt E) (D * (1 + Real.sqrt E)) hC hT hV
-  calc
-    ‖∑ i : Fin n, T i * V i‖ ≤
-        (Fintype.card (Fin n) : ℝ) *
-          ((Tbound * Real.sqrt E) * (D * (1 + Real.sqrt E))) := h
-    _ = (n : ℝ) * Tbound * D * (Real.sqrt E + E) := by
-      rw [Fintype.card_fin]
-      have hs : Real.sqrt E * Real.sqrt E = E := by
-        calc
-          Real.sqrt E * Real.sqrt E = (Real.sqrt E) ^ 2 := by ring
-          _ = E := Real.sq_sqrt hE
-      calc
-        (n : ℝ) * (Tbound * Real.sqrt E * (D * (1 + Real.sqrt E))) =
-            (n : ℝ) * Tbound * D * (Real.sqrt E + Real.sqrt E * Real.sqrt E) := by ring
-        _ = (n : ℝ) * Tbound * D * (Real.sqrt E + E) := by rw [hs]
 
 /-- Full three-slot Ricci-derivative action bound. The factor `n^3` counts
 all tensor components; the preceding one-slot estimate only counts one sum. -/
@@ -547,30 +257,21 @@ private theorem c3PartialBar_mul {n : ℕ}
   simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
   ring
 
-private theorem c3PartialZ_mul {n : ℕ}
+private theorem wirtingerDerivInChart_mul {n : ℕ}
     {u v : EuclideanSpace ℂ (Fin n) → ℂ} {z : EuclideanSpace ℂ (Fin n)}
     (hu : DifferentiableAt ℝ u z) (hv : DifferentiableAt ℝ v z) (j : Fin n) :
-    c3PartialZ (fun w ↦ u w * v w) z j =
-      c3PartialZ u z j * v z + u z * c3PartialZ v z j := by
-  unfold c3PartialZ
+    wirtingerDerivInChart (fun w ↦ u w * v w) z j =
+      wirtingerDerivInChart u z j * v z + u z * wirtingerDerivInChart v z j := by
+  unfold wirtingerDerivInChart
   rw [fderiv_fun_mul hu hv]
   simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
   ring
 
-private theorem c3PartialZ_add {n : ℕ}
+private theorem wirtingerDerivInChart_add {n : ℕ}
     {u v : EuclideanSpace ℂ (Fin n) → ℂ} {z : EuclideanSpace ℂ (Fin n)}
     (hu : DifferentiableAt ℝ u z) (hv : DifferentiableAt ℝ v z) (j : Fin n) :
-    c3PartialZ (fun w ↦ u w + v w) z j = c3PartialZ u z j + c3PartialZ v z j := by
-  unfold c3PartialZ
-  rw [fderiv_fun_add hu hv]
-  simp only [_root_.add_apply]
-  ring
-
-private theorem c3PartialBar_add {n : ℕ}
-    {u v : EuclideanSpace ℂ (Fin n) → ℂ} {z : EuclideanSpace ℂ (Fin n)}
-    (hu : DifferentiableAt ℝ u z) (hv : DifferentiableAt ℝ v z) (j : Fin n) :
-    c3PartialBar (fun w ↦ u w + v w) z j = c3PartialBar u z j + c3PartialBar v z j := by
-  unfold c3PartialBar
+    wirtingerDerivInChart (fun w ↦ u w + v w) z j = wirtingerDerivInChart u z j + wirtingerDerivInChart v z j := by
+  unfold wirtingerDerivInChart
   rw [fderiv_fun_add hu hv]
   simp only [_root_.add_apply]
   ring
@@ -592,10 +293,10 @@ private theorem c3PartialBar_differentiable_at {n : ℕ}
       Complex.I * fderiv ℝ f w (Complex.I • EuclideanSpace.single j 1)) / 2) z
   fun_prop
 
-private theorem c3PartialZ_differentiable_at {n : ℕ}
+private theorem wirtingerDerivInChart_differentiable_at {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ) (hf : ContDiff ℝ 2 f)
     (z : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
-    DifferentiableAt ℝ (fun w ↦ c3PartialZ f w j) z := by
+    DifferentiableAt ℝ (fun w ↦ wirtingerDerivInChart f w j) z := by
   have hdf : ContDiffAt ℝ 1 (fderiv ℝ f) z :=
     (hf.contDiffAt (x := z)).fderiv_right (m := 1) (by norm_num)
   have hDx : DifferentiableAt ℝ
@@ -612,15 +313,15 @@ private theorem c3PartialZ_differentiable_at {n : ℕ}
 /-- The mixed Wirtinger derivative, taken as `∂z` after `∂bar`. -/
 private noncomputable def c3MixedZBar (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (j : Fin n) : ℂ :=
-  c3PartialZ (fun w ↦ c3PartialBar f w j) z j
+  wirtingerDerivInChart (fun w ↦ c3PartialBar f w j) z j
 
 private theorem c3_partialBar_star_of_fderiv_star
     {n : ℕ} (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (j : Fin n)
     (hstar : fderiv ℝ (fun w ↦ star (f w)) z =
       (Complex.conjCLE : ℂ →L[ℝ] ℂ).comp (fderiv ℝ f z)) :
-    c3PartialBar (fun w ↦ star (f w)) z j = star (c3PartialZ f z j) := by
-  unfold c3PartialBar c3PartialZ
+    c3PartialBar (fun w ↦ star (f w)) z j = star (wirtingerDerivInChart f z j) := by
+  unfold c3PartialBar wirtingerDerivInChart
   rw [hstar]
   simp [ContinuousLinearEquiv.coe_coe]
 
@@ -629,8 +330,8 @@ private theorem c3_partialZ_star_of_fderiv_star
     (z : EuclideanSpace ℂ (Fin n)) (j : Fin n)
     (hstar : fderiv ℝ (fun w ↦ star (f w)) z =
       (Complex.conjCLE : ℂ →L[ℝ] ℂ).comp (fderiv ℝ f z)) :
-    c3PartialZ (fun w ↦ star (f w)) z j = star (c3PartialBar f z j) := by
-  unfold c3PartialBar c3PartialZ
+    wirtingerDerivInChart (fun w ↦ star (f w)) z j = star (c3PartialBar f z j) := by
+  unfold c3PartialBar wirtingerDerivInChart
   rw [hstar]
   simp [ContinuousLinearEquiv.coe_coe]
   ring
@@ -689,7 +390,7 @@ private theorem c3_partialBar_deriv_apply {n : ℕ}
 private theorem c3_partialZ_deriv_apply {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ) (hf : ContDiff ℝ 2 f)
     (z u : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
-    fderiv ℝ (fun y ↦ c3PartialZ f y j) z u =
+    fderiv ℝ (fun y ↦ wirtingerDerivInChart f y j) z u =
       (fderiv ℝ (fderiv ℝ f) z u (EuclideanSpace.single j 1) -
         Complex.I * fderiv ℝ (fderiv ℝ f) z u (Complex.I • EuclideanSpace.single j 1)) / 2 := by
   have he : DifferentiableAt ℝ (fun y ↦ fderiv ℝ f y (EuclideanSpace.single j 1)) z :=
@@ -703,7 +404,7 @@ private theorem c3_partialZ_deriv_apply {n : ℕ}
       (fun y ↦ fderiv ℝ f y (EuclideanSpace.single j 1) -
         Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) z :=
     he.sub (hie.const_mul Complex.I)
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [show (fun y ↦ (fderiv ℝ f y (EuclideanSpace.single j 1) -
         Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) / 2) =
       (fun y ↦ (fderiv ℝ f y (EuclideanSpace.single j 1) -
@@ -720,13 +421,13 @@ private theorem c3_partialZ_deriv_apply {n : ℕ}
 private theorem c3_mixedWirtinger_commute {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ) (hf : ContDiff ℝ 2 f)
     (z : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
-    c3PartialZ (fun w ↦ c3PartialBar f w j) z j =
-      c3PartialBar (fun w ↦ c3PartialZ f w j) z j := by
+    wirtingerDerivInChart (fun w ↦ c3PartialBar f w j) z j =
+      c3PartialBar (fun w ↦ wirtingerDerivInChart f w j) z j := by
   change (fderiv ℝ (fun w ↦ c3PartialBar f w j) z (EuclideanSpace.single j 1) -
       Complex.I * fderiv ℝ (fun w ↦ c3PartialBar f w j) z
         (Complex.I • EuclideanSpace.single j 1)) / 2 =
-    (fderiv ℝ (fun w ↦ c3PartialZ f w j) z (EuclideanSpace.single j 1) +
-      Complex.I * fderiv ℝ (fun w ↦ c3PartialZ f w j) z
+    (fderiv ℝ (fun w ↦ wirtingerDerivInChart f w j) z (EuclideanSpace.single j 1) +
+      Complex.I * fderiv ℝ (fun w ↦ wirtingerDerivInChart f w j) z
         (Complex.I • EuclideanSpace.single j 1)) / 2
   rw [c3_partialBar_deriv_apply f hf z (EuclideanSpace.single j 1) j,
     c3_partialBar_deriv_apply f hf z (Complex.I • EuclideanSpace.single j 1) j,
@@ -783,9 +484,9 @@ private theorem c3_mixed_normSq_hessian_of_star_bridge
         HasFDerivAt (fun w ↦ star (g w))
           ((Complex.conjCLE : ℂ →L[ℝ] ℂ).comp (fderiv ℝ g x)) x) :
     RCLike.re (c3MixedZBar (fun w ↦ f w * star (f w)) z j) =
-      ‖c3PartialZ f z j‖ ^ 2 + ‖c3PartialBar f z j‖ ^ 2 +
+      ‖wirtingerDerivInChart f z j‖ ^ 2 + ‖c3PartialBar f z j‖ ^ 2 +
         2 * RCLike.re (star (f z) * c3MixedZBar f z j) := by
-  let a : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialZ f x j
+  let a : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wirtingerDerivInChart f x j
   let b : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialBar f x j
   let u : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ b x * star (f x)
   let v : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ f x * star (a x)
@@ -796,7 +497,7 @@ private theorem c3_mixed_normSq_hessian_of_star_bridge
         ((Complex.conjCLE : ℂ →L[ℝ] ℂ).comp (fderiv ℝ f x)) x :=
     hstar f x (hfdiff x)
   have haDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ a x :=
-    c3PartialZ_differentiable_at f hf x j
+    wirtingerDerivInChart_differentiable_at f hf x j
   have hbDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ b x :=
     c3PartialBar_differentiable_at f hf x j
   have hstarA (x : EuclideanSpace ℂ (Fin n)) :
@@ -809,17 +510,17 @@ private theorem c3_mixed_normSq_hessian_of_star_bridge
     rw [c3PartialBar_mul (hfdiff x) (hstarF x).differentiableAt j]
     rw [c3_partialBar_star_of_fderiv_star f x j (hstarF x).fderiv]
   have hmix : c3MixedZBar (fun w ↦ f w * star (f w)) z j =
-      c3PartialZ (fun x ↦ u x + v x) z j := by
+      wirtingerDerivInChart (fun x ↦ u x + v x) z j := by
     unfold c3MixedZBar
     rw [hbar]
-  rw [hmix, c3PartialZ_add (u := u) (v := v)
+  rw [hmix, wirtingerDerivInChart_add (u := u) (v := v)
     ((hbDiff z).mul (hstarF z).differentiableAt)
     ((hfdiff z).mul (hstarA z).differentiableAt) j]
-  change RCLike.re (c3PartialZ (fun x ↦ b x * star (f x)) z j +
-      c3PartialZ (fun x ↦ f x * star (a x)) z j) = _
-  rw [c3PartialZ_mul (u := b) (v := fun x ↦ star (f x))
+  change RCLike.re (wirtingerDerivInChart (fun x ↦ b x * star (f x)) z j +
+      wirtingerDerivInChart (fun x ↦ f x * star (a x)) z j) = _
+  rw [wirtingerDerivInChart_mul (u := b) (v := fun x ↦ star (f x))
       (hbDiff z) (hstarF z).differentiableAt j,
-    c3PartialZ_mul (u := f) (v := fun x ↦ star (a x))
+    wirtingerDerivInChart_mul (u := f) (v := fun x ↦ star (a x))
       (hfdiff z) (hstarA z).differentiableAt j]
   rw [c3_partialZ_star_of_fderiv_star f z j (hstarF z).fderiv,
     c3_partialZ_star_of_fderiv_star a z j (hstarA z).fderiv,
@@ -827,10 +528,10 @@ private theorem c3_mixed_normSq_hessian_of_star_bridge
   have hlast : c3PartialBar a z j = c3MixedZBar f z j :=
     (c3_mixedWirtinger_commute f hf z j).symm
   rw [hlast]
-  have halpha : c3MixedZBar f z j = c3PartialZ b z j := rfl
+  have halpha : c3MixedZBar f z j = wirtingerDerivInChart b z j := rfl
   rw [halpha]
   have hjet := c3_mixed_normSq_jet_algebra
-    (f z) (a z) (b z) (c3PartialZ b z j)
+    (f z) (a z) (b z) (wirtingerDerivInChart b z j)
   simpa [a, b, add_assoc, add_left_comm, add_comm] using hjet
 
 /-- For an arbitrary real-C² complex-valued function, the diagonal mixed derivative
@@ -839,7 +540,7 @@ private theorem c3_mixed_normSq_hessian
     (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (hf : ContDiff ℝ 2 f) (z : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
     RCLike.re (c3MixedZBar (fun w ↦ f w * star (f w)) z j) =
-      ‖c3PartialZ f z j‖ ^ 2 + ‖c3PartialBar f z j‖ ^ 2 +
+      ‖wirtingerDerivInChart f z j‖ ^ 2 + ‖c3PartialBar f z j‖ ^ 2 +
         2 * RCLike.re (star (f z) * c3MixedZBar f z j) := by
   apply c3_mixed_normSq_hessian_of_star_bridge f hf z j
   intro g x hg
@@ -877,14 +578,14 @@ private theorem c3_weighted_normSq_mixed_hessian_of_star_bridge
       RCLike.re
         (c3MixedZBar w z j * (f z * star (f z)) +
           c3PartialBar w z j *
-            (c3PartialZ f z j * star (f z) + f z * star (c3PartialBar f z j)) +
-          c3PartialZ w z j *
-            (c3PartialBar f z j * star (f z) + f z * star (c3PartialZ f z j)) +
+            (wirtingerDerivInChart f z j * star (f z) + f z * star (c3PartialBar f z j)) +
+          wirtingerDerivInChart w z j *
+            (c3PartialBar f z j * star (f z) + f z * star (wirtingerDerivInChart f z j)) +
           w z * c3MixedZBar (fun x ↦ f x * star (f x)) z j) := by
   let q : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ f x * star (f x)
-  let a : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialZ f x j
+  let a : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wirtingerDerivInChart f x j
   let b : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialBar f x j
-  let wz : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialZ w x j
+  let wz : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wirtingerDerivInChart w x j
   let wb : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialBar w x j
   let u : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wb x * q x
   let v : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ w x * c3PartialBar q x j
@@ -901,11 +602,11 @@ private theorem c3_weighted_normSq_mixed_hessian_of_star_bridge
         ((Complex.conjCLE : ℂ →L[ℝ] ℂ).comp (fderiv ℝ f x)) x :=
     hstar f x (hfdiff x)
   have haDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ a x :=
-    c3PartialZ_differentiable_at f hf x j
+    wirtingerDerivInChart_differentiable_at f hf x j
   have hbDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ b x :=
     c3PartialBar_differentiable_at f hf x j
   have hwzDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ wz x :=
-    c3PartialZ_differentiable_at w hw x j
+    wirtingerDerivInChart_differentiable_at w hw x j
   have hwbDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ wb x :=
     c3PartialBar_differentiable_at w hw x j
   have hstarA (x : EuclideanSpace ℂ (Fin n)) :
@@ -919,10 +620,10 @@ private theorem c3_weighted_normSq_mixed_hessian_of_star_bridge
     funext x
     rw [c3PartialBar_mul (hfdiff x) (hstarF x).differentiableAt j]
     rw [c3_partialBar_star_of_fderiv_star f x j (hstarF x).fderiv]
-  have hZQ : (fun x ↦ c3PartialZ q x j) =
+  have hZQ : (fun x ↦ wirtingerDerivInChart q x j) =
       (fun x ↦ a x * star (f x) + f x * star (b x)) := by
     funext x
-    rw [c3PartialZ_mul (u := f) (v := fun y ↦ star (f y))
+    rw [wirtingerDerivInChart_mul (u := f) (v := fun y ↦ star (f y))
       (hfdiff x) (hstarF x).differentiableAt j]
     rw [c3_partialZ_star_of_fderiv_star f x j (hstarF x).fderiv]
   have hbarQDiff (x : EuclideanSpace ℂ (Fin n)) :
@@ -932,25 +633,25 @@ private theorem c3_weighted_normSq_mixed_hessian_of_star_bridge
     · exact (hbDiff x).mul (hstarF x).differentiableAt
     · exact (hfdiff x).mul (hstarA x).differentiableAt
   have hmixWQ : c3MixedZBar (fun x ↦ w x * q x) z j =
-      c3PartialZ (fun x ↦ u x + v x) z j := by
+      wirtingerDerivInChart (fun x ↦ u x + v x) z j := by
     unfold c3MixedZBar
-    change c3PartialZ (fun x ↦ c3PartialBar (fun y ↦ w y * q y) x j) z j = _
+    change wirtingerDerivInChart (fun x ↦ c3PartialBar (fun y ↦ w y * q y) x j) z j = _
     rw [show (fun x ↦ c3PartialBar (fun y ↦ w y * q y) x j) =
         (fun x ↦ u x + v x) by
       funext x
       rw [c3PartialBar_mul (hwdiff x) (hqDiff x) j]]
-  rw [hmixWQ, c3PartialZ_add (u := u) (v := v)
+  rw [hmixWQ, wirtingerDerivInChart_add (u := u) (v := v)
     ((hwbDiff z).mul (hqDiff z)) ((hwdiff z).mul (hbarQDiff z)) j]
   change RCLike.re
-      (c3PartialZ (fun x ↦ wb x * q x) z j +
-        c3PartialZ (fun x ↦ w x * c3PartialBar q x j) z j) = _
-  rw [c3PartialZ_mul (u := wb) (v := q) (hwbDiff z) (hqDiff z) j,
-    c3PartialZ_mul (u := w) (v := fun x ↦ c3PartialBar q x j)
+      (wirtingerDerivInChart (fun x ↦ wb x * q x) z j +
+        wirtingerDerivInChart (fun x ↦ w x * c3PartialBar q x j) z j) = _
+  rw [wirtingerDerivInChart_mul (u := wb) (v := q) (hwbDiff z) (hqDiff z) j,
+    wirtingerDerivInChart_mul (u := w) (v := fun x ↦ c3PartialBar q x j)
       (hwdiff z) (hbarQDiff z) j]
   have hbarQz := congrFun hbarQ z
   have hZQz := congrFun hZQ z
-  rw [show c3PartialZ wb z j = c3MixedZBar w z j by rfl,
-    show c3PartialZ (fun x ↦ c3PartialBar q x j) z j = c3MixedZBar q z j by rfl,
+  rw [show wirtingerDerivInChart wb z j = c3MixedZBar w z j by rfl,
+    show wirtingerDerivInChart (fun x ↦ c3PartialBar q x j) z j = c3MixedZBar q z j by rfl,
     hbarQz, hZQz]
   congr 1
   ring
@@ -970,20 +671,20 @@ private theorem c3_weighted_pair_mixed_hessian_of_star_bridge
       RCLike.re
         (c3MixedZBar w z j * (f z * star (u z)) +
           c3PartialBar w z j *
-            (c3PartialZ f z j * star (u z) + f z * star (c3PartialBar u z j)) +
-          c3PartialZ w z j *
-            (c3PartialBar f z j * star (u z) + f z * star (c3PartialZ u z j)) +
+            (wirtingerDerivInChart f z j * star (u z) + f z * star (c3PartialBar u z j)) +
+          wirtingerDerivInChart w z j *
+            (c3PartialBar f z j * star (u z) + f z * star (wirtingerDerivInChart u z j)) +
           w z *
             (c3MixedZBar f z j * star (u z) +
               c3PartialBar f z j * star (c3PartialBar u z j) +
-              c3PartialZ f z j * star (c3PartialZ u z j) +
+              wirtingerDerivInChart f z j * star (wirtingerDerivInChart u z j) +
               f z * star (c3MixedZBar u z j))) := by
   let p : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ f x * star (u x)
-  let a : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialZ f x j
+  let a : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wirtingerDerivInChart f x j
   let b : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialBar f x j
-  let c : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialZ u x j
+  let c : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wirtingerDerivInChart u x j
   let d : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialBar u x j
-  let wz : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialZ w x j
+  let wz : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wirtingerDerivInChart w x j
   let wb : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ c3PartialBar w x j
   let v : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ w x * c3PartialBar p x j
   let r : EuclideanSpace ℂ (Fin n) → ℂ := fun x ↦ wb x * p x
@@ -1004,11 +705,11 @@ private theorem c3_weighted_pair_mixed_hessian_of_star_bridge
         ((Complex.conjCLE : ℂ →L[ℝ] ℂ).comp (fderiv ℝ u x)) x :=
     hstar u x (hudiff x)
   have haDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ a x :=
-    c3PartialZ_differentiable_at f hf x j
+    wirtingerDerivInChart_differentiable_at f hf x j
   have hbDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ b x :=
     c3PartialBar_differentiable_at f hf x j
   have hcDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ c x :=
-    c3PartialZ_differentiable_at u hu x j
+    wirtingerDerivInChart_differentiable_at u hu x j
   have hdDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ d x :=
     c3PartialBar_differentiable_at u hu x j
   have hwbDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ wb x :=
@@ -1024,10 +725,10 @@ private theorem c3_weighted_pair_mixed_hessian_of_star_bridge
     funext x
     rw [c3PartialBar_mul (hfdiff x) (hstarU x).differentiableAt j]
     rw [c3_partialBar_star_of_fderiv_star u x j (hstarU x).fderiv]
-  have hZP : (fun x ↦ c3PartialZ p x j) =
+  have hZP : (fun x ↦ wirtingerDerivInChart p x j) =
       (fun x ↦ a x * star (u x) + f x * star (d x)) := by
     funext x
-    rw [c3PartialZ_mul (u := f) (v := fun y ↦ star (u y))
+    rw [wirtingerDerivInChart_mul (u := f) (v := fun y ↦ star (u y))
       (hfdiff x) (hstarU x).differentiableAt j]
     rw [c3_partialZ_star_of_fderiv_star u x j (hstarU x).fderiv]
   have hsDiff (x : EuclideanSpace ℂ (Fin n)) : DifferentiableAt ℝ s x :=
@@ -1043,75 +744,37 @@ private theorem c3_weighted_pair_mixed_hessian_of_star_bridge
     funext x
     exact c3PartialBar_mul (hwdiff x) (hpDiff x) j
   have hmixedWP : c3MixedZBar (fun x ↦ w x * p x) z j =
-      c3PartialZ (fun x ↦ r x + v x) z j := by
+      wirtingerDerivInChart (fun x ↦ r x + v x) z j := by
     unfold c3MixedZBar
-    change c3PartialZ (fun x ↦ c3PartialBar (fun y ↦ w y * p y) x j) z j = _
+    change wirtingerDerivInChart (fun x ↦ c3PartialBar (fun y ↦ w y * p y) x j) z j = _
     rw [hbarWP]
-  rw [hmixedWP, c3PartialZ_add (u := r) (v := v)
+  rw [hmixedWP, wirtingerDerivInChart_add (u := r) (v := v)
     ((hwbDiff z).mul (hpDiff z)) ((hwdiff z).mul (hbarPDiff z)) j]
   change RCLike.re
-      (c3PartialZ (fun x ↦ wb x * p x) z j +
-        c3PartialZ (fun x ↦ w x * c3PartialBar p x j) z j) = _
-  rw [c3PartialZ_mul (u := w) (v := fun x ↦ c3PartialBar p x j)
+      (wirtingerDerivInChart (fun x ↦ wb x * p x) z j +
+        wirtingerDerivInChart (fun x ↦ w x * c3PartialBar p x j) z j) = _
+  rw [wirtingerDerivInChart_mul (u := w) (v := fun x ↦ c3PartialBar p x j)
       (hwdiff z) (hbarPDiff z) j,
-    c3PartialZ_mul (u := wb) (v := p) (hwbDiff z) (hpDiff z) j]
+    wirtingerDerivInChart_mul (u := wb) (v := p) (hwbDiff z) (hpDiff z) j]
   have hbarPz := congrFun hbarP z
   have hZPz := congrFun hZP z
-  rw [show c3PartialZ wb z j = c3MixedZBar w z j by rfl,
+  rw [show wirtingerDerivInChart wb z j = c3MixedZBar w z j by rfl,
     hbarPz, hZPz]
-  have hbarPderiv : c3PartialZ (fun x ↦ c3PartialBar p x j) z j =
-      c3PartialZ (fun x ↦ s x + t x) z j := by
+  have hbarPderiv : wirtingerDerivInChart (fun x ↦ c3PartialBar p x j) z j =
+      wirtingerDerivInChart (fun x ↦ s x + t x) z j := by
     have hfun : (fun x ↦ c3PartialBar p x j) = (fun x ↦ s x + t x) := hbarP
     rw [hfun]
-  rw [hbarPderiv, c3PartialZ_add (u := s) (v := t) (hsDiff z) (htDiff z) j]
-  rw [c3PartialZ_mul (u := b) (v := fun x ↦ star (u x))
+  rw [hbarPderiv, wirtingerDerivInChart_add (u := s) (v := t) (hsDiff z) (htDiff z) j]
+  rw [wirtingerDerivInChart_mul (u := b) (v := fun x ↦ star (u x))
       (hbDiff z) (hstarU z).differentiableAt j,
-    c3PartialZ_mul (u := f) (v := fun x ↦ star (c x))
+    wirtingerDerivInChart_mul (u := f) (v := fun x ↦ star (c x))
       (hfdiff z) (hstarC z).differentiableAt j]
-  rw [show c3PartialZ b z j = c3MixedZBar f z j by rfl,
+  rw [show wirtingerDerivInChart b z j = c3MixedZBar f z j by rfl,
     c3_partialZ_star_of_fderiv_star u z j (hstarU z).fderiv,
     c3_partialZ_star_of_fderiv_star c z j (hstarC z).fderiv,
     show c3PartialBar c z j = c3MixedZBar u z j by
       exact (c3_mixedWirtinger_commute u hu z j).symm]
   congr 1; ring
-
-omit [T2Space M] in
-private theorem c3_finite_cover_glue_five_slot_bound
-    (ω₀ : KahlerForm n M)
-    (T : M → Fin n → Fin n → Fin n → Fin n → Fin n → ℂ)
-    (hlocal : ∀ x : M, ∃ U : Set M, IsOpen U ∧ x ∈ U ∧
-      ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ U, ∀ (P : Matrix (Fin n) (Fin n) ℂ),
-        Matrix.transpose P *
-            ω₀.metricInChart y (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y) * P.map star = 1 →
-          ∀ s p q j k : Fin n,
-            ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n,
-              ∑ d : Fin n, ∑ e : Fin n,
-                P a s * P b p * star (P c q) * P d j * star (P e k) *
-                  T y a b c d e‖ ≤ C) :
-    ∃ A : ℝ, 0 ≤ A ∧ ∀ (x : M) (P : Matrix (Fin n) (Fin n) ℂ),
-      Matrix.transpose P *
-          ω₀.metricInChart x (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) * P.map star = 1 →
-        ∀ s p q j k : Fin n,
-          ‖∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n,
-            ∑ d : Fin n, ∑ e : Fin n,
-              P a s * P b p * star (P c q) * P d j * star (P e k) *
-                T x a b c d e‖ ≤ A := by
-  classical
-  choose U hUopen hx hbound using hlocal
-  choose C hCnonneg hCbound using hbound
-  have hcover : (Set.univ : Set M) ⊆ ⋃ x : M, U x := by
-    intro x hxuniv
-    exact Set.mem_iUnion.mpr ⟨x, hx x⟩
-  obtain ⟨t, ht⟩ := (isCompact_univ : IsCompact (Set.univ : Set M)).elim_finite_subcover
-    U hUopen hcover
-  let A : ℝ := ∑ x ∈ t, C x
-  refine ⟨A, ?_, ?_⟩
-  · exact Finset.sum_nonneg fun x hx => hCnonneg x
-  · intro x P hP s p q j k
-    rcases Set.mem_iUnion₂.mp (ht (Set.mem_univ x)) with ⟨y, hyt, hxy⟩
-    have hsingle : C y ≤ ∑ z ∈ t, C z :=
-      Finset.single_le_sum (fun z hz => hCnonneg z) hyt
-    exact (hCbound y x hxy P hP s p q j k).trans (by simpa [A] using hsingle)
 
 /-- Uniform CY form of Calabi's pointwise inequality `Δ_{ωφ} E ≥ -C E - C`.
 Here `E = |Γ(gφ)-Γ(g₀)|²_{gφ}` uses the normalization in `CalabiEnergy`. -/

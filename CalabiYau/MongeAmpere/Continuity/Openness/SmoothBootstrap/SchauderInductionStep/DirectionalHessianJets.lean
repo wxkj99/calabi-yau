@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # Reconstructing Hölder metric jets from directional derivatives
@@ -443,7 +443,7 @@ private theorem local_hessian_entry_holder
 theorem locally_holder_metric_of_directional_derivatives
     {n k : ℕ} (hk : 3 ≤ k) {α : ℝ≥0}
     {W : Set (EuclideanSpace ℂ (Fin n))}
-    (hW : IsOpen W) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (hW : IsOpen W) (hα₁ : α < 1)
     (f : EuclideanSpace ℂ (Fin n) → ℝ)
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (hf : ContDiffOn ℝ k f W)
@@ -461,7 +461,6 @@ theorem locally_holder_metric_of_directional_derivatives
   let direction (p : Fin n × Bool) : EuclideanSpace ℂ (Fin n) :=
     if p.2 then Complex.I • EuclideanSpace.single p.1 1
     else EuclideanSpace.single p.1 1
-  have _hα₀ := hα₀
   obtain ⟨U, C, hU, hzU, hUW, hdirsU⟩ :=
     common_directional_bounds hW f hfirst z hz
   obtain ⟨R, hR, hball⟩ := Metric.isOpen_iff.mp hU z hzU

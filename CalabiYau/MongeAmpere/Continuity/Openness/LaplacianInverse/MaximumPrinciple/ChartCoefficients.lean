@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.Geometry.Kahler.Laplacian
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # Local inverse-metric coefficient bounds

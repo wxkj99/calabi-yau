@@ -22,14 +22,14 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 theorem referenceContraction_mixed_weighted_pair {n : ℕ}
     (G : Matrix (Fin n) (Fin n) ℂ) (z : EuclideanSpace ℂ (Fin n))
     (P Q : Matrix (Fin n) (Fin n) ℂ) (d : Fin n → ℝ)
-    (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1) (hQP : Q * P = 1)
+    (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1)
     (hdiag : c3PullbackMetric P G = Matrix.diagonal (fun i ↦ (d i : ℂ)))
     (U T : Fin n → Fin n → Fin n → ℂ) :
     c3Pair (fun _ : EuclideanSpace ℂ (Fin n) ↦ G) z U T =
       ∑ i, ∑ j, ∑ k, ((d i / (d j * d k) : ℝ) : ℂ) *
-        referenceContraction_tensorFrameTransform Q P U i j k *
-          star (referenceContraction_tensorFrameTransform Q P T i j k) := by
-  rcases c3_metric_frame_factorizations G P Q d hd hPQ hQP hdiag with
+        referenceContractionTensorFrameTransform Q P U i j k *
+          star (referenceContractionTensorFrameTransform Q P T i j k) := by
+  rcases c3_metric_frame_factorizations G P Q d hd hPQ hdiag with
     ⟨hUpper, hLower⟩
   let B : Matrix (Fin n) (Fin n) ℂ :=
     Matrix.diagonal (fun i ↦ (Real.sqrt (d i) : ℂ)) * Q
@@ -66,15 +66,15 @@ theorem referenceContraction_mixed_weighted_pair {n : ℕ}
         ne_of_gt (Real.sqrt_pos.2 (hd k))]
     exact_mod_cast hreal
   have htransform (W : Fin n → Fin n → Fin n → ℂ) (i j k : Fin n) :
-      referenceContraction_tensorFrameTransform B C W i j k =
+      referenceContractionTensorFrameTransform B C W i j k =
         (((Real.sqrt (d i) / (Real.sqrt (d j) * Real.sqrt (d k)) : ℝ) : ℂ) *
-          referenceContraction_tensorFrameTransform Q P W i j k) := by
+          referenceContractionTensorFrameTransform Q P W i j k) := by
     have hscale' :
         ((Real.sqrt (d i) : ℝ) : ℂ) *
             (((Real.sqrt (d j))⁻¹ : ℝ) : ℂ) *
             (((Real.sqrt (d k))⁻¹ : ℝ) : ℂ) =
           ((Real.sqrt (d i) / (Real.sqrt (d j) * Real.sqrt (d k)) : ℝ) : ℂ) := hscale i j k
-    simp only [referenceContraction_tensorFrameTransform]
+    simp only [referenceContractionTensorFrameTransform]
     simp_rw [hBentry, hCentry]
     have hterm (a b c : Fin n) :
         (((Real.sqrt (d i) : ℝ) : ℂ) * Q i a) *
@@ -100,11 +100,11 @@ theorem referenceContraction_mixed_weighted_pair {n : ℕ}
       _ = (((Real.sqrt (d i) : ℝ) : ℂ) *
           (((Real.sqrt (d j))⁻¹ : ℝ) : ℂ) *
           (((Real.sqrt (d k))⁻¹ : ℝ) : ℂ)) *
-          referenceContraction_tensorFrameTransform Q P W i j k := by
+          referenceContractionTensorFrameTransform Q P W i j k := by
         simp_rw [← Finset.mul_sum]
         rfl
       _ = (((Real.sqrt (d i) / (Real.sqrt (d j) * Real.sqrt (d k)) : ℝ) : ℂ) *
-          referenceContraction_tensorFrameTransform Q P W i j k) := by rw [hscale']
+          referenceContractionTensorFrameTransform Q P W i j k) := by rw [hscale']
   rw [hframe]
   apply Finset.sum_congr rfl
   intro i hi
@@ -125,16 +125,16 @@ theorem referenceContraction_mixed_weighted_pair {n : ℕ}
   have hsstar : star ((s : ℝ) : ℂ) = ((s : ℝ) : ℂ) := by simp
   have hcast : (((s : ℝ) : ℂ) ^ 2) = ((d i / (d j * d k) : ℝ) : ℂ) := by
     exact_mod_cast hsquare
-  change ((s : ℝ) : ℂ) * referenceContraction_tensorFrameTransform Q P U i j k *
-      star (((s : ℝ) : ℂ) * referenceContraction_tensorFrameTransform Q P T i j k) = _
-  have hstar : star (((s : ℝ) : ℂ) * referenceContraction_tensorFrameTransform Q P T i j k) =
-      ((s : ℝ) : ℂ) * star (referenceContraction_tensorFrameTransform Q P T i j k) := by
+  change ((s : ℝ) : ℂ) * referenceContractionTensorFrameTransform Q P U i j k *
+      star (((s : ℝ) : ℂ) * referenceContractionTensorFrameTransform Q P T i j k) = _
+  have hstar : star (((s : ℝ) : ℂ) * referenceContractionTensorFrameTransform Q P T i j k) =
+      ((s : ℝ) : ℂ) * star (referenceContractionTensorFrameTransform Q P T i j k) := by
     simp [hsstar]
   rw [hstar]
-  rw [show ((s : ℝ) : ℂ) * referenceContraction_tensorFrameTransform Q P U i j k *
-      (((s : ℝ) : ℂ) * star (referenceContraction_tensorFrameTransform Q P T i j k)) =
-      ((s : ℝ) : ℂ) ^ 2 * referenceContraction_tensorFrameTransform Q P U i j k *
-        star (referenceContraction_tensorFrameTransform Q P T i j k) by ring]
+  rw [show ((s : ℝ) : ℂ) * referenceContractionTensorFrameTransform Q P U i j k *
+      (((s : ℝ) : ℂ) * star (referenceContractionTensorFrameTransform Q P T i j k)) =
+      ((s : ℝ) : ℂ) ^ 2 * referenceContractionTensorFrameTransform Q P U i j k *
+        star (referenceContractionTensorFrameTransform Q P T i j k) by ring]
   rw [hcast]
 
 end KahlerForm

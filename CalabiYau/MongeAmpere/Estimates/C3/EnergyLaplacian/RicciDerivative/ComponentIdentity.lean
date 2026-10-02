@@ -45,6 +45,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- General MA gives every Ricci coefficient on the chart target, hence an
 open-neighborhood identity available for differentiation at its centre. -/
 theorem c3RicciInChart_perturb_eq_of_solvesMongeAmpere (ω₀ : KahlerForm n M)

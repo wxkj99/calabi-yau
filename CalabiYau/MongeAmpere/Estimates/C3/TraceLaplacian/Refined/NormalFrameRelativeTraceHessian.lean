@@ -98,7 +98,7 @@ private theorem c3RefinedTraceRelativeTraceHessian_chartWirtinger
 private theorem c3RefinedTraceRelativeTraceHessian_realCastWirtinger
     (f : EuclideanSpace ℂ (Fin n) → ℝ) (z : EuclideanSpace ℂ (Fin n))
     (hf : ContDiffAt ℝ 2 f z) (p q : Fin n) :
-    c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
       (fun v ↦ (f v : ℂ)) w q) z p = complexHessian f z p q := by
   have hbar : (fun w ↦ c3RefinedTracePartialBar (fun v ↦ (f v : ℂ)) w q) =ᶠ[𝓝 z]
       fun w ↦ chartPartialBar f w q := by
@@ -112,7 +112,7 @@ private theorem c3RefinedTraceRelativeTraceHessian_realCastWirtinger
     unfold c3RefinedTracePartialBar chartPartialBar
     rw [hfd]
     simp [ContinuousLinearMap.comp_apply]
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hbar.fderiv_eq]
   change chartPartialZComplex (fun w ↦ chartPartialBar f w q) z p = _
   exact c3RefinedTraceRelativeTraceHessian_chartWirtinger f z hf p q
@@ -281,7 +281,7 @@ theorem c3RefinedTrace_normalFrame_relativeTraceHessian
     (ω₀.perturb φ hsol.1).laplacian
         (fun y ↦ relTrace (ω₀ y) (ω₀ y + mddbar n φ y)) x =
       RCLike.re (((h frame.center)⁻¹ * Matrix.of (fun p q ↦
-        c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+        wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
           (fun v ↦ c3RefinedTraceRelativeMatrixTrace g h v) w q) frame.center p)).trace) := by
   let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
   let z₀ := e x
@@ -336,7 +336,7 @@ theorem c3RefinedTrace_normalFrame_relativeTraceHessian
     simpa [T, u, f, g, h, e, Function.comp_def] using
       c3RefinedTraceRelativeTraceHessian_frameTraceEqIntrinsic ω₀ G φ hsol x frame w hw
   have hMixed (p q : Fin n) :
-      c3PartialZ (fun w ↦ c3RefinedTracePartialBar T w q) frame.center p =
+      wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar T w q) frame.center p =
         complexHessian u frame.center p q := by
     have hbarAt (w : EuclideanSpace ℂ (Fin n)) (hw : w ∈ frame.domain) :
         c3RefinedTracePartialBar T w q =
@@ -350,11 +350,11 @@ theorem c3RefinedTrace_normalFrame_relativeTraceHessian
         fun w ↦ c3RefinedTracePartialBar (fun v ↦ (u v : ℂ)) w q := by
       filter_upwards [frame.open_domain.mem_nhds frame.center_mem] with w hw
       exact hbarAt w hw
-    unfold c3PartialZ
+    unfold wirtingerDerivInChart
     rw [hbar.fderiv_eq]
     exact c3RefinedTraceRelativeTraceHessian_realCastWirtinger u frame.center hUtwo p q
   have hHessianMatrix :
-      Matrix.of (fun p q ↦ c3PartialZ
+      Matrix.of (fun p q ↦ wirtingerDerivInChart
         (fun w ↦ c3RefinedTracePartialBar T w q) frame.center p) =
         complexHessian u frame.center := by
     ext p q

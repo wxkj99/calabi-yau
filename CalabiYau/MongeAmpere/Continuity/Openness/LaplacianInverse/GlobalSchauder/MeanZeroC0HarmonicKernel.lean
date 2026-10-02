@@ -20,12 +20,11 @@ open MeasureTheory ContinuousAlternatingMap
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
+section
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 private theorem hIsOneOne_c2 (φ : M → ℝ)
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 φ) :
     (mddbar n φ).IsOneOne := by
@@ -44,7 +43,6 @@ private theorem hIsOneOne_c2 (φ : M → ℝ)
   change (ddbar (φ ∘ e.symm) (e x)).IsOneOne
   exact isOneOne_ddbar hφC
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The intrinsic Kähler Laplacian in an arbitrary real chart, at C² regularity. This is the
 coordinate bridge used for the C² compactness limit; it does not upgrade that limit to smoothness. -/
 private theorem hLaplacianChart_c2 (ω₁ : KahlerForm n M) (f : M → ℝ)
@@ -138,7 +136,6 @@ private theorem hLaplacianChart_c2 (ω₁ : KahlerForm n M) (f : M → ℝ)
       rw [← hrep ω₁.toFormField, ← hrep (mddbar n f), hddbar]
       rfl
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem complexEllipticOp_eq_zero_of_laplacian_eq_zero_c2
     (ω₁ : KahlerForm n M) (f : M → ℝ)
     (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 f)
@@ -158,34 +155,12 @@ private theorem complexEllipticOp_eq_zero_of_laplacian_eq_zero_c2
   rw [← hchart]
   exact hzero
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem laplacian_nonpos_of_isLocalMax_c2 (ω₁ : KahlerForm n M)
-    {f : M → ℝ}
-    (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 f)
-    {x : M} (hx : IsLocalMax f x) : ω₁.laplacian f x ≤ 0 := by
-  let ψ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
-  let z := ψ x
-  let f' := f ∘ ψ.symm
-  have hcoord :=
-    (contMDiffAt_iff_of_mem_source (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n)))
-      (I' := 𝓘(ℝ)) (x := x) (x' := x) (y := f x) (by simp) (by simp)).1 (hf x)
-  have hC2 : ContDiffAt ℝ 2 f' z := by
-    have h : ContDiffWithinAt ℝ 2 f' Set.univ z := by
-      simpa [f', ψ, z, chartAt_self_eq, ModelWithCorners.range_eq_univ] using hcoord.2
-    exact contDiffWithinAt_univ.mp h
-  have hmax : IsLocalMax f' z := by
-    have hx' : IsLocalMax f (ψ.symm z) := by simpa [ψ, z] using hx
-    exact hx'.comp_continuous (continuousAt_extChartAt_symm x)
-  have hnonneg : (-ddbar f' z).IsNonneg :=
-    isNonneg_neg_ddbar_of_isLocalMax hC2 hmax
-  have htrace : 0 ≤ relTrace (ω₁ x) (-ddbar f' z) :=
-    ContinuousAlternatingMap.relTrace_nonneg (ω₁.isPositive x) hnonneg
-  have htrace' : relTrace (ω₁ x) (ddbar f' z) ≤ 0 := by
-    rw [ContinuousAlternatingMap.relTrace_neg] at htrace
-    linarith
-  simpa [KahlerForm.laplacian, mddbar, f', ψ, z] using htrace'
+end
 
-omit [ConnectedSpace M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem eq_zero_of_eq_const_and_integral_zero [Nonempty M]
     (ω₁ : KahlerForm n M) (f : M → ℝ)
     (hconst : ∃ c : ℝ, ∀ x, f x = c)
@@ -207,7 +182,9 @@ private theorem eq_zero_of_eq_const_and_integral_zero [Nonempty M]
   intro x
   rw [hc x, hc0]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 /-- Local strong maximum principle at a global maximum, assembled from the explicit C²
 coordinate-domain theorem and local inverse-metric coefficient bounds. -/
 private theorem eqOn_nhd_of_isGlobalMax_laplacian_eq_zero_c2 [Nonempty M]
@@ -248,7 +225,10 @@ private theorem eqOn_nhd_of_isGlobalMax_laplacian_eq_zero_c2 [Nonempty M]
     simpa only [Function.comp_apply, e.left_inv hy.1,
       e.left_inv (mem_extChartAt_source x)] using h
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [CompactSpace M] [ConnectedSpace M] in
 /-- The C² strong maximum-principle step: on a connected compact Kähler manifold, a C²
 harmonic function is constant. This isolates the regularity-level gap that cannot be discharged
 by the imported smooth-only harmonic rigidity theorem. -/
@@ -282,6 +262,10 @@ private theorem exists_eq_const_of_laplacian_eq_zero_c2 [Nonempty M]
   have hx : x ∈ S := by rw [hSuniv]; exact Set.mem_univ x
   exact hx
 
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The C² version of harmonic-kernel rigidity needed after C² Arzelà–Ascoli; the smooth-only
 `KahlerForm.eq_const_of_laplacian_eq_zero` does not apply to this limit. -/
 theorem eq_zero_of_C2_laplacian_eq_zero_and_integral_zero [Nonempty M]

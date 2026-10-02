@@ -14,7 +14,7 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M]
 
 noncomputable def c0Softplus (t : ℝ) : ℝ :=
   1 + Real.log (1 + Real.exp t)
@@ -180,12 +180,11 @@ theorem deriv_c0Softplus_le_one (t : ℝ) : deriv c0Softplus t ≤ 1 := by
   apply (div_le_one₀ (by positivity : 0 < 1 + Real.exp t)).2
   linarith
 
-omit [ConnectedSpace M] in private theorem integrable_of_continuous_volume
+private theorem integrable_of_continuous_volume
     (ω₀ : KahlerForm n M) {f : M → ℝ} (hf : Continuous f) : Integrable f ω₀.volume :=
   hf.integrable_of_hasCompactSupport
     (HasCompactSupport.of_support_subset_isCompact isCompact_univ (Set.subset_univ _))
 
-omit [ConnectedSpace M] in
 
 /-- Softplus has at most linear growth in L². -/
 theorem c0_softplus_integral_sq_le
@@ -219,7 +218,6 @@ theorem c0_softplus_integral_sq_le
         simp
       rw [integral_const_mul, hsum]
 
-omit [ConnectedSpace M] in
 
 /-- Lift a softplus essential bound to a pointwise bound using full support. -/
 theorem c0_softplus_pointwise_of_essSup

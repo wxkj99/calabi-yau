@@ -27,6 +27,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] in
 /-- On the interior of a compact chart piece, every coordinate derivative through order two of the
 completed evaluation is the corresponding canonical completed chart jet. -/
 theorem smoothChartHolderContinuousMapExtension_completedJet_eq
@@ -42,6 +43,7 @@ theorem smoothChartHolderContinuousMapExtension_completedJet_eq
         ⟨z, interior_subset hz⟩ := by
   exact smoothChartHolderCompletedJetIdentity cover α N u j hj i z hz
 
+omit [FiniteDimensional ℝ E] [CompactSpace M] in
 /-- The completed chart jet at an interior point is bounded by the little-Hölder norm. -/
 theorem smoothChartHolderContinuousMapExtension_completedJet_norm_le
     (cover : CompactChartCover E M) (α : ℝ≥0)
@@ -53,6 +55,7 @@ theorem smoothChartHolderContinuousMapExtension_completedJet_norm_le
       ⟨z, interior_subset hz⟩‖ ≤ ‖u‖ := by
   exact smoothChartHolderCompletedJetNormBound cover α N u j hj i z hz
 
+omit [FiniteDimensional ℝ E] in
 /-- The fixed-cover estimate retains the top-order Hölder seminorm in addition to all jet sup
 bounds. -/
 theorem smoothChartHolderContinuousMapExtension_holderBoundOn
@@ -64,6 +67,7 @@ theorem smoothChartHolderContinuousMapExtension_holderBoundOn
         (extChartAt 𝓘(ℝ, E) (cover.base i)).symm) := by
   exact smoothChartHolderCompletedTopJetHolderBoundOn cover α N u i
 
+omit [FiniteDimensional ℝ E] in
 /-- For smooth-core elements, the completed-jet identity reduces to the defining chart jet. This
 coercion check is valid for every `α`, including `α = 0`. -/
 private theorem smoothChartHolderContinuousMapExtension_completedJet_eq_smoothCore

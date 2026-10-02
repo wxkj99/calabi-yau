@@ -101,9 +101,7 @@ private theorem holderBoundOn_of_contDiffOn_compact
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem finiteChartHolderGauge_lt_top_of_smooth_orderZero
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M) (α : ℝ≥0)
     (f : M → ℝ)
@@ -131,6 +129,7 @@ private theorem finiteChartHolderGauge_lt_top_of_smooth_orderZero
   exact hBi.mono_const (Finset.single_le_sum (s := Finset.univ) (f := B)
     (fun j hj => by positivity) (Finset.mem_univ i))
 
+variable [MeasurableSpace M] [T2Space M] [CompactSpace M] in
 /-- The finite-chart gauge bound and mean-zero mapping property for the smooth forward operator.
 The codomain value is required to be an actual order-zero smooth core element, not merely a function
 with a finite gauge. -/
@@ -145,7 +144,6 @@ def HasBoundedForwardLaplacian (ω₁ : KahlerForm n M)
       (finiteChartHolderGauge cover 0 α g.smoothMap).toReal ≤
         (C : ℝ) * (finiteChartHolderGauge cover 2 α f.smoothMap).toReal
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem exists_metricInChartInverseEntryHolderBound
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α : ℝ≥0) (hα₁ : α < 1) (i : cover.ι) (j k : Fin n) :
@@ -617,21 +615,6 @@ private theorem holderBoundOn_zero_complexHessian_entry_of_orderTwoBound
   intro z hz
   exact complexHessian_norm_le_of_orderTwoBound hf hSmooth i j hz
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem inverseMetric_mul_complexHessian_holderBoundOn_zero
-    (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (α : ℝ≥0) (hα₁ : α < 1) (i : cover.ι) (r s : Fin n)
-    {u : EuclideanSpace ℂ (Fin n) → ℝ} {C : ℝ≥0}
-    (hu : HolderBoundOn 2 α C (cover.piece i) u)
-    (hSmooth : ∀ z ∈ cover.piece i, ContDiffAt ℝ 2 u z) :
-    ∃ D : ℝ≥0, HolderBoundOn 0 α D (cover.piece i)
-      (fun z ↦ (ω₁.metricInChart (cover.base i) z)⁻¹ r s * complexHessian u z s r) := by
-  obtain ⟨B, hB⟩ := exists_metricInChartInverseEntryHolderBound ω₁ cover α hα₁ i r s
-  refine ⟨2 * B * C, ?_⟩
-  exact holderBoundOn_zero_complex_mul hB
-    (holderBoundOn_zero_complexHessian_entry_of_orderTwoBound hu hSmooth s r)
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem laplacianInChart_holderBoundOn_zero
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α : ℝ≥0) (hα₁ : α < 1) (i : cover.ι) :
@@ -729,10 +712,9 @@ private theorem laplacianInChart_holderBoundOn_zero
     rw [hjet z (by simpa [K] using hz), hjet w (by simpa [K] using hw)]
     exact hSumScaled.2 z (by simpa [K] using hz) w (by simpa [K] using hw)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem forward_laplacian_gauge_toReal_bound
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1) :
+    (α : ℝ≥0) (hα₁ : α < 1) :
     ∃ C : ℝ≥0, ∀ f : SmoothChartHolderCore cover 2 α,
       (finiteChartHolderGauge cover 0 α (ω₁.laplacian f.smoothMap)).toReal ≤
         (C : ℝ) * (finiteChartHolderGauge cover 2 α f.smoothMap).toReal := by
@@ -751,7 +733,7 @@ private theorem forward_laplacian_gauge_toReal_bound
   refine ⟨Ctotal, ?_⟩
   intro f
   have hfGauge : finiteChartHolderGauge cover 2 α f.smoothMap < ⊤ :=
-    smoothChartHolderGauge_finite cover 2 α hα₀ hα₁ f
+    smoothChartHolderGauge_finite cover 2 α hα₁ f
   let Cinput : ℝ≥0 := (finiteChartHolderGauge cover 2 α f.smoothMap).toNNReal
   have hGaugeEq : (Cinput : ℝ≥0∞) = finiteChartHolderGauge cover 2 α f.smoothMap :=
     ENNReal.coe_toNNReal (ne_of_lt hfGauge)
@@ -827,25 +809,24 @@ private theorem forward_laplacian_gauge_toReal_bound
   rw [hInputReal]
   simpa using hToReal
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem forward_laplacian_gauge_estimate
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1) :
+    (α : ℝ≥0) (hα₁ : α < 1) :
     ∃ C : ℝ≥0, ∀ f : SmoothChartHolderCore cover 2 α,
       finiteChartHolderGauge cover 2 α f.smoothMap < ⊤ ∧
       finiteChartHolderGauge cover 0 α (ω₁.laplacian f.smoothMap) < ⊤ ∧
       (finiteChartHolderGauge cover 0 α (ω₁.laplacian f.smoothMap)).toReal ≤
         (C : ℝ) * (finiteChartHolderGauge cover 2 α f.smoothMap).toReal := by
-  obtain ⟨C, hC⟩ := forward_laplacian_gauge_toReal_bound ω₁ cover α hα₀ hα₁
+  obtain ⟨C, hC⟩ := forward_laplacian_gauge_toReal_bound ω₁ cover α hα₁
   refine ⟨C, ?_⟩
   intro f
   refine ⟨?_, ?_, hC f⟩
-  · exact smoothChartHolderGauge_finite cover 2 α hα₀ hα₁ f
+  · exact smoothChartHolderGauge_finite cover 2 α hα₁ f
   · exact finiteChartHolderGauge_lt_top_of_smooth_orderZero cover α
       (ω₁.laplacian f.smoothMap) (ω₁.contMDiff_laplacian f.smoothMap.contMDiff)
       (le_of_lt hα₁)
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem forward_laplacian_smoothCoreOutput
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α : ℝ≥0) (hα₁ : α < 1) (f : SmoothChartHolderCore cover 2 α) :
@@ -859,15 +840,15 @@ private theorem forward_laplacian_smoothCoreOutput
   exact finiteChartHolderGauge_lt_top_of_smooth_orderZero cover α g.smoothMap
     g.smoothMap.contMDiff (le_of_lt hα₁)
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- The smooth Laplacian has a bounded order-two-to-order-zero finite-chart gauge, and its
 integral vanishes. In particular it maps a smooth mean-zero core into the smooth mean-zero target
 core. -/
 theorem exists_forward_laplacian_holder_bound
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1) :
+    (α : ℝ≥0) (hα₁ : α < 1) :
     HasBoundedForwardLaplacian ω₁ cover α := by
-  obtain ⟨C, hC⟩ := forward_laplacian_gauge_estimate ω₁ cover α hα₀ hα₁
+  obtain ⟨C, hC⟩ := forward_laplacian_gauge_estimate ω₁ cover α hα₁
   refine ⟨C, ?_⟩
   intro f
   obtain ⟨hInput, hOutput, hBound⟩ := hC f

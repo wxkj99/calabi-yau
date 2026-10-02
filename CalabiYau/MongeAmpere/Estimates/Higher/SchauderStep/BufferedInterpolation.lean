@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 public import Mathlib.Analysis.Calculus.ContDiff.Comp
 public import Mathlib.Analysis.Calculus.ContDiff.RCLike
 public import Mathlib.Analysis.Calculus.MeanValue
@@ -49,14 +49,12 @@ private theorem exists_pos_segment_radius
 /-- Uniform bounds through one derivative on a compact buffer give a `C^{k,α}` bound on the
 inner open set. The strict exponent range is recorded because it is the range used by interior
 Schauder estimates. -/
-@[deprecated "unused hypotheses `hU` and `hα₀`; will be removed" (since := "2026-10-02")]
 theorem exists_uniform_holderBoundOn_family_of_buffered_derivative_bounds
     {P E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     {W U L : Set E} {k : ℕ} {α C : ℝ≥0}
-    (S : Set P) (f : P → E → F) (hW : IsOpen W) (hU : IsOpen U) (hL : IsCompact L)
-    (hbuffer : closure U ⊆ interior L) (hLW : L ⊆ W)
-    (hα₀ : 0 < α) (hα₁ : α < 1)
+    (S : Set P) (f : P → E → F) (hW : IsOpen W) (hL : IsCompact L)
+    (hbuffer : closure U ⊆ interior L) (hLW : L ⊆ W) (hα₁ : α < 1)
     (hf : ∀ p ∈ S, ContDiffOn ℝ ∞ (f p) W)
     (hbound : ∀ p ∈ S, ∀ j ≤ k + 1, ∀ z ∈ L,
       ‖iteratedFDeriv ℝ j (f p) z‖ ≤ C) :

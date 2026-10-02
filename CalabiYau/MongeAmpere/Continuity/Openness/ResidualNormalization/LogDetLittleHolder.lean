@@ -2,8 +2,6 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
 public import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization.LogDetLittleHolder.Basic
-import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization.LogDetLittleHolder.SmoothOutputs
 import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization.LogDetLittleHolder.ChartMatrixControl
 import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization.LogDetLittleHolder.PositiveLimitTail
@@ -821,77 +819,6 @@ private theorem exists_positive_smoothCore_C2_approximation
     apply Filter.eventually_atTop.2
     exact ⟨b, fun j hj => le_trans hj (Nat.le_add_right j N)⟩
   exact hv.comp hshift
-
-private theorem abs_log_sub_log_le_div_of_lower_bound {x y c : ℝ}
-    (hc : 0 < c) (hx : c ≤ x) (hy : c ≤ y) :
-    |Real.log x - Real.log y| ≤ |x - y| / c := by
-  by_cases hxy : x ≤ y
-  · have hxpos : 0 < x := lt_of_lt_of_le hc hx
-    have hypos : 0 < y := lt_of_lt_of_le hc hy
-    have hlogmono : 0 ≤ Real.log y - Real.log x :=
-      sub_nonneg.mpr (Real.log_le_log hxpos hxy)
-    have hlogdiv : Real.log y - Real.log x = Real.log (y / x) := by
-      rw [Real.log_div hypos.ne' hxpos.ne']
-    have hlog : Real.log y - Real.log x ≤ y / x - 1 := by
-      calc
-        Real.log y - Real.log x = Real.log (y / x) := hlogdiv
-        _ ≤ y / x - 1 := Real.log_le_sub_one_of_pos (div_pos hypos hxpos)
-    have hratio : y / x - 1 = (y - x) / x := by field_simp
-    have hquot : (y - x) / x ≤ (y - x) / c :=
-      (div_le_div_iff₀ hxpos hc).2 (by nlinarith)
-    have hlogabs : |Real.log x - Real.log y| = Real.log y - Real.log x := by
-      rw [abs_of_nonpos (by linarith : Real.log x - Real.log y ≤ 0)]
-      ring
-    have habs : |x - y| = y - x := by
-      calc
-        |x - y| = -(x - y) := abs_of_nonpos (by linarith : x - y ≤ 0)
-        _ = y - x := by ring
-    rw [hlogabs, habs]
-    calc
-      Real.log y - Real.log x ≤ y / x - 1 := hlog
-      _ = (y - x) / x := hratio
-      _ ≤ (y - x) / c := hquot
-  · have hyx : y ≤ x := le_of_not_ge hxy
-    have hxpos : 0 < x := lt_of_lt_of_le hc hx
-    have hypos : 0 < y := lt_of_lt_of_le hc hy
-    have hlogmono : 0 ≤ Real.log x - Real.log y :=
-      sub_nonneg.mpr (Real.log_le_log hypos hyx)
-    have hlogdiv : Real.log x - Real.log y = Real.log (x / y) := by
-      rw [Real.log_div hxpos.ne' hypos.ne']
-    have hlog : Real.log x - Real.log y ≤ x / y - 1 := by
-      calc
-        Real.log x - Real.log y = Real.log (x / y) := hlogdiv
-        _ ≤ x / y - 1 := Real.log_le_sub_one_of_pos (div_pos hxpos hypos)
-    have hratio : x / y - 1 = (x - y) / y := by field_simp
-    have hquot : (x - y) / y ≤ (x - y) / c :=
-      (div_le_div_iff₀ hypos hc).2 (by nlinarith)
-    have hlogabs : |Real.log x - Real.log y| = Real.log x - Real.log y :=
-      abs_of_nonneg hlogmono
-    have habs : |x - y| = x - y := abs_of_nonneg (sub_nonneg.mpr hyx)
-    rw [hlogabs, habs]
-    calc
-      Real.log x - Real.log y ≤ x / y - 1 := hlog
-      _ = (x - y) / y := hratio
-      _ ≤ (x - y) / c := hquot
-
-private theorem lipschitzOnWith_log_of_lower_bound {c : ℝ} (hc : 0 < c) :
-    LipschitzOnWith (Real.toNNReal c⁻¹) Real.log (Set.Ici c) := by
-  apply LipschitzOnWith.of_dist_le_mul
-  intro x hx y hy
-  have h := abs_log_sub_log_le_div_of_lower_bound hc hx hy
-  change dist (Real.log x) (Real.log y) ≤
-    (↑(Real.toNNReal c⁻¹) : ℝ) * dist x y
-  simpa [Real.dist_eq, Real.coe_toNNReal (c⁻¹) (by positivity), div_eq_mul_inv, mul_comm] using h
-
-private theorem holderOnWith_log_comp_of_lower_bound
-    {E : Type*} [PseudoMetricSpace E] {s : Set E}
-    {f : E → ℝ} {C α : ℝ≥0} {c : ℝ}
-    (hc : 0 < c) (hf : HolderOnWith C α f s)
-    (hlower : ∀ x ∈ s, c ≤ f x) :
-    HolderOnWith ((Real.toNNReal c⁻¹) * C) α (Real.log ∘ f) s := by
-  have hlog := (lipschitzOnWith_log_of_lower_bound hc).holderOnWith
-  have hcomp := hlog.comp hf (fun x hx => hlower x hx)
-  simpa [one_mul] using hcomp
 
 private theorem exists_littleHolder_completion_limit_with_evaluation
     {n : ℕ} {M : Type*} [TopologicalSpace M]

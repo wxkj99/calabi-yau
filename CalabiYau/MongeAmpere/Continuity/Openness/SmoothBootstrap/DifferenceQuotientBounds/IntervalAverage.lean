@@ -1,9 +1,7 @@
 module
 
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-import Mathlib.Tactic.FunProp
-import Mathlib.Tactic.Ring
 
 public section
 open scoped NNReal Topology

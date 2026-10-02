@@ -65,7 +65,7 @@ theorem c3Pair_frame_change {n : ℕ}
         simp only [f₀, f₁, f₂]
         ring_nf
       _ = _ :=
-        c3SumPairTripleFactor (f₀ y x) (f₁ y x) (f₂ y x)
+        sum_prod_pairs_mul_mul_mul_const (f₀ y x) (f₁ y x) (f₂ y x)
           (D y.1 y.2.1 y.2.2 * star (T x.1 x.2.1 x.2.2))
   have hfacNested (y x : C3Pair n) :
       (∑ a : Fin n, ∑ b : Fin n, ∑ c : Fin n, ∑ d : Fin n,

@@ -3,7 +3,6 @@ module
 public import CalabiYau.Geometry.Kahler.Laplacian.Cofactor
 public import Mathlib.Analysis.Matrix.Normed
 import Mathlib.Analysis.Calculus.FDeriv.Star
-import Mathlib.Analysis.Calculus.FDeriv.Prod
 
 @[expose] public section
 

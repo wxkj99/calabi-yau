@@ -22,13 +22,15 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
-variable {HB : Type*} [TopologicalSpace HB] {IB : ModelWithCorners 𝕜 EB HB}
-variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
-variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)]
-  [TopologicalSpace (TotalSpace F E)]
-  [FiberBundle F E] [VectorBundle 𝕜 F E]
+variable {HB : Type*} [TopologicalSpace HB]
 
 local notation "MLF" s => ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜
+
+section
+
+variable {IB : ModelWithCorners 𝕜 EB HB}
+variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)] [TopologicalSpace (TotalSpace F E)] [FiberBundle F E] [VectorBundle 𝕜 F E]
 
 abbrev MultilinearSection
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
@@ -39,15 +41,22 @@ abbrev MultilinearSection
     (E : B → Type*) [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)]
     [TopologicalSpace (TotalSpace F E)]
     [FiberBundle F E] [VectorBundle 𝕜 F E]
-    (n : WithTop ℕ∞) [hSmooth : ContMDiffVectorBundle n F E IB] (s : ℕ) :=
-  let _ := hSmooth
+    (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB] (s : ℕ) :=
   ContMDiffSection IB
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
     n
     (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x)
 
+end
+
 namespace MultilinearSection
 
+
+section
+
+variable {IB : ModelWithCorners 𝕜 EB HB}
+variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)] [TopologicalSpace (TotalSpace F E)] [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
@@ -57,13 +66,31 @@ def smulByFun {s : ℕ}
     MultilinearSection 𝕜 F IB E n s :=
   ⟨fun x => φ x • α x, hφ.smul_section α.contMDiff⟩
 
-omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
+end
+
+section
+
+variable {IB : ModelWithCorners 𝕜 EB HB}
+variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)] [TopologicalSpace (TotalSpace F E)] [FiberBundle F E] [VectorBundle 𝕜 F E]
+variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
+
 @[simp]
 theorem smulByFun_apply {s : ℕ}
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)
     (α : MultilinearSection 𝕜 F IB E n s) (x : B) :
     smulByFun n φ hφ α x = φ x • α x :=
   rfl
+
+end
+
+section
+
+variable {IB : ModelWithCorners 𝕜 EB HB}
+variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)] [TopologicalSpace (TotalSpace F E)] [FiberBundle F E] [VectorBundle 𝕜 F E]
+variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
+variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
 noncomputable def fromScalarField
     (f : B → 𝕜) (hf : ContMDiff IB 𝓘(𝕜) n f) :
@@ -131,7 +158,15 @@ theorem fromScalarField_toScalarField
   rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
   exact congrArg (α.toFun x) (Subsingleton.elim Fin.elim0 v)
 
-omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
+end
+
+section
+
+variable {IB : ModelWithCorners 𝕜 EB HB}
+variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)] [TopologicalSpace (TotalSpace F E)] [FiberBundle F E] [VectorBundle 𝕜 F E]
+variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
+
 @[simp]
 theorem toScalarField_add
     (α β : MultilinearSection 𝕜 F IB E n 0) :
@@ -142,7 +177,6 @@ theorem toScalarField_add
   rw [show (α + β).toFun x = α.toFun x + β.toFun x from rfl]
   exact add_apply _ _ _
 
-omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 @[simp]
 theorem toScalarField_smulByFun
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)
@@ -152,6 +186,8 @@ theorem toScalarField_smulByFun
   simp only [toScalarField, Pi.mul_apply]
   change (φ x • α.toFun x) Fin.elim0 = φ x * α.toFun x Fin.elim0
   rw [smul_apply, smul_eq_mul]
+
+end
 
 end MultilinearSection
 

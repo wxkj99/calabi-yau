@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.TraceMatrixJets
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 
 /-!
 # Mixed Wirtinger derivatives of a bounded family
@@ -31,7 +31,7 @@ No positivity of the potential and no comparison of metrics is needed. -/
 private theorem refinedTrace_mixedPotentialDerivative_eq_complexHessian
     {n : ℕ} (u : EuclideanSpace ℂ (Fin n) → ℝ) {z : EuclideanSpace ℂ (Fin n)}
     (hu : ContDiffAt ℝ 2 u z) (i j : Fin n) :
-    c3PartialZ (fun w ↦ c3RefinedTracePartialBar (fun v ↦ (u v : ℂ)) w j) z i =
+    wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar (fun v ↦ (u v : ℂ)) w j) z i =
       complexHessian u z i j := by
   let ei : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single i 1
   let ej : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single j 1
@@ -97,7 +97,7 @@ private theorem refinedTrace_mixedPotentialDerivative_eq_complexHessian
       fderiv_fun_add hAcomplex (hBcomplex.const_mul Complex.I),
       fderiv_const_mul hBcomplex Complex.I]
     simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul, hAc, hBc]
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hpartial ei, hpartial (Complex.I • ei)]
   rw [complexHessian_apply hu i j]
   simp only [ei, ej, div_eq_mul_inv]
@@ -113,7 +113,7 @@ theorem exists_uniform_c3RefinedTrace_mixedPotentialDerivative_bound
     (x₀ : M) (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
     (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ p ∈ S, ∀ z ∈ K, ∀ i j : Fin n,
-      ‖c3PartialZ
+      ‖wirtingerDerivInChart
         (fun w ↦ c3RefinedTracePartialBar
           (fun v ↦ ((p.1 ∘ (extChartAt
             𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) v : ℂ)) w j) z i‖ ≤ C := by
@@ -249,7 +249,7 @@ theorem exists_uniform_c3RefinedTrace_mixedPotentialDerivative_bound
         have hdiv := div_le_div_of_nonneg_right hnum (by norm_num : (0 : ℝ) ≤ 4)
         simpa using hdiv
       _ = (C : ℝ) := by ring
-  change ‖c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+  change ‖wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
     (fun v ↦ (u v : ℂ)) w j) z i‖ ≤ (C : ℝ)
   rw [refinedTrace_mixedPotentialDerivative_eq_complexHessian u hu i j]
   simpa [u, ψ] using hhess

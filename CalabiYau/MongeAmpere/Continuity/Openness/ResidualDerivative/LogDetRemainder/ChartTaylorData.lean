@@ -19,7 +19,7 @@ open MeasureTheory Set
 
 namespace KahlerForm
 
-def chartFixedEstimate (n : ℕ) : Prop :=
+def LogDetTaylorRemainderLipschitz (n : ℕ) : Prop :=
   ∀ (A X Y : Matrix (Fin n) (Fin n) ℂ) (μ : ℝ),
     0 < μ → A.PosDef →
     ‖A⁻¹‖ ≤ Real.sqrt (Fintype.card (Fin n) : ℝ) / μ →
@@ -30,7 +30,7 @@ def chartFixedEstimate (n : ℕ) : Prop :=
     |Matrix.logDetTaylorRemainder A X - Matrix.logDetTaylorRemainder A Y| ≤
       ((Fintype.card (Fin n) : ℝ) / μ ^ 2) * max ‖X‖ ‖Y‖ * ‖X - Y‖
 
-def chartBaseEstimate (n : ℕ) : Prop :=
+def LogDetTaylorRemainderBaseLipschitz (n : ℕ) : Prop :=
   ∀ (Mbound : ℝ≥0), 0 < Mbound →
     ∃ C : ℝ≥0, ∀ A B H : Matrix (Fin n) (Fin n) ℂ,
       (∀ s t : ℝ, s ∈ Icc (0 : ℝ) 1 → t ∈ Icc (0 : ℝ) 1 →

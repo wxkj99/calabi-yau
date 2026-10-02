@@ -24,6 +24,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
   [MeasurableSpace M] [BorelSpace M] [T2Space M] [SigmaCompactSpace M]
 
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartDensity_lower_bound_on_compact
     (ω₀ : KahlerForm n M) (a : M)
     (K : Set (EuclideanSpace ℝ

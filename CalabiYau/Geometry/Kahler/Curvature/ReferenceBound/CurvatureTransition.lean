@@ -194,9 +194,6 @@ theorem referenceCurvatureComponent_transition (ω₀ : KahlerForm n M) (x y : M
     (by
       intro w hw
       exact hmetric w hw)
-    (by
-      intro w hw i a b
-      exact ω₀.kahler_chart_metric_symmetry x (himage hw) i a b)
     z₀ hz₀
     (by
       exact hjac)

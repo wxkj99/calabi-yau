@@ -3,7 +3,6 @@ module
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ReferenceCurvatureDerivative.Basic
 public import CalabiYau.MongeAmpere.Estimates.C3.CalabiEnergy.Basic
 public import CalabiYau.Geometry.Kahler.Curvature.Chart.Basic
-import Mathlib.Topology.Compactness.Compact
 
 /-!
 # Finite-cover bound for the centered reference curvature derivative
@@ -34,7 +33,7 @@ theorem exists_uniform_c3_curvature_derivative_bound_of_local
           ∀ s p q j k : Fin n,
             ‖c3FiveSlotFrameContraction P
               (c3CovariantFourTensorZJet
-                (c3ChristoffelInChart (ω₀.metricInChart y)
+                (christoffelInChart (ω₀.metricInChart y)
                   (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y))
                 (chartCurvature (ω₀.metricInChart y)
                   (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y))
@@ -48,7 +47,7 @@ theorem exists_uniform_c3_curvature_derivative_bound_of_local
         ∀ s p q j k : Fin n,
           ‖c3FiveSlotFrameContraction P
             (c3CovariantFourTensorZJet
-              (c3ChristoffelInChart (ω₀.metricInChart x)
+              (christoffelInChart (ω₀.metricInChart x)
                 (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
               (chartCurvature (ω₀.metricInChart x)
                 (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))

@@ -73,7 +73,7 @@ private theorem fixed_pairwise_pointwise
     (A : κ → E → Matrix (Fin n) (Fin n) ℂ)
     (H : U → κ → E → Matrix (Fin n) (Fin n) ℂ)
     (ctrl : ChartTaylorControl α S A H)
-    (hfixed : chartFixedEstimate n)
+    (hfixed : LogDetTaylorRemainderLipschitz n)
     {r : ℝ} (hr : 0 < r) (hrsmall : 3 * (ctrl.jetConstant : ℝ) * r < ctrl.epsilon)
     {u v : U} (hu : ‖u‖ < r) (hv : ‖v‖ < r)
     {i : κ} {x : E} (hx : x ∈ S i) (hn : 0 < n) :
@@ -295,7 +295,7 @@ private theorem exists_matrixPairwiseTaylor_nearDifferenceBound
     (A : κ → E → Matrix (Fin n) (Fin n) ℂ)
     (H : U → κ → E → Matrix (Fin n) (Fin n) ℂ)
     (ctrl : ChartTaylorControl α S A H)
-    (hfixed : chartFixedEstimate n) (hbase : chartBaseEstimate n)
+    (hfixed : LogDetTaylorRemainderLipschitz n) (hbase : LogDetTaylorRemainderBaseLipschitz n)
     (hn : 0 < n) :
     ∃ Anear Bnear : ℝ≥0, ∃ r : ℝ, 0 < r ∧
       3 * (ctrl.jetConstant : ℝ) * r < ctrl.epsilon ∧
@@ -638,9 +638,9 @@ private theorem exists_matrixPairwiseTaylor_nearDifferenceBound
   have hPair := matrixDifferenceRemainder_pointwise
     (M : ℝ) Q Δ a k d (Cb : ℝ) ((M : ℝ) ^ 2)
     (A i x) (A i y) Hx Kx Hy Ky
-    (NNReal.coe_nonneg M) hQnonneg hΔnonneg hanonneg hknonneg hdnonneg
+    hQnonneg hanonneg hknonneg
     hAx hAy hUx hUy hAxInv hAyInv hUxInv hUyInv
-    hKxNorm hKyNorm hDxBound hDyBound hAxAy' hKxKy' hDxDy'
+    hKxNorm hKyNorm hDxBound hAxAy' hKxKy' hDxDy'
     hbasePair1 hbasePair2 hfixedPair (fun U V => abs_re_trace_mul_le_frobenius_test U V)
   have hSnonneg : 0 ≤ snorm := by positivity
   have hDnonneg : 0 ≤ dnorm := by positivity
@@ -918,7 +918,7 @@ theorem exists_matrixPairwiseTaylor_holderBound
     (A : κ → E → Matrix (Fin n) (Fin n) ℂ)
     (H : U → κ → E → Matrix (Fin n) (Fin n) ℂ)
     (ctrl : ChartTaylorControl α S A H)
-    (hfixed : chartFixedEstimate n) (hbase : chartBaseEstimate n) :
+    (hfixed : LogDetTaylorRemainderLipschitz n) (hbase : LogDetTaylorRemainderBaseLipschitz n) :
     ∃ C : ℝ≥0, ∃ r : ℝ, 0 < r ∧
       ∀ u v : U, ‖u‖ < r → ‖v‖ < r → ∀ i,
         HolderBoundOn 0 α (C * (‖u‖₊ + ‖v‖₊) * ‖u - v‖₊) (S i)

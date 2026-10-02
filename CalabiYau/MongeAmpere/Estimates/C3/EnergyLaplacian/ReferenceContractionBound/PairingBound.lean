@@ -30,14 +30,14 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
     (hR : ∀ i j k l, ‖R i j k l‖ ≤ K) :
     |(∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
       ((d i / (d j * d k) : ℝ) : ℂ) *
-        referenceContraction_diagonal_drift d X R T i j k * star (T i j k)).re| ≤
+        referenceContractionDiagonalDrift d X R T i j k * star (T i j k)).re| ≤
       (n : ℝ) ^ 4 * B ^ 6 * A * Real.sqrt E +
         3 * (n : ℝ) ^ 5 * B ^ 8 * K * E := by
   have hpositiveB : 0 < B := lt_of_lt_of_le zero_lt_one hB
   have hweighted := referenceContraction_unweighted_energy_bound T d B E hpositiveB hd hdb henergy
   have hnonneg : 0 ≤ B ^ 3 * E := mul_nonneg (pow_nonneg (le_of_lt hpositiveB) 3) hE
   have hT := referenceContraction_component_bound_of_energy T (B ^ 3 * E) hnonneg hweighted
-  have hDrift := referenceContraction_diagonal_drift_component_bound d X R T B A K E
+  have hDrift := referenceContractionDiagonalDrift_component_bound d X R T B A K E
     hpositiveB hE hd hdb henergy hX hR
   have hweight (i j k : Fin n) : d i / (d j * d k) ≤ B ^ 3 := by
     have hden : 0 < d j * d k := mul_pos (hd j) (hd k)
@@ -65,7 +65,7 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
     positivity
   have hterm (i j k : Fin n) :
       ‖((d i / (d j * d k) : ℝ) : ℂ) *
-        referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ ≤
+        referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ ≤
       B ^ 3 * D * Real.sqrt W := by
     have hwi : 0 ≤ d i / (d j * d k) :=
       div_nonneg (le_of_lt (hd i)) (le_of_lt (mul_pos (hd j) (hd k)))
@@ -73,7 +73,7 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
       exact (RCLike.norm_ofReal (K := ℂ) _).trans (abs_of_nonneg hwi)
     rw [norm_mul, norm_mul, norm_star, hnormw]
     calc
-      (d i / (d j * d k) * ‖referenceContraction_diagonal_drift d X R T i j k‖) *
+      (d i / (d j * d k) * ‖referenceContractionDiagonalDrift d X R T i j k‖) *
           ‖T i j k‖ ≤ (B ^ 3 * D) * Real.sqrt W := by
         exact mul_le_mul (mul_le_mul (hweight i j k) (hDrift i j k)
           (norm_nonneg _) (pow_nonneg (le_of_lt hpositiveB) 3))
@@ -83,17 +83,17 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
   have hnormsum :
       ‖∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
         ((d i / (d j * d k) : ℝ) : ℂ) *
-          referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ ≤
+          referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ ≤
       ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
         ‖((d i / (d j * d k) : ℝ) : ℂ) *
-          referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ := by
+          referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ := by
     calc
       _ ≤ ∑ i : Fin n, ‖∑ j : Fin n, ∑ k : Fin n,
           ((d i / (d j * d k) : ℝ) : ℂ) *
-            referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ := norm_sum_le _ _
+            referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ := norm_sum_le _ _
       _ ≤ ∑ i : Fin n, ∑ j : Fin n, ‖∑ k : Fin n,
           ((d i / (d j * d k) : ℝ) : ℂ) *
-            referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ := by
+            referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ := by
         apply Finset.sum_le_sum
         intro i hi
         exact norm_sum_le _ _
@@ -106,7 +106,7 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
   have hsumBound :
       ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
         ‖((d i / (d j * d k) : ℝ) : ℂ) *
-          referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ ≤
+          referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ ≤
         (n : ℝ) ^ 3 * (B ^ 3 * D * Real.sqrt W) := by
     calc
       _ ≤ ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, B ^ 3 * D * Real.sqrt W := by
@@ -124,13 +124,13 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
   have hrough :
       |(∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
         ((d i / (d j * d k) : ℝ) : ℂ) *
-          referenceContraction_diagonal_drift d X R T i j k * star (T i j k)).re| ≤
+          referenceContractionDiagonalDrift d X R T i j k * star (T i j k)).re| ≤
         (n : ℝ) ^ 4 * B ^ 4 * A * Real.sqrt W +
           3 * (n : ℝ) ^ 5 * B ^ 4 * K * W := by
     calc
       _ ≤ ‖∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           ((d i / (d j * d k) : ℝ) : ℂ) *
-            referenceContraction_diagonal_drift d X R T i j k * star (T i j k)‖ :=
+            referenceContractionDiagonalDrift d X R T i j k * star (T i j k)‖ :=
         RCLike.abs_re_le_norm _
       _ ≤ (n : ℝ) ^ 3 * (B ^ 3 * D * Real.sqrt W) := hnormsum.trans hsumBound
       _ = (n : ℝ) ^ 4 * B ^ 4 * A * Real.sqrt W +
@@ -177,7 +177,7 @@ theorem referenceContraction_diagonal_pairing_weighted_bound {n : ℕ}
       _ = 3 * (n : ℝ) ^ 5 * B ^ 8 * K * E := by ring
   exact (hrough.trans (add_le_add hfirst hsecond))
 
-theorem referenceContraction_final_constant_bound {n : ℕ}
+theorem referenceContraction_le_const_mul_add_sqrt {n : ℕ}
     (B A K E : ℝ) (hB : 1 ≤ B) (hA : 0 ≤ A) (hK : 0 ≤ K) (hE : 0 ≤ E) :
     let C := (n : ℝ) ^ 4 * B ^ 6 * A + 3 * (n : ℝ) ^ 5 * B ^ 8 * K
     0 ≤ C ∧

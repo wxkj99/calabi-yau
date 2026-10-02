@@ -34,8 +34,8 @@ theorem exists_sobolevInequality
     [CompactSpace M] (ω₀ : KahlerForm n M) :
     ∃ κ C_S : ℝ, 1 < κ ∧ 0 ≤ C_S ∧ ω₀.SobolevInequality κ C_S := by
   cases BorelSpace.measurable_eq (α := M)
-  letI : MeasurableSpace M := borel M
-  letI : BorelSpace M := ⟨rfl⟩
+  let : MeasurableSpace M := borel M
+  let : BorelSpace M := ⟨rfl⟩
   by_cases hn0 : n = 0
   · subst n
     obtain ⟨C, hC, hSob⟩ := exists_sobolevInequality_dimension_zero ω₀

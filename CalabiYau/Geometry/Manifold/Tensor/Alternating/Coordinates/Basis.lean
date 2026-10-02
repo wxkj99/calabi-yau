@@ -4,9 +4,9 @@
 Authors: Jack McCarthy
 -/
 module
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.FiniteEquivalence
+public import CalabiYau.Mathlib.Logic.Equiv.FinReindexing
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Coordinates.MultiKroneckerDelta
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.PredualBasis
+public import CalabiYau.Mathlib.LinearAlgebra.Dual.PredualBasis
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Curry
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.Analysis.Normed.Module.Alternating.Basic
@@ -84,19 +84,6 @@ theorem elementaryCovector_apply
     Matrix.det (show Matrix (Fin k) (Fin k) 𝕜 from fun i j => b (ι i) (v j))
   rw [← Matrix.det_transpose]; rfl
 
-theorem curryFin_elementaryCovector
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (I : Fin (k + 1) → Fin n) (x : E) :
-    curryFin (elementaryCovector b I) x =
-    ∑ i : Fin (k + 1), ((-1 : 𝕜) ^ i.val * b (I i) x) •
-      elementaryCovector b (I ∘ Fin.succAbove i) := by
-  ext v
-  simp only [curryFin_apply, sum_apply, smul_apply, smul_eq_mul]
-  rw [elementaryCovector_apply, Matrix.det_succ_column_zero]
-  apply Finset.sum_congr rfl; intro i _
-  simp only [Fin.cons_zero]
-  congr 1; rw [elementaryCovector_apply]; congr 1
-
 theorem elementaryCovector_basis_eval
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -108,62 +95,6 @@ theorem elementaryCovector_basis_eval
   congr 1
   ext i j
   exact dual (I i) (J j)
-
-theorem elementaryCovector_basis_eval_comp_perm
-    (B : Module.Basis (Fin n) 𝕜 E)
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (dual : ∀ i j, b i (B j) = if i = j then 1 else 0)
-    {J : Fin k → Fin n} (hJ : Function.Injective J)
-    (σ : Equiv.Perm (Fin k)) :
-    elementaryCovector b (J ∘ ⇑σ) (B ∘ J) = (Equiv.Perm.sign σ : 𝕜) := by
-  rw [elementaryCovector_basis_eval B b dual,
-    Fin.multiKroneckerDelta_comp_perm hJ]
-
-theorem elementaryCovector_basis_eval_eq_zero
-    (B : Module.Basis (Fin n) 𝕜 E)
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (dual : ∀ i j, b i (B j) = if i = j then 1 else 0)
-    {I J : Fin k → Fin n}
-    (h : ∀ σ : Equiv.Perm (Fin k), I ≠ J ∘ ⇑σ) :
-    elementaryCovector b I (B ∘ J) = 0 := by
-  rw [elementaryCovector_basis_eval B b dual,
-    Fin.multiKroneckerDelta_eq_zero h]
-
-theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_left
-    (B : Module.Basis (Fin n) 𝕜 E)
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (dual : ∀ i j, b i (B j) = if i = j then 1 else 0)
-    {I : Fin k → Fin n} (hI : ¬Function.Injective I)
-    (J : Fin k → Fin n) :
-    elementaryCovector b I (B ∘ J) = 0 := by
-  rw [elementaryCovector_basis_eval B b dual,
-    Fin.multiKroneckerDelta_eq_zero_of_not_injective_left hI]
-
-theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_right
-    (B : Module.Basis (Fin n) 𝕜 E)
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (dual : ∀ i j, b i (B j) = if i = j then 1 else 0)
-    {J : Fin k → Fin n} (hJ : ¬Function.Injective J)
-    (I : Fin k → Fin n) :
-    elementaryCovector b I (B ∘ J) = 0 := by
-  rw [elementaryCovector_basis_eval B b dual,
-    Fin.multiKroneckerDelta_eq_zero_of_not_injective_right hJ]
-
-theorem elementaryCovector_comp_perm
-    [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (J : Fin k → Fin n) (σ : Equiv.Perm (Fin k)) :
-    elementaryCovector b (J ∘ ⇑σ) =
-      (Equiv.Perm.sign σ : 𝕜) • elementaryCovector b J := by
-  obtain ⟨B, dual⟩ := exists_predual_basis b
-  apply toAlternatingMap_injective
-  apply B.ext_alternating
-  intro v hv
-  change elementaryCovector b (J ∘ ⇑σ) (B ∘ v) =
-    (Equiv.Perm.sign σ : 𝕜) • elementaryCovector b J (B ∘ v)
-  rw [elementaryCovector_basis_eval B b dual,
-    elementaryCovector_basis_eval B b dual,
-    Fin.multiKroneckerDelta_comp_perm_left, smul_eq_mul]
 
 section ElementaryCovectorBasis
 
@@ -289,23 +220,6 @@ theorem elementaryCovectorBasis_apply
     (elementaryCovectorBasis B : Module.Basis (Fin k ↪o Fin n) 𝕜 _) I =
       elementaryCovector B.cDualBasis ↑I := by
   rw [elementaryCovectorBasis, Module.Basis.mk_apply]
-
-theorem finrank_continuousAlternatingMap :
-    Module.finrank 𝕜 (E [⋀^Fin k]→L[𝕜] 𝕜) =
-      (Module.finrank 𝕜 E).choose k := by
-  set d := Module.finrank 𝕜 E
-  let B : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
-  rw [Module.finrank_eq_card_basis
-      (elementaryCovectorBasis (k := k) B)]
-  rw [Fintype.card_congr
-    (Set.powersetCard.ofFinEmbEquiv
-      (I := Fin d) (n := k))]
-  have h := Set.powersetCard.card
-    (α := Fin d) (n := k)
-  rw [Nat.card_eq_fintype_card] at h
-  simp only [Nat.card_eq_fintype_card,
-    Fintype.card_fin] at h
-  exact h
 
 end ElementaryCovectorBasis
 

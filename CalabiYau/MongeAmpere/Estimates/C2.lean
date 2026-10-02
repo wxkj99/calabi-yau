@@ -42,173 +42,11 @@ open ContinuousAlternatingMap
 namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+section
 
-omit [T2Space M] [CompactSpace M] in
-private theorem c2_chartRep_isOneOne_in_chart (form : KahlerForm n M) (x : M) {y : M}
-    (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x).source) :
-    (form.toFormField.chartRep x
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y)).IsOneOne := by
-  have hyxR : y ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).source := by
-    rw [extChartAt_source]
-    exact hy
-  have hyyR : y ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y).source :=
-    mem_extChartAt_source y
-  have hyxC : y ∈ (extChartAt 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x).source := by
-    simpa only [← extChartAt_real_eq] using hyxR
-  have hyyC : y ∈ (extChartAt 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) y).source := by
-    simpa only [← extChartAt_real_eq] using hyyR
-  let A := tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x y y
-  let B := tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) y x y
-  have hBA : ∀ v, B (A v) = v := by
-    intro v
-    calc
-      B (A v) = tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x x y v := by
-        exact tangentCoordChange_comp (I := 𝓘(ℂ, EuclideanSpace ℂ (Fin n)))
-          (w := x) (x := y) (y := x) (z := y) (v := v)
-          ⟨⟨hyxC, hyyC⟩, hyxC⟩
-      _ = v := tangentCoordChange_self (I := 𝓘(ℂ, EuclideanSpace ℂ (Fin n)))
-        (x := x) (z := y) (v := v) hyxC
-  have hAB : ∀ v, A (B v) = v := by
-    intro v
-    calc
-      A (B v) = tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) y y y v := by
-        exact tangentCoordChange_comp (I := 𝓘(ℂ, EuclideanSpace ℂ (Fin n)))
-          (w := y) (x := x) (y := y) (z := y) (v := v)
-          ⟨⟨hyyC, hyxC⟩, hyyC⟩
-      _ = v := tangentCoordChange_self (I := 𝓘(ℂ, EuclideanSpace ℂ (Fin n)))
-        (x := y) (z := y) (v := v) hyyC
-  let AEquiv : EuclideanSpace ℂ (Fin n) ≃L[ℂ] EuclideanSpace ℂ (Fin n) := {
-    toLinearEquiv := {
-      toFun := A
-      invFun := B
-      left_inv := hBA
-      right_inv := hAB
-      map_add' := A.map_add
-      map_smul' := A.map_smul }
-    continuous_toFun := A.continuous
-    continuous_invFun := B.continuous }
-  have hrep := FormField.chartRep_eq_chartRep_comp (α := form.toFormField)
-    (x := x) (x' := y) (z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y)
-    ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).map_source hyxR)
-    (by rw [(extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).left_inv hyxR]; exact hyyR)
-  have hAreal : tangentCoordChange 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y y =
-      A.restrictScalars ℝ := tangentCoordChange_real_eq ⟨hyxR, hyyR⟩
-  have hderiv : fderiv ℝ
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y ∘
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y) = A.restrictScalars ℝ := by
-    have h := hAreal
-    rw [tangentCoordChange_def, extChartAt_real_eq] at h
-    simpa [ModelWithCorners.range_eq_univ, fderivWithin_univ] using h
-  rw [hderiv] at hrep
-  have hcenter : extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y
-      ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y)) =
-      extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y := by
-    rw [(extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).left_inv hyxR]
-  rw [hcenter, FormField.chartRep_self] at hrep
-  have hbase := (form.isOneOne y).compContinuousLinearMap AEquiv
-  have hAEquiv : (AEquiv : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)) = A := by
-    ext v
-    rfl
-  rw [hAEquiv] at hbase
-  rw [← hrep] at hbase
-  exact hbase
+variable [T2Space M] [CompactSpace M]
 
-omit [T2Space M] [CompactSpace M] in
-private theorem c2_metricInChart_transition_eq
-    (form : KahlerForm n M) (x₀ x₁ : M) {y : M}
-    (hy₀ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source)
-    (hy₁ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₁).source) :
-    form.metricInChart x₀ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀ y) =
-      Matrix.transpose (EuclideanSpace.clmMatrix
-        (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) *
-        form.metricInChart x₁ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁ y) *
-        (EuclideanSpace.clmMatrix
-          (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)).map star := by
-  let c₀ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀
-  let c₁ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁
-  let A := tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y
-  have hy₀' : y ∈ c₀.source := by
-    rw [extChartAt_source]
-    exact hy₀
-  have hy₁' : y ∈ c₁.source := by
-    rw [extChartAt_source]
-    exact hy₁
-  have hz₀ : c₀ y ∈ c₀.target := c₀.map_source hy₀'
-  have hAreal : tangentCoordChange 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y =
-      A.restrictScalars ℝ := by
-    exact tangentCoordChange_real_eq ⟨hy₀', hy₁'⟩
-  have hderiv : fderiv ℝ (c₁ ∘ c₀.symm) (c₀ y) = A.restrictScalars ℝ := by
-    have h := hAreal
-    dsimp [A, c₀, c₁] at h ⊢
-    rw [tangentCoordChange_def, extChartAt_real_eq] at h
-    simpa [ModelWithCorners.range_eq_univ, fderivWithin_univ] using h
-  have hrep := FormField.chartRep_eq_chartRep_comp (α := form.toFormField)
-    (x := x₀) (x' := x₁) (z := c₀ y) hz₀
-    (by rw [c₀.left_inv hy₀']; exact hy₁')
-  rw [hderiv] at hrep
-  have hcenter : c₁ (c₀.symm (c₀ y)) = c₁ y := by
-    rw [c₀.left_inv hy₀']
-  rw [hcenter] at hrep
-  have hcoeff := congrArg
-    (fun α : _ [⋀^Fin 2]→L[ℝ] ℝ => α.coeffMatrix) hrep
-  rw [ContinuousAlternatingMap.IsOneOne.coeffMatrix_compContinuousLinearMap
-    (c2_chartRep_isOneOne_in_chart form x₁ hy₁) A] at hcoeff
-  change (form.toFormField.chartRep x₀ (c₀ y)).coeffMatrix =
-    (EuclideanSpace.clmMatrix A).transpose *
-      (form.toFormField.chartRep x₁ (c₁ y)).coeffMatrix *
-      (EuclideanSpace.clmMatrix A).map star
-  exact hcoeff
-
-omit [T2Space M] [CompactSpace M] in
-private theorem c2_metricInChart_perturb_transition_eq
-    (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ)
-    (x₀ x₁ : M) {y : M}
-    (hy₀ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source)
-    (hy₁ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₁).source) :
-    (ω₀.perturb φ hφ).metricInChart x₀
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀ y) =
-      Matrix.transpose (EuclideanSpace.clmMatrix
-        (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) *
-        (ω₀.metricInChart x₁ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁ y) +
-          complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁).symm)
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁ y)) *
-        (EuclideanSpace.clmMatrix
-          (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)).map star := by
-  simpa only [KahlerForm.metricInChart_perturb hφ x₀
-      ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).map_source
-        (by rw [extChartAt_source]; exact hy₀)),
-    KahlerForm.metricInChart_perturb hφ x₁
-      ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁).map_source
-        (by rw [extChartAt_source]; exact hy₁))] using
-    c2_metricInChart_transition_eq (ω₀.perturb φ hφ) x₀ x₁ hy₀ hy₁
-
-omit [T2Space M] [CompactSpace M] in
-private theorem c2_complexHessian_transition_eq
-    (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ)
-    (x₀ x₁ : M) {y : M}
-    (hy₀ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source)
-    (hy₁ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₁).source) :
-    complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm)
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀ y) =
-      Matrix.transpose (EuclideanSpace.clmMatrix
-        (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) *
-        complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁).symm)
-          (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁ y) *
-        (EuclideanSpace.clmMatrix
-          (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)).map star := by
-  have hpert := c2_metricInChart_perturb_transition_eq ω₀ hφ x₀ x₁ hy₀ hy₁
-  have hbase := c2_metricInChart_transition_eq ω₀ x₀ x₁ hy₀ hy₁
-  have hz₀ : (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀ y) ∈
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target := by
-    exact (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).map_source
-      ((by rw [extChartAt_source]; exact hy₀))
-  rw [KahlerForm.metricInChart_perturb hφ x₀ hz₀] at hpert
-  rw [hbase] at hpert
-  rw [Matrix.mul_add, Matrix.add_mul] at hpert
-  exact add_left_cancel hpert
 
 private theorem c2_weighted_bisectional_sum_lower_bound
     {ι κ : Type*} [Fintype ι] [Fintype κ]
@@ -288,21 +126,6 @@ private theorem c2_weighted_curvature_trace_lower_bound
         -B * (∑ p, (lambda p)⁻¹) * (∑ j, mu j) := by ring
     _ ≤ ∑ p, ∑ j, (lambda p)⁻¹ * mu j * curvature p j := h
 
-private theorem c2_normalized_weighted_curvature_trace_lower_bound
-    {ι κ : Type*} [Fintype ι] [Fintype κ]
-    (lambda : ι → ℝ) (mu : κ → ℝ) (curvature : ι → κ → ℝ) (B : ℝ)
-    (hlambda : ∀ p, 0 < lambda p) (hmu : ∀ j, 0 ≤ mu j)
-    (hcurvature : ∀ p j, -B ≤ curvature p j) (hu : 0 < ∑ j, mu j) :
-    -B * (∑ p, (lambda p)⁻¹) ≤
-      (∑ p, ∑ j, (lambda p)⁻¹ * mu j * curvature p j) / (∑ j, mu j) := by
-  have h := c2_weighted_curvature_trace_lower_bound lambda mu curvature B
-    hlambda hmu hcurvature
-  calc
-    -B * (∑ p, (lambda p)⁻¹) =
-        (-B * (∑ j, mu j) * (∑ p, (lambda p)⁻¹)) / (∑ j, mu j) := by
-      field_simp [ne_of_gt hu]
-    _ ≤ _ := div_le_div_of_nonneg_right h hu.le
-
 /-- Absorb the bounded reference-Ricci scalar in the Chern–Lu pointwise inequality.  The
 `n² ≤ u v` trace bridge turns `C/u` into `(C/n²) v`. -/
 private theorem c2_absorb_reference_scalar_term
@@ -334,7 +157,9 @@ private noncomputable def c2TraceBoundConstant (n : ℕ) (K A δ : ℝ) : ℝ :=
   let U := T ^ (n - 1) * Real.exp K * Real.exp (A * K)
   max U (U ^ (n - 1) * Real.exp K)
 
-omit [T2Space M] in
+end
+
+variable [CompactSpace M] in
 private theorem c2_trace_bounds_of_chernLu
     (ω₀ : KahlerForm n M) (K A δ : ℝ) {G φ : M → ℝ}
     (hGbound : ∀ x, |G x| ≤ K) (hosc : ∀ x y, φ x - φ y ≤ K)
@@ -452,7 +277,6 @@ private theorem c2_trace_bounds_of_chernLu
   · intro x
     exact (hM ⟨x⟩).elim
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c2_trace_lower_bound_of_mongeAmpere
     [NeZero n] (ω₀ : KahlerForm n M) (K : ℝ) {G φ : M → ℝ}
     (hGbound : ∀ x, |G x| ≤ K) (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) :
@@ -493,14 +317,12 @@ private theorem c2_trace_lower_bound_of_mongeAmpere
     (n : ℝ) * Real.exp (-K / (n : ℝ)) = Real.exp (-K / (n : ℝ)) * n := by ring
     _ ≤ relTrace (ω₀ x) ((ω₀.perturb φ hsol.1) x) := hmul
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c2_relTrace_perturb_eq_dimension_add_laplacian
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (x : M) :
     relTrace (ω₀ x) ((ω₀.perturb φ hφ) x) = (n : ℝ) + ω₀.laplacian φ x := by
   rw [ω₀.perturb_apply hφ x, relTrace_add, relTrace_self (ω₀.isPositive x)]
   rfl
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c2_logTrace_smooth_of_laplacian_log_smooth
     (ω₀ : KahlerForm n M) (A : ℝ) {G φ : M → ℝ} (hsol : ω₀.SolvesMongeAmpere G φ)
     (hlog : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
@@ -514,7 +336,6 @@ private theorem c2_logTrace_smooth_of_laplacian_log_smooth
     rw [c2_relTrace_perturb_eq_dimension_add_laplacian ω₀ hsol.1 x]
   exact hlogTrace.sub (contMDiff_const.mul hsol.1.1)
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c2_log_dimension_add_laplacian_smooth [NeZero n]
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) :
     ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
@@ -575,7 +396,6 @@ private theorem c2_log_dimension_add_laplacian_smooth [NeZero n]
       (chartAt (EuclideanSpace ℂ (Fin n)) x).target
     simpa [f, Function.comp_apply, ModelWithCorners.range_eq_univ] using hx
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c2_logTrace_is_smooth [NeZero n]
     (ω₀ : KahlerForm n M) (A : ℝ) {G φ : M → ℝ}
     (hsol : ω₀.SolvesMongeAmpere G φ) :
@@ -584,6 +404,7 @@ private theorem c2_logTrace_is_smooth [NeZero n]
   exact c2_logTrace_smooth_of_laplacian_log_smooth ω₀ A hsol
     (c2_log_dimension_add_laplacian_smooth ω₀ hsol.1)
 
+variable [CompactSpace M] in
 private theorem c2_chernLu_pointwise_input [NeZero n]
     (ω₀ : KahlerForm n M) (K : ℝ) (_hK : 0 ≤ K) :
     ∃ A : ℝ, 0 ≤ A ∧
@@ -621,7 +442,7 @@ private theorem c2_chernLu_pointwise_input [NeZero n]
   have hricci :
       relTrace (ω₀ x) (ω₁.ricciForm x) = s x - ω₀.laplacian G x := by
     dsimp [ω₁, s]
-    exact ricciForm_trace_perturb_eq_of_solvesMongeAmpere ω₀ hG hsol x
+    exact ricciForm_trace_perturb_eq_of_solvesMongeAmpere ω₀ hsol x
   have hlog :
       ω₁.laplacian (fun y ↦ Real.log (u y)) x ≥
         (ω₀.laplacian G x - s x) / u x - B * v x := by
@@ -684,7 +505,12 @@ private theorem c2_chernLu_pointwise_input [NeZero n]
     _ = v x - A * (n : ℝ) - K / u x := by
       dsimp [A]
       ring
+section
 
+variable [T2Space M] [CompactSpace M]
+
+
+omit [T2Space M] in
 private theorem c2_logTrace_estimate_inputs [NeZero n]
     (ω₀ : KahlerForm n M) (K : ℝ) (hK : 0 ≤ K) :
     ∃ A : ℝ, 0 ≤ A ∧
@@ -707,6 +533,7 @@ private theorem c2_logTrace_estimate_inputs [NeZero n]
   exact ⟨c2_logTrace_is_smooth ω₀ A hsol,
     hCL G φ hG hGbound hΔ hosc hsol⟩
 
+omit [T2Space M] in
 /-- **The Aubin–Yau `C²` estimate.** Uniform equivalence of `ω₀ + i∂∂̄φ` with `ω₀`, in terms of
 `(M, ω₀)`, `sup |G|`, `inf Δ_ω₀ G` and `osc φ`. -/
 theorem exists_relTrace_le_of_solvesMongeAmpere (ω₀ : KahlerForm n M) (K : ℝ) :
@@ -811,5 +638,7 @@ theorem exists_relTrace_le_of_solvesMongeAmpere (ω₀ : KahlerForm n M) (K : �
             simpa [δ] using c2_trace_lower_bound_of_mongeAmpere ω₀ K hGbound hsol x
           exact c2_trace_bounds_of_chernLu ω₀ K A δ hGbound hosc hsol hKnonneg hA hδ
             htraceLower hF hCL
+
+end
 
 end KahlerForm

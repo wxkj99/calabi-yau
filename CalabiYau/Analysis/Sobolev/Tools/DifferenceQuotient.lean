@@ -2,12 +2,10 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Tools.Convolution
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -16,7 +14,7 @@ open scoped ENNReal NNReal Convolution Pointwise
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
@@ -28,33 +26,28 @@ noncomputable def diffQuot (i : Fin d) (h : ℝ) (v : E → ℝ) : E → ℝ :=
 noncomputable def translate (i : Fin d) (h : ℝ) (v : E → ℝ) : E → ℝ :=
   fun x => v (x + h • EuclideanSpace.single i 1)
 
-omit [NeZero d] in
 @[simp] lemma translate_zero_h (i : Fin d) (v : E → ℝ) :
     translate i 0 v = v := by
   ext x
   simp [translate]
 
-omit [NeZero d] in
 @[simp] lemma diffQuot_zero_h (i : Fin d) (v : E → ℝ) :
     diffQuot i 0 v = 0 := by
   ext x
   simp [diffQuot]
 
-omit [NeZero d] in
 lemma diffQuot_apply_of_ne (i : Fin d) {h : ℝ} (hh : h ≠ 0) (v : E → ℝ)
     (x : E) :
     diffQuot i h v x =
       (v (x + h • EuclideanSpace.single i 1) - v x) / h := by
   simp [diffQuot, hh]
 
-omit [NeZero d] in
 lemma diffQuot_eq_translate_sub_div (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (v : E → ℝ) :
     diffQuot i h v = fun x => (translate i h v x - v x) / h := by
   ext x
   simp [diffQuot, translate, hh]
 
-omit [NeZero d] in
 @[simp] lemma diffQuot_smul (i : Fin d) (h c : ℝ) (v : E → ℝ) :
     diffQuot i h (c • v) = c • diffQuot i h v := by
   ext x
@@ -63,7 +56,6 @@ omit [NeZero d] in
   · simp only [diffQuot, hh, ↓reduceIte, Pi.smul_apply, smul_eq_mul]
     ring
 
-omit [NeZero d] in
 @[simp] lemma diffQuot_add (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     diffQuot i h (v + w) = diffQuot i h v + diffQuot i h w := by
   ext x
@@ -72,37 +64,31 @@ omit [NeZero d] in
   · simp only [diffQuot, hh, ↓reduceIte, Pi.add_apply]
     ring
 
-omit [NeZero d] in
 @[simp] lemma translate_zero (i : Fin d) (h : ℝ) :
     translate i h (0 : E → ℝ) = 0 := by
   ext x
   simp [translate]
 
-omit [NeZero d] in
 @[simp] lemma translate_neg (i : Fin d) (h : ℝ) (v : E → ℝ) :
     translate i h (-v) = -translate i h v := by
   ext x
   simp [translate, Pi.neg_apply]
 
-omit [NeZero d] in
 @[simp] lemma translate_smul (i : Fin d) (h c : ℝ) (v : E → ℝ) :
     translate i h (c • v) = c • translate i h v := by
   ext x
   simp [translate, Pi.smul_apply]
 
-omit [NeZero d] in
 @[simp] lemma translate_sub (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     translate i h (v - w) = translate i h v - translate i h w := by
   ext x
   simp [translate, Pi.sub_apply]
 
-omit [NeZero d] in
 @[simp] lemma translate_add (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     translate i h (v + w) = translate i h v + translate i h w := by
   ext x
   simp [translate, Pi.add_apply]
 
-omit [NeZero d] in
 @[simp] lemma diffQuot_sub (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     diffQuot i h (v - w) = diffQuot i h v - diffQuot i h w := by
   ext x
@@ -111,7 +97,6 @@ omit [NeZero d] in
   · simp only [diffQuot, hh, ↓reduceIte, Pi.sub_apply]
     ring
 
-omit [NeZero d] in
 @[simp] lemma diffQuot_neg (i : Fin d) (h : ℝ) (v : E → ℝ) :
     diffQuot i h (-v) = -diffQuot i h v := by
   ext x
@@ -120,7 +105,6 @@ omit [NeZero d] in
   · simp only [diffQuot, hh, ↓reduceIte, Pi.neg_apply]
     ring
 
-omit [NeZero d] in
 @[simp] lemma diffQuot_zero (i : Fin d) (h : ℝ) :
     diffQuot i h (0 : E → ℝ) = 0 := by
   ext x
@@ -128,14 +112,12 @@ omit [NeZero d] in
   · simp [diffQuot, hh]
   · simp [diffQuot, hh]
 
-omit [NeZero d] in
 lemma continuous_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Continuous v) : Continuous (translate i h v) := by
   have hadd : Continuous (fun x : E => x + h • EuclideanSpace.single i 1) :=
     continuous_id.add continuous_const
   exact hv.comp hadd
 
-omit [NeZero d] in
 lemma continuous_diffQuot_of_continuous (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Continuous v) : Continuous (diffQuot i h v) := by
   by_cases hh : h = 0
@@ -152,7 +134,6 @@ lemma continuous_diffQuot_of_continuous (i : Fin d) (h : ℝ) {v : E → ℝ}
       ext x; simp [diffQuot, hh]
     rw [heq]; exact hd
 
-omit [NeZero d] in
 lemma aestronglyMeasurable_diffQuot
     (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : AEStronglyMeasurable v volume) :
@@ -186,7 +167,6 @@ lemma aestronglyMeasurable_diffQuot
       ext x; simp [diffQuot, hh]
     rw [heq]; exact hd
 
-omit [NeZero d] in
 lemma tendsto_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) (x : E) :
     Tendsto (fun h : ℝ => diffQuot i h v x) (𝓝[≠] 0)
@@ -230,13 +210,11 @@ lemma tendsto_diffQuot_of_contDiff
     rw [div_eq_inv_mul]
   exact hpre.congr' hCong
 
-omit [NeZero d] in
 private lemma measurePreserving_translate (i : Fin d) (h : ℝ) :
     MeasurePreserving
       (fun x : E => x + h • EuclideanSpace.single i 1) volume volume :=
   measurePreserving_add_right volume _
 
-omit [NeZero d] in
 lemma memLp_translate
     {p : ℝ≥0∞} (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v p volume) :
@@ -252,7 +230,6 @@ lemma memLp_translate
     eLpNorm_comp_measurePreserving hv.aestronglyMeasurable hMP
   rw [h_eq]; exact hv.eLpNorm_lt_top
 
-omit [NeZero d] in
 theorem memLp_diffQuot
     {p : ℝ≥0∞} (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v p volume) :
@@ -265,22 +242,18 @@ theorem memLp_diffQuot
     simpa only [Pi.sub_apply, div_eq_mul_inv] using
       ((memLp_translate i h hv).sub hv).mul_const h⁻¹
 
-omit [NeZero d] in
 private lemma holder_two_two : ENNReal.HolderTriple (2 : ℝ≥0∞) 2 1 := by
   constructor
   rw [show (1 : ℝ≥0∞)⁻¹ = 1 from inv_one]
   rw [ENNReal.inv_two_add_inv_two]
 
-omit [NeZero d] in
 lemma integrable_mul_of_memLp_two
     {f g : E → ℝ} (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
     Integrable (fun x => f x * g x) volume := by
-  have := holder_two_two
   have h := MemLp.integrable_mul (μ := (volume : Measure E))
     (p := (2 : ℝ≥0∞)) (q := (2 : ℝ≥0∞)) hf hg
   exact h.congr (Filter.Eventually.of_forall fun _ => rfl)
 
-omit [NeZero d] in
 theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
     (i : Fin d) {h : ℝ} (hh : h ≠ 0) {f g : E → ℝ}
     (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
@@ -380,7 +353,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
   rw [hLHS_decomp, hRHS_decomp, hLHS_subst]
   rw [div_neg, neg_neg]
 
-omit [NeZero d] in
 lemma diffQuot_eq_integral_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (x : E) :
@@ -467,7 +439,6 @@ lemma diffQuot_eq_integral_partialDeriv
     rw [hdiv]
   rw [hrewrite_goal]
 
-omit [NeZero d] in
 lemma sq_diffQuot_le_integral_sq_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (x : E) :
@@ -515,39 +486,5 @@ lemma sq_diffQuot_le_integral_sq_partialDeriv
     hsq_convex.map_integral_le hcont_on isClosed_univ hfs hf_int hf2_int
   rw [hFTC]
   exact hJensen
-
-omit [NeZero d] in
-private lemma diffQuot_bound_of_lipschitz
-    {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_support : HasCompactSupport φ)
-    (i : Fin d) :
-    ∃ L : ℝ, 0 ≤ L ∧ ∀ h : ℝ, ∀ x : E, |diffQuot i h φ x| ≤ L := by
-  obtain ⟨L, hL_nn, hLip⟩ :=
-    lipschitz_of_contDiff_compactSupport (d := d) hφ_C1 hφ_support
-  refine ⟨L, hL_nn, fun h x => ?_⟩
-  by_cases hh : h = 0
-  · rw [hh, diffQuot_zero_h]; simpa using hL_nn
-  · rw [diffQuot_apply_of_ne (d := d) i hh φ x]
-    have hLip_apply :
-        ‖φ (x + h • EuclideanSpace.single i 1) - φ x‖ ≤
-          L * ‖x + h • EuclideanSpace.single i 1 - x‖ := hLip _ _
-    have hsimp : x + h • EuclideanSpace.single i 1 - x =
-        h • EuclideanSpace.single i 1 := by
-      rw [add_sub_cancel_left]
-    rw [hsimp] at hLip_apply
-    have hsing_norm :
-        ‖(EuclideanSpace.single i (1 : ℝ) : E)‖ = 1 := by simp
-    have hnorm_smul :
-        ‖h • EuclideanSpace.single i (1 : ℝ)‖ = |h| := by
-      rw [norm_smul, hsing_norm, mul_one, Real.norm_eq_abs]
-    rw [hnorm_smul] at hLip_apply
-    rw [abs_div]
-    have habs_h : 0 < |h| := abs_pos.mpr hh
-    rw [div_le_iff₀ habs_h]
-    have h_lhs_norm :
-        |φ (x + h • EuclideanSpace.single i 1) - φ x| =
-          ‖φ (x + h • EuclideanSpace.single i 1) - φ x‖ :=
-      (Real.norm_eq_abs _).symm
-    rw [h_lhs_norm]
-    exact hLip_apply
 
 end Sobolev

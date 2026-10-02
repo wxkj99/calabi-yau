@@ -15,11 +15,10 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 theorem locallyIntegrable_translate
     (k : Fin d) (h : ℝ) {u : E → ℝ}
     (hu : LocallyIntegrable u (volume : Measure E)) :
@@ -36,7 +35,6 @@ theorem locallyIntegrable_translate
   rw [h_eq]
   exact (hτ_preserving.integrableOn_comp_preimage hτ_emb (f := u) (s := V)).mpr hu_int
 
-omit [NeZero d] in
 theorem locallyIntegrable_diffQuot
     (k : Fin d) (h : ℝ) {u : E → ℝ}
     (hu : LocallyIntegrable u (volume : Measure E)) :
@@ -74,15 +72,13 @@ theorem locallyIntegrable_diffQuot
       exact hu.smul (-h⁻¹)
     exact h_first.add h_second
 
-omit [NeZero d] in
 private lemma tsupport_subset_univ (φ : E → ℝ) :
     tsupport φ ⊆ (Set.univ : Set E) := fun _ _ => trivial
 
-omit [NeZero d] in
 private theorem hasWeakPartialDeriv_translate_neg
     (k j : Fin d) (h : ℝ) {f g : E → ℝ}
-    (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) j g f Set.univ) :
-    DeGiorgi.HasWeakPartialDeriv (d := d) j
+    (hwp : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j g f Set.univ) :
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
       (translate k (-h) g) (translate k (-h) f) Set.univ := by
   intro φ hφ_smooth hφ_support _hφ_sub
   set ψ : E → ℝ := translate k h φ with hψ_def
@@ -155,15 +151,13 @@ private theorem hasWeakPartialDeriv_translate_neg
   rw [h_RHS_subst] at h_test
   exact h_test
 
-omit [NeZero d] in
 theorem hasWeakPartialDeriv_translate
     (k j : Fin d) (h : ℝ) {f g : E → ℝ}
-    (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) j g f Set.univ) :
-    DeGiorgi.HasWeakPartialDeriv (d := d) j
+    (hwp : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j g f Set.univ) :
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
       (translate k h g) (translate k h f) Set.univ := by
   simpa using hasWeakPartialDeriv_translate_neg (d := d) k j (-h) hwp
 
-omit [NeZero d] in
 private lemma locallyIntegrable_translate_restrict_univ
     (k : Fin d) (h : ℝ) {u : E → ℝ}
     (hu : LocallyIntegrable u ((volume : Measure E).restrict Set.univ)) :
@@ -172,15 +166,14 @@ private lemma locallyIntegrable_translate_restrict_univ
   rw [Measure.restrict_univ] at hu ⊢
   exact locallyIntegrable_translate (d := d) k h hu
 
-omit [NeZero d] in
 theorem hasWeakPartialDeriv_diffQuot
     (k j : Fin d) (h : ℝ) {u g_j : E → ℝ}
     (hu_localInt :
       LocallyIntegrable u ((volume : Measure E).restrict Set.univ))
     (hg_j_localInt :
       LocallyIntegrable g_j ((volume : Measure E).restrict Set.univ))
-    (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) j g_j u Set.univ) :
-    DeGiorgi.HasWeakPartialDeriv (d := d) j
+    (hwp : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j g_j u Set.univ) :
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
       (diffQuot k h g_j) (diffQuot k h u) Set.univ := by
   by_cases hh : h = 0
   · subst hh
@@ -208,7 +201,7 @@ theorem hasWeakPartialDeriv_diffQuot
       ring
     rw [h_diffQuot_u_eq, h_diffQuot_g_eq]
     have h_translate :
-        DeGiorgi.HasWeakPartialDeriv (d := d) j
+        Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
           (translate k h g_j) (translate k h u) Set.univ := by
       exact hasWeakPartialDeriv_translate (d := d) k j h hwp
     have h_translate_u_localInt :
@@ -220,12 +213,12 @@ theorem hasWeakPartialDeriv_diffQuot
           ((volume : Measure E).restrict Set.univ) :=
       locallyIntegrable_translate_restrict_univ (d := d) k h hg_j_localInt
     have h_smul_translate :
-        DeGiorgi.HasWeakPartialDeriv (d := d) j
+        Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
           (fun x => h⁻¹ * translate k h g_j x)
           (fun x => h⁻¹ * translate k h u x) Set.univ :=
       h_translate.const_smul h⁻¹
     have h_smul_orig :
-        DeGiorgi.HasWeakPartialDeriv (d := d) j
+        Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
           (fun x => (-h⁻¹) * g_j x)
           (fun x => (-h⁻¹) * u x) Set.univ :=
       hwp.const_smul (-h⁻¹)

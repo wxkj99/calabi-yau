@@ -1,8 +1,6 @@
 module
 
 public import CalabiYau.Mathlib.Analysis.Matrix.Order
-import CalabiYau.Geometry.Complex.Holder
-import Mathlib.Data.Matrix.Basic
 
 /-!
 # Uniform inverse-entry bounds from determinant and coefficient bounds

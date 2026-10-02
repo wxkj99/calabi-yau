@@ -15,7 +15,7 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators InnerProductSpace
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
@@ -23,7 +23,6 @@ def mollifyEps {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) : E → ℝ :=
   Sobolev.mollifierEps (d := d) hε ⋆[
     ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u
 
-omit [NeZero d] in
 theorem mollifyEps_contDiff {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_local : LocallyIntegrable u (volume : Measure E)) :
     ContDiff ℝ (⊤ : ℕ∞) (mollifyEps (d := d) hε u) := by
@@ -34,13 +33,11 @@ theorem mollifyEps_contDiff {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (Sobolev.mollifierEps_smooth hε)
     hu_local
 
-omit [NeZero d] in
 theorem mollifyEps_continuous {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_local : LocallyIntegrable u (volume : Measure E)) :
     Continuous (mollifyEps (d := d) hε u) :=
   (mollifyEps_contDiff (d := d) hε hu_local).continuous
 
-omit [NeZero d] in
 lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
       ∫ t,
@@ -49,7 +46,6 @@ lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
   simp [mollifyEps, MeasureTheory.convolution_def,
     ContinuousLinearMap.lsmul_apply, smul_eq_mul]
 
-omit [NeZero d] in
 theorem mollifyEps_eq_convolution_swap
     {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
@@ -62,7 +58,6 @@ theorem mollifyEps_eq_convolution_swap
   filter_upwards with t
   rw [smul_eq_mul, smul_eq_mul, mul_comm]
 
-omit [NeZero d] in
 theorem ae_tendsto_mollifyEps_of_locallyIntegrable {ι : Type*} {l : Filter ι}
     {ε : ι → ℝ} (hε : ∀ i, 0 < ε i) (hε_tendsto : Tendsto ε l (𝓝 0))
     {u : E → ℝ} (hu_local : LocallyIntegrable u (volume : Measure E)) :

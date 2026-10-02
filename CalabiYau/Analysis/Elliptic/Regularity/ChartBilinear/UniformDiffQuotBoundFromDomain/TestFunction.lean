@@ -1,7 +1,7 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Regularity/ChartBilinear/UniformDiffQuotBoundFromDomain/TestFunction.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Calculus.Cutoff.Compact
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
 public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearVariationalIdentity
 public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient.WeakDerivativeBound
@@ -285,7 +285,7 @@ theorem integral_sq_nirenbergTestFunction_le
   have hG_l2 : ∀ i, MemLp (G i) 2 (volume : Measure EuclN) := fun i =>
     cutoff_uChart_partial_memLp_two_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_tsupp i
-  have hG_isWP : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+  have hG_isWP : ∀ i, Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
       (G i) u_g Set.univ := fun i =>
     cutoff_uChart_hasWeakPartialDeriv_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_tsupp i
@@ -307,7 +307,7 @@ theorem integral_sq_nirenbergTestFunction_le
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
   have h_abs_nh : |-h| = |h| := abs_neg h
   have h_inner_wp :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
         (fun y => (η y)^2 *
             Sobolev.diffQuot k h (G k) y +
           ((fderiv ℝ (fun z => (η z)^2) y) (EuclideanSpace.single k 1)) *
@@ -445,7 +445,7 @@ theorem integral_sq_nirenbergTestFunction_le
       ((fderiv ℝ (fun z => (η z)^2) y) (EuclideanSpace.single k 1)) *
         Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h u_g y with hG_F_def
-  have hF_wp : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k G_F F
+  have hF_wp : Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) k G_F F
       Set.univ := h_inner_wp
   have hη_sq_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclN => (η y)^2) :=
     hη.pow 2

@@ -42,6 +42,7 @@ def HasUniformDifferenceQuotientBounds (ω₀ : KahlerForm n M) (G φ : M → �
                 (∀ j l, HolderBoundOn 0 α K U fun z ↦ A z j l) ∧
                 HolderBoundOn 0 α K U (chartDifferenceQuotientRhs ω₀ G φ x v h)
 
+omit [MeasurableSpace M] [BorelSpace M] [ConnectedSpace M] in
 /-- The `C^{2,α}` chart gauge, positivity, and smooth data give uniform ellipticity and
 `C^{0,α}` coefficient and forcing estimates for the quotient equations. -/
 theorem solvesMongeAmpereC2_hasUniformDifferenceQuotientBounds
@@ -60,7 +61,7 @@ theorem solvesMongeAmpereC2_hasUniformDifferenceQuotientBounds
   let P : Set ℝ := {h | h ≠ 0 ∧ |h| < δ}
   have hSegmentData (h : ℝ) (hh : h ∈ P) := hBounds h hh.1 hh.2
   obtain ⟨Kinv, hInverseHolder⟩ :=
-    exists_uniform_holderBoundOn_matrix_inverse α lam Kmat hα₀ hα₁ hlam U P
+    exists_uniform_holderBoundOn_matrix_inverse α lam Kmat hlam U P
       (fun h s z ↦ chartBootstrapSegmentMatrix ω₀ φ x v h s z)
       (by
         intro h hh s hs
@@ -79,11 +80,10 @@ theorem solvesMongeAmpereC2_hasUniformDifferenceQuotientBounds
     hInverseHolder h hhP s hs j l
   refine ⟨hEllAvg, ?_, ?_⟩
   · intro j l
-    have hAverage := exists_holderBoundOn_interval_average α Kinv hα₀ hα₁ U
+    have hAverage := exists_holderBoundOn_interval_average α Kinv hα₀ U
       (fun s z ↦ (chartBootstrapSegmentMatrix ω₀ φ x v h s z)⁻¹ j l)
       (fun s hs ↦ hInverseAt s hs j l)
       (fun z hz ↦ hIntegrable z hz j l)
-      (fun z hz ↦ hContinuous z hz j l)
     simpa [averagedChartInverse, chartBootstrapSegmentMatrix] using
       hAverage.mono_const (le_max_left Kinv (max Kinv Krhs))
   · exact hRhs.mono_const (le_max_right Kinv Krhs)

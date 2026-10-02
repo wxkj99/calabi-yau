@@ -1,11 +1,11 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Euclidean/Embedding/Morrey/RieszKernel.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Witnesses
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Approximation
-public import CalabiYau.Analysis.DeGiorgi.Poincare
-public import CalabiYau.Analysis.DeGiorgi.SobolevPoincare
-public import CalabiYau.Analysis.DeGiorgi.UnitBallApproximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Witness
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.Ball
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.SobolevPoincare
+public import CalabiYau.Analysis.Sobolev.Euclidean.Ball.Approximation
 public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 public import Mathlib.MeasureTheory.Covering.DensityTheorem
@@ -14,8 +14,6 @@ public import Mathlib.MeasureTheory.Integral.Average
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -27,9 +25,6 @@ namespace EuclideanMorrey
 variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
-
-def meanLebesgueOnBall (B : Set E) (u : E → ℝ) : ℝ :=
-  ⨍ z in B, u z ∂(volume : Measure E)
 
 theorem riesz_kernel_integrable_of_gt_neg_dim
     {α : ℝ} (hα : -(d : ℝ) < α) {R : ℝ} (hR : 0 < R) :
@@ -205,7 +200,7 @@ theorem representation_formula_smooth_translated
     rw [Metric.mem_ball, dist_eq_norm] at this
     exact this
   have hkey :=
-    DeGiorgi.representation_formula_smooth (d := d) hR (u := v) hv (x - x₀) hx_t
+    Sobolev.Euclidean.representation_formula_smooth (d := d) hR (u := v) hv (x - x₀) hx_t
   have hv_x_t : v (x - x₀) = u x := by simp [v]
   rw [hv_x_t] at hkey
   have havg_eq : ⨍ z in Metric.ball (0 : E) R, v z ∂volume =
@@ -322,10 +317,6 @@ lemma measurable_norm_sub_rpow (α : ℝ) (x : E) :
       with y hy
     exact hy]
   exact h_aesm_compl
-
-private lemma measurable_norm_sub_rpow_restrict (α : ℝ) (x : E) (s : Set E) :
-    AEStronglyMeasurable (fun y : E => ‖x - y‖ ^ α) (volume.restrict s) :=
-  (measurable_norm_sub_rpow α x).restrict
 
 theorem riesz_kernel_memLp
     {p : ℝ} (hp : (d : ℝ) < p) {z : E} {R : ℝ} (hR : 0 < R) (x : E) :

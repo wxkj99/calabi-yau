@@ -4,7 +4,7 @@ public import CalabiYau.Geometry.Kahler.Basic
 public import Mathlib.Geometry.Manifold.PartitionOfUnity
 public import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-import CalabiYau.LinearAlgebra.Matrix.Realification
+import CalabiYau.Mathlib.LinearAlgebra.Matrix.Realification
 import Mathlib.MeasureTheory.Function.Jacobian
 
 /-!
@@ -120,6 +120,7 @@ private theorem chartVolume_apply_of_measurable_subset_source (x : M) {A : Set M
       rw [Measure.restrict_restrict₀ hpre]
     _ = ∫⁻ z in D, d z ∂MeasureTheory.volume := by rw [hpreEq]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartVolume_lintegral (x : M) {f : M → ℝ≥0∞} (hf : Measurable f) :
     ∫⁻ y, f y ∂ω₀.chartVolume x =
       ∫⁻ z in (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target,
@@ -263,6 +264,7 @@ private theorem extChartAt_transition_hasFDerivWithinAt_on_overlap_image
   rw [hsymm]
   exact hfull.mono himage_sub
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartVolume_lintegral_U_eq_image (x : M)
     {U : Set M} (hUopen : IsOpen U)
     (hUsub : U ⊆ (chartAt (EuclideanSpace ℂ (Fin n)) x).source)
@@ -535,6 +537,7 @@ private theorem volumeDensityInChart_transition_absDet (x₀ x₁ : M) {y : M}
   rw [abs_of_nonneg (Complex.normSq_nonneg _)]
   exact volumeDensityInChart_transition_normSq ω₀ x₀ x₁ hy₀ hy₁
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartVolume_lintegral_U_eq_of_overlap (x₀ x₁ : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
     ∫⁻ y in (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source ∩
@@ -617,6 +620,7 @@ private theorem chartVolume_lintegral_U_eq_of_overlap (x₀ x₁ : M)
   rw [c₁.left_inv hy₁]
   ac_rfl
 
+omit [SigmaCompactSpace M] in
 private theorem chartVolume_lt_top_of_isCompact_subset_source (x : M) {K : Set M}
     (hK : IsCompact K) (hKx : K ⊆ (chartAt (EuclideanSpace ℂ (Fin n)) x).source) :
     ω₀.chartVolume x K < ⊤ := by
@@ -1025,6 +1029,7 @@ private theorem chartVolume_withDensity_le
         rw [lintegral_indicator htsup_meas, Measure.restrict_restrict htsup_meas,
           setLIntegral_const, one_mul, Set.inter_comm]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartVolume_pos_of_open_subset_source (x : M) {U : Set M}
     (hU : IsOpen U) (hUne : U.Nonempty)
     (hUx : U ⊆ (chartAt (EuclideanSpace ℂ (Fin n)) x).source) :
@@ -1291,6 +1296,7 @@ private theorem relDet_eq_chartRep (ω₁ : KahlerForm n M) {x y : M}
         (ω₁.toFormField.chartRep x
           (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y)) := by rw [hrep0', hrep1']
 
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [SigmaCompactSpace M] in
 private theorem volumeDensityInChart_eq_relDet_mul (ω₁ : KahlerForm n M) (x : M)
     {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
@@ -1312,6 +1318,7 @@ private theorem volumeDensityInChart_eq_relDet_mul (ω₁ : KahlerForm n M) (x :
       ((2 : ℝ) ^ n * RCLike.re (ω₀.metricInChart x z).det)
   field_simp [hden]
 
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem continuous_relDet (ω₁ : KahlerForm n M) : Continuous fun x ↦ relDet (ω₀ x) (ω₁ x) := by
   rw [continuous_iff_continuousAt]
   intro x
@@ -1354,6 +1361,7 @@ theorem continuous_relDet (ω₁ : KahlerForm n M) : Continuous fun x ↦ relDet
     exact hlocal y hy
   exact (hqAt.comp (continuousAt_extChartAt x)).congr_of_eventuallyEq heq
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartVolume_eq_withDensity_relDet (ω₁ : KahlerForm n M) (x : M) :
     ω₁.chartVolume x = (ω₀.chartVolume x).withDensity
       (fun y ↦ ENNReal.ofReal (relDet (ω₀ y) (ω₁ y))) := by

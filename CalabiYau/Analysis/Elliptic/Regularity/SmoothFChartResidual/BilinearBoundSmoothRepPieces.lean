@@ -4,10 +4,10 @@ module
 public import CalabiYau.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 public import CalabiYau.Analysis.Elliptic.Regularity.GradInner.CLM.ChartFormula
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushforwardBound
-public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
+public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.HigherOrder
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Iterated
-public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 @[expose] public section
 
@@ -345,65 +345,6 @@ lemma tsupport_gradInnerPiece_subset_source
     tsupport (gradInnerPiece (I := I) (M := M) g α v) ⊆ (chartAt H α).source :=
   (tsupport_gradInnerPiece_subset (I := I) (M := M) g α v).trans
     (chartAtlasPOU_isSubordinate I M α)
-
-omit [SigmaCompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma tsupport_lapPiece_subset
-    (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
-    tsupport (lapPiece (I := I) (M := M) g α v) ⊆
-      tsupport (etaTimesV (I := I) (M := M) α v) := by
-  classical
-  have h_support_subset : Function.support (lapPiece (I := I) (M := M) g α v) ⊆
-      Function.support (etaTimesV (I := I) (M := M) α v) := by
-    intro x hx
-    by_contra hxoff
-    apply hx
-    have h0 : etaTimesV (I := I) (M := M) α v x = 0 := by
-      simpa [Function.mem_support, not_not] using hxoff
-    change lapPiece (I := I) (M := M) g α v x = 0
-    rw [lapPiece_apply, h0]; ring
-  exact closure_minimal (h_support_subset.trans (subset_tsupport _))
-    (isClosed_tsupport _)
-
-omit [SigmaCompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
-lemma tsupport_lapPiece_subset_source
-    (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
-    tsupport (lapPiece (I := I) (M := M) g α v) ⊆ (chartAt H α).source :=
-  (tsupport_lapPiece_subset (I := I) (M := M) g α v).trans
-    (tsupport_etaTimesV_subset (I := I) (M := M) α v)
-
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma chartPushedRaw_gradInnerPiece_eq_rhs
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    chartPushedRaw (I := I) (M := M) α
-        (gradInnerPiece (I := I) (M := M) g α v.toFun) y =
-      (2 : ℝ) * chartFormulaRhsSmooth (I := I) (M := M) g α
-        (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-        (etaTimesVScalar (I := I) (M := M) g α v).toFun y := by
-  classical
-  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
-    (gradInnerPiece (I := I) (M := M) g α v.toFun) hy]
-  rw [gradInnerPiece_apply]
-  rw [etaTimesVScalar_toFun]
-  have h_inner_eq :
-      g.inner ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
-        (gradFun (I := I) g
-          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
-        (gradFun (I := I) g
-          (etaTimesV (I := I) (M := M) α v.toFun)
-          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) =
-      chartFormulaRhsSmooth (I := I) (M := M) g α
-        (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-        (etaTimesV (I := I) (M := M) α v.toFun) y := by
-    have :=
-      chartPushedRaw_gradInnerSmooth_pointwise
-      (I := I) (M := M) g α (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-      (etaTimesVScalar (I := I) (M := M) g α v) hy
-    simpa using this
-  rw [h_inner_eq]
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_lapPiece_factor

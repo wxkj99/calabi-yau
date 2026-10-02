@@ -124,73 +124,6 @@ private lemma chartLocal_volume_density_lower_bound
     intro y hy
     exact (hne ⟨y, hy⟩).elim
 
-private theorem riemannian_inner_sq_le
-    {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [FiniteDimensional ℝ E] [TopologicalSpace H]
-    {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
-    [ChartedSpace H M] [IsManifold I ∞ M]
-    (g : CalabiYau.SmoothRiemannianMetric I M) (x : M)
-    (u v : TangentSpace I x) :
-    (g.inner x u v) ^ 2 ≤ g.inner x u u * g.inner x v v := by
-  by_cases hv : v = 0
-  · simp [hv]
-  · have hc : 0 < g.inner x v v := g.pos x v hv
-    let t : ℝ := g.inner x u v / g.inner x v v
-    have hnonneg : 0 ≤ g.inner x (u - t • v) (u - t • v) :=
-      CalabiYau.metric_inner_self_nonneg g x (u - t • v)
-    have hexpand : g.inner x (u - t • v) (u - t • v) =
-        g.inner x u u - t * g.inner x v u - t * g.inner x u v +
-          t ^ 2 * g.inner x v v := by
-      simp only [map_sub, map_smul, sub_apply, smul_apply, smul_eq_mul]
-      ring
-    rw [hexpand] at hnonneg
-    rw [g.symm x v u] at hnonneg
-    dsimp [t] at hnonneg
-    have hcne : g.inner x v v ≠ 0 := ne_of_gt hc
-    field_simp [hcne] at hnonneg
-    nlinarith
-
-private theorem chartCoordinate_fderiv_eq_partialDeriv
-    {n : ℕ} {M : Type*} [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-    (a : M) (u : M → ℝ)
-    (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u)
-    (z : EuclideanSpace ℂ (Fin n))
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) a).target)
-    (i : Fin (Module.finrank ℝ (EuclideanSpace ℂ (Fin n)))) :
-    fderiv ℝ
-      (fun w => u ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) a).symm
-        ((toEuclidean (E := EuclideanSpace ℂ (Fin n))).symm w)))
-      ((toEuclidean (E := EuclideanSpace ℂ (Fin n))) z)
-      (EuclideanSpace.single i 1) =
-    CalabiYau.Tensor.Coordinates.partialDeriv i
-      (CalabiYau.Tensor.Coordinates.scalarOnE
-        (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) a u) z := by
-  let e := toEuclidean (E := EuclideanSpace ℂ (Fin n))
-  let S := CalabiYau.Tensor.Coordinates.scalarOnE
-    (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) a u
-  have hS : DifferentiableAt ℝ S z := by
-    have hcont := CalabiYau.Tensor.Coordinates.scalarOnE_contDiffOn
-      (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) a hu
-    have hAt : ContDiffAt ℝ ∞ S z :=
-      (hcont z hz).contDiffAt
-        ((isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) a).mem_nhds hz)
-    exact hAt.differentiableAt (by norm_num)
-  have hS' : DifferentiableAt ℝ S (e.symm (e z)) := by
-    simpa [e] using hS
-  have hcomp := fderiv_comp (f := e.symm) (g := S) (x := e z)
-    hS' e.symm.differentiableAt
-  change fderiv ℝ (S ∘ e.symm) (e z) (EuclideanSpace.single i 1) = _
-  rw [hcomp]
-  have hlin : fderiv ℝ (e.symm : _ → _) (e z) = e.symm.toContinuousLinearMap :=
-    e.symm.toContinuousLinearMap.fderiv
-  rw [hlin]
-  simp only [e.symm_apply_apply, ContinuousLinearMap.comp_apply]
-  change fderiv ℝ S z (e.symm (EuclideanSpace.single i 1)) = _
-  rw [CalabiYau.Tensor.Coordinates.partialDeriv,
-    CalabiYau.Tensor.Coordinates.chartModelBasis_apply]
-
 private theorem map_toEuclidean_volume_eq_positive_smul (n : ℕ) :
     ∃ c : ℝ, 0 < c ∧
       Measure.map (toEuclidean (E := EuclideanSpace ℂ (Fin n)))
@@ -236,63 +169,6 @@ private theorem map_toEuclidean_volume_eq_positive_smul (n : ℕ) :
   refine ⟨|(LinearMap.det (L : V →ₗ[ℝ] V))⁻¹|, ?_, ?_⟩
   · exact abs_pos.mpr (inv_ne_zero hdet)
   · simpa [E, V, e] using hmap
-
-private theorem chartLocal_volumeDensity_lower_bound
-    {n : ℕ} {M : Type*} [TopologicalSpace M]
-    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-    [MeasurableSpace M] [BorelSpace M] [T2Space M]
-    [CompactSpace M] [SigmaCompactSpace M]
-    (ω₀ : KahlerForm n M)
-    (a : M)
-    (K : Set (EuclideanSpace ℝ
-      (Fin (Module.finrank ℝ (EuclideanSpace ℂ (Fin n))))))
-    (hKcompact : IsCompact K)
-    (hK : K ⊆ Sobolev.Chart.chartTargetEuclid
-      (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (M := M) a) :
-    ∃ c : ℝ, 0 < c ∧ ∀ y ∈ K,
-      c ≤ ω₀.volumeDensityInChart a
-        ((toEuclidean (E := EuclideanSpace ℂ (Fin n))).symm y) := by
-  let e := toEuclidean (E := EuclideanSpace ℂ (Fin n))
-  let c := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) a
-  let Z := e.symm '' K
-  have hdet : ContinuousOn (fun z : EuclideanSpace ℂ (Fin n) =>
-      (ω₀.metricInChart a z).det) c.target := by
-    classical
-    simp_rw [Matrix.det_apply]
-    exact continuousOn_finsetSum Finset.univ fun σ _ =>
-      continuousOn_const.smul <| continuousOn_finsetProd Finset.univ fun j _ =>
-        (ω₀.contDiffOn_metricInChart a (σ j) j).continuousOn
-  have hden : ContinuousOn (ω₀.volumeDensityInChart a) c.target := by
-    unfold volumeDensityInChart
-    have hre : ContinuousOn
-        (fun z : EuclideanSpace ℂ (Fin n) =>
-          RCLike.re ((ω₀.metricInChart a z).det)) c.target := by
-      exact Complex.continuous_re.continuousOn.comp hdet (fun _ _ => Set.mem_univ _)
-    exact continuousOn_const.mul hre
-  have hZcompact : IsCompact Z := hKcompact.image e.symm.continuous
-  have hZsubset : Z ⊆ c.target := by
-    rintro z ⟨y, hy, rfl⟩
-    have hy' : y ∈ Sobolev.Chart.chartTargetEuclid
-        (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (M := M) a := hK hy
-    change y ∈ e '' c.target at hy'
-    rcases hy' with ⟨w, hw, hwy⟩
-    rw [← hwy]
-    simpa using hw
-  have hdenZ : ContinuousOn (ω₀.volumeDensityInChart a) Z := hden.mono hZsubset
-  by_cases hKne : K.Nonempty
-  · have hZne : Z.Nonempty := by
-      rcases hKne with ⟨y, hy⟩
-      exact ⟨e.symm y, y, hy, rfl⟩
-    obtain ⟨z₀, hz₀, hmin⟩ := hZcompact.exists_isMinOn hZne hdenZ
-    have hz₀target : z₀ ∈ c.target := hZsubset hz₀
-    refine ⟨ω₀.volumeDensityInChart a z₀,
-      ω₀.volumeDensityInChart_pos a hz₀target, ?_⟩
-    intro y hy
-    exact hmin ⟨y, hy, rfl⟩
-  · refine ⟨1, by norm_num, ?_⟩
-    intro y hy
-    exact (hKne ⟨y, hy⟩).elim
 
 private theorem chartVolume_lintegral_coordinate
     {n : ℕ} {M : Type*} [TopologicalSpace M]

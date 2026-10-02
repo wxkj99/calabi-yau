@@ -5,7 +5,7 @@ Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
 module
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.FiniteEquivalence
+public import CalabiYau.Mathlib.Logic.Equiv.FinReindexing
 public import Mathlib.LinearAlgebra.Alternating.DomCoprod
 
 @[expose] public section
@@ -20,17 +20,10 @@ variable {m n p k : ℕ}
 def addAssocPerm : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p) ≃ Equiv.Perm (Fin m ⊕ Fin n ⊕ Fin p) :=
     Equiv.permCongr (Equiv.sumAssoc (Fin m) (Fin n) (Fin p))
 
-lemma addAssocPerm_symm_addAssocPerm (σ₁ : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p)) :
-    addAssocPerm.symm (addAssocPerm σ₁) = σ₁ := by
-  exact Equiv.symm_apply_apply addAssocPerm σ₁
-
 @[simp]
 lemma sign_addAssocPerm (σ₁ : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p)) :
     Equiv.Perm.sign (addAssocPerm σ₁) = Equiv.Perm.sign σ₁ := by
   simp only [addAssocPerm, Equiv.Perm.sign_permCongr]
-
-def addCongrPerm : Equiv.Perm (Fin (m + n)) ≃ Equiv.Perm (Fin (n + m)) :=
-  Equiv.permCongr finAddCongr
 
 def sumCongrPerm : Equiv.Perm (Fin m ⊕ Fin n) ≃ Equiv.Perm (Fin n ⊕ Fin m) :=
   Equiv.permCongr finSumCongr
@@ -351,64 +344,7 @@ theorem addCasesSwapPerm_sign (m n : ℕ) :
       rw [Nat.add_mod, show 2 * ((2 * c + n) * c + c) % 2 = 0 by simp]
       simp [Nat.add_mod]
 
-noncomputable def blockPerm
-    {m p : ℕ} (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p)) :
-    Equiv.Perm (Fin (m + p)) :=
-  Equiv.permCongr finSumFinEquiv (α.sumCongr β)
-
-theorem blockPerm_castAdd
-    {m p : ℕ} (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p))
-    (i : Fin m) : blockPerm α β (Fin.castAdd p i) = Fin.castAdd p (α i) := by
-  simp [blockPerm, Equiv.permCongr_apply, Sum.map]
-
-theorem blockPerm_natAdd
-    {m p : ℕ} (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p))
-    (j : Fin p) : blockPerm α β (Fin.natAdd m j) = Fin.natAdd m (β j) := by
-  simp [blockPerm, Equiv.permCongr_apply, Sum.map]
-
-theorem sign_blockPerm
-    {m p : ℕ} (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p)) :
-    Equiv.Perm.sign (blockPerm α β) = Equiv.Perm.sign α * Equiv.Perm.sign β := by
-  simp [blockPerm, Equiv.Perm.sign_permCongr, Equiv.Perm.sign_sumCongr]
-
 variable {𝕜 : Type*} [Field 𝕜]
-
-theorem sum_sign_prod_eq
-    {n : ℕ} (M : Matrix (Fin n) (Fin n) 𝕜) (γ : Equiv.Perm (Fin n)) :
-    ∑ σ : Equiv.Perm (Fin n),
-      (Equiv.Perm.sign σ : 𝕜) * ∏ k, M (γ k) (σ k) =
-    (Equiv.Perm.sign γ : 𝕜) * M.det := by
-  have h_prod : ∀ σ : Equiv.Perm (Fin n),
-      ∏ k : Fin n, M (γ k) (σ k) =
-      ∏ k, (M.submatrix (⇑γ) id).transpose (σ k) k := by
-    intro σ; apply Finset.prod_congr rfl; intro k _
-    simp [Matrix.submatrix, Matrix.transpose_apply]
-  simp_rw [h_prod,
-    show ∀ (σ : Equiv.Perm (Fin n)) (x : 𝕜),
-      (↑↑(Equiv.Perm.sign σ) : 𝕜) * x = Equiv.Perm.sign σ • x from
-      fun _ _ => by simp [Units.smul_def, zsmul_eq_mul],
-    ← Matrix.det_apply, Matrix.det_transpose, Matrix.det_permute]
-  simp [Units.smul_def, zsmul_eq_mul]
-
-theorem inner_sum_eq_det
-    {m p : ℕ} (M : Matrix (Fin (m + p)) (Fin (m + p)) 𝕜)
-    (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p)) :
-    ∑ σ : Equiv.Perm (Fin (m + p)),
-        (Equiv.Perm.sign σ : 𝕜) *
-          ((∏ i : Fin m, M (Fin.castAdd p (α i)) (σ (Fin.castAdd p i))) *
-           (∏ j : Fin p, M (Fin.natAdd m (β j)) (σ (Fin.natAdd m j)))) =
-    (Equiv.Perm.sign α : 𝕜) * (Equiv.Perm.sign β : 𝕜) * M.det := by
-  have h_comb : ∀ σ : Equiv.Perm (Fin (m + p)),
-      (∏ i : Fin m, M (Fin.castAdd p (α i)) (σ (Fin.castAdd p i))) *
-      (∏ j : Fin p, M (Fin.natAdd m (β j)) (σ (Fin.natAdd m j))) =
-      ∏ k : Fin (m + p), M (blockPerm α β k) (σ k) := by
-    intro σ; symm; rw [Fin.prod_univ_add]
-    congr 1
-    · apply Finset.prod_congr rfl; intro i _; rw [blockPerm_castAdd]
-    · apply Finset.prod_congr rfl; intro j _; rw [blockPerm_natAdd]
-  simp_rw [h_comb]
-  rw [sum_sign_prod_eq M (blockPerm α β), sign_blockPerm]
-  push_cast; ring
 
 end Perm
 end Equiv

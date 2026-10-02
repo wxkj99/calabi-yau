@@ -14,34 +14,10 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators
 
 namespace Sobolev.NirenbergTestFunction
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
-private lemma locallyIntegrable_continuous_mul
-    {η f : EuclN → ℝ} (hη : Continuous η)
-    (hf_localInt : LocallyIntegrable f (volume : Measure EuclN)) :
-    LocallyIntegrable (fun x => η x * f x) (volume : Measure EuclN) := by
-  rw [← locallyIntegrableOn_univ] at hf_localInt ⊢
-  have hcl : IsLocallyClosed (Set.univ : Set EuclN) :=
-    isClosed_univ.isLocallyClosed
-  exact LocallyIntegrableOn.continuousOn_mul hf_localInt hη.continuousOn hcl
-
-omit [NeZero d] in
-private lemma locallyIntegrable_of_restrict_univ
-    {f : EuclN → ℝ}
-    (hf : LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ)) :
-    LocallyIntegrable f (volume : Measure EuclN) := by
-  rwa [Measure.restrict_univ] at hf
-
-omit [NeZero d] in
-private lemma locallyIntegrable_to_restrict_univ
-    {f : EuclN → ℝ} (hf : LocallyIntegrable f (volume : Measure EuclN)) :
-    LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ) := by
-  rwa [Measure.restrict_univ]
-
-omit [NeZero d] in
 private lemma eLpNorm_const_mul
     (c : ℝ) (f : EuclN → ℝ) :
     eLpNorm (fun x => c * f x) 2 (volume : Measure EuclN) =
@@ -52,7 +28,6 @@ private lemma eLpNorm_const_mul
   rw [eLpNorm_const_smul c f]
   simp [Real.enorm_eq_ofReal_abs]
 
-omit [NeZero d] in
 private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
     eLpNorm (translate k h F) 2 (volume : Measure EuclN) =
       eLpNorm F 2 (volume : Measure EuclN) := by
@@ -69,7 +44,6 @@ private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
-omit [NeZero d] in
 private lemma eLpNorm_diffQuot_neg_le
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -124,7 +98,6 @@ private lemma eLpNorm_diffQuot_neg_le
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
-omit [NeZero d] in
 private lemma eLpNorm_eta_sq_diffQuot_le
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     {M_η : ℝ} (_hM_η_nn : 0 ≤ M_η) (hM_η : ∀ x, |η x| ≤ M_η) :
@@ -234,7 +207,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
     rw [h_calc, ENNReal.rpow_one]
   rw [h_sqrt_M4]
 
-omit [NeZero d] in
 theorem eLpNorm_nirenbergTestFunction_le
     (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {η u : EuclN → ℝ}

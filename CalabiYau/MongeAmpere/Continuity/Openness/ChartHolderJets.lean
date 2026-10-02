@@ -22,20 +22,27 @@ open scoped Manifold ContDiff NNReal ENNReal Topology
 namespace KahlerForm
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E]
-  {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
-  [IsManifold 𝓘(ℝ, E) ∞ M]
-
+    [FiniteDimensional ℝ E]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+    [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- Pointwise jet fields on the selected compact chart pieces. -/
 noncomputable instance finiteCompactChartCover_pieceCompactSpace
     (cover : CompactChartCover E M) (i : cover.ι) :
     CompactSpace (cover.piece i) :=
   isCompact_iff_compactSpace.mp (cover.isCompact_piece i)
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [FiniteDimensional ℝ E]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+    [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- The finite product of continuous chart-jet functions, with the sup norm. -/
 abbrev SmoothChartHolderJetTarget (cover : CompactChartCover E M) (j : ℕ) :=
   ∀ i, C(cover.piece i, E [×j]→L[ℝ] ℝ)
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    
+    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+    [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- The j-jets of smooth core functions define a linear map into the finite product of continuous
 chart-jet functions. Its sup norm is bounded by the finite-chart gauge; for `j ≤ k` this is one of
 the jet sup terms in that gauge. The compactness fields make each target ContinuousMap normed and
@@ -143,6 +150,12 @@ theorem exists_smoothChartHolderJetLinearMap
   · intro f i z
     rfl
 
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [FiniteDimensional ℝ E]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+    [IsManifold 𝓘(ℝ, E) ∞ M]
 /-- Upgrade a chart-jet linear map with the gauge bound to a continuous linear map on the smooth
 core. The normed data fixes the source norm to the gauge, so no separate continuity hypothesis is
 needed. -/
@@ -196,6 +209,12 @@ noncomputable def smoothChartHolderJetCanonicalExtension
     smoothChartHolderCoreNormedSpace cover k α N
   exact (smoothChartHolderJetCanonicalContinuousLinearMap cover k α N j hj).fromCompletion
 
+end
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    
+    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+    [IsManifold 𝓘(ℝ, E) ∞ M] in
 @[simp]
 theorem smoothChartHolderJetCanonicalContinuousLinearMap_apply
     (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0)
@@ -210,6 +229,10 @@ theorem smoothChartHolderJetCanonicalContinuousLinearMap_apply
   let h := exists_smoothChartHolderJetLinearMap cover k α N j hj
   exact (Classical.choose_spec h).2 f i z
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    
+    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+    [IsManifold 𝓘(ℝ, E) ∞ M] in
 @[simp]
 theorem smoothChartHolderJetCanonicalExtension_coe
     (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0)

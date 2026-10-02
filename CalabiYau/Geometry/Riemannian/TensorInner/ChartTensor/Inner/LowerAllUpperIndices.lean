@@ -27,11 +27,12 @@ open CalabiYau.L2
 open CalabiYau.Tensor
 open CalabiYau.Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+section
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 def chartCoordCLM (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] (i : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin (Module.finrank ℝ E) => ℝ) i).comp
@@ -151,7 +152,11 @@ private def chartLowerAllUpperIndices_modelFn
       (fun i : Fin r => v (Fin.castAdd s i)))
     (fun j : Fin s => v (Fin.natAdd r j))
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E] in
+end
+
+section
+
+variable {E : Type*}
 private lemma upd_castAdd_first {r s : ℕ} (v : Fin (r + s) → E) (i : Fin r) (c : E) :
     (fun k : Fin r => Function.update v (Fin.castAdd s i) c (Fin.castAdd s k)) =
       Function.update (fun k : Fin r => v (Fin.castAdd s k)) i c := by
@@ -164,7 +169,6 @@ private lemma upd_castAdd_first {r s : ℕ} (v : Fin (r + s) → E) (i : Fin r) 
     intro h
     exact hk (Fin.castAdd_injective r s h.symm).symm
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E] in
 private lemma upd_castAdd_first_noop_last
     {r s : ℕ} (v : Fin (r + s) → E) (i : Fin r) (c : E) :
     (fun j : Fin s => Function.update v (Fin.castAdd s i) c (Fin.natAdd r j)) =
@@ -178,7 +182,6 @@ private lemma upd_castAdd_first_noop_last
   simp [Fin.castAdd, Fin.natAdd] at hcoe
   omega
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E] in
 private lemma upd_natAdd_last_noop_first
     {r s : ℕ} (v : Fin (r + s) → E) (j : Fin s) (c : E) :
     (fun k : Fin r => Function.update v (Fin.natAdd r j) c (Fin.castAdd s k)) =
@@ -192,7 +195,6 @@ private lemma upd_natAdd_last_noop_first
   simp [Fin.castAdd, Fin.natAdd] at hcoe
   omega
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E] in
 private lemma upd_natAdd_last
     {r s : ℕ} (v : Fin (r + s) → E) (j : Fin s) (c : E) :
     (fun k : Fin s => Function.update v (Fin.natAdd r j) c (Fin.natAdd r k)) =
@@ -206,7 +208,15 @@ private lemma upd_natAdd_last
     intro h
     exact hk (Fin.natAdd_injective s r h.symm).symm
 
-private noncomputable def chartLowerAllUpperIndices_modelML
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+noncomputable def chartLowerAllUpperIndices_modelML
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel r s ℝ E) :
     MultilinearMap ℝ (fun _ : Fin (r + s) => E) ℝ := by
@@ -376,8 +386,16 @@ lemma chartLowerAllUpperIndices_model_smul
   simp [chartLowerAllUpperIndices_model_apply,
     smul_apply, smul_apply]
 
+end
+
 section Smoothness
 
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 private noncomputable def chartLowerEvalBasisLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
@@ -425,13 +443,23 @@ private lemma chartLower_finrank_tensor0SModel (n : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
-omit [Module.Finite ℝ E] in
+end
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 private lemma chartLower_finrank_basis_pi (n : ℕ) :
     Module.finrank ℝ ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) =
       (Module.finrank ℝ E) ^ n := by
   rw [Module.finrank_pi, Fintype.card_pi]
   simp [Fintype.card_fin]
 
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 private lemma chartLowerEvalBasisLinear_bijective (n : ℕ) :
     Function.Bijective (chartLowerEvalBasisLinear (E := E) n) := by
   have h_inj := chartLowerEvalBasisLinear_injective (E := E) n
@@ -453,138 +481,7 @@ private noncomputable def chartLowerEvalBasisCLE (n : ℕ) :
     chartLowerEvalBasisCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ k)) := rfl
 
-omit [IsManifold I ∞ M] in
-private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
-    {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
-    (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
-      ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun b : M =>
-        Φ b (fun k : Fin n => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ k))) U) :
-    ContMDiffOn I 𝓘(ℝ, Tensor0SModel n ℝ E) ∞ Φ U := by
-  have hpi : ContMDiffOn I 𝓘(ℝ, (Fin n → Fin (Module.finrank ℝ E)) → ℝ) ∞
-      (fun b : M => chartLowerEvalBasisCLE (E := E) n (Φ b)) U := by
-    rw [contMDiffOn_pi_space]
-    intro φ
-    exact h φ
-  have hsymm_smooth :
-      ContMDiff 𝓘(ℝ, (Fin n → Fin (Module.finrank ℝ E)) → ℝ)
-        𝓘(ℝ, Tensor0SModel n ℝ E) ∞
-        (chartLowerEvalBasisCLE (E := E) n).symm :=
-    (chartLowerEvalBasisCLE (E := E) n).symm.toContinuousLinearMap.contMDiff
-  have hcomp := hsymm_smooth.comp_contMDiffOn hpi
-  refine hcomp.congr ?_
-  intro b _
-  exact ((chartLowerEvalBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
-
-private lemma chartGramBilin_basis_basis
-    (g : SmoothRiemannianMetric I M) (α b : M)
-    (i j : Fin (Module.finrank ℝ E)) :
-    chartGramBilin (I := I) (M := M) g α b
-        ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) =
-      CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b i j := by
-  classical
-  rw [chartGramBilin_apply]
-  have hcollapse :
-      ∀ j' : Fin (Module.finrank ℝ E),
-        (∑ k : Fin (Module.finrank ℝ E),
-            CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b j' k *
-              (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) j' *
-              (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) k)
-          = if j' = i then CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b i j else 0 := by
-    intro j'
-    by_cases hj' : j' = i
-    · rw [hj']
-      have hself_i :
-          (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) i = 1 := by
-        rw [(CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun_self]
-        simp
-      have hk_sum :
-          (∑ k : Fin (Module.finrank ℝ E),
-              CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b i k *
-                (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) i *
-                (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) k)
-            = CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b i j := by
-        rw [Finset.sum_eq_single j]
-        · rw [hself_i, mul_one]
-          have hjj :
-              (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) j = 1 := by
-            rw [(CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun_self]; simp
-          rw [hjj, mul_one]
-        · intro k _ hk
-          have hkj_zero :
-              (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) k = 0 := by
-            rw [(CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun_self]
-            simp [hk.symm]
-          rw [hkj_zero, mul_zero]
-        · intro h
-          exact (h (Finset.mem_univ _)).elim
-      rw [hk_sum]
-      simp
-    · have hzero :
-          (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) j' = 0 := by
-        rw [(CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun_self]
-        simp [Ne.symm hj']
-      have h_sum_zero :
-          (∑ k : Fin (Module.finrank ℝ E),
-              CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b j' k *
-                (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) j' *
-                (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) k)
-            = 0 := by
-        refine Finset.sum_eq_zero ?_
-        intro k _
-        rw [hzero]; ring
-      rw [h_sum_zero]
-      simp [hj']
-  have houter :
-      (∑ j' : Fin (Module.finrank ℝ E),
-          ∑ k : Fin (Module.finrank ℝ E),
-            CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b j' k *
-              (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) j' *
-              (CalabiYau.Tensor.Coordinates.chartModelBasis E).equivFun ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) k)
-        = ∑ j' : Fin (Module.finrank ℝ E),
-            if j' = i then CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b i j else 0 := by
-    refine Finset.sum_congr rfl ?_
-    intro j' _
-    exact hcollapse j'
-  rw [houter, Finset.sum_ite_eq' Finset.univ i (fun _ =>
-      CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b i j)]
-  simp
-
-private lemma chartSeparableFormAt_basis_basis
-    (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ)
-    (φ_first ψ : Fin r → Fin (Module.finrank ℝ E)) :
-    chartSeparableFormAt (I := I) (M := M) g α b r
-        (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ_first k))
-        (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (ψ k)) =
-      ∏ k : Fin r,
-        CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b (φ_first k) (ψ k) := by
-  rw [chartSeparableFormAt_apply]
-  refine Finset.prod_congr rfl ?_
-  intro k _
-  exact chartGramBilin_basis_basis (I := I) (M := M) g α b
-    (φ_first k) (ψ k)
-
-private lemma chartSeparableFormAt_basis_contMDiffOn
-    {r : ℕ} (g : SmoothRiemannianMetric I M) (α : M)
-    (φ_first : Fin r → Fin (Module.finrank ℝ E)) :
-    ContMDiffOn I 𝓘(ℝ, Tensor0SModel r ℝ E) ∞
-      (fun b : M => chartSeparableFormAt (I := I) (M := M) g α b r
-        (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ_first k)))
-      (trivializationAt E (TangentSpace I) α).baseSet := by
-  refine contMDiffOn_into_tensor0SModel_of_eval_basis_local _ ?_
-  intro ψ
-  have heq :
-      (fun b : M =>
-          chartSeparableFormAt (I := I) (M := M) g α b r
-            (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ_first k))
-            (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (ψ k)))
-        = fun b : M =>
-            ∏ k : Fin r,
-              CalabiYau.Tensor.Coordinates.chartGramMatrix (I := I) g α b (φ_first k) (ψ k) := by
-    funext b
-    exact chartSeparableFormAt_basis_basis (I := I) (M := M) g α b r φ_first ψ
-  rw [heq]
-  refine contMDiffOn_finsetProd (fun k _ => ?_)
-  exact CalabiYau.Tensor.Coordinates.chartGramMatrix_entry_contMDiffOn (I := I) g α (φ_first k) (ψ k)
+end
 
 end Smoothness
 

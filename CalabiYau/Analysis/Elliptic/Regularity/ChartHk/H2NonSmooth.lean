@@ -3,7 +3,16 @@
 module
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient.LocalWeakLimit
-public import CalabiYau.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionHTwo
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
+public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Distribution
+public import Mathlib.Analysis.Normed.Lp.SmoothApprox
+public import Mathlib.Analysis.Normed.Operator.Extend
+public import Mathlib.Analysis.InnerProductSpace.Dual
+public import Mathlib.MeasureTheory.Function.L2Space
 
 @[expose] public section
 
@@ -62,7 +71,7 @@ theorem exists_weak_second_partial_of_uniform_diffQuot_bound
     ∀ i k : Fin (Module.finrank ℝ E),
     ∃ g_ik : EuclN → ℝ,
       MemLp g_ik 2 ((volume : Measure EuclN).restrict Ω'') ∧
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g_ik
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g_ik
         (D.weakPartial i) Ω'' ∧
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict Ω'') ≤
         ENNReal.ofReal (MBound i k) := by

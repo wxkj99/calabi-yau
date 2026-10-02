@@ -24,6 +24,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- The local expression is intrinsic, smooth, and nonnegative for a positive solution.
 Székelyhidi, §3.3, (3.13), p. 45. -/
 theorem calabiEnergy_chartFormula_is_intrinsic (ω₀ : KahlerForm n M)

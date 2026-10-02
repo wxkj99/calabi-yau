@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseHolderJets
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.MetricCoefficientJets
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.MetricInverseEntryBound
@@ -37,10 +37,9 @@ theorem exists_uniform_inverse_coefficient_holder
     (ω₀ : KahlerForm n M) (S : Set ((M → ℝ) × (M → ℝ)))
     (hS : ∀ p ∈ S, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ p.1 ∧
       ω₀.SolvesMongeAmpere p.1 p.2)
-    {x : M} {α : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1)
+    {x : M} {α : ℝ≥0} (hα₁ : α < 1)
     {r : ℕ} (hr : 2 ≤ r) {Cφ CG : ℝ≥0}
-    {U L : Set (EuclideanSpace ℂ (Fin n))}
-    (hUopen : IsOpen U) (hUcompact : IsCompact (closure U))
+    {U L : Set (EuclideanSpace ℂ (Fin n))} (hUcompact : IsCompact (closure U))
     (hUtarget : closure U ⊆
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (hLcompact : IsCompact L) (hBuffer : closure U ⊆ interior L)
@@ -68,7 +67,7 @@ theorem exists_uniform_inverse_coefficient_holder
     intro p hp
     exact (hCurrentOuter p hp).mono_set (hBuffer.trans interior_subset)
   obtain ⟨CA, hMetricJets⟩ := exists_uniform_perturbed_metric_coefficient_jets
-    ω₀ S (fun p hp ↦ (hS p hp).2) hα₀ hα₁ hr hUopen hLcompact hBuffer
+    ω₀ S (fun p hp ↦ (hS p hp).2) hα₁ hr hLcompact hBuffer
     hLtarget hCurrentOuter
   obtain ⟨B, hInverseEntries⟩ := exists_uniform_perturbed_metric_inverse_entry_bound
     ω₀ S (fun p hp ↦ (hS p hp).2) hr hUcompact hUtarget hCurrent hGlocal
@@ -94,7 +93,7 @@ theorem exists_uniform_inverse_coefficient_holder
     intro p hp z hz i j
     exact hInverseEntries p hp z hz i j
   obtain ⟨CI, hInvJets⟩ := exists_holderBoundOn_matrix_inverse_entries
-    S hα₀ hα₁ hW hUW A hASmooth hA hUnit hInv
+    S hW hUW A hASmooth hA hUnit hInv
   refine ⟨CI, ?_⟩
   intro p hp i j
   exact ⟨(hInvJets p hp i j).2.1,

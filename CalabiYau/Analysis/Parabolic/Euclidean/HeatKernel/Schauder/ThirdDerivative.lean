@@ -7,8 +7,6 @@ public import CalabiYau.Analysis.Parabolic.Euclidean.HeatKernel.Derivatives.High
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -17,19 +15,23 @@ open scoped ENNReal NNReal RealInnerProductSpace
 
 namespace HeatEquation
 
-variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
-  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
+variable {V : Type*} [NormedAddCommGroup V]
+
+section
+
+variable [InnerProductSpace Real V]
 
 def baseD3Holder (alpha : NNReal) (x : V) : Real :=
   ‖x‖ ^ (alpha : Real) * baseD3Maj x
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem baseD3Holder_nonneg (alpha : NNReal) (x : V) :
     0 ≤ baseD3Holder alpha x :=
   mul_nonneg (Real.rpow_nonneg (norm_nonneg x) _) (baseD3Maj_nonneg x)
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
 theorem baseD3Holder_int {alpha : NNReal} (halpha : alpha ≤ 1) :
     Integrable (baseD3Holder alpha : V → Real) := by
   have hfirst : Integrable (fun x : V => ‖x‖ * baseD3Maj x) := by
@@ -75,12 +77,21 @@ theorem baseD3Holder_int {alpha : NNReal} (halpha : alpha ≤ 1) :
         (le_add_of_nonneg_left zero_le_one)
   exact mul_le_mul_of_nonneg_right hrpow (baseD3Maj_nonneg x)
 
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+
 def heatC3Holder (alpha : NNReal) : Real :=
   ∫ x : V, baseD3Holder alpha x
 
-omit [Nontrivial V] in
 theorem heatC3Holder_nonneg (alpha : NNReal) : 0 ≤ heatC3Holder (V := V) alpha :=
   integral_nonneg (baseD3Holder_nonneg alpha)
+
+end
+
+section
+
+variable [InnerProductSpace Real V]
 
 def heatD3Holder (alpha : NNReal) (t : Real) (x : V) : Real :=
   ((heatScale t) ^ Module.finrank Real V)⁻¹ * (heatScale t)⁻¹ *
@@ -88,8 +99,6 @@ def heatD3Holder (alpha : NNReal) (t : Real) (x : V) : Real :=
       (heatScale t) ^ (alpha : Real) *
         baseD3Holder alpha ((heatScale t)⁻¹ • x)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatD3Holder_nonneg (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
     0 ≤ heatD3Holder alpha t x := by
   unfold heatD3Holder
@@ -105,8 +114,6 @@ theorem heatD3Holder_nonneg (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
       (Real.rpow_nonneg (heatScale_pos ht).le _))
     (baseD3Holder_nonneg alpha _)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatD3Holder_eq (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
     heatD3Holder alpha t x = ‖x‖ ^ (alpha : Real) * heatD3Maj t x := by
   have hr : 0 < heatScale t := heatScale_pos ht
@@ -128,6 +135,10 @@ theorem heatD3Holder_eq (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
   rw [hrpow]
   ring
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
 theorem heatD3Holder_int {alpha : NNReal} (halpha : alpha ≤ 1)
     {t : Real} (ht : 0 < t) :
     Integrable (heatD3Holder (V := V) alpha t) := by
@@ -135,7 +146,7 @@ theorem heatD3Holder_int {alpha : NNReal} (halpha : alpha ≤ 1)
   exact (baseD3Holder_int (V := V) halpha).comp_smul
     (inv_ne_zero (heatScale_pos ht).ne') |>.const_mul _
 
-omit [Nontrivial V] in
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V] in
 theorem integral_heatD3Holder (alpha : NNReal) {t : Real} (ht : 0 < t) :
     ∫ x : V, heatD3Holder alpha t x =
       t⁻¹ * (heatScale t)⁻¹ * (heatScale t) ^ (alpha : Real) *
@@ -167,7 +178,7 @@ theorem integral_heatD3Holder (alpha : NNReal) {t : Real} (ht : 0 < t) :
 def holderThirdHeatScale (alpha : NNReal) (t : Real) : Real :=
   t ^ ((alpha : Real) / 2 - 3 / 2)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] in
 theorem holderThirdHeatScale_eq (alpha : NNReal) {t : Real} (ht : 0 < t) :
     t⁻¹ * (heatScale t)⁻¹ * (heatScale t) ^ (alpha : Real) =
       holderThirdHeatScale alpha t := by
@@ -178,8 +189,10 @@ theorem holderThirdHeatScale_eq (alpha : NNReal) {t : Real} (ht : 0 < t) :
   congr 1
   ring
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
+section
+
+variable [InnerProductSpace Real V]
+
 theorem heatD3_holder_bound (alpha : NNReal) {t : Real} (ht : 0 < t)
     (u v w x : V) :
     ‖heatD3 t u v w x‖ * ‖x‖ ^ (alpha : Real) ≤
@@ -194,14 +207,16 @@ theorem heatD3_holder_bound (alpha : NNReal) {t : Real} (ht : 0 < t)
     _ = ‖u‖ * ‖v‖ * ‖w‖ *
         (‖x‖ ^ (alpha : Real) * heatD3Maj t x) := by ring
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatD3_neg (t : Real) (u v w x : V) :
     heatD3 t u v w (-x) = -heatD3 t u v w x := by
   unfold heatD3 baseD3 baseHeat
   simp only [smul_neg, inner_neg_left, norm_neg]
   ring
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
 theorem heatD3_int {t : Real} (ht : 0 < t) (u v w : V) :
     Integrable (heatD3 t u v w : V → Real) := by
   refine ((heatD3Maj_int (V := V) ht).const_mul
@@ -212,7 +227,7 @@ theorem heatD3_int {t : Real} (ht : 0 < t) (u v w : V) :
   filter_upwards with x
   simpa [mul_assoc] using heatD3_bound ht u v w x
 
-omit [Nontrivial V] in
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V] in
 theorem integral_heatD3_zero (t : Real) (u v w : V) :
     ∫ x : V, heatD3 t u v w x = 0 := by
   have hneg := MeasureTheory.integral_neg_eq_self
@@ -223,8 +238,11 @@ theorem integral_heatD3_zero (t : Real) (u v w : V) :
 
 section Cancellation
 
-variable {F : Type*}
-  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F]
 
 def heatD3Cancel (t : Real) (u v w : V) (f : V → F) (x : V) : F :=
   ∫ y : V, heatD3 t u v w y • (f (x - y) - f x)
@@ -232,9 +250,9 @@ def heatD3Cancel (t : Real) (u v w : V) (f : V → F) (x : V) : F :=
 def heatD3Convolution (t : Real) (u v w : V) (f : V → F) (x : V) : F :=
   ∫ y : V, heatD3 t u v w y • f (x - y)
 
-omit [InnerProductSpace Real V] [FiniteDimensional Real V]
-  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
-  [NormedSpace Real F] [CompleteSpace F] in
+end
+
+variable {F : Type*} [NormedAddCommGroup F] in
 private theorem holder_shift_bound_d3 {alpha K : NNReal} {f : V → F}
     (hf : HolderWith K alpha f) (x y : V) :
     ‖f (x - y) - f x‖ ≤ (K : Real) * ‖y‖ ^ (alpha : Real) := by
@@ -246,8 +264,8 @@ private theorem holder_shift_bound_d3 {alpha K : NNReal} {f : V → F}
   rw [dist_eq_norm, hxy] at h
   exact h
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
-omit [FiniteDimensional ℝ V] in
+variable [InnerProductSpace Real V] in
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] in
 private theorem d3_cancel_bound_of_holder {alpha K : NNReal}
     {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
     (u v w x y : V) :
@@ -267,7 +285,12 @@ private theorem d3_cancel_bound_of_holder {alpha K : NNReal}
       rw [heatD3Holder_eq alpha ht]
       ring
 
-omit [CompleteSpace F] in
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F]
+
 theorem heatD3Cancel_int_of_holder {alpha K : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
@@ -285,7 +308,6 @@ theorem heatD3Cancel_int_of_holder {alpha K : NNReal}
   filter_upwards with y
   exact d3_cancel_bound_of_holder ht hf u v w x y
 
-omit [CompleteSpace F] in
 theorem heatD3Convolution_int_of_holder {alpha K : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
@@ -296,6 +318,11 @@ theorem heatD3Convolution_int_of_holder {alpha K : NNReal}
   refine (hcancel.add hconst).congr (Filter.Eventually.of_forall fun y => ?_)
   simp only [Pi.add_apply, smul_sub, sub_add_cancel]
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 theorem heatD3Convolution_eq_cancel_of_holder {alpha K : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
@@ -316,7 +343,9 @@ theorem heatD3Convolution_eq_cancel_of_holder {alpha K : NNReal}
     _ = ∫ y : V, heatD3 t u v w y • (f (x - y) - f x) := by
       rw [integral_smul_const, integral_heatD3_zero, zero_smul, add_zero]
 
-omit [CompleteSpace F] in
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] in
 theorem heatD3Cancel_norm_of_holder {alpha K : NNReal}
     (halpha : alpha ≤ 1) {t : Real} (ht : 0 < t)
     {f : V → F} (hf : HolderWith K alpha f) (u v w x : V) :
@@ -341,6 +370,9 @@ theorem heatD3Cancel_norm_of_holder {alpha K : NNReal}
       rw [holderThirdHeatScale_eq alpha ht]
       ring
 
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 theorem heatD3Convolution_norm_of_holder {alpha K : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
@@ -352,6 +384,11 @@ theorem heatD3Convolution_norm_of_holder {alpha K : NNReal}
   exact heatD3Cancel_norm_of_holder halpha1 ht hf u v w x
 
 end Cancellation
+
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V]
 
 theorem holderHeatScale_integral_sq {alpha : NNReal} (halpha : 0 < alpha)
     {r : Real} (hr : 0 ≤ r) :
@@ -445,5 +482,7 @@ theorem mul_holderThirdHeatScale_integral_le {alpha : NNReal}
     _ = (2 / (1 - (alpha : Real))) * r ^ (alpha : Real) := by
       congr 1
       ring_nf
+
+end
 
 end HeatEquation

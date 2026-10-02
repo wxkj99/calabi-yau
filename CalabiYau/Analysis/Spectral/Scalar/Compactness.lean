@@ -3,7 +3,7 @@
 module
 public import CalabiYau.Analysis.Spectral.Scalar.Resolvent
 public import CalabiYau.Analysis.Spectral.Scalar.Spectrum
-public import CalabiYau.Analysis.Elliptic.Operator.SmoothBridge
+public import CalabiYau.Analysis.Elliptic.Operator.SmoothResolvent
 public import CalabiYau.Analysis.Sobolev.Manifold.Rellich.OnManifold
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.IntrinsicToChart.ComponentNormBound
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.Basic
@@ -26,7 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
 open CalabiYau.Analysis.Laplacian
@@ -41,9 +40,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [CompactSpace M]
-  [NeZero (Module.finrank ℝ E)]
-
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_smoothScalar_le_norm_smoothScalar
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     eLpNorm s.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -70,7 +66,6 @@ private lemma eLpNorm_smoothScalar_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma sqrt_g_inner_grad_memLp_two
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     MemLp (fun x : M => Real.sqrt
@@ -90,7 +85,6 @@ private lemma sqrt_g_inner_grad_memLp_two
   exact h_cont.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     eLpNorm (fun x : M => Real.sqrt
@@ -185,7 +179,6 @@ private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
     (v : H1Compl g) {δ : ℝ} (hδ : 0 < δ) :
     ∃ s : SmoothScalar g, ‖v - smoothToH1Compl (I := I) (M := M) g s‖ < δ := by
@@ -201,16 +194,20 @@ private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
   rw [dist_eq_norm] at hs_close
   exact hs_close
 
-theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
-    IsCompactOperator (H1ComplToLp (I := I) (M := M) g) := by
+section
+
+variable [NeZero (Module.finrank ℝ E)]
+
+theorem h1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
+    IsCompactOperator (h1ComplToLp (I := I) (M := M) g) := by
   classical
   have h_iff := isCompactOperator_iff_isCompact_closure_image_closedBall
-      (H1ComplToLp (I := I) (M := M) g : H1Compl g →ₗ[ℝ]
+      (h1ComplToLp (I := I) (M := M) g : H1Compl g →ₗ[ℝ]
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) zero_lt_one
   refine h_iff.mpr ?_
   rw [isCompact_iff_isSeqCompact]
   set T : H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
-    H1ComplToLp (I := I) (M := M) g with hT_def
+    h1ComplToLp (I := I) (M := M) g with hT_def
   intro y hy_in_closure
   have h_choose_z : ∀ n : ℕ, ∃ z ∈ T '' Metric.closedBall (0 : H1Compl g) 1,
       dist (y n) z < 1 / (n + 1 : ℝ) := by
@@ -386,7 +383,7 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
       have hT_s_eq : smoothToLp (I := I) (M := M) g (s (φ k)) =
           T (smoothToH1Compl (I := I) (M := M) g (s (φ k))) := by
         rw [hT_def]
-        exact (H1ComplToLp_smoothToH1Compl (I := I) (M := M) g (s (φ k))).symm
+        exact (h1ComplToLp_smoothToH1Compl (I := I) (M := M) g (s (φ k))).symm
       have h_zS_eq : z (φ k) - smoothToLp (I := I) (M := M) g (s (φ k)) =
           T (x (φ k) - smoothToH1Compl (I := I) (M := M) g (s (φ k))) := by
         rw [← hx_eq (φ k), hT_s_eq, ← T.map_sub]
@@ -445,14 +442,14 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
 theorem resolventL2_isCompactOperator (g : SmoothRiemannianMetric I M) :
     IsCompactOperator (resolventL2 (I := I) (M := M) g) := by
   have h_eq : (resolventL2 (I := I) (M := M) g : _ → _) =
-      (H1ComplToLp (I := I) (M := M) g) ∘ (resolvent (I := I) (M := M) g) := by
+      (h1ComplToLp (I := I) (M := M) g) ∘ (resolvent (I := I) (M := M) g) := by
     funext f
     rw [resolventL2_apply]
     rfl
   rw [show (resolventL2 (I := I) (M := M) g : _ → _) =
-        (fun v => (H1ComplToLp (I := I) (M := M) g) v) ∘
+        (fun v => (h1ComplToLp (I := I) (M := M) g) v) ∘
           (fun f => (resolvent (I := I) (M := M) g) f) from h_eq]
-  exact (H1ComplToLp_isCompactOperator (I := I) (M := M) g).comp_clm
+  exact (h1ComplToLp_isCompactOperator (I := I) (M := M) g).comp_clm
     (resolvent (I := I) (M := M) g)
 
 theorem resolventEigenspace_finiteDim_of_eigenvalue_ne_zero
@@ -475,6 +472,8 @@ theorem resolvent_eigenvalues_finite_above_on_closed
           ((resolventL2 (I := I) (M := M) g).toLinearMap) μ ∧ ε ≤ |μ| } :=
   resolvent_eigenvalues_finite_above (I := I) (M := M) g
     (resolventL2_isCompactOperator (I := I) (M := M) g) hε
+
+end
 
 end Laplacian
 end CalabiYau

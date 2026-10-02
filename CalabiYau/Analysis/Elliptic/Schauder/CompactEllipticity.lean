@@ -3,7 +3,7 @@
 module
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.LinearAlgebra.Matrix.PosDef
-public import CalabiYau.Analysis.FiniteDimensional.Coercivity
+public import CalabiYau.Mathlib.Analysis.InnerProductSpace.Coercivity
 public import Mathlib.Topology.Algebra.Module.FiniteDimensionBilinear
 public import Mathlib.LinearAlgebra.Matrix.BilinearForm
 
@@ -11,6 +11,7 @@ public import Mathlib.LinearAlgebra.Matrix.BilinearForm
 
 set_option backward.privateInPublic true
 set_option backward.privateInPublic.warn false
+
 
 noncomputable section
 

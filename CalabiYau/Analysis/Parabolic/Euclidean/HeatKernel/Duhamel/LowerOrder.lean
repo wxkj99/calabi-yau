@@ -16,11 +16,11 @@ namespace HeatEquation
 
 section ValuePotential
 
-variable {V F : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
-  [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+variable {V F : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 def d0DuhamelMajor (K : ℝ≥0) : ℝ := K
 
@@ -38,7 +38,12 @@ theorem d0DuhamelMajor_int (t : ℝ) (K : ℝ≥0) :
 def heatDuhamel (t : ℝ) (f : ℝ → BoundedContinuousFunction V F) (x : V) : F :=
   ∫ s : ℝ in 0..t, heatSup (t - s) (f s) x
 
-omit [Nontrivial V] [CompleteSpace F] in
+end
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [NormedAddCommGroup F] [NormedSpace ℝ F]
+
 theorem heatDuhamel_const_eq_integral_heatSup
     (t : Real) (f : BoundedContinuousFunction V F) (x : V) :
     heatDuhamel t (fun _ ↦ f) x =
@@ -48,7 +53,12 @@ theorem heatDuhamel_const_eq_integral_heatSup
     (fun s : Real ↦ heatSup s f x) t]
   simp
 
-omit [CompleteSpace F] in
+end
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F]
+
 theorem heatDuhamel_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     (f : ℝ → BoundedContinuousFunction V F)
     (hf : ∀ s ∈ Set.Icc (0 : ℝ) t, ‖f s‖ ≤ K) (x : V)
@@ -70,7 +80,6 @@ theorem heatDuhamel_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     _ ≤ K := hf s ⟨hs.1.le, hs.2⟩
     _ = d0DuhamelMajor K := by rfl
 
-omit [CompleteSpace F] in
 theorem heatDuhamel_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     (f : ℝ → BoundedContinuousFunction V F)
     (hf : ∀ s ∈ Set.Icc (0 : ℝ) t, ‖f s‖ ≤ K) (x : V)
@@ -95,15 +104,17 @@ theorem heatDuhamel_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
         _ = d0DuhamelMajor K := by rfl
     _ = t * (K : ℝ) := d0DuhamelMajor_int t K
 
+end
+
 end ValuePotential
 
 section GradientPotential
 
-variable {V F : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
-  [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+variable {V F : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 def d1DuhamelConst (v : V) (K : ℝ≥0) : ℝ :=
   ‖v‖ * (K : ℝ) * heatC1 V
@@ -111,16 +122,32 @@ def d1DuhamelConst (v : V) (K : ℝ≥0) : ℝ :=
 def d1DuhamelMajor (v : V) (K : ℝ≥0) (t s : ℝ) : ℝ :=
   d1DuhamelConst v K * heatScale12 (t - s)
 
-omit [Nontrivial V] in
+end
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+
 theorem d1DuhamelMajor_intble {t : ℝ} (v : V) (K : ℝ≥0) :
     IntervalIntegrable (d1DuhamelMajor v K t) volume 0 t := by
   exact (scale12_intble).const_mul (d1DuhamelConst v K)
+
+end
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 def heatD1Duhamel (t : ℝ) (v : V)
     (f : ℝ → BoundedContinuousFunction V F) (x : V) : F :=
   ∫ s : ℝ in 0..t, heatD1Sup (t - s) v (f s) x
 
-omit [CompleteSpace F] in
+end
+
+section
+
+variable [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F]
+
 theorem heatD1Duhamel_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     (f : ℝ → BoundedContinuousFunction V F)
     (hf : ∀ s ∈ Set.Icc (0 : ℝ) t, ‖f s‖ ≤ K)
@@ -152,6 +179,8 @@ theorem heatD1Duhamel_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       rw [← heatScale12_eq hpos]
       unfold d1DuhamelMajor d1DuhamelConst
       ring
+
+end
 
 end GradientPotential
 

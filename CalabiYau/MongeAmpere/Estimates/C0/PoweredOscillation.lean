@@ -43,7 +43,7 @@ theorem c0_oscillation_from_powered_data
       (∀ x, |G x| ≤ K) → ω₀.SolvesMongeAmpere G φ →
       ∀ x y, φ x - φ y ≤ C := by
   obtain ⟨B, hBne, hprod, C, hiter⟩ :=
-    c0_powered_iteration_bound (ω₀ := ω₀) (L := L) hκ hS hA
+    c0_powered_iteration_bound (ω₀ := ω₀) (C_S := C_S) (L := L) hκ hA
   refine ⟨C, ?_⟩
   intro G φ hG hbound hsol x y
   obtain ⟨x₀, hx₀, hmax⟩ :=

@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.BochnerTensors
-import CalabiYau.Geometry.Kahler.MatrixInverse
+import CalabiYau.Mathlib.Analysis.Matrix.EntrywiseSmoothness
 import Mathlib.Analysis.Calculus.FDeriv.Star
 
 /-!
@@ -28,7 +28,7 @@ noncomputable def c3OppositeConnectionTensorLaplacian (ω₀ : KahlerForm n M)
     (φ : M → ℝ) (x : M) (z : EuclideanSpace ℂ (Fin n))
     (i j k : Fin n) : ℂ :=
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   ∑ p, ∑ q, (g z)⁻¹ q p *
     c3PartialBar (fun w ↦ c3TensorCovariantZ g T w p i j k) z q
 
@@ -40,14 +40,14 @@ theorem c3Pair_add_left
       c3Pair g z A U + c3Pair g z B U := by
   simp [c3Pair, Finset.sum_add_distrib, mul_add, add_mul]
 
-def c3MetricPairLeibnizOn {n : ℕ}
+def MetricPairLeibnizOn {n : ℕ}
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (U : Set (EuclideanSpace ℂ (Fin n))) : Prop :=
   ∀ (A B : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ),
     (∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ A w i j k) U) →
     (∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ B w i j k) U) →
     ∀ z ∈ U, ∀ p,
-      c3PartialZ (fun w ↦ c3Pair g w (A w) (B w)) z p =
+      wirtingerDerivInChart (fun w ↦ c3Pair g w (A w) (B w)) z p =
         c3Pair g z (c3TensorCovariantZ g A z p) (B z) +
           c3Pair g z (A z) (fun i j k ↦
             c3PartialBar (fun w ↦ B w i j k) z p)
@@ -55,16 +55,16 @@ def c3MetricPairLeibnizOn {n : ℕ}
 noncomputable def c3ChartPairHessianLaplacian (ω₀ : KahlerForm n M)
     (φ : M → ℝ) (x : M) : ℝ :=
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
   (((g z)⁻¹ * complexHessian (fun w ↦ (c3Pair g w (T w) (T w)).re) z).trace).re
 
-private theorem c3PartialZ_contDiffOn_entry
+private theorem wirtingerDerivInChart_contDiffOn_entry
     {U : Set (EuclideanSpace ℂ (Fin n))} (hU : IsOpen U)
     {G : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ}
     (hG : ∀ k l, ContDiffOn ℝ ∞ (fun z ↦ G z k l) U)
     (j k l : Fin n) :
-    ContDiffOn ℝ ∞ (fun z ↦ c3PartialZ (fun w ↦ G w k l) z j) U := by
+    ContDiffOn ℝ ∞ (fun z ↦ wirtingerDerivInChart (fun w ↦ G w k l) z j) U := by
   let f : EuclideanSpace ℂ (Fin n) → ℂ := fun w ↦ G w k l
   have hD : ContDiffOn ℝ ∞ (fderiv ℝ f) U :=
     (hG k l).fderiv_of_isOpen hU (by rw [ENat.coe_top_add_one])
@@ -85,19 +85,19 @@ theorem c3Christoffel_contDiffOn
     (hG : ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ G z i j) U)
     (hGinv : ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ (G z)⁻¹ i j) U)
     (i j k : Fin n) :
-    ContDiffOn ℝ ∞ (fun z ↦ c3ChristoffelInChart G z i j k) U := by
+    ContDiffOn ℝ ∞ (fun z ↦ christoffelInChart G z i j k) U := by
   have hterm (l : Fin n) : ContDiffOn ℝ ∞
-      (fun z ↦ (G z)⁻¹ l i * c3PartialZ (fun w ↦ G w k l) z j) U :=
-    (hGinv l i).mul (c3PartialZ_contDiffOn_entry hU hG j k l)
+      (fun z ↦ (G z)⁻¹ l i * wirtingerDerivInChart (fun w ↦ G w k l) z j) U :=
+    (hGinv l i).mul (wirtingerDerivInChart_contDiffOn_entry hU hG j k l)
   have hsum : ContDiffOn ℝ ∞
       (fun z ↦ ∑ l ∈ Finset.univ, (G z)⁻¹ l i *
-        c3PartialZ (fun w ↦ G w k l) z j) U := by
+        wirtingerDerivInChart (fun w ↦ G w k l) z j) U := by
     apply ContDiffOn.sum
     intro l hl
     exact hterm l
   change ContDiffOn ℝ ∞
     (fun z ↦ ∑ l ∈ Finset.univ, (G z)⁻¹ l i *
-      c3PartialZ (fun w ↦ G w k l) z j) U
+      wirtingerDerivInChart (fun w ↦ G w k l) z j) U
   exact hsum
 
 omit [T2Space M] [CompactSpace M] in theorem c3ConnectionDifference_contDiffAt
@@ -106,7 +106,7 @@ omit [T2Space M] [CompactSpace M] in theorem c3ConnectionDifference_contDiffAt
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (i j k : Fin n) :
     ContDiffAt ℝ ∞
-      (fun w ↦ c3ConnectionDifferenceInChart ω₀ φ x w i j k) z := by
+      (fun w ↦ connectionDifferenceInChart ω₀ φ x w i j k) z := by
   let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
   let U := e.target
   let g₀ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
@@ -138,16 +138,16 @@ omit [T2Space M] [CompactSpace M] in theorem c3ConnectionDifference_contDiffAt
   have hG₀inv := Matrix.contDiffOn_inverse_entries hG₀ hUnit₀
   have hGφinv := Matrix.contDiffOn_inverse_entries hGφ hUnitφ
   have hΓ₀ : ContDiffOn ℝ ∞
-      (fun w ↦ c3ChristoffelInChart g₀ w i j k) U :=
+      (fun w ↦ christoffelInChart g₀ w i j k) U :=
     c3Christoffel_contDiffOn hU hG₀ hG₀inv i j k
   have hΓφ : ContDiffOn ℝ ∞
-      (fun w ↦ c3ChristoffelInChart gφ w i j k) U :=
+      (fun w ↦ christoffelInChart gφ w i j k) U :=
     c3Christoffel_contDiffOn hU hGφ hGφinv i j k
   have hT : ContDiffOn ℝ ∞
-      (fun w ↦ c3ConnectionDifferenceInChart ω₀ φ x w i j k) U := by
+      (fun w ↦ connectionDifferenceInChart ω₀ φ x w i j k) U := by
     change ContDiffOn ℝ ∞
-      (fun w ↦ c3ChristoffelInChart gφ w i j k -
-        c3ChristoffelInChart g₀ w i j k) U
+      (fun w ↦ christoffelInChart gφ w i j k -
+        christoffelInChart g₀ w i j k) U
     exact hΓφ.sub hΓ₀
   exact hT.contDiffAt (hU.mem_nhds hz)
 
@@ -155,8 +155,8 @@ theorem c3Pair_partialZ_mul
     (f h : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hf : DifferentiableAt ℝ f z) (hh : DifferentiableAt ℝ h z) :
-    c3PartialZ (fun w ↦ f w * h w) z p =
-      c3PartialZ f z p * h z + f z * c3PartialZ h z p := by
+    wirtingerDerivInChart (fun w ↦ f w * h w) z p =
+      wirtingerDerivInChart f z p * h z + f z * wirtingerDerivInChart h z p := by
   have hprod (v : EuclideanSpace ℂ (Fin n)) :
       fderiv ℝ (fun w ↦ f w * h w) z v =
         f z * fderiv ℝ h z v + fderiv ℝ f z v * h z := by
@@ -168,7 +168,7 @@ theorem c3Pair_partialZ_mul
         · rfl
         · simp [smul_eq_mul]
       _ = f z * fderiv ℝ h z v + fderiv ℝ f z v * h z := by ring
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hprod (EuclideanSpace.single p 1),
     hprod (Complex.I • EuclideanSpace.single p 1)]
   ring
@@ -177,9 +177,9 @@ theorem c3Pair_partialZ_finset_sum {α : Type*} (s : Finset α)
     (f : α → EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hf : ∀ a ∈ s, DifferentiableAt ℝ (f a) z) :
-    c3PartialZ (fun w ↦ ∑ a ∈ s, f a w) z p =
-      ∑ a ∈ s, c3PartialZ (f a) z p := by
-  unfold c3PartialZ
+    wirtingerDerivInChart (fun w ↦ ∑ a ∈ s, f a w) z p =
+      ∑ a ∈ s, wirtingerDerivInChart (f a) z p := by
+  unfold wirtingerDerivInChart
   rw [fderiv_fun_sum hf]
   simp only [sum_apply]
   rw [Finset.mul_sum, ← Finset.sum_sub_distrib, ← Finset.sum_div]
@@ -188,9 +188,9 @@ theorem c3Pair_partialZ_star
     (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (_hf : DifferentiableAt ℝ f z) :
-    c3PartialZ (fun w ↦ star (f w)) z p =
+    wirtingerDerivInChart (fun w ↦ star (f w)) z p =
       star (c3PartialBar f z p) := by
-  unfold c3PartialZ c3PartialBar
+  unfold wirtingerDerivInChart c3PartialBar
   rw [fderiv_star]
   simp [starL']
   ring

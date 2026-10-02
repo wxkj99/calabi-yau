@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization.LogDetLittleHolder.Basic
-import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization.LogDetLittleHolder.ChartMatrixControl
-import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 
 /-!
 # Common positive matrix-segment controls near the actual positive limit
@@ -23,7 +22,6 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
 /-- The entrywise formula for the Frobenius norm, kept explicit while using matrix inverse
 continuity in Mathlib's elementwise matrix topology. -/
@@ -140,7 +138,6 @@ private theorem affine_segment_posDef {n : ℕ}
         lt_of_le_of_ne hs.1 (by intro h; apply hs0; linarith)
       exact (hA.smul hleft).add (hB.smul hright)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- A positive smooth core perturbation gives the positive chart matrix on every chart target. -/
 private theorem smoothCore_chart_matrix_posDef
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
@@ -199,7 +196,6 @@ private theorem smoothCore_chartMatrix_segments_posDef
   rw [heq]
   exact affine_segment_posDef _ _ s hfirst hsecond hs
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem c2Potential_chartRep_isPositive
     (θ : FormField (EuclideanSpace ℂ (Fin n)) M 2)
     (hθ : ∀ x, (θ x).IsPositive) (x : M) {z : EuclideanSpace ℂ (Fin n)}
@@ -265,6 +261,7 @@ private theorem c2Potential_chartRep_isPositive
   rw [hchart]
   exact (hθ y).compContinuousLinearMap AEquiv
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem evaluated_chart_matrix_posDef
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -357,7 +354,7 @@ private theorem continuousOn_complexHessian_of_contDiffOn_two
     fun_prop
   exact hcont.congr hformula
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem evaluated_limit_chart_matrix_continuousOn
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -399,6 +396,7 @@ private theorem evaluated_limit_chart_matrix_continuousOn
   exact hL'.mono (P.finiteChartCover.piece_in_target i)
 
 open scoped Matrix.Norms.Elementwise in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem evaluated_limit_chart_inverse_bound
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -414,6 +412,7 @@ private theorem evaluated_limit_chart_inverse_bound
     (evaluated_limit_chart_matrix_continuousOn ω₀ φ hφ α u hpositiveLimit i)
     (fun z hz => evaluated_chart_matrix_posDef ω₀ φ hφ α u hpositiveLimit i z hz)
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem evaluated_limit_uniform_inverse_bound
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -505,7 +504,7 @@ private theorem pair_segment_close_of_uniform_displacement
       (mul_le_mul_of_nonneg_left hkclose hθ₀)
     _ = η := by ring
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem smoothCore_chartMatrix_segment_close_limit
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -646,7 +645,7 @@ private theorem convergent_displacement_nnnorm_bounded0
   rw [Metric.mem_closedBall, dist_eq_norm] at hmem
   simpa [dist_eq_norm] using hmem
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem holder_tail_from_base
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -811,7 +810,6 @@ private theorem complexHessian_entry_contDiffAt_one_forCore
     exact complexHessian_apply (hx.of_le (by norm_num)) j k
   exact hq.congr_of_eventuallyEq hEq
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem smoothCore_chartMatrix_contDiffAt_one
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) [P : ContinuityHolderPair (ω₀.perturb φ hφ) α]
@@ -935,6 +933,7 @@ private theorem exists_smoothCore_chartMatrix_anchor_holder
       (fun k hk => by positivity) (Finset.mem_univ i)
   exact (Classical.choose_spec (hpieces i)).mono_const hle
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem exists_smoothCore_chartMatrix_segment_holder_tail
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ)
     (α : ℝ≥0) (hα₁ : α < 1)
@@ -977,8 +976,8 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- One tail, one finite Frobenius inverse bound and one spatial Hölder bound for every pairwise
 segment. The two matrix-control hypotheses are exactly projections of ChartMatrixControl. -/
 theorem exists_smoothCore_chartMatrix_common_tail

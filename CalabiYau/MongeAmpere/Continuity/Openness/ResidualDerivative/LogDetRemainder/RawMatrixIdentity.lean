@@ -14,9 +14,7 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem logMongeAmpere_eq_chart_logdet_of_c2
     (ω₁ : KahlerForm n M) (ψ : M → ℝ)
     (hψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 ψ)
@@ -50,7 +48,6 @@ private theorem logMongeAmpere_eq_chart_logdet_of_c2
     exact (div_pos_iff_of_pos_right hAdet).mp hMApos
   rw [hMA, Real.log_div (ne_of_gt hBdet) (ne_of_gt hAdet)]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem logMongeAmpere_sub_laplacian_eq_logDetTaylorRemainder
     (ω₁ : KahlerForm n M) (ψ : M → ℝ)
     (hψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 ψ)
@@ -66,7 +63,7 @@ private theorem logMongeAmpere_sub_laplacian_eq_logDetTaylorRemainder
   rfl
 
 set_option maxHeartbeats 800000 in
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- Matrix log-determinant Taylor identity for the actual evaluated C2 potentials. -/
 theorem actualPairwiseTaylor_eq_chartMatrix
     (ω₀ : KahlerForm n M) (F : M → ℝ)
@@ -181,7 +178,7 @@ theorem actualPairwiseTaylor_eq_chartMatrix
   rw [← hTu', ← hTv']
   ring
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem rawLogRatio_continuous
     (ω₀ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
@@ -208,7 +205,7 @@ theorem rawLogRatio_continuous
   rw [heq]
   exact c.continuous.add continuous_const
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem actualPairwiseTaylor_continuous
     (ω₀ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
@@ -224,7 +221,7 @@ theorem actualPairwiseTaylor_continuous
   exact ((rawLogRatio_continuous ω₀ F hF t φ hsol α D u hu).sub
     (rawLogRatio_continuous ω₀ F hF t φ hsol α D v hv)).sub ell.continuous
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem actualPairwiseTaylor_centering
     (ω₀ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)

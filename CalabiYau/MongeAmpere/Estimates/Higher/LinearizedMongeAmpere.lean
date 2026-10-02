@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
-import CalabiYau.Geometry.Complex.Forms.Positive
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # Chartwise linearization of the complex Monge–Ampère equation
@@ -25,7 +24,11 @@ open ContinuousAlternatingMap
 namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+section
+
+variable [T2Space M] [CompactSpace M]
+
 private theorem hasDerivAt_det_one_add_smul (M : Matrix (Fin n) (Fin n) ℂ) :
     HasDerivAt (fun z : ℂ ↦ (1 + z • M).det) M.trace 0 := by
   let P : Polynomial ℂ :=
@@ -84,9 +87,9 @@ private theorem real_hasDerivAt_log_of_pos {x : ℝ} (hx : 0 < x) :
     exact ⟨hω₁₁, by rw [hcoeff]; exact Matrix.PosDef.one⟩
   have hα : (x • θ).IsPositive := hω.smul hx
   have hrel (t : ℝ) : relDet θ (x • θ + t • θ) = x + t := by
-    rw [← add_smul, relDet_smul hω, relDet_self hω]
+    rw [← add_smul, relDet_smul, relDet_self hω]
     simp
-  have hlog := hasDerivAt_log_relDet hω hα hω₁₁ (α := x • θ) (β := θ)
+  have hlog := hasDerivAt_log_relDet hω hα (α := x • θ) (β := θ)
   have hlog' : HasDerivAt (fun t : ℝ ↦ Real.log (x + t))
       (relTrace (x • θ) θ) 0 := by
     have heq : (fun t : ℝ ↦ Real.log (relDet θ (x • θ + t • θ))) =
@@ -161,57 +164,6 @@ private theorem hasDerivAt_det_of_entrywise {A H : Matrix (Fin n) (Fin n) ℂ}
     exact Matrix.det_apply' (F s)
   exact hsum.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hdet)
 
-private theorem hasDerivAt_adjugate_entry_of_entrywise
-    {A H : Matrix (Fin n) (Fin n) ℂ} {F : ℝ → Matrix (Fin n) (Fin n) ℂ} {t : ℝ}
-    (hF : ∀ i j, HasDerivAt (fun s ↦ F s i j) (H i j) t) (hFt : F t = A)
-    (i j : Fin n) :
-    HasDerivAt (fun s ↦ (F s).adjugate i j)
-      (deriv (fun s ↦ (F s).adjugate i j) t) t := by
-  let Q : ℝ → Matrix (Fin n) (Fin n) ℂ := fun s ↦
-    (F s).updateRow j (Pi.single i 1)
-  let H' : Matrix (Fin n) (Fin n) ℂ := Matrix.of fun a b ↦ if a = j then 0 else H a b
-  have hQ (a b : Fin n) : HasDerivAt (fun s ↦ Q s a b) (H' a b) t := by
-    by_cases ha : a = j
-    · subst a
-      let c : ℂ := if b = i then 1 else 0
-      have hEq : (fun s ↦ Q s j b) = fun _ : ℝ ↦ c := by
-        funext s
-        simp [Q, c, Matrix.updateRow_apply, Pi.single_apply]
-      have hconst : HasDerivAt (fun _ : ℝ ↦ c) 0 t := hasDerivAt_const t c
-      have h := hconst.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hEq)
-      exact h.congr_deriv (by simp [H'])
-    · have hEq : (fun s ↦ Q s a b) = fun s ↦ F s a b := by
-        funext s
-        simp [Q, Matrix.updateRow_apply, ha]
-      have h := (hF a b).congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hEq)
-      exact h.congr_deriv (by simp [H', ha])
-  have hQt : Q t = A.updateRow j (Pi.single i 1) := by
-    ext a b
-    simp [Q, hFt]
-  have hdet := hasDerivAt_det_of_entrywise (F := Q) (H := H') hQ hQt
-  have hAdjEq : (fun s ↦ (F s).adjugate i j) = fun s ↦ (Q s).det := by
-    funext s
-    exact Matrix.adjugate_apply (F s) i j
-  have hAdj := hdet.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hAdjEq)
-  exact hAdj.congr_deriv hAdj.deriv.symm
-
-private theorem hasDerivAt_matrix_inv_entry_of_entrywise
-    {A H : Matrix (Fin n) (Fin n) ℂ} {F : ℝ → Matrix (Fin n) (Fin n) ℂ} {t : ℝ}
-    (hF : ∀ i j, HasDerivAt (fun s ↦ F s i j) (H i j) t) (hFt : F t = A)
-    (hdet : A.det ≠ 0) (i j : Fin n) :
-    HasDerivAt (fun s ↦ (F s)⁻¹ i j)
-      (deriv (fun s ↦ (F s).det⁻¹ * (F s).adjugate i j) t) t := by
-  have hdetLine := hasDerivAt_det_of_entrywise hF hFt
-  have hdetLineInv := hdetLine.inv (by simpa [hFt] using hdet)
-  have hAdjLine := hasDerivAt_adjugate_entry_of_entrywise hF hFt i j
-  have hProd := hdetLineInv.mul hAdjLine
-  have hEq : (fun s ↦ (F s)⁻¹ i j) = fun s ↦ (F s).det⁻¹ * (F s).adjugate i j := by
-    funext s
-    rw [Matrix.inv_def, Ring.inverse_eq_inv]
-    simp [Matrix.smul_apply, smul_eq_mul]
-  have hInv := hProd.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq hEq)
-  exact hInv.congr_deriv hProd.deriv.symm
-
 private theorem hasDerivAt_det_of_entrywise_posDef {A H : Matrix (Fin n) (Fin n) ℂ}
     (hA : A.PosDef) {F : ℝ → Matrix (Fin n) (Fin n) ℂ} {t : ℝ}
     (hF : ∀ i j, HasDerivAt (fun s ↦ F s i j) (H i j) t) (hFt : F t = A) :
@@ -272,43 +224,6 @@ private theorem hasDerivAt_log_det_of_entrywise_posDef {A H : Matrix (Fin n) (Fi
   have hlog' := hlog.congr_deriv hcancel
   exact hlog'.congr_of_eventuallyEq (Filter.EventuallyEq.of_eq rfl)
 
-private theorem hasDerivAt_log_det_along_line {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] {F : E → Matrix (Fin n) (Fin n) ℂ}
-    {D : Matrix (Fin n) (Fin n) (E →L[ℝ] ℂ)} {H : Matrix (Fin n) (Fin n) ℂ}
-    {x v : E} (hF : (F x).PosDef) (hH : ∀ i j, H i j = D i j v)
-    (hderiv : ∀ i j, HasFDerivAt (fun y : E ↦ F y i j) (D i j) x) :
-    HasDerivAt (fun t : ℝ ↦ Real.log (RCLike.re (F (x + t • v)).det))
-      (RCLike.re ((F x)⁻¹ * H).trace) 0 := by
-  let Fline : ℝ → Matrix (Fin n) (Fin n) ℂ := fun t ↦ F (x + t • v)
-  have hline : HasDerivAt (fun t : ℝ ↦ x + t • v) v 0 := by
-    simpa using ((hasDerivAt_id (0 : ℝ)).smul_const v).const_add x
-  have hentry (i j : Fin n) :
-      HasDerivAt (fun t : ℝ ↦ Fline t i j) (H i j) 0 := by
-    have h := (hderiv i j).comp_hasDerivAt_of_eq 0 hline (by simp)
-    have h' : HasDerivAt (fun t : ℝ ↦ Fline t i j) (D i j v) 0 := by
-      simpa [Fline, Function.comp_def] using h
-    exact h'.congr_deriv (hH i j).symm
-  have h0 : Fline 0 = F x := by simp [Fline]
-  have hlog := hasDerivAt_log_det_of_entrywise_posDef hF hentry h0
-  simpa [Fline] using hlog
-
-private theorem hasDerivAt_log_det_contDiff_along_line {E : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] {F : E → Matrix (Fin n) (Fin n) ℂ}
-    {H : Matrix (Fin n) (Fin n) ℂ} {x v : E} (hF : (F x).PosDef)
-    (hH : ∀ i j, H i j = fderiv ℝ (fun y : E ↦ F y i j) x v)
-    (hcont : ∀ i j, ContDiffAt ℝ 1 (fun y : E ↦ F y i j) x) :
-    HasDerivAt (fun t : ℝ ↦ Real.log (RCLike.re (F (x + t • v)).det))
-      (RCLike.re ((F x)⁻¹ * H).trace) 0 := by
-  let D : Matrix (Fin n) (Fin n) (E →L[ℝ] ℂ) :=
-    fun i j ↦ fderiv ℝ (fun y : E ↦ F y i j) x
-  have hderiv (i j : Fin n) :
-      HasFDerivAt (fun y : E ↦ F y i j) (D i j) x := by
-    exact ((hcont i j).differentiableAt (by norm_num)).hasFDerivAt
-  have hH' : ∀ i j, H i j = D i j v := by
-    intro i j
-    simpa [D] using hH i j
-  exact hasDerivAt_log_det_along_line hF hH' hderiv
-
 private theorem hasDerivAt_log_det_ratio_of_entrywise
     {A B H K : Matrix (Fin n) (Fin n) ℂ}
     {F J : ℝ → Matrix (Fin n) (Fin n) ℂ} {G : ℝ → ℝ}
@@ -327,7 +242,8 @@ private theorem hasDerivAt_log_det_ratio_of_entrywise
     exact hFlog.sub hJlog
   exact hsub.congr_of_eventuallyEq hEq
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem chart_log_det_ratio_eventually (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
     (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) {z v : EuclideanSpace ℂ (Fin n)}
@@ -377,6 +293,7 @@ private theorem chart_log_det_ratio_eventually (ω₀ : KahlerForm n M) {G φ : 
   rw [Real.log_exp, Real.log_div hnumPos.ne' hdenPos.ne'] at hlog
   simpa [F, J, y, e] using hlog
 
+variable [T2Space M] [CompactSpace M] in
 private theorem hasDerivAt_of_eventually_log_det_ratio {E : Type*} [NormedAddCommGroup E]
     [NormedSpace ℝ E] {F J : E → Matrix (Fin n) (Fin n) ℂ} {G : E → ℝ}
     {DF DJ : Matrix (Fin n) (Fin n) (E →L[ℝ] ℂ)}
@@ -413,7 +330,6 @@ private theorem hasDerivAt_of_eventually_log_det_ratio {E : Type*} [NormedAddCom
   have h := hasDerivAt_log_det_ratio_of_entrywise hFpos hJpos hFline hF0 hJline hJ0 hEq'
   simpa [Fline, Jline] using h
 
-omit [T2Space M] [CompactSpace M] in
 private theorem hasDerivAt_G_along_chart_line (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
     (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) {z v : EuclideanSpace ℂ (Fin n)}
@@ -464,6 +380,10 @@ private theorem hasDerivAt_G_along_chart_line (ω₀ : KahlerForm n M) {G φ : M
     hFderiv hJderiv hEq
   simpa [e] using hderiv
 
+section
+
+variable [T2Space M] [CompactSpace M]
+
 private noncomputable def chartPerturbedMetricDirection (ω₀ : KahlerForm n M)
     (φ : M → ℝ) (x : M) (z v : EuclideanSpace ℂ (Fin n)) :
     Matrix (Fin n) (Fin n) ℂ :=
@@ -475,7 +395,8 @@ private noncomputable def chartBackgroundMetricDirection (ω₀ : KahlerForm n M
     (x : M) (z v : EuclideanSpace ℂ (Fin n)) : Matrix (Fin n) (Fin n) ℂ :=
   fun j k ↦ fderiv ℝ (fun u ↦ ω₀.metricInChart x u j k) z v
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem hasDerivAt_G_along_chart_line_of_smooth (ω₀ : KahlerForm n M)
     {G φ : M → ℝ} (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
     (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) {z v : EuclideanSpace ℂ (Fin n)}
@@ -542,6 +463,10 @@ private theorem hasDerivAt_G_along_chart_line_of_smooth (ω₀ : KahlerForm n M)
     exact (ω₀.contDiffOn_metricInChart x j k).contDiffAt
       ((isOpen_extChartAt_target x).mem_nhds hz) |>.of_le (by norm_num)
   exact hasDerivAt_G_along_chart_line ω₀ hφ hsol x hz hH hK hFcont hJcont
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem fderiv_second_apply_comm {f : EuclideanSpace ℂ (Fin n) → ℝ}
     {z a b c : EuclideanSpace ℂ (Fin n)} (hf : ContDiffAt ℝ 3 f z) :
@@ -775,7 +700,9 @@ private theorem fderiv_complexHessian_direction {f : EuclideanSpace ℂ (Fin n) 
     simp [D, Complex.ofRealCLM_apply, hq₁eq, hq₂eq, hq₃eq, hq₄eq, a, b, ia, ib]
     ring_nf
   exact hleft.trans hright
-omit [T2Space M] [CompactSpace M] in
+
+end
+
 private theorem chartPerturbedMetricDirection_eq (ω₀ : KahlerForm n M) {φ : M → ℝ}
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
     (x : M) {z v : EuclideanSpace ℂ (Fin n)}
@@ -865,7 +792,6 @@ private theorem chartPerturbedMetricDirection_eq (ω₀ : KahlerForm n M) {φ : 
   simp only [_root_.add_apply]
   rw [fderiv_complexHessian_direction hf]
 
-omit [T2Space M] [CompactSpace M] in
 private theorem hasDerivAt_G_along_chart_line_linearized (ω₀ : KahlerForm n M)
     {G φ : M → ℝ} (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
     (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) {z v : EuclideanSpace ℂ (Fin n)}
@@ -907,7 +833,6 @@ private theorem hasDerivAt_G_along_chart_line_linearized (ω₀ : KahlerForm n M
   have hbase' := hbase.congr_deriv hderiv
   simpa [gφ, dφ, e] using hbase'
 
-omit [T2Space M] [CompactSpace M] in
 theorem complexEllipticOp_eq_fderiv_chart_G (ω₀ : KahlerForm n M)
     {G φ : M → ℝ} (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
@@ -958,24 +883,5 @@ theorem complexEllipticOp_eq_fderiv_chart_G (ω₀ : KahlerForm n M)
       RCLike.re ((ω₀.metricInChart x z)⁻¹ *
         chartBackgroundMetricDirection ω₀ x z v).trace
   linarith
-
-private theorem hasDerivAt_log_det_affine {A H : Matrix (Fin n) (Fin n) ℂ}
-    (t : ℝ) (hAt : (A + t • H).PosDef) :
-    HasDerivAt (fun s : ℝ ↦ Real.log (RCLike.re (A + s • H).det))
-      (RCLike.re ((A + t • H)⁻¹ * H).trace) t := by
-  let B := A + t • H
-  have hline := hasDerivAt_log_det_add_smul (A := B) (H := H) hAt
-  have hshift : (fun s : ℝ ↦ Real.log (RCLike.re (B + s • H).det)) =
-      fun s : ℝ ↦ Real.log (RCLike.re (A + (t + s) • H).det) := by
-    funext s
-    congr 2
-    dsimp [B]
-    rw [add_assoc, ← add_smul]
-  have hshift' := hline.congr_of_eventuallyEq
-    (Filter.EventuallyEq.of_eq hshift.symm)
-  have htrans : HasDerivAt (fun s : ℝ ↦ s - t) 1 t := by
-    simpa using (hasDerivAt_id t).sub_const t
-  have hcomp := hshift'.comp_of_eq t htrans (by simp)
-  simpa [Function.comp_def, add_sub_cancel_left, B] using hcomp
 
 end KahlerForm

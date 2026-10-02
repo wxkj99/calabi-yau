@@ -31,6 +31,7 @@ noncomputable def littleHolderOrderTwoEvaluation
     (u : LittleHolder cover 2 α N) : M → ℝ :=
   smoothChartHolderContinuousMapExtension cover 2 α N u
 
+omit [FiniteDimensional ℝ E] in
 /-- For `0 < α < 1`, evaluation of the order-two little-Hölder completion is C². A Cauchy
 sequence in the gauge converges uniformly with each chart jet through order two; the local
 uniform-derivative limit theorem on the interiors of the cover identifies those limits as the
@@ -46,9 +47,6 @@ theorem littleHolderOrderTwoEvaluation_contMDiff
     cover α N u
     (fun j hj i z hz =>
       smoothChartHolderContinuousMapExtension_completedJet_eq
-        cover α N u j hj i z hz)
-    (fun j hj i z hz =>
-      smoothChartHolderContinuousMapExtension_completedJet_norm_le
         cover α N u j hj i z hz)
 
 end KahlerForm

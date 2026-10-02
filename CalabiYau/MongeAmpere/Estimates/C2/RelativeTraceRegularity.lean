@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.Geometry.Kahler.Basic
-import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 /-!

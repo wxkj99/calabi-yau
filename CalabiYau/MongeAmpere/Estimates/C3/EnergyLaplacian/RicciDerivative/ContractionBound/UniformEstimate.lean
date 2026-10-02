@@ -70,17 +70,18 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
 set_option maxHeartbeats 600000 in
+omit [T2Space M] [CompactSpace M] in
 theorem c3_exists_uniform_ricci_derivative_error_bound (ω₀ : KahlerForm n M)
     (S : Set ((M → ℝ) × (M → ℝ))) (hS : ∀ p ∈ S, ω₀.IsPotential p.2)
     (hMetric : ∃ B : ℝ, 0 < B ∧ ∀ p ∈ S, ∀ x,
       relTrace (ω₀ x) (ω₀ x + mddbar n p.2 x) ≤ B ∧
       relTrace (ω₀ x + mddbar n p.2 x) (ω₀ x) ≤ B)
     (R H : ℝ) (hR : 0 ≤ R) (hH : 0 ≤ H)
-    (hRicci : ∀ x P, referenceOrthonormalFrameMatrix ω₀ x P →
-      c3ReferenceRicciFrameBound ω₀ x
+    (hRicci : ∀ x P, IsReferenceOrthonormalFrame ω₀ x P →
+      ReferenceRicciFrameBound ω₀ x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) P R)
-    (hForcing : ∀ p ∈ S, ∀ x P, referenceOrthonormalFrameMatrix ω₀ x P →
-      c3ForcingFrameBound ω₀ p.1 x
+    (hForcing : ∀ p ∈ S, ∀ x P, IsReferenceOrthonormalFrame ω₀ x P →
+      ForcingFrameBound ω₀ p.1 x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) P H) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ p ∈ S, ∀ x,
       |c3RicciDerivativeError ω₀ p.1 p.2 x| ≤
@@ -155,7 +156,7 @@ theorem c3_exists_uniform_ricci_derivative_error_bound (ω₀ : KahlerForm n M)
       have h := congrArg star (congrFun (congrFun hleft i) j)
       simpa [Astar, Q, Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul,
         mul_comm] using h
-    have hframe : referenceOrthonormalFrameMatrix ω₀ x P := by
+    have hframe : IsReferenceOrthonormalFrame ω₀ x P := by
       change P.transpose * g * P.map star = 1
       exact hPG
     have hdiagReal : P.transpose * c3PerturbedMetricInChart ω₀ p.2 x z * P.map star =
@@ -175,7 +176,7 @@ theorem c3_exists_uniform_ricci_derivative_error_bound (ω₀ : KahlerForm n M)
     let D2 : Fin n → Fin n → ℂ := fun j l ↦ R0 z j l - H0 z j l
     let D3 : Fin n → Fin n → Fin n → ℂ := fun k j l ↦ X k j l - Y k j l
     let T0 : Fin n → Fin n → Fin n → ℂ :=
-      c3ConnectionDifferenceInChart ω₀ p.2 x z
+      connectionDifferenceInChart ω₀ p.2 x z
     let T := c3MixedFrameChange P Q T0
     let Q2 := c3TwoCovariantFrame P D2
     let Y3 := c3ThreeCovariantFrame P D3

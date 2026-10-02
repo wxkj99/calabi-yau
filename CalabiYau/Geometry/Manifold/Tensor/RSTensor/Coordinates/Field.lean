@@ -25,8 +25,10 @@ open Bundle Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [FiniteDimensional 𝕜 E]
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
@@ -46,8 +48,18 @@ abbrev Tensor0SField (s : ℕ) :=
     n
     (fun x : M => Tensor0SSpace s I x)
 
+end
+
 section SmulByFun
 
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 variable {r s : ℕ} [CompleteSpace 𝕜]
 
 def tensorRSFieldSmulByFun
@@ -68,13 +80,34 @@ def tensorRSFieldSmulByFun
       (e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt _ _ x₀))
       fun x hx => (e.linear 𝕜 hx).2 _ _⟩
 
-omit [IsManifold I (n + 1) M] [CompleteSpace 𝕜] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞)
+variable {r s : ℕ}
+
 @[simp]
 theorem tensorRSField_smulByFun_apply
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
     (α : TensorRSField n r s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) (x : M) :
     tensorRSFieldSmulByFun n φ hφ α x = φ x • α x :=
   rfl
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
+variable {r s : ℕ} [CompleteSpace 𝕜]
 
 def tensor0SFieldSmulByFun
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -83,7 +116,17 @@ def tensor0SFieldSmulByFun
   letI := tensor0SBundleTopology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   ⟨fun x => φ x • α x, hφ.smul_section α.contMDiff⟩
 
-omit [IsManifold I (n + 1) M] [CompleteSpace 𝕜] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞)
+variable {r s : ℕ}
+
 @[simp]
 theorem tensor0SField_smulByFun_apply
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -91,7 +134,17 @@ theorem tensor0SField_smulByFun_apply
     tensor0SFieldSmulByFun n φ hφ α x = φ x • α x :=
   rfl
 
+end
+
 end SmulByFun
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
 noncomputable def Tensor0SField.fromScalarField [CompleteSpace 𝕜]
     (f : M → 𝕜) (hf : ContMDiff I 𝓘(𝕜) n f) :
@@ -115,7 +168,16 @@ noncomputable def Tensor0SField.fromScalarField [CompleteSpace 𝕜]
     exact (hf.contMDiffAt).congr_of_eventuallyEq
       (Filter.Eventually.of_forall fun x => hcoord x)⟩
 
-omit [IsManifold I (n + 1) M] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞)
+
 @[simp]
 theorem Tensor0SField.fromScalarField_apply [CompleteSpace 𝕜]
     (f : M → 𝕜) (hf : ContMDiff I 𝓘(𝕜) n f) (x : M) (v : Fin 0 → TangentSpace I x) :
@@ -123,11 +185,30 @@ theorem Tensor0SField.fromScalarField_apply [CompleteSpace 𝕜]
   unfold Tensor0SField.fromScalarField
   exact ContinuousMultilinearMap.constOfIsEmpty_apply _ _ _ _
 
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
+
 noncomputable def Tensor0SField.toScalarField
     (α : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) : M → 𝕜 :=
   fun x => Tensor0SSpace.toModel (α x) Fin.elim0
 
-omit [IsManifold I (n + 1) M] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞)
+
 theorem Tensor0SField.toScalarField_contMDiff [CompleteSpace 𝕜]
     (hM : IsManifold I (n + 1) M)
     (α : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -160,13 +241,22 @@ theorem Tensor0SField.toScalarField_contMDiff [CompleteSpace 𝕜]
   simp_rw [continuousMultilinearMap_basis_repr]
   rfl
 
-omit [IsManifold I (n + 1) M] in
 @[simp]
 theorem Tensor0SField.toScalarField_fromScalarField [CompleteSpace 𝕜]
     (f : M → 𝕜) (hf : ContMDiff I 𝓘(𝕜) n f) :
     Tensor0SField.toScalarField n (Tensor0SField.fromScalarField n f hf) = f := by
   ext x
   exact Tensor0SField.fromScalarField_apply n f hf x Fin.elim0
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
 @[simp]
 theorem Tensor0SField.fromScalarField_toScalarField [CompleteSpace 𝕜]
@@ -185,7 +275,16 @@ theorem Tensor0SField.fromScalarField_toScalarField [CompleteSpace 𝕜]
     (α x) Fin.elim0
   exact congrArg _ (Subsingleton.elim v Fin.elim0)
 
-omit [IsManifold I (n + 1) M] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞)
+
 @[simp]
 theorem Tensor0SField.toScalarField_add
     (α β : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -195,7 +294,6 @@ theorem Tensor0SField.toScalarField_add
   rw [show (α + β) x = α x + β x from rfl, Tensor0SSpace.toModel_add,
     add_apply]
 
-omit [IsManifold I (n + 1) M] in
 @[simp]
 theorem Tensor0SField.toScalarField_smulByFun
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -205,15 +303,30 @@ theorem Tensor0SField.toScalarField_smulByFun
   simp only [Tensor0SField.toScalarField, tensor0SField_smulByFun_apply,
     Tensor0SSpace.toModel_smul, smul_apply, Pi.mul_apply, smul_eq_mul]
 
-omit n in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+
 noncomputable def tensor0SSpaceEvalScalar (x : M) :
     Tensor0SSpace 0 I x →L[𝕜] 𝕜 :=
   (ContinuousMultilinearMap.apply 𝕜
     (fun _ : Fin 0 => TangentSpace I x) 𝕜 Fin.elim0).comp
       (tensor0SSpaceFiberContinuousLinearEquiv (I := I) 0 x).toContinuousLinearMap
 
-omit n in
-omit [FiniteDimensional 𝕜 E] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+
 @[simp]
 theorem Tensor0SSpace.evalScalar_apply (x : M) (c : Tensor0SSpace 0 I x) :
     tensor0SSpaceEvalScalar (𝕜 := 𝕜) (I := I) (M := M) x c = c Fin.elim0 := by
@@ -222,19 +335,44 @@ theorem Tensor0SSpace.evalScalar_apply (x : M) (c : Tensor0SSpace 0 I x) :
   rw [tensor0SSpaceFiberContinuousLinearEquiv_apply]
   rfl
 
-omit n in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+
 noncomputable def Tensor0SSpace.toRS0 {s : ℕ} {x : M} (A : Tensor0SSpace s I x) :
     TensorRSSpace 0 s I x :=
   (tensor0SSpaceEvalScalar (𝕜 := 𝕜) (I := I) (M := M) x).smulRight A
 
-omit n in
-omit [FiniteDimensional 𝕜 E] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+
 @[simp]
 theorem Tensor0SSpace.toRS0_apply {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (c : Tensor0SSpace 0 I x) :
     Tensor0SSpace.toRS0 A c =
       tensor0SSpaceEvalScalar (𝕜 := 𝕜) (I := I) (M := M) x c • A :=
   rfl
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
 noncomputable def Tensor0SField.toTensorRSField {s : ℕ}
     (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -293,7 +431,16 @@ noncomputable def Tensor0SField.toTensorRSField {s : ℕ}
     rw [hαx]
     ⟩
 
-omit [IsManifold I (n + 1) M] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable (n : WithTop ℕ∞)
+
 @[simp]
 theorem Tensor0SField.toRS0_apply {s : ℕ}
     (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
@@ -302,13 +449,7 @@ theorem Tensor0SField.toRS0_apply {s : ℕ}
       tensor0SSpaceEvalScalar (𝕜 := 𝕜) (I := I) (M := M) x c • α x :=
   rfl
 
-omit [IsManifold I (n + 1) M] in
-theorem Tensor0SField.toRS0_eq {s : ℕ}
-    (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
-    (x : M) :
-    α.toTensorRSField n x = Tensor0SSpace.toRS0 (α x) := by
-  ext c
-  rw [Tensor0SField.toRS0_apply, Tensor0SSpace.toRS0_apply]
+end
 
 end
 end Tensor0SBundle
@@ -320,13 +461,15 @@ open Bundle Set IsManifold ContinuousLinearMap
 
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [FiniteDimensional 𝕜 E]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+
+section
+
+variable [CompleteSpace 𝕜]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable (n : WithTop ℕ∞)
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  [IsManifold I 1 M] [IsManifold I (n + 1) M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M] [IsManifold I (n + 1) M]
 variable {s q : ℕ}
 
 noncomputable def Tensor0SField.domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
@@ -408,29 +551,6 @@ theorem tensor0SField_product_zero
   unfold tensor0SFieldProduct
   exact MultilinearSection.product_zero n α
 
-theorem tensor0SField_product_add_left
-    (α β : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
-    (γ : Tensor0SField n q (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
-    tensor0SFieldProduct n (α + β) γ =
-      tensor0SFieldProduct n α γ + tensor0SFieldProduct n β γ := by
-  let _ : ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I :=
-    TangentBundle.contMDiffVectorBundle
-  unfold tensor0SFieldProduct
-  exact MultilinearSection.product_add_left n α β γ
-
-theorem tensor0SField_product_domDomCongr_left {s' : ℕ} (e : Fin s ≃ Fin s')
-    (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
-    (β : Tensor0SField n q (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
-    tensor0SFieldProduct n (Tensor0SField.domDomCongr n e α) β =
-      Tensor0SField.domDomCongr n
-        (finSumFinEquiv.symm.trans
-          ((Equiv.sumCongr e (Equiv.refl (Fin q))).trans finSumFinEquiv))
-        (tensor0SFieldProduct n α β) := by
-  let _ : ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I :=
-    TangentBundle.contMDiffVectorBundle
-  unfold tensor0SFieldProduct Tensor0SField.domDomCongr
-  exact MultilinearSection.product_domDomCongr_left n e α β
-
 theorem Tensor0SField.domDomCongr_id_of_valPres {s : ℕ} (e : Fin s ≃ Fin s)
     (he : ∀ i, ((e i : Fin s) : ℕ) = (i : ℕ))
     (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -445,6 +565,8 @@ theorem Tensor0SField.domDomCongr_id_of_valPres {s : ℕ} (e : Fin s ≃ Fin s)
     Tensor0SSpace.eval (α x) v
   rw [Tensor0SSpace.eval_domDomCongr]
   rfl
+
+end
 
 end
 end Tensor0SBundle

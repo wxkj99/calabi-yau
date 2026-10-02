@@ -106,6 +106,7 @@ theorem chartTopCoefficient_smoothMulForm
     simp only [ContinuousAlternatingMap.smul_apply, smul_eq_mul]
   · simp
 
+omit [T2Space M] in
 /-- Numerical evaluation is the finite weighted signed coordinate integral,
 with no additional reference-form, factorial, or power-of-two factor. -/
 theorem FinitePositiveChartPartition.integral_apply_weighted

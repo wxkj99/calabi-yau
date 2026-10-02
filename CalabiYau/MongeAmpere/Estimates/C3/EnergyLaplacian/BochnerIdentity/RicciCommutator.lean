@@ -137,18 +137,18 @@ private theorem c3TensorCovariantZ_bar_commutator
     (T : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p q i j k : Fin n)
     (hT : ∀ a b c, ContDiffAt ℝ ∞ (fun w => T w a b c) z)
-    (hΓ : ∀ a b c, ContDiffAt ℝ ∞ (fun w => c3ChristoffelInChart g w a b c) z) :
+    (hΓ : ∀ a b c, ContDiffAt ℝ ∞ (fun w => christoffelInChart g w a b c) z) :
     chartPartialBarComplex
         (fun w => c3TensorCovariantZ g T w p i j k) z q =
       c3TensorCovariantZ g
           (fun w a b c => chartPartialBarComplex (fun v => T v a b c) w q)
           z p i j k +
         (∑ r, chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w i p r) z q * T z r j k) -
+          (fun w => christoffelInChart g w i p r) z q * T z r j k) -
         (∑ r, chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w r p j) z q * T z i r k) -
+          (fun w => christoffelInChart g w r p j) z q * T z i r k) -
         ∑ r, chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w r p k) z q * T z i j r := by
+          (fun w => christoffelInChart g w r p k) z q * T z i j r := by
   let ι := Fin n ⊕ Fin n ⊕ Fin n
   let F : EuclideanSpace ℂ (Fin n) → ℂ := fun w => T w i j k
   let V : ι → EuclideanSpace ℂ (Fin n) → ℂ := fun s w =>
@@ -158,17 +158,17 @@ private theorem c3TensorCovariantZ_bar_commutator
     | Sum.inr (Sum.inr r) => T w i j r
   let G : ι → EuclideanSpace ℂ (Fin n) → ℂ := fun s w =>
     match s with
-    | Sum.inl r => c3ChristoffelInChart g w i p r
-    | Sum.inr (Sum.inl r) => -c3ChristoffelInChart g w r p j
-    | Sum.inr (Sum.inr r) => -c3ChristoffelInChart g w r p k
+    | Sum.inl r => christoffelInChart g w i p r
+    | Sum.inr (Sum.inl r) => -christoffelInChart g w r p j
+    | Sum.inr (Sum.inr r) => -christoffelInChart g w r p k
   have hdecomp (w : EuclideanSpace ℂ (Fin n)) :
       c3TensorCovariantZ g T w p i j k =
         chartPartialZComplex F w p + ∑ s, G s w * V s w := by
-    change c3PartialZ (fun v => T v i j k) w p +
-        (∑ r, c3ChristoffelInChart g w i p r * T w r j k) -
-        (∑ r, c3ChristoffelInChart g w r p j * T w i r k) -
-        ∑ r, c3ChristoffelInChart g w r p k * T w i j r =
-      c3PartialZ (fun v => T v i j k) w p + ∑ s, G s w * V s w
+    change wirtingerDerivInChart (fun v => T v i j k) w p +
+        (∑ r, christoffelInChart g w i p r * T w r j k) -
+        (∑ r, christoffelInChart g w r p j * T w i r k) -
+        ∑ r, christoffelInChart g w r p k * T w i j r =
+      wirtingerDerivInChart (fun v => T v i j k) w p + ∑ s, G s w * V s w
     simp [G, V, ι, Fintype.sum_sum_type, Finset.sum_neg_distrib]
     ring
   have hV (s : ι) : ContDiffAt ℝ ∞ (V s) z := by
@@ -188,11 +188,11 @@ private theorem c3TensorCovariantZ_bar_commutator
           z p i j k =
         chartPartialZComplex (fun w => chartPartialBarComplex (fun v => T v i j k) w q) z p +
           ∑ s, G s z * chartPartialBarComplex (V s) z q := by
-    change c3PartialZ (fun w => chartPartialBarComplex (fun v => T v i j k) w q) z p +
-        (∑ r, c3ChristoffelInChart g z i p r * chartPartialBarComplex (fun v => T v r j k) z q) -
-        (∑ r, c3ChristoffelInChart g z r p j * chartPartialBarComplex (fun v => T v i r k) z q) -
-        ∑ r, c3ChristoffelInChart g z r p k * chartPartialBarComplex (fun v => T v i j r) z q =
-      c3PartialZ (fun w => chartPartialBarComplex (fun v => T v i j k) w q) z p +
+    change wirtingerDerivInChart (fun w => chartPartialBarComplex (fun v => T v i j k) w q) z p +
+        (∑ r, christoffelInChart g z i p r * chartPartialBarComplex (fun v => T v r j k) z q) -
+        (∑ r, christoffelInChart g z r p j * chartPartialBarComplex (fun v => T v i r k) z q) -
+        ∑ r, christoffelInChart g z r p k * chartPartialBarComplex (fun v => T v i j r) z q =
+      wirtingerDerivInChart (fun w => chartPartialBarComplex (fun v => T v i j k) w q) z p +
         ∑ s, G s z * chartPartialBarComplex (V s) z q
     simp [G, V, ι, Fintype.sum_sum_type, Finset.sum_neg_distrib]
     ring
@@ -204,17 +204,17 @@ private theorem c3TensorCovariantZ_bar_commutator
   rw [hdecompFun, hcomm, ← hbarcov]
   have hnegj (r : Fin n) :
       chartPartialBarComplex
-          (fun w => -c3ChristoffelInChart g w r p j) z q =
+          (fun w => -christoffelInChart g w r p j) z q =
         -chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w r p j) z q :=
-    c3Pair_bar_neg (fun w => c3ChristoffelInChart g w r p j) z q
+          (fun w => christoffelInChart g w r p j) z q :=
+    c3Pair_bar_neg (fun w => christoffelInChart g w r p j) z q
       ((hΓ r p j).differentiableAt (by simp))
   have hnegk (r : Fin n) :
       chartPartialBarComplex
-          (fun w => -c3ChristoffelInChart g w r p k) z q =
+          (fun w => -christoffelInChart g w r p k) z q =
         -chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w r p k) z q :=
-    c3Pair_bar_neg (fun w => c3ChristoffelInChart g w r p k) z q
+          (fun w => christoffelInChart g w r p k) z q :=
+    c3Pair_bar_neg (fun w => christoffelInChart g w r p k) z q
       ((hΓ r p k).differentiableAt (by simp))
   simp [G, V, ι, Fintype.sum_sum_type, Finset.sum_neg_distrib,
     hnegj, hnegk]
@@ -230,7 +230,7 @@ private theorem c3PerturbedMetric_barChristoffel
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (i p r q : Fin n) :
     chartPartialBarComplex
-        (fun w => c3ChristoffelInChart (c3PerturbedMetricInChart ω₀ φ x) w i p r) z q =
+        (fun w => christoffelInChart (c3PerturbedMetricInChart ω₀ φ x) w i p r) z q =
       -(∑ l, (c3PerturbedMetricInChart ω₀ φ x z)⁻¹ l i *
         chartCurvature (c3PerturbedMetricInChart ω₀ φ x) z p q r l) := by
   let U := (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target
@@ -248,26 +248,12 @@ private theorem c3PerturbedMetric_barChristoffel
     intro a b
     exact (ωφ.contDiffOn_metricInChart x a b).congr
       (fun w hw => congrArg (fun G : Matrix (Fin n) (Fin n) ℂ => G a b) (heq hw))
-  have hK : ∀ w ∈ U, ∀ a b c,
-      chartPartialZComplex (fun v => gφ v b c) w a =
-        chartPartialZComplex (fun v => gφ v a c) w b := by
-    intro w hw a b c
-    have hnhds : U ∈ nhds w := hU.mem_nhds hw
-    have hentry (s t : Fin n) :
-        (fun v => gφ v s t) =ᶠ[nhds w] (fun v => ωφ.metricInChart x v s t) := by
-      filter_upwards [hnhds] with v hv
-      exact congrArg (fun G : Matrix (Fin n) (Fin n) ℂ => G s t) (heq hv)
-    have hleft := (hentry b c).fderiv_eq (𝕜 := ℝ)
-    have hright := (hentry a c).fderiv_eq (𝕜 := ℝ)
-    unfold chartPartialZComplex
-    rw [hleft, hright]
-    exact ωφ.kahler_chart_metric_symmetry x hw a b c
   have hdet : IsUnit (gφ z).det := by
     rw [heq hz]
     exact (Matrix.isUnit_iff_isUnit_det (A := ωφ.metricInChart x z)).mp
       (ωφ.posDef_metricInChart x hz).isUnit
   have hresult := chartChristoffel_bar_eq_curvature_local
-    gφ U hU hg hK z hz hdet i p r q
+    gφ U hU hg z hz hdet i p r q
   change chartPartialBarComplex
       (fun w => ∑ l, (gφ w)⁻¹ l i *
         chartPartialZComplex (fun v => gφ v r l) w p) z q =
@@ -315,14 +301,6 @@ private theorem c3Pair_fintype_sum_mul {α : Type*} [Fintype α]
   classical
   exact Finset.sum_mul Finset.univ f a
 
-private theorem c3Pair_sum_scalar_left_right {n : ℕ}
-    (a t : ℂ) (f : Fin n → ℂ) :
-    (a * (∑ l, f l)) * t = ∑ l, (a * f l) * t := by
-  rw [mul_assoc, c3Pair_fintype_sum_mul, c3Pair_fintype_mul_sum]
-  congr 1
-  funext l
-  rw [mul_assoc]
-
 private theorem c3Pair_sum_neg_scalar_left_right {n : ℕ}
     (a t : ℂ) (f : Fin n → ℂ) :
     a * ((-(∑ l, f l)) * t) = ∑ l, -((a * f l) * t) := by
@@ -352,15 +330,15 @@ private theorem c3RicciTensorAction_eq_barChristoffel_contraction
     (z : EuclideanSpace ℂ (Fin n)) (i j k : Fin n)
     (hbar : ∀ a b c q,
       chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w a b c) z q =
+          (fun w => christoffelInChart g w a b c) z q =
         -(∑ l, (g z)⁻¹ l a * chartCurvature g z b q c l)) :
     (∑ p, ∑ q, (g z)⁻¹ q p *
       ((∑ r, chartPartialBarComplex
-        (fun w => c3ChristoffelInChart g w i p r) z q * T r j k) -
+        (fun w => christoffelInChart g w i p r) z q * T r j k) -
        (∑ r, chartPartialBarComplex
-        (fun w => c3ChristoffelInChart g w r p j) z q * T i r k) -
+        (fun w => christoffelInChart g w r p j) z q * T i r k) -
        ∑ r, chartPartialBarComplex
-        (fun w => c3ChristoffelInChart g w r p k) z q * T i j r)) =
+        (fun w => christoffelInChart g w r p k) z q * T i j r)) =
       c3RicciTensorAction g T z i j k := by
   classical
   simp_rw [hbar]
@@ -474,7 +452,7 @@ theorem c3ConnectionTensorLaplacian_commutator (ω₀ : KahlerForm n M)
         c3ConnectionTensorLaplacian ω₀ φ x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) i j k +
           c3RicciTensorAction (c3PerturbedMetricInChart ω₀ φ x)
-            (c3ConnectionDifferenceInChart ω₀ φ x
+            (connectionDifferenceInChart ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) i j k := by
   classical
@@ -482,13 +460,13 @@ theorem c3ConnectionTensorLaplacian_commutator (ω₀ : KahlerForm n M)
   let U := e.target
   let z := e x
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   funext i j k
   have hz : z ∈ U := by
     dsimp [z, U, e]
     exact mem_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x
   have hGamma (a b c : Fin n) :
-      ContDiffAt ℝ ∞ (fun w => c3ChristoffelInChart g w a b c) z := by
+      ContDiffAt ℝ ∞ (fun w => christoffelInChart g w a b c) z := by
     let ωφ := ω₀.perturb φ hφ
     let gφ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
       fun w => ω₀.metricInChart x w + complexHessian (φ ∘ e.symm) w
@@ -517,7 +495,7 @@ theorem c3ConnectionTensorLaplacian_commutator (ω₀ : KahlerForm n M)
       exact (Matrix.isUnit_iff_isUnit_det (A := ωφ.metricInChart x z)).mp
         (ωφ.posDef_metricInChart x hz).isUnit
     have hGammaAt : ContDiffAt ℝ ∞
-        (fun w => c3ChristoffelInChart gφ w a b c) z := by
+        (fun w => christoffelInChart gφ w a b c) z := by
       have hinv (l : Fin n) : ContDiffAt ℝ ∞
           (fun w => (gφ w)⁻¹ l a) z :=
         c3Ricci_inverse_entry_contDiffAt gφ z hGAt hdet l a
@@ -528,23 +506,23 @@ theorem c3ConnectionTensorLaplacian_commutator (ω₀ : KahlerForm n M)
             (fderiv ℝ (fun v => gφ v c l)) z := hmetric.fderiv_right (by simp)
         unfold chartPartialZComplex
         fun_prop (disch := assumption)
-      unfold c3ChristoffelInChart
+      unfold christoffelInChart
       apply ContDiffAt.sum
       intro l hl
       have hpartial : ContDiffAt ℝ ∞
-          (fun w => c3PartialZ (fun v => gφ v c l) w b) z := by
+          (fun w => wirtingerDerivInChart (fun v => gφ v c l) w b) z := by
         change ContDiffAt ℝ ∞
           (fun w => chartPartialZComplex (fun v => gφ v c l) w b) z
         exact hpart l
       exact (hinv l).mul hpartial
-    change ContDiffAt ℝ ∞ (fun w => c3ChristoffelInChart g w a b c) z
+    change ContDiffAt ℝ ∞ (fun w => christoffelInChart g w a b c) z
     exact hGammaAt
   have hT (a b c : Fin n) :
       ContDiffAt ℝ ∞ (fun w => T w a b c) z :=
     c3ConnectionDifference_contDiffAt ω₀ φ hφ x z hz a b c
   have hbar : ∀ a b c q,
       chartPartialBarComplex
-          (fun w => c3ChristoffelInChart g w a b c) z q =
+          (fun w => christoffelInChart g w a b c) z q =
         -(∑ l, (g z)⁻¹ l a * chartCurvature g z b q c l) := by
     intro a b c q
     exact c3PerturbedMetric_barChristoffel ω₀ φ hφ x z hz a b c q
@@ -554,11 +532,11 @@ theorem c3ConnectionTensorLaplacian_commutator (ω₀ : KahlerForm n M)
     c3TensorCovariantZ_bar_commutator g T z p q i j k hT hGamma
   let C : Fin n → Fin n → ℂ := fun p q =>
     (∑ r, chartPartialBarComplex
-      (fun w => c3ChristoffelInChart g w i p r) z q * T z r j k) -
+      (fun w => christoffelInChart g w i p r) z q * T z r j k) -
     (∑ r, chartPartialBarComplex
-      (fun w => c3ChristoffelInChart g w r p j) z q * T z i r k) -
+      (fun w => christoffelInChart g w r p j) z q * T z i r k) -
     ∑ r, chartPartialBarComplex
-      (fun w => c3ChristoffelInChart g w r p k) z q * T z i j r
+      (fun w => christoffelInChart g w r p k) z q * T z i j r
   have hcomm' (p q : Fin n) :
       chartPartialBarComplex (fun w => c3TensorCovariantZ g T w p i j k) z q =
         c3TensorCovariantZ g
@@ -569,11 +547,11 @@ theorem c3ConnectionTensorLaplacian_commutator (ω₀ : KahlerForm n M)
             (fun w a b c => c3PartialBar (fun v => T v a b c) w q)
             z p i j k +
           (∑ r, chartPartialBarComplex
-            (fun w => c3ChristoffelInChart g w i p r) z q * T z r j k) -
+            (fun w => christoffelInChart g w i p r) z q * T z r j k) -
           (∑ r, chartPartialBarComplex
-            (fun w => c3ChristoffelInChart g w r p j) z q * T z i r k) -
+            (fun w => christoffelInChart g w r p j) z q * T z i r k) -
           ∑ r, chartPartialBarComplex
-            (fun w => c3ChristoffelInChart g w r p k) z q * T z i j r := hcomm p q
+            (fun w => christoffelInChart g w r p k) z q * T z i j r := hcomm p q
       _ = _ := by simp [C]; ring
   have hcontract : (∑ p, ∑ q, (g z)⁻¹ q p * C p q) =
       c3RicciTensorAction g (T z) z i j k := by

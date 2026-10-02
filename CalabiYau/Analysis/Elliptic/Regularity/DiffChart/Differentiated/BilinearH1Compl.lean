@@ -17,7 +17,7 @@ namespace Laplacian
 namespace DiffChartBilinearH1Compl
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -43,7 +43,6 @@ def densityDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l 1)
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -66,7 +65,6 @@ lemma weightedInvGramDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma densityDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -88,7 +86,6 @@ lemma densityDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma densityDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -106,15 +103,15 @@ structure DiffChartBilinearH1ComplData
   fChartDeriv : EuclN → ℝ
   weakPartialDeriv : Fin (Module.finrank ℝ E) → EuclN → ℝ
   u_chart_deriv_isWeakPartial :
-    DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
       uChartDeriv base.uChart
       (chartTargetEuclid (I := I) (M := M) α)
   f_chart_deriv_isWeakPartial :
-    DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
       fChartDeriv base.fChart
       (chartTargetEuclid (I := I) (M := M) α)
   weak_partial_deriv_isWeakPartial :
-    ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
+    ∀ i, Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
       (weakPartialDeriv i) (base.weakPartial i)
       (chartTargetEuclid (I := I) (M := M) α)
   u_chart_deriv_locally_memLp :
@@ -162,44 +159,6 @@ structure DiffChartBilinearH1ComplData
           base.fChart y * ψ y
         ∂(volume : Measure EuclN))
 
-omit [NeZero (Module.finrank ℝ E)] in
-theorem differentiated_chart_bilinear_identity
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α)
-    {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    (hψ_cs : HasCompactSupport ψ)
-    (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      (∑ i : Fin (Module.finrank ℝ E),
-        ∑ j : Fin (Module.finrank ℝ E),
-          weightedInvGramOnEuclid (I := I) g α i j y *
-            D.weakPartialDeriv i y *
-            (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
-      ∂(volume : Measure EuclN)) +
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      densityOnEuclid (I := I) g α y * D.uChartDeriv y * ψ y
-      ∂(volume : Measure EuclN)) =
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      densityOnEuclid (I := I) g α y * D.fChartDeriv y * ψ y
-      ∂(volume : Measure EuclN)) -
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      (∑ i : Fin (Module.finrank ℝ E),
-        ∑ j : Fin (Module.finrank ℝ E),
-          weightedInvGramDerivOnEuclid (I := I) g α i j D.direction y *
-            D.base.weakPartial i y *
-            (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
-      ∂(volume : Measure EuclN)) -
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      densityDerivOnEuclid (I := I) g α D.direction y *
-        D.base.uChart y * ψ y
-      ∂(volume : Measure EuclN)) +
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      densityDerivOnEuclid (I := I) g α D.direction y *
-        D.base.fChart y * ψ y
-      ∂(volume : Measure EuclN)) :=
-  D.differentiated_variational_identity ψ hψ hψ_cs hψ_support
-
 abbrev base
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -211,29 +170,6 @@ abbrev direction
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.direction
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem base_chart_bilinear_identity
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α)
-    {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    (hψ_cs : HasCompactSupport ψ)
-    (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      (∑ i : Fin (Module.finrank ℝ E),
-        ∑ j : Fin (Module.finrank ℝ E),
-          weightedInvGramOnEuclid (I := I) g α i j y *
-            D.base.weakPartial i y *
-            (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
-      ∂(volume : Measure EuclN)) +
-    (∫ y in chartTargetEuclid (I := I) (M := M) α,
-      densityOnEuclid (I := I) g α y * D.base.uChart y * ψ y
-      ∂(volume : Measure EuclN)) =
-    ∫ y in chartTargetEuclid (I := I) (M := M) α,
-      densityOnEuclid (I := I) g α y * D.base.fChart y * ψ y
-      ∂(volume : Measure EuclN) :=
-  D.base.variational_identity ψ hψ hψ_cs hψ_support
 
 end DiffChartBilinearH1Compl
 end Laplacian

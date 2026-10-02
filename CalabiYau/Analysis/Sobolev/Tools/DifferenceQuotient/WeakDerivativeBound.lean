@@ -13,11 +13,10 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_local
     {v : EuclN → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {Ω' Ω'' : Set EuclN}
@@ -197,7 +196,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
             ∂(volume : Measure EuclN) := h_outer_const
     _ = ∫⁻ y in Ω', FF y ∂(volume : Measure EuclN) := h_indicator_to_restrict
 
-omit [NeZero d] in
 private lemma eLpNorm_two_restrict_le_of_sup_bound
     {K : Set EuclN} (hK_meas : MeasurableSet K)
     {f : EuclN → ℝ} {C : ℝ} (hf : ∀ x ∈ K, ‖f x‖ ≤ C) :
@@ -223,7 +221,6 @@ private lemma eLpNorm_two_restrict_le_of_sup_bound
   rw [h_pow_eq] at h_bound
   exact h_bound
 
-omit [NeZero d] in
 private lemma tendsto_eLpNorm_restrict_of_tendstoUniformlyOn
     {ι : Type*} {l : Filter ι}
     {K : Set EuclN} (hK_meas : MeasurableSet K)
@@ -286,7 +283,6 @@ private lemma tendsto_eLpNorm_restrict_of_tendstoUniformlyOn
   filter_upwards [h_eventual_bound ε₀ hε₀_pos] with i hi
   exact hi.trans hε₀_le
 
-omit [NeZero d] in
 private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -327,7 +323,6 @@ private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
   rw [dist_comm]
   exact lt_of_le_of_lt h_bound h_half_lt
 
-omit [NeZero d] in
 private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSupport
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -358,7 +353,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSuppo
       hφ_cont hφ_uc
   exact tendsto_eLpNorm_restrict_of_tendstoUniformlyOn hK_meas hK_volume_finite h_uniform
 
-omit [NeZero d] in
 private lemma mollifyEps_sub_eq_mollifyEps_sub
     {ε : ℝ} (hε : 0 < ε) {f g : EuclN → ℝ}
     (hf_local : LocallyIntegrable f (volume : Measure EuclN))
@@ -396,7 +390,6 @@ private lemma mollifyEps_sub_eq_mollifyEps_sub
   simp [Pi.sub_apply]
   ring
 
-omit [NeZero d] in
 private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -520,7 +513,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
   refine (add_le_add (add_le_add h_f1_le h_f2_le) h_f3_le).trans ?_
   rw [h_sum]
 
-omit [NeZero d] in
 private lemma eLpNorm_le_of_eLpNorm_sub_le
     {μ : Measure EuclN} {f g : EuclN → ℝ}
     (hf_aestron : AEStronglyMeasurable f μ)
@@ -535,7 +527,6 @@ private lemma eLpNorm_le_of_eLpNorm_sub_le
   rw [add_comm]
   exact add_le_add le_rfl h_le
 
-omit [NeZero d] in
 private lemma eLpNorm_sq_le_of_eLpNorm_sub_le
     {μ : Measure EuclN} {f g : EuclN → ℝ}
     (hf_aestron : AEStronglyMeasurable f μ)
@@ -545,7 +536,6 @@ private lemma eLpNorm_sq_le_of_eLpNorm_sub_le
     eLpNorm f 2 μ ^ 2 ≤ (eLpNorm g 2 μ + δ) ^ 2 :=
   pow_le_pow_left' (eLpNorm_le_of_eLpNorm_sub_le hf_aestron hg_aestron h_le) 2
 
-omit [NeZero d] in
 private lemma lintegral_enorm_sq_eq_eLpNorm_sq
     {μ : Measure EuclN} (f : EuclN → ℝ) :
     ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ = (eLpNorm f 2 μ) ^ 2 := by
@@ -564,12 +554,11 @@ private lemma lintegral_enorm_sq_eq_eLpNorm_sq
   rw [← ENNReal.rpow_mul]
   norm_num
 
-omit [NeZero d] in
 private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
     (hg_k_l2 : MemLp g_k 2 (volume : Measure EuclN))
-    (k : Fin d) (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) k g_k u Set.univ)
+    (k : Fin d) (hwp : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) k g_k u Set.univ)
     {Ω' Ω'' : Set EuclN}
     (_hΩ'_meas : MeasurableSet Ω') (hΩ''_meas : MeasurableSet Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))
@@ -845,12 +834,11 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
             h_lint_eq_eLpNorm_sq_g.symm
     _ ≤ ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) := h_K_to_Ω'
 
-omit [NeZero d] in
 theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
     (hg_k_l2 : MemLp g_k 2 (volume : Measure EuclN))
-    (k : Fin d) (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) k g_k u Set.univ)
+    (k : Fin d) (hwp : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) k g_k u Set.univ)
     {Ω' Ω'' : Set EuclN}
     (hΩ'_meas : MeasurableSet Ω') (hΩ''_meas : MeasurableSet Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))

@@ -45,7 +45,7 @@ theorem c3RefinedTrace_normalTraceHessian_identity
     (hh : ∀ i j, ContDiffAt ℝ ∞ (fun w ↦ h w i j) z)
     (hG : ContDiffAt ℝ ∞ G z)
     (hNormal : g z = 1)
-    (hFirst : ∀ i j p, c3PartialZ (fun w ↦ g w i j) z p = 0)
+    (hFirst : ∀ i j p, wirtingerDerivInChart (fun w ↦ g w i j) z p = 0)
     (hDiagonal : h z = Matrix.diagonal (fun i ↦ (lam i : ℂ)))
     (hPositive : ∀ i, 0 < lam i)
     (hLocal : ∃ U : Set (EuclideanSpace ℂ (Fin n)),
@@ -56,12 +56,12 @@ theorem c3RefinedTrace_normalTraceHessian_identity
       c3RefinedTraceMatrixMixedPartial h z p p j j =
         c3RefinedTraceMatrixMixedPartial h z j j p p) :
     RCLike.re (((h z)⁻¹ * Matrix.of (fun p q ↦
-        c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+        wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
           (fun v ↦ c3RefinedTraceRelativeMatrixTrace g h v) w q) z p)).trace) =
       (∑ p : Fin n,
-        RCLike.re (c3PartialZ (fun w ↦ c3RefinedTracePartialBar G w p) z p)) +
+        RCLike.re (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar G w p) z p)) +
       (∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-        ‖c3PartialZ (fun w ↦ h w j k) z p‖ ^ (2 : ℕ) /
+        ‖wirtingerDerivInChart (fun w ↦ h w j k) z p‖ ^ (2 : ℕ) /
           (lam j * lam k)) +
       (∑ p : Fin n, ∑ j : Fin n,
         (lam j / lam p - 1) *

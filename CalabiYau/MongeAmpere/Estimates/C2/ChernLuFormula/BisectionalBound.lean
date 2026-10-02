@@ -68,7 +68,7 @@ theorem exists_normalFrame_bisectional_lower_bound (ω₀ : KahlerForm n M) :
     F.maps_into_chart F.center F.center_mem
   have hGdet : IsUnit (ω₀.metricInChart x (F.map F.center)).det :=
     (ne_of_gt (ω₀.posDef_metricInChart x hcenter).det_pos).isUnit
-  have horth : referenceOrthonormalFrameMatrix ω₀ x J := by
+  have horth : IsReferenceOrthonormalFrame ω₀ x J := by
     have hnorm := F.reference_normalized
     change Matrix.transpose (holomorphicJacobianMatrix F.map F.center) *
       ω₀.metricInChart x (F.map F.center) *
@@ -77,7 +77,7 @@ theorem exists_normalFrame_bisectional_lower_bound (ω₀ : KahlerForm n M) :
     change Matrix.transpose J *
       ω₀.metricInChart x (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) *
         J.map star = 1
-    simpa [referenceOrthonormalFrameMatrix, J] using hnorm
+    simpa [IsReferenceOrthonormalFrame, J] using hnorm
   have hg' (a b : Fin n) :
       ContDiffOn ℝ ∞ (fun z ↦ ω₀.metricInChart x z a b) (F.map '' F.domain) := by
     apply (ω₀.contDiffOn_metricInChart x a b).mono
@@ -104,7 +104,7 @@ theorem exists_normalFrame_bisectional_lower_bound (ω₀ : KahlerForm n M) :
     have h := chartCurvature_pullback F.domain F.isOpen_domain F.map
       F.smooth_map F.holomorphic_map
       (fun z ↦ pulledBackMetricInChart ω₀ x F.map z)
-      (fun z ↦ ω₀.metricInChart x z) hg' hmetric hkahler
+      (fun z ↦ ω₀.metricInChart x z) hg' hmetric
       F.center F.center_mem hJdet hGdet p p j j
     simpa [referenceCurvatureComponent, J, holomorphicJacobianMatrix,
       F.center_eq_chart_center] using h

@@ -5,8 +5,6 @@ public import CalabiYau.Analysis.Sobolev.Tools.Convolution
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -29,9 +27,6 @@ private lemma restrict_mem_Icc_of_abs_le
   have hbd := hf_bdd n (x : E)
   rcases abs_le.mp hbd with ⟨hL, hR⟩
   exact ⟨hL, hR⟩
-
-omit [NeZero d] in
-private lemma C_nonneg_of_pos {C : ℝ} (hC : 0 < C) : 0 ≤ C := hC.le
 
 omit [NeZero d] in
 theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded

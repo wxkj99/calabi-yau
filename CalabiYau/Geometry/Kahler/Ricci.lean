@@ -4,7 +4,7 @@ public import CalabiYau.Geometry.Kahler.Basic
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-import CalabiYau.Analysis.Complex.JacobianLogNorm
+import CalabiYau.Mathlib.Analysis.Complex.JacobianLogNorm
 
 /-!
 # The Ricci form and the first Chern class

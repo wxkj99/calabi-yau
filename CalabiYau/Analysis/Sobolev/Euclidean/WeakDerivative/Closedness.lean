@@ -6,8 +6,6 @@ public import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -17,9 +15,13 @@ open scoped ENNReal NNReal
 namespace Sobolev
 namespace Euclidean
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
+section
+
+variable [NeZero d]
+
 
 private def conj (p : ℝ≥0∞) : ℝ≥0∞ := (1 - p⁻¹)⁻¹
 
@@ -36,14 +38,14 @@ private theorem holderConjugate_conj (p : ℝ≥0∞) (hp : 1 ≤ p) :
     simp only [inv_one]
     exact conj_inv_add_inv_eq_one hp
 
-omit [NeZero d] in
+end
+
 private lemma memLp_of_contDiff_hasCompactSupport
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_support : HasCompactSupport φ)
     (Ω : Set E) (q : ℝ≥0∞) :
     MemLp φ q (volume.restrict Ω) :=
   (hφ.continuous.memLp_of_hasCompactSupport hφ_support).restrict _
 
-omit [NeZero d] in
 private lemma fderiv_apply_memLp
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_support : HasCompactSupport φ)
     (v : E) (Ω : Set E) (q : ℝ≥0∞) :
@@ -55,7 +57,6 @@ private lemma fderiv_apply_memLp
     hφ_support.fderiv_apply (𝕜 := ℝ) v
   exact (hcont.memLp_of_hasCompactSupport hcpt).restrict _
 
-omit [NeZero d] in
 private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     {μ : Measure E} {f g : E → ℝ} {p q : ℝ≥0∞}
     [ENNReal.HolderConjugate p q]
@@ -91,7 +92,6 @@ private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     _ ≤ eLpNorm g q μ * eLpNorm f p μ := h_smul_bound
     _ = eLpNorm f p μ * eLpNorm g q μ := mul_comm _ _
 
-omit [NeZero d] in
 private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     {μ : Measure E} {p q : ℝ≥0∞}
     [ENNReal.HolderConjugate p q]
@@ -137,7 +137,6 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     exact squeeze_zero h_ge h_le_real h_rhs_real_tendsto
   exact (tendsto_zero_iff_abs_tendsto_zero _).2 h_abs_tendsto
 
-omit [NeZero d] in
 theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E}
@@ -148,14 +147,14 @@ theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     (hg_n_lp : ∀ n, MemLp (g_n n) p (volume.restrict Ω))
     (hu_lp : MemLp u p (volume.restrict Ω))
     (hg_lp : MemLp g p (volume.restrict Ω))
-    (h_weak : ∀ n, DeGiorgi.HasWeakPartialDeriv i (g_n n) (u_n n) Ω)
+    (h_weak : ∀ n, Sobolev.Euclidean.HasWeakPartialDeriv i (g_n n) (u_n n) Ω)
     (h_u_tendsto : Tendsto
       (fun n => eLpNorm (fun x => u_n n x - u x) p (volume.restrict Ω))
       atTop (𝓝 0))
     (h_g_tendsto : Tendsto
       (fun n => eLpNorm (fun x => g_n n x - g x) p (volume.restrict Ω))
       atTop (𝓝 0)) :
-    DeGiorgi.HasWeakPartialDeriv i g u Ω := by
+    Sobolev.Euclidean.HasWeakPartialDeriv i g u Ω := by
   intro φ hφ hφ_support hφ_sub
   let μ : Measure E := volume.restrict Ω
   let dφ : E → ℝ := fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)
@@ -249,13 +248,12 @@ theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     -∫ x in Ω, g x * φ x
   simpa [dφ] using h_unique
 
-omit [NeZero d] in
 private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
     {u_n : ℕ → E → ℝ} {u : E → ℝ}
     {g : Fin d → E → ℝ}
-    (hu_n_w1p : ∀ n, DeGiorgi.MemW1p p (u_n n) Ω)
+    (hu_n_w1p : ∀ n, Sobolev.Euclidean.MemW1p p (u_n n) Ω)
     (hu_lp : MemLp u p (volume.restrict Ω))
     (hg_lp : ∀ i, MemLp (g i) p (volume.restrict Ω))
     (h_u_tendsto : Tendsto
@@ -266,7 +264,7 @@ private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
         (fun x => chosenWeakPartialOrZero p i (u_n n) Ω x - g i x)
         p (volume.restrict Ω))
       atTop (𝓝 0)) :
-    DeGiorgi.MemW1p p u Ω ∧
+    Sobolev.Euclidean.MemW1p p u Ω ∧
       ∀ i, chosenWeakPartialOrZero p i u Ω =ᵐ[volume.restrict Ω] g i := by
   classical
   have h_chosen_lp : ∀ n i,
@@ -274,19 +272,19 @@ private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     fun n i => chosenWeakPartialOrZero_memLp_of_mem (hu_n_w1p n) i
   have hu_n_lp : ∀ n, MemLp (u_n n) p (volume.restrict Ω) :=
     fun n => (hu_n_w1p n).1
-  have h_weak_g : ∀ i, DeGiorgi.HasWeakPartialDeriv i (g i) u Ω := by
+  have h_weak_g : ∀ i, Sobolev.Euclidean.HasWeakPartialDeriv i (g i) u Ω := by
     intro i
     refine hasWeakPartialDeriv_of_tendsto_eLpNorm hp_one i
       hu_n_lp (fun n => h_chosen_lp n i) hu_lp (hg_lp i) ?_ h_u_tendsto (h_partial_tendsto i)
     intro n
     exact chosenWeakPartialOrZero_isWeakPartial_of_mem (hu_n_w1p n) i
-  have hu_w1p : DeGiorgi.MemW1p p u Ω := by
+  have hu_w1p : Sobolev.Euclidean.MemW1p p u Ω := by
     refine ⟨hu_lp, ?_⟩
     intro i
     exact ⟨g i, hg_lp i, h_weak_g i⟩
   refine ⟨hu_w1p, ?_⟩
   intro i
-  have h_chosen_weak : DeGiorgi.HasWeakPartialDeriv i
+  have h_chosen_weak : Sobolev.Euclidean.HasWeakPartialDeriv i
       (chosenWeakPartialOrZero p i u Ω) u Ω :=
     chosenWeakPartialOrZero_isWeakPartial_of_mem hu_w1p i
   have h_chosen_local : LocallyIntegrable (chosenWeakPartialOrZero p i u Ω)
@@ -294,9 +292,8 @@ private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     (chosenWeakPartialOrZero_memLp_of_mem hu_w1p i).locallyIntegrable hp_one
   have hg_local : LocallyIntegrable (g i) (volume.restrict Ω) :=
     (hg_lp i).locallyIntegrable hp_one
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ h_chosen_weak (h_weak_g i) h_chosen_local hg_local
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ h_chosen_weak (h_weak_g i) h_chosen_local hg_local
 
-omit [NeZero d] in
 theorem MemWkp_of_iter_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -330,7 +327,7 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
         subst hβ
         rfl
   | succ k ih =>
-      have hu_n_w1p : ∀ n, DeGiorgi.MemW1p p (u_n n) Ω := fun n =>
+      have hu_n_w1p : ∀ n, Sobolev.Euclidean.MemW1p p (u_n n) Ω := fun n =>
         (hu_n_mem n).memW1p
       have hu_lp : MemLp (v 0 ![]) p (volume.restrict Ω) :=
         hv_lp 0 ![] (Nat.zero_le _)

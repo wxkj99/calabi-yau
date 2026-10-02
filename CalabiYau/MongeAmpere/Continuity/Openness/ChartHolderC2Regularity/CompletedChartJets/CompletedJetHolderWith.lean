@@ -24,6 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
 omit [CompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 /-- On a fixed compact chart piece, every completed jet through order two is bounded by the
 completion norm, and the completed order-two jet retains the full Holder seminorm with that same
 constant. The statement is conditional on the supplied normed data and includes α = 0. -/
@@ -36,9 +37,9 @@ theorem smoothChartHolderCompletedJetHolderWith
     HolderWith ‖u‖₊ α
       (fun z : cover.piece i =>
         smoothChartHolderJetCanonicalExtension cover 2 α N 2 le_rfl u i z) := by
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   let T := smoothChartHolderJetCanonicalContinuousLinearMap cover 2 α N 2 le_rfl
   let K := T.fromCompletion
@@ -50,9 +51,9 @@ theorem smoothChartHolderCompletedJetHolderWith
       Classical.choose_spec h |>.1
     change ‖smoothChartHolderJetContinuousLinearMap cover 2 α N 2 J hJ‖ ≤ 1
     dsimp [smoothChartHolderJetContinuousLinearMap]
-    letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+    let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
       smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-    letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+    let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
       smoothChartHolderCoreNormedSpace cover 2 α N
     exact LinearMap.mkContinuous_norm_le J zero_le_one (fun f => by
       calc

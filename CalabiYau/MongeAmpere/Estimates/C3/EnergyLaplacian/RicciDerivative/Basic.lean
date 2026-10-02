@@ -38,8 +38,8 @@ one antiholomorphic slot. There is no holomorphic connection on the latter. -/
 noncomputable def c3ReferenceCovariantTwoTensorZ (ω₀ : KahlerForm n M) (x : M)
     (Q : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (k j l : Fin n) : ℂ :=
-  c3PartialZ (fun w ↦ Q w j l) z k -
-    ∑ r, c3ChristoffelInChart (ω₀.metricInChart x) z r k j * Q z r l
+  wirtingerDerivInChart (fun w ↦ Q w j l) z k -
+    ∑ r, christoffelInChart (ω₀.metricInChart x) z r k j * Q z r l
 
 noncomputable def c3ForcingHessianInChart (G : M → ℝ) (x : M)
     (z : EuclideanSpace ℂ (Fin n)) : Matrix (Fin n) (Fin n) ℂ :=
@@ -47,21 +47,21 @@ noncomputable def c3ForcingHessianInChart (G : M → ℝ) (x : M)
 
 /-- Separate component bounds for the Hessian and its reference covariant
 holomorphic derivative, both evaluated in the specified (possibly fixed) chart. -/
-def c3ForcingFrameBound (ω₀ : KahlerForm n M) (G : M → ℝ) (x : M)
+def ForcingFrameBound (ω₀ : KahlerForm n M) (G : M → ℝ) (x : M)
     (z : EuclideanSpace ℂ (Fin n)) (P : Matrix (Fin n) (Fin n) ℂ) (A : ℝ) : Prop :=
   (∀ j l, ‖c3TwoCovariantFrame P (c3ForcingHessianInChart G x z) j l‖ ≤ A) ∧
   (∀ k j l, ‖c3ThreeCovariantFrame P
     (c3ReferenceCovariantTwoTensorZ ω₀ x (c3ForcingHessianInChart G x) z) k j l‖ ≤ A)
 
 omit [T2Space M] [CompactSpace M] in
-theorem c3ForcingFrameBound_mono (ω₀ : KahlerForm n M) (G : M → ℝ) (x : M)
+theorem ForcingFrameBound.mono (ω₀ : KahlerForm n M) (G : M → ℝ) (x : M)
     (z : EuclideanSpace ℂ (Fin n)) (P : Matrix (Fin n) (Fin n) ℂ)
-    {A B : ℝ} (h : c3ForcingFrameBound ω₀ G x z P A) (hAB : A ≤ B) :
-    c3ForcingFrameBound ω₀ G x z P B :=
+    {A B : ℝ} (h : ForcingFrameBound ω₀ G x z P A) (hAB : A ≤ B) :
+    ForcingFrameBound ω₀ G x z P B :=
   ⟨fun j l ↦ (h.1 j l).trans hAB, fun k j l ↦ (h.2 k j l).trans hAB⟩
 
 /-- Corresponding bounds for the fixed reference Ricci tensor and its derivative. -/
-def c3ReferenceRicciFrameBound (ω₀ : KahlerForm n M) (x : M)
+def ReferenceRicciFrameBound (ω₀ : KahlerForm n M) (x : M)
     (z : EuclideanSpace ℂ (Fin n)) (P : Matrix (Fin n) (Fin n) ℂ) (A : ℝ) : Prop :=
   (∀ j l, ‖c3TwoCovariantFrame P (c3RicciInChart (ω₀.metricInChart x) z) j l‖ ≤ A) ∧
   (∀ k j l, ‖c3ThreeCovariantFrame P
@@ -74,7 +74,7 @@ noncomputable def c3RicciDerivativeError (ω₀ : KahlerForm n M)
     (G φ : M → ℝ) (x : M) : ℝ :=
   let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   let R := c3RicciInChart (ω₀.metricInChart x)
   let H := c3ForcingHessianInChart G x
   let D : Fin n → Fin n → Fin n → ℂ := fun i j k ↦

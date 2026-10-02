@@ -1,7 +1,18 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Euclidean/Embedding/Morrey/HigherOrder.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.Basic
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Witness
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.Ball
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.SobolevPoincare
+public import CalabiYau.Analysis.Sobolev.Euclidean.Ball.Approximation
+public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
+public import Mathlib.MeasureTheory.Covering.DensityTheorem
+public import Mathlib.MeasureTheory.Integral.Average
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.RieszKernel
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.SmoothHolderBound
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.SmoothInequality
 public import CalabiYau.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 
 @[expose] public section
@@ -19,11 +30,10 @@ open Sobolev.Euclidean Sobolev.EuclideanMorrey
 
 namespace EuclideanMorrey
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma euclideanSpace_coord_abs_le_norm (v : E) (i : Fin d) :
     |v i| ≤ ‖v‖ := by
   classical
@@ -44,21 +54,19 @@ private lemma euclideanSpace_coord_abs_le_norm (v : E) (i : Fin d) :
   rw [h_norm_eq, ← h_sqrt_sq]
   exact h_sqrt_le
 
+variable [NeZero d] in
 private def basisTuple {m : ℕ} (α : Fin m → Fin d) : Fin m → E :=
   fun i => EuclideanSpace.single (α i) 1
 
-omit [NeZero d] in
 private lemma basisTuple_norm_one {m : ℕ} (α : Fin m → Fin d) (i : Fin m) :
     ‖basisTuple α i‖ = 1 := by
   simp [basisTuple]
 
-omit [NeZero d] in
 private lemma basisTuple_prod_norms {m : ℕ} (α : Fin m → Fin d) :
     (∏ i : Fin m, ‖basisTuple α i‖) = 1 := by
   apply Finset.prod_eq_one
   intros i _; exact basisTuple_norm_one α i
 
-omit [NeZero d] in
 private lemma euclideanSpace_basis_expansion (v : E) :
     v = ∑ j : Fin d, v j • EuclideanSpace.single j (1 : ℝ) := by
   classical
@@ -86,7 +94,6 @@ private lemma euclideanSpace_basis_expansion (v : E) :
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [LinearEquiv.map_smul]
 
-omit [NeZero d] in
 private theorem opNorm_le_sum_basis
     {m : ℕ} (f : ContinuousMultilinearMap ℝ (fun _ : Fin m => E) ℝ) :
     ‖f‖ ≤ ∑ α : Fin m → Fin d, |f (basisTuple α)| := by
@@ -140,7 +147,6 @@ private theorem opNorm_le_sum_basis
   refine le_trans (Finset.sum_le_sum (fun α _ => h_each α)) ?_
   rw [← Finset.sum_mul]
 
-omit [NeZero d] in
 private lemma abs_apply_basisTuple_le_opNorm
     {m : ℕ} (f : ContinuousMultilinearMap ℝ (fun _ : Fin m => E) ℝ)
     (α : Fin m → Fin d) :
@@ -149,7 +155,6 @@ private lemma abs_apply_basisTuple_le_opNorm
   rw [basisTuple_prod_norms α, mul_one] at h
   exact h
 
-omit [NeZero d] in
 private theorem contDiff_iteratedFDeriv_apply_basisTuple
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) {m : ℕ} (α : Fin m → Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun y : E => (iteratedFDeriv ℝ m u y) (basisTuple α)) := by
@@ -161,13 +166,11 @@ private theorem contDiff_iteratedFDeriv_apply_basisTuple
     ContinuousMultilinearMap.apply ℝ (fun _ : Fin m => E) ℝ (basisTuple α)
   exact app.contDiff.comp h_iterFD
 
-omit [NeZero d] in
 private lemma abs_iteratedFDeriv_apply_basisTuple_le
     (u : E → ℝ) {m : ℕ} (α : Fin m → Fin d) (y : E) :
     |(iteratedFDeriv ℝ m u y) (basisTuple α)| ≤ ‖iteratedFDeriv ℝ m u y‖ :=
   abs_apply_basisTuple_le_opNorm _ α
 
-omit [NeZero d] in
 private theorem norm_fderiv_iteratedFDeriv_apply_basisTuple_le
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) {m : ℕ} (α : Fin m → Fin d) (y : E) :
     ‖fderiv ℝ (fun z : E => (iteratedFDeriv ℝ m u z) (basisTuple α)) y‖ ≤
@@ -215,7 +218,6 @@ private theorem norm_fderiv_iteratedFDeriv_apply_basisTuple_le
         mul_le_mul_of_nonneg_right h_app_norm_le (norm_nonneg _)
     _ = ‖iteratedFDeriv ℝ (m + 1) u y‖ := one_mul _
 
-omit [NeZero d] in
 private lemma eLpNorm_apply_basisTuple_le_eLpNorm_iteratedFDeriv
     (u : E → ℝ) (m : ℕ) {p_e : ℝ≥0∞} {μ : Measure E} (α : Fin m → Fin d) :
     eLpNorm (fun y : E => (iteratedFDeriv ℝ m u y) (basisTuple α)) p_e μ ≤
@@ -227,7 +229,6 @@ private lemma eLpNorm_apply_basisTuple_le_eLpNorm_iteratedFDeriv
     Real.norm_of_nonneg (norm_nonneg _)]
   exact abs_iteratedFDeriv_apply_basisTuple_le _ _ _
 
-omit [NeZero d] in
 private lemma eLpNorm_fderiv_apply_basisTuple_le_eLpNorm_iteratedFDeriv_succ
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (m : ℕ) {p_e : ℝ≥0∞} {μ : Measure E}
     (α : Fin m → Fin d) :
@@ -244,7 +245,6 @@ private lemma eLpNorm_fderiv_apply_basisTuple_le_eLpNorm_iteratedFDeriv_succ
     Real.norm_of_nonneg (norm_nonneg _)]
   exact norm_fderiv_iteratedFDeriv_apply_basisTuple_le hu α y
 
-omit [NeZero d] in
 private lemma smooth_iteratedFDeriv_norm_memLp_on_ball
     {p : ℝ} (_hp_pos : 0 < p) {x₀ : E} {R : ℝ} (_hR : 0 < R) (j : ℕ)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -270,7 +270,6 @@ private lemma smooth_iteratedFDeriv_norm_memLp_on_ball
     rw [norm_one, mul_one]
     exact hM y hy'
 
-omit [NeZero d] in
 private lemma smooth_iteratedFDeriv_norm_eLpNorm_ne_top
     {p : ℝ} (hp_pos : 0 < p) {x₀ : E} {R : ℝ} (hR : 0 < R) (j : ℕ)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -278,6 +277,7 @@ private lemma smooth_iteratedFDeriv_norm_eLpNorm_ne_top
       (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ :=
   (smooth_iteratedFDeriv_norm_memLp_on_ball hp_pos hR j hu).eLpNorm_ne_top
 
+variable [NeZero d] in
 theorem smooth_morrey_iteratedFDeriv_bound_uniform
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)
@@ -405,7 +405,6 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
     exact mul_le_mul_of_nonneg_left h_Nm_plus_Nm1_le_total hN_C₀_nn
   exact le_trans h_step1 h_step2
 
-omit [NeZero d] in
 private theorem exists_smooth_cutoff_outer
     {x₀ : E} {R : ℝ} (hR : 0 < R) :
     ∃ η : E → ℝ,
@@ -452,7 +451,6 @@ private theorem exists_smooth_cutoff_outer
   · intro x hx
     exact (hη_one_iff x).1 hx
 
-omit [NeZero d] in
 private theorem exists_smooth_cutoff_smaller
     {x₀ : E} {R : ℝ} (hR : 0 < R) :
     ∃ ψ : E → ℝ,
@@ -496,7 +494,6 @@ private theorem exists_smooth_cutoff_smaller
   · intro x hx
     exact (hψ_one_iff x).1 hx
 
-omit [NeZero d] in
 private lemma exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_compact : HasCompactSupport η)
     (m : ℕ) :
@@ -529,6 +526,10 @@ private lemma exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
   intro x j hj
   have hj_mem : j ∈ Finset.range (m + 1) := Finset.mem_range.mpr (Nat.lt_succ_of_le hj)
   exact le_trans (hCj_bound j x) (hC_ge j hj_mem)
+section
+
+variable [NeZero d]
+
 
 private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
     {p : ℝ} (hp : (d : ℝ) < p)
@@ -744,7 +745,8 @@ private theorem exists_smooth_approx_seq_of_memWkp
     hv_W, hv_support, hv_compact,
     hφ_smooth, hφ_compact, hφ_support, hφ_close⟩
 
-omit [NeZero d] in
+end
+
 private lemma norm_iteratedFDeriv_mul_left_bound
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_compact : HasCompactSupport ψ)
@@ -816,6 +818,10 @@ private lemma norm_iteratedFDeriv_mul_left_bound
         rw [h_reindex]
     _ = (Cψ * 2 ^ m) *
           ∑ i ∈ Finset.range (j + 1), ‖iteratedFDeriv ℝ i f x‖ := by ring
+section
+
+variable [NeZero d]
+
 
 private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
     {p : ℝ} (hp : (d : ℝ) < p)
@@ -904,7 +910,8 @@ private noncomputable def cauchyIteratedLimit
     E → ContinuousMultilinearMap ℝ (fun _ : Fin j => E) ℝ :=
   fun x => Classical.choose (cauchySeq_tendsto_of_complete (h_cauchy x))
 
-omit [NeZero d] in
+end
+
 private lemma cauchyIteratedLimit_tendsto
     {j : ℕ} {g : ℕ → E → ℝ}
     (h_cauchy : ∀ x : E, CauchySeq (fun n => iteratedFDeriv ℝ j (g n) x))
@@ -913,7 +920,6 @@ private lemma cauchyIteratedLimit_tendsto
       (𝓝 (cauchyIteratedLimit j g h_cauchy x)) :=
   Classical.choose_spec (cauchySeq_tendsto_of_complete (h_cauchy x))
 
-omit [NeZero d] in
 private lemma cauchy_at_of_uniformCauchy
     {j : ℕ} {g : ℕ → E → ℝ}
     (h_uniform_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
@@ -927,7 +933,6 @@ private lemma cauchy_at_of_uniformCauchy
   rw [dist_eq_norm]
   exact lt_of_le_of_lt (hN n n' hn hn' x) (by linarith)
 
-omit [NeZero d] in
 private lemma cauchyIteratedLimit_tendstoUniformly
     {j : ℕ} {g : ℕ → E → ℝ}
     (h_uniform_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
@@ -972,7 +977,6 @@ noncomputable def cauchyLimitFun
       rw [dist_eq_norm]
       exact lt_of_le_of_lt (hN n n' hn hn' x) (by linarith)))
 
-omit [NeZero d] in
 lemma cauchyLimitFun_tendsto
     {g : ℕ → E → ℝ}
     (h_uniform_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
@@ -991,31 +995,6 @@ lemma cauchyLimitFun_tendsto
   unfold cauchyLimitFun
   exact h_spec
 
-omit [NeZero d] in
-private lemma cauchyLimitFun_tendstoUniformly
-    {g : ℕ → E → ℝ}
-    (h_uniform_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
-      ‖g n x - g n' x‖ ≤ ε) :
-    TendstoUniformly g (cauchyLimitFun g h_uniform_cauchy) Filter.atTop := by
-  rw [Metric.tendstoUniformly_iff]
-  intro ε hε
-  obtain ⟨N, hN⟩ := h_uniform_cauchy (ε / 2) (half_pos hε)
-  refine Filter.eventually_atTop.mpr ⟨N, fun n hn x => ?_⟩
-  set Lx := cauchyLimitFun g h_uniform_cauchy x with hLx_def
-  have h_limit_norm :
-      Filter.Tendsto
-        (fun n' => ‖g n x - g n' x‖) Filter.atTop
-        (𝓝 ‖g n x - Lx‖) :=
-    (continuous_norm.tendsto _).comp
-      (tendsto_const_nhds.sub (cauchyLimitFun_tendsto h_uniform_cauchy x))
-  have h_eventually : ∀ᶠ n' in Filter.atTop, ‖g n x - g n' x‖ ≤ ε / 2 :=
-    Filter.eventually_atTop.mpr ⟨N, fun n' hn' => hN n n' hn hn' x⟩
-  have h_norm_le : ‖g n x - Lx‖ ≤ ε / 2 :=
-    le_of_tendsto h_limit_norm h_eventually
-  rw [dist_eq_norm, norm_sub_rev]
-  linarith
-
-omit [NeZero d] in
 theorem iteratedFDeriv_cauchyLimitFun_eq
     (m : ℕ) {g : ℕ → E → ℝ} (hg_smooth : ∀ n, ContDiff ℝ (⊤ : ℕ∞) (g n))
     (h_uniform_cauchy_C0 : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
@@ -1148,6 +1127,7 @@ theorem iteratedFDeriv_cauchyLimitFun_eq
     rw [h_iter_eq_D j hj]
     exact hD_tendsto j hj x
 
+variable [NeZero d] in
 theorem morrey_iteratedFDeriv_representative
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R) (m : ℕ)

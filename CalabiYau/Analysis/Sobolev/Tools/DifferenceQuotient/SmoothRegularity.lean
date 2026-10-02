@@ -12,11 +12,9 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
-
+variable {d : ℕ}
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 theorem contDiff_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -51,14 +49,12 @@ theorem contDiff_diffQuot_of_contDiff
   rw [heq_fun]
   exact h_div
 
-omit [NeZero d] in
 private lemma hasFDerivAt_translate (k : Fin d) (h : ℝ) (x : E) :
     HasFDerivAt
       (fun y : E => y + h • EuclideanSpace.single k 1)
       (ContinuousLinearMap.id ℝ E) x := by
   exact (hasFDerivAt_id x).add_const _
 
-omit [NeZero d] in
 theorem fderiv_diffQuot_apply_eq_diffQuot_partial
     {g : E → ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :
@@ -138,7 +134,6 @@ theorem fderiv_diffQuot_apply_eq_diffQuot_partial
     (d := d) k hh _ x]
   rw [div_eq_inv_mul, smul_eq_mul]
 
-omit [NeZero d] in
 theorem contDiff_translate (k : Fin d) (h : ℝ) {φ : E → ℝ}
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) : ContDiff ℝ (⊤ : ℕ∞) (translate k h φ) := by
   unfold translate
@@ -147,7 +142,6 @@ theorem contDiff_translate (k : Fin d) (h : ℝ) {φ : E → ℝ}
     contDiff_id.add contDiff_const
   exact hφ.comp htrans_smooth
 
-omit [NeZero d] in
 theorem fderiv_translate_apply (k j : Fin d) (h : ℝ) {φ : E → ℝ}
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (x : E) :
     (fderiv ℝ (translate k h φ) x) (EuclideanSpace.single j 1) =

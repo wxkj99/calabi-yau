@@ -20,11 +20,14 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
-
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 open scoped ComplexOrder MatrixOrder
 open ContinuousAlternatingMap
 open Filter Topology
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem c3_forcing_complexHessian_comp_holomorphic
     {n : ℕ} (u : EuclideanSpace ℂ (Fin n) → ℝ)
@@ -57,7 +60,8 @@ private theorem c3_forcing_complexHessian_eq_of_eventuallyEq {n : ℕ}
     hDerEq.fderiv_eq
   rw [complexHessian_apply hf i j, complexHessian_apply hg i j, hSecond]
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem c3_forcing_chartPotential_eventuallyEq
     (G : M → ℝ) (x y : M)
     (hy : y ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).source) :
@@ -80,7 +84,6 @@ private theorem c3_forcing_chartPotential_eventuallyEq
   change G (Cy.symm w) = G (Cx.symm (F w))
   rw [hF, Cx.left_inv hwSource]
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c3_forcing_chartPotential_hessian_transition
     (G : M → ℝ)
     (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
@@ -139,46 +142,6 @@ private theorem c3_forcing_chartPotential_hessian_transition
   rw [hcenter] at hPull
   rw [hHess, hPull]
 
-omit [T2Space M] [CompactSpace M] in
-private theorem c3_actual_chartChristoffel_pullback_at
-    (ω₀ : KahlerForm n M) (x y : M)
-    (U : Set (EuclideanSpace ℂ (Fin n))) (hU : ω₀.IsReferenceChartOverlap x y U)
-    (i j k : Fin n) :
-    let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y
-    let f := referenceChartTransition (n := n) x y
-    let zx := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y
-    let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ f w)
-    ∑ l, (ω₀.metricInChart y z)⁻¹ l i *
-        chartPartialZComplex (fun v => ω₀.metricInChart y v k l) z j =
-      (∑ s, ∑ c, ∑ a, (A z)⁻¹ i s * A z c j * A z a k *
-        (∑ l, (ω₀.metricInChart x zx)⁻¹ l s *
-          chartPartialZComplex (fun v => ω₀.metricInChart x v a l) zx c)) +
-        ∑ s, (A z)⁻¹ i s *
-          chartPartialZComplex (fun v => A v s k) z j := by
-  rcases hU with ⟨hOpen, hz, himage, hf, hhol, hjac, hmetric⟩
-  let f := referenceChartTransition (n := n) x y
-  let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y
-  let zx := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y
-  let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ f w)
-  have hcenter : f z = extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y := by
-    change (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x)
-      ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y).symm
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y)) = _
-    rw [(extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y).left_inv
-      (mem_extChartAt_source y)]
-  have hjacA : IsUnit (A z).det := by
-    simpa [A, z, f, referenceTransitionMatrix] using hjac
-  have hgamma := chartChristoffel_pullback_eventuallyEq U hOpen f hf hhol
-    (ω₀.metricInChart y) (ω₀.metricInChart x)
-    (fun a b => (ω₀.contDiffOn_metricInChart x a b).mono himage)
-    hmetric z hz hjacA
-    ((Matrix.isUnit_iff_isUnit_det _).1
-      (ω₀.posDef_metricInChart x (himage ⟨z, hz, rfl⟩)).isUnit) i j k
-  have hpoint := hgamma.eq_of_nhds
-  rw [hcenter] at hpoint
-  simpa [A, f, z, zx] using hpoint
-
-omit [T2Space M] [CompactSpace M] in
 private theorem c3_connection_pullback_lowered_actual
     (ω₀ : KahlerForm n M) (x y : M)
     (U : Set (EuclideanSpace ℂ (Fin n))) (hU : ω₀.IsReferenceChartOverlap x y U) :
@@ -187,10 +150,10 @@ private theorem c3_connection_pullback_lowered_actual
     let zx := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y
     let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ f w)
     ∀ a s p,
-      ∑ i, A z a i * c3ChristoffelInChart (ω₀.metricInChart y) z i s p =
-        c3PartialZ (fun w => A w a p) z s +
+      ∑ i, A z a i * christoffelInChart (ω₀.metricInChart y) z i s p =
+        wirtingerDerivInChart (fun w => A w a p) z s +
           ∑ u, ∑ v, A z u s * A z v p *
-            c3ChristoffelInChart (ω₀.metricInChart x) zx a u v := by
+            christoffelInChart (ω₀.metricInChart x) zx a u v := by
   dsimp only
   rcases hU with ⟨hOpen, hz, himage, hf, hhol, hjac, hmetric⟩
   let f := referenceChartTransition (n := n) x y
@@ -214,9 +177,13 @@ private theorem c3_connection_pullback_lowered_actual
     hmetric z hz hjacA hgdet
   intro a s p
   have h := hlow a s p
-  rw [show chartPartialZComplex = c3PartialZ from rfl] at h
+  rw [show chartPartialZComplex = wirtingerDerivInChart from rfl] at h
   rw [hcenter] at h
   simpa [A, f, z, zx] using h
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private def permuteFour {α : Type*} :
     (α × (α × (α × α))) ≃ (α × (α × (α × α))) where
@@ -767,7 +734,8 @@ private theorem c3_complexHessian_comp_firstJet
   simp [J, H]
   ring_nf
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem c3_forcing_chartPotential_hessian_eventuallyEq
     (G : M → ℝ)
     (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
@@ -829,6 +797,10 @@ private theorem c3_forcing_chartPotential_hessian_eventuallyEq
       (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top))
   exact c3_forcing_complexHessian_eq_of_eventuallyEq
     (G ∘ Cy.symm) ((G ∘ Cx.symm) ∘ F) w j l hf hg heq
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem sumSwapTest {α β : Type*} [Fintype α] [Fintype β]
     (f : α → β → ℂ) :
@@ -984,7 +956,8 @@ private theorem covariantDerivative_pullback_algebra {n : ℕ}
     simpa [mul_assoc] using hGamma
   simpa using hGamma'
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 set_option maxHeartbeats 1000000 in
 private theorem c3_forcing_covariantHessian_transition
     (ω₀ : KahlerForm n M) {G : M → ℝ}
@@ -1019,13 +992,13 @@ private theorem c3_forcing_covariantHessian_transition
   let dBarA : Fin n → Fin n → Fin n → ℂ := fun a b k =>
     chartPartialZComplex (fun w => star (A w a b)) zY k
   let Γy : Fin n → Fin n → Fin n → ℂ :=
-    fun i k j => c3ChristoffelInChart (ω₀.metricInChart y) zY i k j
+    fun i k j => christoffelInChart (ω₀.metricInChart y) zY i k j
   let Γx : Fin n → Fin n → Fin n → ℂ :=
-    fun i k j => c3ChristoffelInChart (ω₀.metricInChart x) zX i k j
+    fun i k j => christoffelInChart (ω₀.metricInChart x) zX i k j
   let dQy : Fin n → Fin n → Fin n → ℂ := fun k j l =>
-    c3PartialZ (fun w => Qy w j l) zY k
+    wirtingerDerivInChart (fun w => Qy w j l) zY k
   let dQx : Fin n → Fin n → Fin n → ℂ := fun k j l =>
-    c3PartialZ (fun w => Qx w j l) zX k
+    wirtingerDerivInChart (fun w => Qx w j l) zX k
   rcases hV with ⟨hOpen, hz, himage, hSmooth, hHol, hjac, hmetric⟩
   have hcenter : F zY = zX := by
     change (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x)
@@ -1090,8 +1063,8 @@ private theorem c3_forcing_covariantHessian_transition
         (∑ a, ∑ b, ∑ c, J a k * J b j * star (J c l) * dQx a b c) := by
     intro k j l
     have hjet := hfirst j l k
-    change c3PartialZ (fun w => Qy w j l) zY k = _
-    rw [show c3PartialZ = chartPartialZComplex from rfl]
+    change wirtingerDerivInChart (fun w => Qy w j l) zY k = _
+    rw [show wirtingerDerivInChart = chartPartialZComplex from rfl]
     change chartPartialZComplex
       (fun w => complexHessian (G ∘ Cy.symm) w j l) zY k = _
     rw [hPotentialDerivative j l k, hjet]
@@ -1107,7 +1080,7 @@ private theorem c3_forcing_covariantHessian_transition
           exact Finset.sum_comm
         _ = ∑ t, ∑ r, ∑ s, f r s t := Finset.sum_comm
     rw [hswap]
-    rw [show c3PartialZ = chartPartialZComplex from rfl]
+    rw [show wirtingerDerivInChart = chartPartialZComplex from rfl]
     apply Finset.sum_congr rfl
     intro a ha
     apply Finset.sum_congr rfl
@@ -1121,19 +1094,18 @@ private theorem c3_forcing_covariantHessian_transition
     have hlow := c3_connection_pullback_lowered_actual ω₀ x y V
       ⟨hOpen, hz, himage, hSmooth, hHol, hjac, hmetric⟩
     simpa only [A, J, dA, Γy, Γx, Cy, Cx, zY, zX, F,
-      referenceTransitionMatrix, c3PartialZ, chartPartialZComplex] using hlow a k j
+      referenceTransitionMatrix, wirtingerDerivInChart, chartPartialZComplex] using hlow a k j
   have hAlg := covariantDerivative_pullback_algebra
     (A := fun a b => J a b) (dA := dA) (dBarA := dBarA) (Γx := Γx) (Γy := Γy)
     (Qx := fun a b => Qx zX a b) (Qy := fun a b => Qy zY a b)
     (dQx := dQx) (dQy := dQy) hbar hQ hdQ hGamma
   intro k j l
   have h := hAlg k j l
-  simpa [c3ReferenceCovariantTwoTensorZ, c3PartialZ, Qx, Qy, Γy, Γx,
+  simpa [c3ReferenceCovariantTwoTensorZ, wirtingerDerivInChart, Qx, Qy, Γy, Γx,
     Cy, Cx, zY, zX, J, dQx, dQy, dBarA] using h
 
 -- The algebraic identity follows from the two tensor-coordinate identities.
-set_option linter.unusedSectionVars false in
-private theorem c3ForcingFrameBound_chart_transition_algebraic
+private theorem forcingFrameBound_chart_transition_algebraic
     (ω₀ : KahlerForm n M) {G : M → ℝ}
     (_hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
     (x y : M)
@@ -1157,9 +1129,9 @@ private theorem c3ForcingFrameBound_chart_transition_algebraic
               c3ReferenceCovariantTwoTensorZ ω₀ x
                 (c3ForcingHessianInChart G x)
                 (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y) a b c) :
-    c3ForcingFrameBound ω₀ G y
+    ForcingFrameBound ω₀ G y
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y) P A ↔
-      c3ForcingFrameBound ω₀ G x
+      ForcingFrameBound ω₀ G x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y)
         (referenceTransitionMatrix x y * P) A := by
   let J : Matrix (Fin n) (Fin n) ℂ := referenceTransitionMatrix x y
@@ -1284,15 +1256,15 @@ private theorem c3ForcingFrameBound_chart_transition_algebraic
 fixed chart containing y. Source membership must be explicit: the overlap
 predicate alone permits total off-source extensions. No smoothness of the
 selected moving centre chart is assumed. -/
-theorem c3ForcingFrameBound_chart_transition (ω₀ : KahlerForm n M)
+theorem forcingFrameBound_chart_transition (ω₀ : KahlerForm n M)
     {G : M → ℝ} (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
     (x y : M) (hy : y ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).source)
     (V : Set (EuclideanSpace ℂ (Fin n)))
     (hV : ω₀.IsReferenceChartOverlap x y V)
     (P : Matrix (Fin n) (Fin n) ℂ) (A : ℝ) :
-    c3ForcingFrameBound ω₀ G y
+    ForcingFrameBound ω₀ G y
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y y) P A ↔
-      c3ForcingFrameBound ω₀ G x
+      ForcingFrameBound ω₀ G x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y)
         (referenceTransitionMatrix x y * P) A := by
   have hH : ∀ j l,
@@ -1336,6 +1308,6 @@ theorem c3ForcingFrameBound_chart_transition (ω₀ : KahlerForm n M)
       _ = ∑ a, ∑ b, f a b := by
         rw [Finset.sum_comm]
   have hD := c3_forcing_covariantHessian_transition ω₀ hG x y hy V hV
-  exact c3ForcingFrameBound_chart_transition_algebraic ω₀ hG x y hy V hV P A hH hD
+  exact forcingFrameBound_chart_transition_algebraic ω₀ hG x y hy V hV P A hH hD
 
 end KahlerForm

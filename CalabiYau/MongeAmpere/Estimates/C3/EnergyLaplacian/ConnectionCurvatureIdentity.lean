@@ -27,7 +27,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   -(gφ⁻¹)ₗᵢ R(gφ)ⱼq̄ₖₗ̄ + (g₀⁻¹)ₗᵢ R(g₀)ⱼq̄ₖₗ̄`.
 The inverse row is `l` and the column is `i`; no factor of two is introduced
 because both Wirtinger derivatives contain their own `1/2`. -/
-def c3ConnectionDifferenceCurvatureIdentity (ω₀ : KahlerForm n M) : Prop :=
+def ConnectionDifferenceCurvatureIdentity (ω₀ : KahlerForm n M) : Prop :=
     ∀ (φ : M → ℝ) (_hφ : ω₀.IsPotential φ) (x : M)
       (z : EuclideanSpace ℂ (Fin n))
       (_hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
@@ -38,7 +38,7 @@ def c3ConnectionDifferenceCurvatureIdentity (ω₀ : KahlerForm n M) : Prop :=
       fun w ↦ g₀ w + complexHessian
         (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w
     chartPartialBarComplex
-        (fun w ↦ c3ConnectionDifferenceInChart ω₀ φ x w i j k) z q =
+        (fun w ↦ connectionDifferenceInChart ω₀ φ x w i j k) z q =
       -(∑ l : Fin n, (gφ z)⁻¹ l i * chartCurvature gφ z j q k l) +
         ∑ l : Fin n, (g₀ z)⁻¹ l i * chartCurvature g₀ z j q k l
 
@@ -76,7 +76,7 @@ private theorem local_connection_differentiableAt
 Kähler potential. This is an independent geometric input to the Bochner
 estimate and does not assume the Monge–Ampère equation. -/
 theorem c3ConnectionDifference_bar_derivative (ω₀ : KahlerForm n M) :
-    c3ConnectionDifferenceCurvatureIdentity ω₀ := by
+    ConnectionDifferenceCurvatureIdentity ω₀ := by
   intro φ hφ x z hz i j k q
   let U : Set (EuclideanSpace ℂ (Fin n)) :=
     (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target
@@ -97,33 +97,14 @@ theorem c3ConnectionDifference_bar_derivative (ω₀ : KahlerForm n M) :
     intro a b
     exact (ωφ.contDiffOn_metricInChart x a b).congr
       (fun w hw ↦ congrArg (fun G : Matrix (Fin n) (Fin n) ℂ ↦ G a b) (heq hw))
-  have hK₀ : ∀ w ∈ U, ∀ a b c,
-      chartPartialZComplex (fun v => g₀ v b c) w a =
-        chartPartialZComplex (fun v => g₀ v a c) w b := by
-    intro w hw a b c
-    exact ω₀.kahler_chart_metric_symmetry x hw a b c
-  have hKφ : ∀ w ∈ U, ∀ a b c,
-      chartPartialZComplex (fun v => gφ v b c) w a =
-        chartPartialZComplex (fun v => gφ v a c) w b := by
-    intro w hw a b c
-    have hnhds : U ∈ nhds w := hU.mem_nhds hw
-    have hentry (s t : Fin n) :
-        (fun v => gφ v s t) =ᶠ[nhds w] (fun v => ωφ.metricInChart x v s t) := by
-      filter_upwards [hnhds] with v hv
-      exact congrArg (fun G : Matrix (Fin n) (Fin n) ℂ => G s t) (heq hv)
-    have hleft := (hentry b c).fderiv_eq (𝕜 := ℝ)
-    have hright := (hentry a c).fderiv_eq (𝕜 := ℝ)
-    unfold chartPartialZComplex
-    rw [hleft, hright]
-    exact ωφ.kahler_chart_metric_symmetry x hw a b c
   have hdet₀ : IsUnit (g₀ z).det :=
     (Matrix.isUnit_iff_isUnit_det (A := g₀ z)).mp (ω₀.posDef_metricInChart x hz).isUnit
   have hdetφ : IsUnit (gφ z).det := by
     rw [heq hz]
     exact (Matrix.isUnit_iff_isUnit_det (A := ωφ.metricInChart x z)).mp
       (ωφ.posDef_metricInChart x hz).isUnit
-  have hcurv₀ := chartChristoffel_bar_eq_curvature_local g₀ U hU hg₀ hK₀ z hz hdet₀ i j k q
-  have hcurvφ := chartChristoffel_bar_eq_curvature_local gφ U hU hgφ hKφ z hz hdetφ i j k q
+  have hcurv₀ := chartChristoffel_bar_eq_curvature_local g₀ U hU hg₀ z hz hdet₀ i j k q
+  have hcurvφ := chartChristoffel_bar_eq_curvature_local gφ U hU hgφ z hz hdetφ i j k q
   have hdiff₀ := local_connection_differentiableAt g₀ U hU hg₀ z hz hdet₀ i j k
   have hdiffφ := local_connection_differentiableAt gφ U hU hgφ z hz hdetφ i j k
   change chartPartialBarComplex

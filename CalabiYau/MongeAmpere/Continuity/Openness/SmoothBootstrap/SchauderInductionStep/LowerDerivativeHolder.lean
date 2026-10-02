@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.LinearAlgebra.Matrix.Defs
@@ -20,10 +20,9 @@ open scoped ContDiff NNReal Topology
 /-- A finite `C^{r,α}` bound controls all lower matrix jets in a common local ball.
 The radius depends on the open domain and the center, but not on the matrix entry
 or derivative order. -/
-@[deprecated "unused hypothesis `hα₀`; will be removed" (since := "2026-10-02")]
 theorem locally_holder_lower_matrix_jets
     {n r : ℕ} {α K : ℝ≥0} {W : Set (EuclideanSpace ℂ (Fin n))}
-    (hW : IsOpen W) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (hW : IsOpen W) (hα₁ : α < 1)
     (B : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (hB : ∀ i j, ContDiffOn ℝ r (fun w ↦ B w i j) W)
     (hBH : ∀ i j, HolderBoundOn r α K W (fun w ↦ B w i j))

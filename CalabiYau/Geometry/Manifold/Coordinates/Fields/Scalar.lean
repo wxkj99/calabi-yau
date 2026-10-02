@@ -6,7 +6,6 @@ public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
 @[expose] public section
 
-
 noncomputable section
 
 open Manifold Set
@@ -22,7 +21,7 @@ def scalarOnE (x₀ : M) (f : M → ℝ) : E → ℝ :=
   fun y => f ((extChartAt I x₀).symm y)
 
 omit [IsManifold I ∞ M] in
-@[simp] lemma scalarOnE_def (x₀ : M) (f : M → ℝ) (y : E) :
+lemma scalarOnE_def (x₀ : M) (f : M → ℝ) (y : E) :
     scalarOnE (I := I) x₀ f y = f ((extChartAt I x₀).symm y) := rfl
 
 omit [IsManifold I ∞ M] in
@@ -43,35 +42,6 @@ lemma scalarOnE_contDiffOn (x₀ : M) {f : M → ℝ}
       (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀).target :=
     hf_on.comp hsymm (fun _ _ => mem_univ _)
   exact hcomp.contDiffOn
-
-lemma scalarOnE_contDiffOn_prod
-    {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
-    (x₀ : M) {f : P → M → ℝ} {s : Set P}
-    (hf : ContMDiffOn (𝓘(ℝ, P).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : P × M => f p.1 p.2) (s ×ˢ univ)) :
-    ContDiffOn ℝ ∞
-      (fun p : P × E => scalarOnE (I := I) x₀ (f p.1) p.2)
-      (s ×ˢ (extChartAt I x₀).target) := by
-  have hfst : ContMDiffOn (𝓘(ℝ, P).prod 𝓘(ℝ, E)) 𝓘(ℝ, P) ∞
-      (fun p : P × E => p.1) (s ×ˢ (extChartAt I x₀).target) :=
-    contMDiffOn_fst
-  have hsnd : ContMDiffOn (𝓘(ℝ, P).prod 𝓘(ℝ, E)) I ∞
-      (fun p : P × E => (extChartAt I x₀).symm p.2)
-      (s ×ˢ (extChartAt I x₀).target) := by
-    refine (contMDiffOn_extChartAt_symm (I := I) x₀).comp contMDiffOn_snd ?_
-    exact fun _ hp => hp.2
-  have hpair : ContMDiffOn (𝓘(ℝ, P).prod 𝓘(ℝ, E)) (𝓘(ℝ, P).prod I) ∞
-      (fun p : P × E => (p.1, (extChartAt I x₀).symm p.2))
-      (s ×ˢ (extChartAt I x₀).target) :=
-    hfst.prodMk hsnd
-  have hcomp := hf.comp hpair (fun _ hp => ⟨hp.1, mem_univ _⟩)
-  have hcont : ContDiffOn ℝ ∞
-      (fun p : P × E => f p.1 ((extChartAt I x₀).symm p.2))
-      (s ×ˢ (extChartAt I x₀).target) := by
-    rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod,
-      ← chartedSpaceSelf_prod]
-    exact hcomp
-  simpa only [scalarOnE_def] using hcont
 
 lemma scalarOnE_contDiffWithinAt
     (x₀ : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {y : E}

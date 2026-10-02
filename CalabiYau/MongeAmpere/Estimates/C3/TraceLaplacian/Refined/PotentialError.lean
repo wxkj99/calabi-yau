@@ -30,6 +30,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
   [T2Space M] [CompactSpace M]
 
+omit [T2Space M] in
 /-- The invariant reference Laplacian of a uniformly chartwise C³ family is
 uniformly bounded on a compact manifold. Unlike raw derivatives in the
 point-selected chart, this intrinsic scalar can be controlled using a finite

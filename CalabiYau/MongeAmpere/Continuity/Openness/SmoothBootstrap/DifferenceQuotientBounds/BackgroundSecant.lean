@@ -26,10 +26,10 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
 open scoped ComplexOrder MatrixOrder in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem posDef_segment_of_endpoints {n : ℕ}
     (A C : Matrix (Fin n) (Fin n) ℂ) (hA : A.PosDef) (hC : C.PosDef)
     {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
@@ -58,7 +58,6 @@ noncomputable def chartBootstrapSegmentMatrix (ω₀ : KahlerForm n M) (φ : M �
   chartBootstrapMatrix ω₀ φ x z + s •
     (chartBootstrapMatrix ω₀ φ x (z + h • v) - chartBootstrapMatrix ω₀ φ x z)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 open scoped ComplexOrder MatrixOrder in
 private theorem chartBootstrapSegmentMatrix_posDef
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
@@ -97,7 +96,6 @@ private theorem chartBootstrapSegmentMatrix_posDef
   simpa [B₀, B₁, chartBootstrapSegmentMatrix] using
     posDef_segment_of_endpoints B₀ B₁ hB₀pos hB₁pos hs
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 open scoped ComplexOrder MatrixOrder in
 private theorem chartBootstrapSegmentMatrix_inverse_intervalData
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
@@ -147,82 +145,8 @@ private theorem chartBootstrapSegmentMatrix_inverse_intervalData
   exact ⟨hcontinuous',
     hcontinuous'.intervalIntegrable_of_Icc (by norm_num : (0 : ℝ) ≤ 1)⟩
 
-private theorem holderBoundOn_zero_interval_average
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (α K : ℝ≥0) (hα₀ : 0 < α) (_hα₁ : α < 1)
-    (U : Set E) (F : ℝ → E → ℂ)
-    (hHolder : ∀ s ∈ Set.Icc (0 : ℝ) 1,
-      HolderBoundOn 0 α K U (F s))
-    (hIntegrable : ∀ z ∈ U,
-      IntervalIntegrable (fun s ↦ F s z) MeasureTheory.volume 0 1)
-    (_hContinuous : ∀ z ∈ U,
-      ContinuousOn (fun s ↦ F s z) (Set.Icc (0 : ℝ) 1)) :
-    HolderBoundOn 0 α K U (fun z ↦ ∫ s in (0 : ℝ)..1, F s z) := by
-  have hpoint (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (z : E) (hz : z ∈ U) :
-      ‖F s z‖ ≤ (K : ℝ) := by
-    have h := (hHolder s hs).1 0 le_rfl z hz
-    simpa only [norm_iteratedFDeriv_zero] using h
-  have hinterval (s : ℝ) (hs : s ∈ Set.uIoc (0 : ℝ) 1) (z : E) (hz : z ∈ U) :
-      ‖F s z‖ ≤ (K : ℝ) := by
-    rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at hs
-    exact hpoint s ⟨hs.1.le, hs.2⟩ z hz
-  refine ⟨?_, ?_⟩
-  · intro j hj z hz
-    have hj0 : j = 0 := Nat.eq_zero_of_le_zero hj
-    subst j
-    have hbound : ‖∫ s in (0 : ℝ)..1, F s z‖ ≤ (K : ℝ) := by
-      calc
-        ‖∫ s in (0 : ℝ)..1, F s z‖ ≤ (K : ℝ) * |(1 : ℝ) - 0| :=
-          intervalIntegral.norm_integral_le_of_norm_le_const (a := (0 : ℝ)) (b := 1)
-            (C := (K : ℝ)) (fun s hs ↦ hinterval s hs z hz)
-        _ = (K : ℝ) := by norm_num
-    simpa only [norm_iteratedFDeriv_zero] using hbound
-  · intro z hz w hw
-    have hdiffint :
-        (∫ s in (0 : ℝ)..1, F s z) - (∫ s in (0 : ℝ)..1, F s w) =
-          ∫ s in (0 : ℝ)..1, (F s z - F s w) := by
-      rw [intervalIntegral.integral_sub (hIntegrable z hz) (hIntegrable w hw)]
-    have hnorm (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) :
-        ‖F s z - F s w‖ ≤ (K : ℝ) * dist z w ^ (α : ℝ) := by
-      let e := continuousMultilinearCurryFin0 ℝ E ℂ
-      have heq : ‖e.symm (F s z) - e.symm (F s w)‖ = ‖F s z - F s w‖ := by
-        rw [← e.symm.map_sub, LinearIsometryEquiv.norm_map]
-      have h := (hHolder s hs).2.dist_le hz hw
-      rw [iteratedFDeriv_zero_eq_comp, Function.comp_apply, Function.comp_apply] at h
-      rw [dist_eq_norm, heq] at h
-      simpa only [dist_eq_norm] using h
-    have hnormint :
-        ‖∫ s in (0 : ℝ)..1, (F s z - F s w)‖ ≤
-          (K : ℝ) * dist z w ^ (α : ℝ) := by
-      have h := intervalIntegral.norm_integral_le_of_norm_le_const
-        (a := (0 : ℝ)) (b := 1) (C := (K : ℝ) * dist z w ^ (α : ℝ)) (fun s hs ↦ by
-          have hs' : s ∈ Set.Icc (0 : ℝ) 1 := by
-            rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at hs
-            exact ⟨hs.1.le, hs.2⟩
-          exact hnorm s hs')
-      simpa using h
-    have hdist :
-        dist (∫ s in (0 : ℝ)..1, F s z) (∫ s in (0 : ℝ)..1, F s w) ≤
-          (K : ℝ) * dist z w ^ (α : ℝ) := by
-      rw [dist_eq_norm, hdiffint]
-      exact hnormint
-    have havg : edist (∫ s in (0 : ℝ)..1, F s z) (∫ s in (0 : ℝ)..1, F s w) ≤
-        (K : ENNReal) * edist z w ^ (α : ℝ) := by
-      calc
-        edist (∫ s in (0 : ℝ)..1, F s z) (∫ s in (0 : ℝ)..1, F s w) =
-            ENNReal.ofReal (dist (∫ s in (0 : ℝ)..1, F s z)
-              (∫ s in (0 : ℝ)..1, F s w)) := edist_dist _ _
-        _ ≤ ENNReal.ofReal ((K : ℝ) * dist z w ^ (α : ℝ)) := ENNReal.ofReal_le_ofReal hdist
-        _ = (K : ENNReal) * edist z w ^ (α : ℝ) := by
-          rw [edist_dist, ENNReal.coe_nnreal_eq,
-            ENNReal.ofReal_rpow_of_nonneg dist_nonneg (by positivity : 0 ≤ (α : ℝ)),
-            ENNReal.ofReal_mul (by positivity : 0 ≤ (K : ℝ))]
-    let e := continuousMultilinearCurryFin0 ℝ E ℂ
-    change edist (e.symm (∫ s in (0 : ℝ)..1, F s z))
-      (e.symm (∫ s in (0 : ℝ)..1, F s w)) ≤ (K : ENNReal) * edist z w ^ (α : ℝ)
-    simpa only [e.symm.edist_map] using havg
-
 open scoped ComplexOrder MatrixOrder in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem compact_positiveHermitian_uniformEllipticity
     {X : Type*} [TopologicalSpace X] {n : ℕ}
     (K : Set X) (hK : IsCompact K)
@@ -380,6 +304,7 @@ private theorem compact_positiveHermitian_uniformEllipticity
     exact (hKne ⟨z, hz⟩).elim
 
 open scoped ComplexOrder MatrixOrder in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem compact_parameter_family_uniformEllipticity
     {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y] {n : ℕ}
     (P : Set X) (hP : IsCompact P) (K : Set Y) (hK : IsCompact K)
@@ -408,6 +333,7 @@ private theorem compact_parameter_family_uniformEllipticity
   exact hbound (p, z) ⟨hp, hz⟩
 
 open scoped ComplexOrder MatrixOrder in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem compact_positiveHermitian_inverse_uniformEllipticity
     {X : Type*} [TopologicalSpace X] {n : ℕ}
     (K : Set X) (hK : IsCompact K)
@@ -451,6 +377,7 @@ private theorem compact_positiveHermitian_inverse_uniformEllipticity
     exact (RCLike.pos_iff.mp ((hApos z hz).inv.dotProduct_mulVec_pos hv)).1
 
 open scoped ComplexOrder MatrixOrder in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem compact_parameter_family_inverse_uniformEllipticity
     {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y] {n : ℕ}
     (P : Set X) (hP : IsCompact P) (K : Set Y) (hK : IsCompact K)
@@ -473,7 +400,6 @@ private theorem compact_parameter_family_inverse_uniformEllipticity
   intro p hp z hz
   exact hbound (p, z) ⟨hp, hz⟩
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem exists_uniform_small_chart_translate
     (K target : Set (EuclideanSpace ℂ (Fin n)))
     (hK : IsCompact K) (hKtarget : K ⊆ target) (htarget : IsOpen target)
@@ -513,7 +439,6 @@ private theorem exists_uniform_small_chart_translate
   have hsum : z + h • v ∈ target := hVW hpair
   simpa [N] using hsum
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartBootstrapMatrix_entry_continuousOn
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hφ : ω₀.SolvesMongeAmpereC2 G φ)
@@ -561,7 +486,6 @@ private theorem chartBootstrapMatrix_entry_continuousOn
   exact hmetric.continuousOn.add hHess.continuousOn
 
 set_option maxHeartbeats 500000 in
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 open scoped ComplexOrder MatrixOrder in
 private theorem exists_uniform_chart_segment_ellipticity
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
@@ -669,7 +593,6 @@ private theorem exists_uniform_chart_segment_ellipticity
   have hPoint := hEll z hz
   simpa [A, B, chartBootstrapSegmentMatrix] using hPoint
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem exists_uniform_chart_segment_geometry
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hφ : ω₀.SolvesMongeAmpereC2 G φ)
@@ -732,7 +655,6 @@ private theorem exists_uniform_chart_segment_geometry
     hz' htranslated j l
   exact ⟨hdata.2, hdata.1⟩
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 open scoped ComplexOrder MatrixOrder in
 private theorem exists_uniform_chart_inverse_segment_ellipticity
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
@@ -814,7 +736,6 @@ private theorem exists_uniform_chart_inverse_segment_ellipticity
   have hp : (h, s) ∈ P := ⟨hhH, hs⟩
   simpa [A, B, chartBootstrapSegmentMatrix] using hUniform (h, s) hp z hz
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem averagedChartInverse_entry_holderBoundOn_of_segment
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (x : M)
     (U : Set (EuclideanSpace ℂ (Fin n))) (v : EuclideanSpace ℂ (Fin n))
@@ -833,7 +754,7 @@ private theorem averagedChartInverse_entry_holderBoundOn_of_segment
       HolderBoundOn 0 α CA U (fun z ↦ averagedChartInverse ω₀ φ x v h z j l) := by
   let P : Set ℝ := {h | h ≠ 0 ∧ |h| < δ}
   obtain ⟨CA, hCA⟩ := exists_uniform_holderBoundOn_matrix_inverse
-    α lam Kmat hα₀ hα₁ hlam U P
+    α lam Kmat hlam U P
     (fun h s z => chartBootstrapSegmentMatrix ω₀ φ x v h s z)
     (fun h hh => hEll h hh.1 hh.2) (fun h hh => hMat h hh.1 hh.2)
   refine ⟨CA, ?_⟩
@@ -844,6 +765,7 @@ private theorem averagedChartInverse_entry_holderBoundOn_of_segment
     (fun z hz => hInt h hne hh z hz j l)
     (fun z hz => hCont h hne hh z hz j l)
   simpa only [averagedChartInverse, chartBootstrapSegmentMatrix] using hAvg
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 
 private theorem ellipticity_mono_constant
     (A : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
@@ -856,7 +778,7 @@ private theorem ellipticity_mono_constant
   exact (mul_le_mul_of_nonneg_right (NNReal.coe_le_coe.mpr hmu)
     (Finset.sum_nonneg fun i _ => sq_nonneg ‖v i‖)).trans ((hA z hz).2 v)
 
-omit [MeasurableSpace M] [BorelSpace M] [ConnectedSpace M] in
+variable [T2Space M] [CompactSpace M] in
 /-- The local chart estimates used by the averaged-inverse and average lemmas. The constants and
 step radius are uniform in `h`; the segment parameter ranges over the closed unit interval. -/
 theorem exists_uniform_chart_segment_bounds

@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
-public import CalabiYau.MongeAmpere.Continuity.Openness.CompactChartCover
+public import CalabiYau.Mathlib.Geometry.Manifold.CompactChartCover
 public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderCarrier.Basic
 public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderCarrier.SmoothGaugeFiniteness
 public import CalabiYau.Geometry.Kahler.Laplacian
@@ -32,7 +32,7 @@ omit [ConnectedSpace M] in
 and mean zero. -/
 theorem exists_smooth_laplacian_core (ω₁ : KahlerForm n M)
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M) (α : ℝ≥0)
-    (hα₀ : 0 < α) (hα₁ : α < 1) (f : M → ℝ)
+    (hα₁ : α < 1) (f : M → ℝ)
     (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ f) :
     ∃ g : SmoothChartHolderCore cover 0 α,
       g.smoothMap = ω₁.laplacian f ∧
@@ -42,6 +42,6 @@ theorem exists_smooth_laplacian_core (ω₁ : KahlerForm n M)
     ⟨⟨ω₁.laplacian f, ω₁.contMDiff_laplacian hf⟩⟩
   refine ⟨g, rfl, ?_, ?_⟩
   · exact ω₁.integral_laplacian hf
-  · exact smoothChartHolderGauge_finite cover 0 α hα₀ hα₁ g
+  · exact smoothChartHolderGauge_finite cover 0 α hα₁ g
 
 end KahlerForm

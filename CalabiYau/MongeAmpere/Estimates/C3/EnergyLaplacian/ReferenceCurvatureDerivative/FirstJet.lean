@@ -73,9 +73,6 @@ private theorem auxiliary_curvature_pullback_eventuallyEq
     (hmetric : ∀ w ∈ U,
       g w = Matrix.transpose (EuclideanSpace.clmMatrix (fderiv ℂ f w)) *
         g' (f w) * (EuclideanSpace.clmMatrix (fderiv ℂ f w)).map star)
-    (hkahler : ∀ w ∈ f '' U, ∀ i j k,
-      chartPartialZComplex (fun v => g' v j k) w i =
-        chartPartialZComplex (fun v => g' v i k) w j)
     (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ U)
     (hdetA : ∀ᶠ w in nhds z,
       IsUnit (EuclideanSpace.clmMatrix (fderiv ℂ f w)).det)
@@ -89,54 +86,8 @@ private theorem auxiliary_curvature_pullback_eventuallyEq
           star ((EuclideanSpace.clmMatrix (fderiv ℂ f w)) d k) *
           chartCurvature g' (f w) a b c d) := by
   filter_upwards [hU.mem_nhds hz, hdetA, hdetg] with w hw hAw hgw
-  exact chartCurvature_pullback U hU f hf hhol g g' hg' hmetric hkahler w hw
+  exact chartCurvature_pullback U hU f hf hhol g g' hg' hmetric w hw
     hAw hgw p q j k
-
-private theorem auxiliary_contDiffOn_chartPartialZ
-    {n : ℕ} {V : Set (EuclideanSpace ℂ (Fin n))} (hV : IsOpen V)
-    (F : EuclideanSpace ℂ (Fin n) → ℂ)
-    (hF : ContDiffOn ℝ ∞ F V) (p : Fin n) :
-    ContDiffOn ℝ ∞ (fun z => chartPartialZComplex F z p) V := by
-  have hD : ContDiffOn ℝ ∞ (fderiv ℝ F) V := by
-    simpa using hF.fderiv_of_isOpen hV (by simp)
-  have hEval (v : EuclideanSpace ℂ (Fin n)) :
-      ContDiffOn ℝ ∞ (fun z => fderiv ℝ F z v) V := by
-    let evL : (EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ) →ₗ[ℝ] ℂ := {
-      toFun := fun D => D v
-      map_add' := by intro D₁ D₂; rfl
-      map_smul' := by intro c D; rfl }
-    let ev : (EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ) →L[ℝ] ℂ :=
-      evL.toContinuousLinearMap
-    exact ev.contDiff.comp_contDiffOn hD
-  change ContDiffOn ℝ ∞ (fun z =>
-    (fderiv ℝ F z (EuclideanSpace.single p 1) -
-      Complex.I * fderiv ℝ F z (Complex.I • EuclideanSpace.single p 1)) / 2) V
-  have h₁ := hEval (EuclideanSpace.single p (1 : ℂ))
-  have h₂ := hEval (Complex.I • EuclideanSpace.single p (1 : ℂ))
-  fun_prop (disch := assumption)
-
-private theorem auxiliary_contDiffOn_chartPartialBar
-    {n : ℕ} {V : Set (EuclideanSpace ℂ (Fin n))} (hV : IsOpen V)
-    (F : EuclideanSpace ℂ (Fin n) → ℂ)
-    (hF : ContDiffOn ℝ ∞ F V) (p : Fin n) :
-    ContDiffOn ℝ ∞ (fun z => chartPartialBarComplex F z p) V := by
-  have hD : ContDiffOn ℝ ∞ (fderiv ℝ F) V := by
-    simpa using hF.fderiv_of_isOpen hV (by simp)
-  have hEval (v : EuclideanSpace ℂ (Fin n)) :
-      ContDiffOn ℝ ∞ (fun z => fderiv ℝ F z v) V := by
-    let evL : (EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ) →ₗ[ℝ] ℂ := {
-      toFun := fun D => D v
-      map_add' := by intro D₁ D₂; rfl
-      map_smul' := by intro c D; rfl }
-    let ev : (EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ) →L[ℝ] ℂ :=
-      evL.toContinuousLinearMap
-    exact ev.contDiff.comp_contDiffOn hD
-  change ContDiffOn ℝ ∞ (fun z =>
-    (fderiv ℝ F z (EuclideanSpace.single p 1) +
-      Complex.I * fderiv ℝ F z (Complex.I • EuclideanSpace.single p 1)) / 2) V
-  have h₁ := hEval (EuclideanSpace.single p (1 : ℂ))
-  have h₂ := hEval (Complex.I • EuclideanSpace.single p (1 : ℂ))
-  fun_prop (disch := assumption)
 
 private theorem auxiliary_chartPartialZ_differentiableAt
     {n : ℕ} (F : EuclideanSpace ℂ (Fin n) → ℂ)
@@ -739,9 +690,6 @@ theorem c3_curvature_pullback_first_jet {n : ℕ}
     (hmetric : ∀ w ∈ U,
       g w = Matrix.transpose (EuclideanSpace.clmMatrix (fderiv ℂ f w)) *
         g' (f w) * (EuclideanSpace.clmMatrix (fderiv ℂ f w)).map star)
-    (hkahler : ∀ w ∈ f '' U, ∀ i j k,
-      chartPartialZComplex (fun v => g' v j k) w i =
-        chartPartialZComplex (fun v => g' v i k) w j)
     (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ U)
     (hjac : IsUnit (EuclideanSpace.clmMatrix (fderiv ℂ f z)).det)
     (hgdet : IsUnit (g' (f z)).det) :
@@ -762,7 +710,7 @@ theorem c3_curvature_pullback_first_jet {n : ℕ}
       chartCurvature g' (f w) a b c d
   have hdomains := auxiliary_detDomains_eventually U hU f hf hhol g' hg' z hz hjac hgdet
   have hevent := auxiliary_curvature_pullback_eventuallyEq U hU f hf hhol g g' hg' hmetric
-    hkahler z hz (Filter.Eventually.mono hdomains (fun w hw => hw.2.1))
+    z hz (Filter.Eventually.mono hdomains (fun w hw => hw.2.1))
     (Filter.Eventually.mono hdomains (fun w hw => hw.2.2)) p q j k
   have hpartial :
       chartPartialZComplex (fun w => chartCurvature g w p q j k) z s =

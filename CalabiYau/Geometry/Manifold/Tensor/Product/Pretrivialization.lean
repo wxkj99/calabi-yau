@@ -145,14 +145,6 @@ instance tensorProduct.isLinear :
       simp [Pretrivialization.tensorProduct_apply]
 
 omit [FiniteDimensional 𝕜 F₂] in
-theorem tensorProduct_symm_apply (p : B × (F₁ ⊗[𝕜] F₂)) :
-    (tensorProduct 𝕜 e₁ e₂).toPartialEquiv.symm p =
-      ⟨p.1, TensorProduct.map
-        (e₁.symmL 𝕜 p.1).toLinearMap
-        (e₂.symmL 𝕜 p.1).toLinearMap p.2⟩ :=
-  rfl
-
-omit [FiniteDimensional 𝕜 F₂] in
 theorem tensorProduct_symm_apply_of_mem {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet) (t : F₁ ⊗[𝕜] F₂) :
     (tensorProduct 𝕜 e₁ e₂).symm b t =
       TensorProduct.map

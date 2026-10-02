@@ -21,8 +21,9 @@ namespace CalabiYau
 namespace Analysis
 namespace Laplacian
 
+section ScalarAlgebra
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -42,7 +43,6 @@ namespace SmoothScalar
 
 variable {g : SmoothRiemannianMetric I M}
 
-omit [Module.Finite ℝ E] in
 @[ext] theorem ext {f h : SmoothScalar g} (hfh : f.toFun = h.toFun) : f = h := by
   cases f; cases h; congr
 
@@ -67,45 +67,34 @@ instance : SMul ℝ (SmoothScalar g) where
         rw [h]
         exact contMDiff_const.mul f.smooth }
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_zero : (0 : SmoothScalar g).toFun = (fun _ : M => 0) := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_zero_apply (x : M) : (0 : SmoothScalar g).toFun x = 0 := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_add (f h : SmoothScalar g) :
     (f + h).toFun = f.toFun + h.toFun := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_add_apply (f h : SmoothScalar g) (x : M) :
     (f + h).toFun x = f.toFun x + h.toFun x := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_neg (f : SmoothScalar g) :
     (-f).toFun = -f.toFun := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_neg_apply (f : SmoothScalar g) (x : M) :
     (-f).toFun x = -f.toFun x := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_sub (f h : SmoothScalar g) :
     (f - h).toFun = f.toFun - h.toFun := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_sub_apply (f h : SmoothScalar g) (x : M) :
     (f - h).toFun x = f.toFun x - h.toFun x := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_smul (c : ℝ) (f : SmoothScalar g) :
     (c • f).toFun = c • f.toFun := rfl
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_smul_apply (c : ℝ) (f : SmoothScalar g) (x : M) :
     (c • f).toFun x = c * f.toFun x := rfl
 
-omit [Module.Finite ℝ E] in
 lemma toFun_injective :
     Function.Injective (fun f : SmoothScalar g => f.toFun) := by
   intro f h hfh
@@ -114,7 +103,6 @@ lemma toFun_injective :
 instance : SMul ℕ (SmoothScalar g) := ⟨nsmulRec⟩
 instance : SMul ℤ (SmoothScalar g) := ⟨zsmulRec⟩
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_nsmul (f : SmoothScalar g) (n : ℕ) :
     (n • f).toFun = n • f.toFun := by
   induction n with
@@ -129,7 +117,6 @@ omit [Module.Finite ℝ E] in
     have hn : (nsmulRec n f).toFun = n • f.toFun := ih
     rw [toFun_add, hn, succ_nsmul]
 
-omit [Module.Finite ℝ E] in
 @[simp] lemma toFun_zsmul (f : SmoothScalar g) (z : ℤ) :
     (z • f).toFun = z • f.toFun := by
   rcases z with n | n
@@ -161,9 +148,21 @@ instance : Module ℝ (SmoothScalar g) :=
 
 end SmoothScalar
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
+end ScalarAlgebra
 
-omit [T2Space M] [CompactSpace M] in
+section ScalarIntegrals
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+open CalabiYau.RiemannianVolume CalabiYau.DivergenceTheorem
+
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+
+
+variable [I.Boundaryless] in
 lemma SmoothScalar.continuous_inner_grad
     {g : SmoothRiemannianMetric I M} (f h : SmoothScalar g) :
     Continuous (fun x : M =>
@@ -174,13 +173,13 @@ lemma SmoothScalar.continuous_inner_grad
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) g
     (gradG (I := I) g ⟨f.toFun, f.smooth⟩) (gradG (I := I) g ⟨h.toFun, h.smooth⟩)
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
+omit [Module.Finite ℝ E] in
 lemma SmoothScalar.continuous_mul {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     Continuous (fun x : M => f.toFun x * h.toFun x) :=
   f.smooth.continuous.mul h.smooth.continuous
 
-omit [I.Boundaryless] in
+variable [T2Space M] [CompactSpace M] in
 lemma SmoothScalar.integrable_mul {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     Integrable (fun x : M => f.toFun x * h.toFun x)
@@ -189,6 +188,10 @@ lemma SmoothScalar.integrable_mul {g : SmoothRiemannianMetric I M}
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   exact (f.continuous_mul h).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
+
+section
+
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 lemma SmoothScalar.integrable_inner_grad {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
@@ -225,7 +228,9 @@ lemma smoothScalarH1Inner_symm {g : SmoothRiemannianMetric I M}
     intro x
     exact g.symm x _ _
 
-omit [I.Boundaryless] in
+end
+
+variable [T2Space M] [CompactSpace M] in
 lemma SmoothScalar.integral_mul_self_nonneg {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     0 ≤ ∫ x, f.toFun x * f.toFun x
@@ -234,7 +239,7 @@ lemma SmoothScalar.integral_mul_self_nonneg {g : SmoothRiemannianMetric I M}
   intro x
   exact mul_self_nonneg _
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
+omit [Module.Finite ℝ E] in
 lemma SmoothRiemannianMetric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -242,6 +247,10 @@ lemma SmoothRiemannianMetric_inner_self_nonneg
   · subst hv
     simp [map_zero]
   · exact (g.pos x v hv).le
+
+section
+
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 lemma SmoothScalar.integral_inner_grad_self_nonneg
     {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) :
@@ -260,7 +269,9 @@ lemma smoothScalarH1Inner_nonneg {g : SmoothRiemannianMetric I M}
   unfold smoothScalarH1Inner
   exact add_nonneg f.integral_mul_self_nonneg f.integral_inner_grad_self_nonneg
 
-omit [I.Boundaryless] in
+end
+
+variable [T2Space M] [CompactSpace M] in
 lemma smoothScalar_integral_mul_add_left {g : SmoothRiemannianMetric I M}
     (f₁ f₂ h : SmoothScalar g) :
     (∫ x, (f₁ + f₂).toFun x * h.toFun x
@@ -279,7 +290,7 @@ lemma smoothScalar_integral_mul_add_left {g : SmoothRiemannianMetric I M}
       funext hpt]
   exact integral_add (f₁.integrable_mul h) (f₂.integrable_mul h)
 
-omit [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 lemma SmoothScalar.grad_g_add_apply {g : SmoothRiemannianMetric I M}
     (f₁ f₂ : SmoothScalar g) (x : M) :
     ((gradG (I := I) g ⟨(f₁ + f₂).toFun, (f₁ + f₂).smooth⟩ :
@@ -294,6 +305,10 @@ lemma SmoothScalar.grad_g_add_apply {g : SmoothRiemannianMetric I M}
   rw [hfun]
   exact gradFun_add (I := I) g (f₁.smooth.mdifferentiable (by simp) x)
     (f₂.smooth.mdifferentiable (by simp) x)
+
+section
+
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 lemma smoothScalar_integral_inner_grad_add_left
     {g : SmoothRiemannianMetric I M}
@@ -357,7 +372,9 @@ lemma smoothScalarH1Inner_add_left {g : SmoothRiemannianMetric I M}
   rw [smoothScalar_integral_mul_add_left, smoothScalar_integral_inner_grad_add_left]
   ring
 
-omit [T2Space M] [CompactSpace M] in
+end
+
+variable [I.Boundaryless] in
 lemma SmoothScalar.grad_g_smul_apply {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f : SmoothScalar g) (x : M) :
     ((gradG (I := I) g ⟨(c • f).toFun, (c • f).smooth⟩ :
@@ -388,7 +405,7 @@ lemma SmoothScalar.grad_g_smul_apply {g : SmoothRiemannianMetric I M}
   change (c • d_f) v = c * d_f v
   rw [smul_apply, smul_eq_mul]
 
-omit [I.Boundaryless] in
+variable [T2Space M] [CompactSpace M] in
 lemma smoothScalar_integral_mul_smul_left {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f h : SmoothScalar g) :
     (∫ x, (c • f).toFun x * h.toFun x
@@ -400,6 +417,10 @@ lemma smoothScalar_integral_mul_smul_left {g : SmoothRiemannianMetric I M}
     funext x; rw [SmoothScalar.toFun_smul_apply]; ring
   rw [hpt]
   rw [integral_const_mul]
+
+section
+
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 lemma smoothScalar_integral_inner_grad_smul_left
     {g : SmoothRiemannianMetric I M} (c : ℝ) (f h : SmoothScalar g) :
@@ -467,9 +488,13 @@ noncomputable instance instInnerProductSpaceSmoothScalar
     InnerProductSpace ℝ (SmoothScalar g) :=
   InnerProductSpace.ofCore _
 
-@[simp] lemma SmoothScalar.inner_def {g : SmoothRiemannianMetric I M}
+lemma SmoothScalar.inner_def {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     @inner ℝ _ _ f h = smoothScalarH1Inner (I := I) (M := M) f h := rfl
+
+end
+
+end ScalarIntegrals
 
 end Laplacian
 end Analysis

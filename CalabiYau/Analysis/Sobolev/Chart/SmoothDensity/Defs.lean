@@ -2,10 +2,12 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Chart.Defs
-public import CalabiYau.Analysis.Sobolev.Chart.AtlasNorm.Atlas
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Normed.Group.NullSubmodule
+public import Mathlib.Analysis.Normed.Group.Uniform
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.Multiply
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
 public import Mathlib.Geometry.Manifold.PartitionOfUnity
 public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
@@ -13,8 +15,6 @@ public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

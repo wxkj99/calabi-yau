@@ -7,8 +7,6 @@ public import Mathlib.Analysis.Calculus.FDeriv.Measurable
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -19,10 +17,12 @@ namespace HeatEquation
 
 open CalabiYau.Schauder
 
-variable {V F : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
-  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+variable {V F : Type*} [NormedAddCommGroup V]
+
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
 
 private def heatD2TimeLocalMajor (t : Real) (y : V) : Real :=
   ((heatScale (t / 2)) ^ Module.finrank Real V)⁻¹ *
@@ -59,8 +59,12 @@ private theorem heatD2TimeLocalMajor_int {t : Real} (ht : 0 < t) :
   intro y
   simp only [heatD2TimeLocalMajor, g]
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
-omit [FiniteDimensional ℝ V] in
+end
+
+section
+
+variable [InnerProductSpace Real V] [NormedAddCommGroup F] [NormedSpace Real F]
+
 private theorem heatD2Maj_le_timeLocalMajor {t q : Real} (ht : 0 < t)
     (hq0 : t / 2 < q) (hq1 : q < 2 * t) (y : V) :
     heatD2Maj q y ≤ heatD2TimeLocalMajor (V := V) t y := by
@@ -177,8 +181,6 @@ private theorem heatD2Maj_le_timeLocalMajor {t q : Real} (ht : 0 < t)
       simp only [rt, rh, a]
       ring
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
-omit [FiniteDimensional ℝ V] in
 private theorem heatD2TimeLocalMajor_nonneg {t : Real} (ht : 0 < t) (y : V) :
     0 ≤ heatD2TimeLocalMajor (V := V) t y := by
   have ht2 : 0 < t / 2 := by linarith
@@ -195,7 +197,10 @@ private theorem heatD2TimeLocalMajor_nonneg {t : Real} (ht : 0 < t) (y : V) :
       (mul_nonneg (inv_nonneg.mpr (by norm_num)) (by positivity))
       (Real.exp_pos _).le)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
 private theorem heatDt_norm_le_timeLocalMajor {t q : Real} (ht : 0 < t)
     (hq0 : t / 2 < q) (hq1 : q < 2 * t) (y : V) :
     ‖heatDt q y‖ ≤
@@ -224,12 +229,15 @@ private theorem heatDt_norm_le_timeLocalMajor {t q : Real} (ht : 0 < t)
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin,
         nsmul_eq_mul]
 
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F] in
 def heatLapSup (t : Real) (u : BoundedContinuousFunction V F) (x : V) : F :=
   ∑ i : Fin (Module.finrank Real V),
     heatD2Convolution t ((stdOrthonormalBasis Real V) i)
       ((stdOrthonormalBasis Real V) i) u x
 
-omit [CompleteSpace F] in
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] in
 theorem heatSup_time_eq_heatLapSup {t : Real} (ht : 0 < t)
     (u : BoundedContinuousFunction V F) (x : V) :
     HasDerivAt (fun q : Real => heatSup q u x) (heatLapSup t u x) t := by
@@ -293,6 +301,11 @@ theorem heatSup_time_eq_heatLapSup {t : Real} (ht : 0 < t)
   unfold heatSup supKernel
   rw [htrace] at hraw
   simpa only [F0] using hraw.2
+
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
 
 theorem heatLapSup_norm_le_of_holder {alpha K : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
@@ -378,10 +391,16 @@ theorem heatSup_primitive_of_holder {alpha K : NNReal}
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto ht hderiv
     (heatLapSup_int halpha0 halpha1 ht hu x) hzero htlim
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F] in
 def heatLapPotential (t : Real)
     (f : Real → BoundedContinuousFunction V F) (x : V) : F :=
   ∫ s : Real in 0..t, heatLapSup (t - s) (f s) x
 
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 theorem heatLapPotential_eq_heatLapDuhamel
     {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t)
@@ -406,10 +425,14 @@ theorem heatLapPotential_eq_heatLapDuhamel
   unfold heatLapPotential heatLapSup heatLapDuhamel heatD2Duhamel
   rw [intervalIntegral.integral_finsetSum (fun i _ => hterm i)]
 
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F] in
 def heatLapTriangle
     (f : Real → BoundedContinuousFunction V F) (x : V) (z : Real × Real) : F :=
   if z.2 < z.1 then heatLapSup (z.1 - z.2) (f z.2) x else 0
 
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 private def heatLapTriangleIntegrand
     (f : Real → BoundedContinuousFunction V F) (x : V)
     (i : Fin (Module.finrank Real V)) (z : (Real × Real) × V) : F :=
@@ -418,7 +441,11 @@ private def heatLapTriangleIntegrand
       ((stdOrthonormalBasis Real V) i) z.2 • f z.1.2 (x - z.2)
   else 0
 
-omit [Nontrivial V] [CompleteSpace F] in
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
 private theorem heatLapTriangleIntegrand_aestronglyMeasurable
     {alpha Csource : NNReal} (halpha0 : 0 < alpha)
     {S t : Real} (htS : t ≤ S)
@@ -498,7 +525,6 @@ private theorem heatLapTriangleIntegrand_aestronglyMeasurable
     rw [Set.indicator_of_notMem hzD]
     simp only [heatLapTriangleIntegrand, if_neg hsr]
 
-omit [Nontrivial V] [CompleteSpace F] in
 private theorem heatLapTriangle_aestronglyMeasurable_of_holder
     {alpha Csource : NNReal} (halpha0 : 0 < alpha)
     {S t : Real} (htS : t ≤ S)
@@ -537,13 +563,21 @@ private theorem heatLapTriangle_aestronglyMeasurable_of_holder
   · simp only [heatLapTriangle, heatLapSup, if_pos hsr]
   · simp only [heatLapTriangle, if_neg hsr, Finset.sum_const_zero]
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 private def heatLapTriangleMajor (alpha K : NNReal) (z : Real × Real) : Real :=
   if z.2 < z.1 then
     Module.finrank Real V * ((K : Real) * heatC2Holder (V := V) alpha) *
       holderHeatScale alpha (z.1 - z.2)
   else 0
 
-omit [Nontrivial V] in
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+
 private theorem heatLapTriangleMajor_nonneg
     {alpha K : NNReal} (z : Real × Real) :
     0 ≤ heatLapTriangleMajor (V := V) alpha K z := by
@@ -556,7 +590,6 @@ private theorem heatLapTriangleMajor_nonneg
       (Real.rpow_nonneg (sub_pos.mpr h).le _)
   · simp only [heatLapTriangleMajor, if_neg h, le_refl]
 
-omit [Nontrivial V] in
 private theorem heatLapTriangleMajor_aestronglyMeasurable
     {alpha K : NNReal} {t : Real} :
     AEStronglyMeasurable (heatLapTriangleMajor (V := V) alpha K)
@@ -591,7 +624,6 @@ private theorem heatLapTriangleMajor_aestronglyMeasurable
     rw [Set.indicator_of_notMem hz]
     simp only [heatLapTriangleMajor, if_neg hz']
 
-omit [Nontrivial V] in
 private theorem integral_heatLapTriangleMajor_right
     {alpha K : NNReal} (halpha : 0 < alpha)
     {t r : Real} (hr : r ∈ Ioc (0 : Real) t) :
@@ -627,7 +659,6 @@ private theorem integral_heatLapTriangleMajor_right
   rw [hsection, intervalIntegral.integral_const_mul,
     timeHolderHeatScale_int halpha]
 
-omit [Nontrivial V] in
 private theorem heatLapTriangleMajor_integrable
     {alpha K : NNReal} (halpha : 0 < alpha)
     {t : Real} (ht : 0 < t) :
@@ -697,6 +728,10 @@ private theorem heatLapTriangleMajor_integrable
         rw [Real.norm_eq_abs,
           abs_of_nonneg (heatLapTriangleMajor_nonneg (V := V) (r, s))]
 
+end
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 private theorem heatLapTriangle_integrable_of_aestronglyMeasurable
     {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t)
@@ -719,7 +754,8 @@ private theorem heatLapTriangle_integrable_of_aestronglyMeasurable
       hraw.trans_eq (by ring)
   · simp [heatLapTriangle, heatLapTriangleMajor, hsr]
 
-omit [Nontrivial V] [CompleteSpace F] in
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F] in
 private theorem integral_heatLapTriangle_right
     {t r : Real} (hr : r ∈ Ioc (0 : Real) t)
     (f : Real → BoundedContinuousFunction V F) (x : V) :
@@ -745,6 +781,11 @@ private theorem integral_heatLapTriangle_right
       intro h
       exact hs ⟨h.1, h.2.trans hr.2⟩
     simp [Set.indicator, hs, hsrMem]
+
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
 
 private theorem integral_heatLapTriangle_left
     {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
@@ -1007,9 +1048,9 @@ theorem heatDuhamel_time_of_intervalIntegrable
         (heatLapTriangle_aestronglyMeasurable_of_holder
           halpha0 hq.2 f hsource z)
 
-omit [InnerProductSpace Real V] [FiniteDimensional Real V]
-  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
-  [NormedSpace Real F] [CompleteSpace F] in
+end
+
+variable [NormedAddCommGroup F] in
 private theorem heatSource_intervalIntegrable_of_holder
     {alpha Csource : NNReal} (halpha0 : 0 < alpha)
     {S t : Real} (ht : t ∈ Ioc (0 : Real) S)
@@ -1060,6 +1101,11 @@ private theorem heatSource_intervalIntegrable_of_holder
         exact add_le_add (le_refl ‖f t x‖)
           (mul_le_mul_of_nonneg_left hpow (NNReal.coe_nonneg Csource))
   simpa only [intervalIntegrable_iff, uIoc_of_le ht.1.le] using hint
+
+section
+
+variable [InnerProductSpace Real V] [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
 
 theorem heatDuhamel_time
     {alpha K Csource : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
@@ -1132,6 +1178,8 @@ theorem eParabolicC2HolderGaugeOn_heatDuhamel_le_of_lower_jets
     exact hmeas1 t ⟨ht.1, ht.2.trans hTS.le⟩ z
   · intro t ht z
     exact hmeas2 t ⟨ht.1, ht.2.trans hTS.le⟩ z
+
+end
 
 end HeatEquation
 

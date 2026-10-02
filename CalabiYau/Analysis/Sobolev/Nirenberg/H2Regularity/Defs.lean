@@ -2,8 +2,8 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.WeakDerivatives
-public import CalabiYau.Analysis.DeGiorgi.EllipticCoefficients
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.WeakDerivative
+public import CalabiYau.Analysis.Elliptic.Coefficients
 
 @[expose] public section
 
@@ -18,43 +18,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
-theorem diffQuot_bound_of_smooth_compactSupport
-    {f : E → ℝ} (hf : ContDiff ℝ 1 f) (hf_support : HasCompactSupport f)
-    (i : Fin d) :
-    ∃ L : ℝ, 0 ≤ L ∧
-      ∀ h : ℝ, ∀ x : E,
-        |Sobolev.diffQuot i h f x| ≤ L := by
-  obtain ⟨L, hL_nn, hLip⟩ :=
-    Sobolev.lipschitz_of_contDiff_compactSupport
-      (d := d) hf hf_support
-  refine ⟨L, hL_nn, fun h x => ?_⟩
-  by_cases hh : h = 0
-  · simp [Sobolev.diffQuot, hh, hL_nn]
-  · rw [Sobolev.diffQuot_apply_of_ne (d := d) i hh f x]
-    have hLip_apply :
-        ‖f (x + h • EuclideanSpace.single i 1) - f x‖ ≤
-          L * ‖x + h • EuclideanSpace.single i 1 - x‖ := hLip _ _
-    have hsimp : x + h • EuclideanSpace.single i 1 - x =
-        h • EuclideanSpace.single i 1 := by
-      rw [add_sub_cancel_left]
-    rw [hsimp] at hLip_apply
-    have hsing_norm :
-        ‖(EuclideanSpace.single i (1 : ℝ) : E)‖ = 1 := by simp
-    have hnorm_smul :
-        ‖h • EuclideanSpace.single i (1 : ℝ)‖ = |h| := by
-      rw [norm_smul, hsing_norm, mul_one, Real.norm_eq_abs]
-    rw [hnorm_smul] at hLip_apply
-    rw [abs_div]
-    have habs_h : 0 < |h| := abs_pos.mpr hh
-    rw [div_le_iff₀ habs_h]
-    have h_lhs_norm :
-        |f (x + h • EuclideanSpace.single i 1) - f x| =
-          ‖f (x + h • EuclideanSpace.single i 1) - f x‖ :=
-      (Real.norm_eq_abs _).symm
-    rw [h_lhs_norm]
-    exact hLip_apply
-
 structure SmoothEllipticBilinearForm
     (d : ℕ) [NeZero d] (Ω : Set (EuclideanSpace ℝ (Fin d))) where
   a : EuclideanSpace ℝ (Fin d) → Matrix (Fin d) (Fin d) ℝ
@@ -67,7 +30,7 @@ structure SmoothEllipticBilinearForm
   ellipticity_pos : 0 < lam
   ellipticity_le_upper : lam ≤ capLam
   coercive : ∀ x ∈ Ω, ∀ ξ : EuclideanSpace ℝ (Fin d),
-    lam * ‖ξ‖ ^ 2 ≤ ⟪ξ, DeGiorgi.matMulE (a x) ξ⟫_ℝ
+    lam * ‖ξ‖ ^ 2 ≤ ⟪ξ, Sobolev.Euclidean.matMulE (a x) ξ⟫_ℝ
 
 namespace SmoothEllipticBilinearForm
 
@@ -82,15 +45,6 @@ theorem continuous_a {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (i j : F
 theorem continuous_c {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     Continuous B.c :=
   B.smooth_c.continuous
-
-theorem lam_nonneg {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
-    0 ≤ B.lam := B.ellipticity_pos.le
-
-theorem capLam_pos {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
-    0 < B.capLam := lt_of_lt_of_le B.ellipticity_pos B.ellipticity_le_upper
-
-theorem capLam_nonneg {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
-    0 ≤ B.capLam := B.capLam_pos.le
 
 theorem bounded_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {K : Set E} (hK : IsCompact K) :
@@ -171,100 +125,6 @@ def IsSmoothWeakSolution {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
   ContDiff ℝ (⊤ : ℕ∞) u ∧
   ∀ φ : E → ℝ, ContDiff ℝ (⊤ : ℕ∞) φ → HasCompactSupport φ → tsupport φ ⊆ Ω →
     B.bilin u φ = ∫ x in Ω, f x * φ x
-
-theorem principalIntegrand_symm {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    (u v : E → ℝ) (x : E) :
-    B.principalIntegrand u v x = B.principalIntegrand v u x := by
-  classical
-  unfold principalIntegrand
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl ?_
-  intro i _
-  refine Finset.sum_congr rfl ?_
-  intro j _
-  rw [B.symm x j i]
-  ring
-
-theorem continuous_principalIntegrand {Ω : Set E}
-    (B : SmoothEllipticBilinearForm d Ω) {u v : E → ℝ}
-    (hu : ContDiff ℝ 1 u) (hv : ContDiff ℝ 1 v) :
-    Continuous (B.principalIntegrand u v) := by
-  classical
-  unfold principalIntegrand
-  refine continuous_finsetSum _ ?_
-  intro i _
-  refine continuous_finsetSum _ ?_
-  intro j _
-  refine ((B.continuous_a i j).mul ?_).mul ?_
-  · exact (hu.continuous_fderiv (by simp)).clm_apply continuous_const
-  · exact (hv.continuous_fderiv (by simp)).clm_apply continuous_const
-
-theorem continuous_bilin_integrand {Ω : Set E}
-    (B : SmoothEllipticBilinearForm d Ω) {u v : E → ℝ}
-    (hu : ContDiff ℝ 1 u) (hv : ContDiff ℝ 1 v) :
-    Continuous (fun x => B.principalIntegrand u v x + B.c x * u x * v x) :=
-  (B.continuous_principalIntegrand hu hv).add
-    ((B.continuous_c.mul hu.continuous).mul hv.continuous)
-
-def gradientVec (u : E → ℝ) (x : E) : E :=
-  WithLp.toLp 2 (fun i : Fin d => (fderiv ℝ u x) (EuclideanSpace.single i 1))
-
-theorem principalIntegrand_self_eq_inner {Ω : Set E}
-    (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ) (x : E) :
-    B.principalIntegrand u u x =
-      ⟪gradientVec u x, DeGiorgi.matMulE (B.a x) (gradientVec u x)⟫_ℝ := by
-  classical
-  set ξ : E := gradientVec u x with hξ
-  set V : Fin d → ℝ := fun i => (fderiv ℝ u x) (EuclideanSpace.single i 1) with hV
-  have h_inner :
-      ⟪ξ, DeGiorgi.matMulE (B.a x) ξ⟫_ℝ =
-        (fun j => (B.a x).mulVec V j) ⬝ᵥ V := by
-    have hξofLp : ξ.ofLp = V := by simp [hξ, hV, gradientVec]
-    have hmatofLp : (DeGiorgi.matMulE (B.a x) ξ).ofLp = (B.a x).mulVec V := by
-      rw [DeGiorgi.matMulE_ofLp, hξofLp]
-    change (DeGiorgi.matMulE (B.a x) ξ).ofLp ⬝ᵥ star ξ.ofLp =
-      (fun j => (B.a x).mulVec V j) ⬝ᵥ V
-    rw [hmatofLp, hξofLp]
-    change (B.a x).mulVec V ⬝ᵥ (star V) = (B.a x).mulVec V ⬝ᵥ V
-    rfl
-  rw [h_inner]
-  unfold principalIntegrand
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl ?_
-  intro j _
-  change ∑ i, B.a x i j * V i * V j = (B.a x).mulVec V j * V j
-  rw [show ((B.a x).mulVec V) j = ∑ i, B.a x j i * V i from rfl]
-  rw [Finset.sum_mul]
-  refine Finset.sum_congr rfl ?_
-  intro i _
-  rw [B.symm x i j]
-
-theorem principalIntegrand_self_ge {Ω : Set E}
-    (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ)
-    {x : E} (hx : x ∈ Ω) :
-    B.lam * ‖gradientVec u x‖ ^ 2 ≤
-      B.principalIntegrand u u x := by
-  rw [principalIntegrand_self_eq_inner]
-  exact B.coercive x hx (gradientVec u x)
-
-omit [NeZero d] in
-theorem gradientVec_norm_sq_eq_sum (u : E → ℝ) (x : E) :
-    ‖gradientVec u x‖ ^ 2 =
-      ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1)) ^ 2 := by
-  unfold gradientVec
-  rw [EuclideanSpace.norm_sq_eq]
-  refine Finset.sum_congr rfl ?_
-  intro i _
-  change ‖(fderiv ℝ u x) (EuclideanSpace.single i 1)‖ ^ 2 = _
-  rw [Real.norm_eq_abs, sq_abs]
-
-theorem bilin_integrand_self_ge {Ω : Set E}
-    (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ)
-    {x : E} (hx : x ∈ Ω) :
-    B.lam * ‖gradientVec u x‖ ^ 2 + B.c x * u x * u x ≤
-      B.principalIntegrand u u x + B.c x * u x * u x := by
-  have h := B.principalIntegrand_self_ge u hx
-  linarith
 
 end SmoothEllipticBilinearForm
 

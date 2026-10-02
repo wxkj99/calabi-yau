@@ -39,9 +39,6 @@ def continuitySet (F : M → ℝ) : Set ℝ :=
 
 variable {ω₀} [CompactSpace M] {F : M → ℝ}
 
-omit [BorelSpace M] [CompactSpace M] in
-theorem continuitySet_subset_Icc : ω₀.continuitySet F ⊆ Icc 0 1 := fun _ ht ↦ ht.1
-
 /-- The right-hand side along the path has the correct total mass. -/
 theorem integral_exp_path [Nonempty M]
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F) (t : ℝ) :

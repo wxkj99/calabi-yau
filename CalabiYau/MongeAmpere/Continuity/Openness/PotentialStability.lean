@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
 
-import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderC2Regularity
+import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderC2Regularity.ChartJets
 
 /-!
 # Stability of positivity under small `C²` perturbations
@@ -21,7 +21,10 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [T2Space M] [CompactSpace M]
+section
+
+variable [ConnectedSpace M]
 
 /-- A continuous strictly positive function on a compact product has a uniform positive margin. -/
 private theorem compact_continuous_positive_margin
@@ -431,7 +434,8 @@ private theorem chart_comp_contDiffAt_two
   exact (contMDiffAt_iff_contDiffAt).mp
     ((hf (e.symm z)).comp_of_eq hsymm rfl)
 
-omit [ConnectedSpace M] in
+end
+
 /-- Mean-zero carrier evaluation is the same function as the completed smooth-chart
 extension after coercing to the ambient little-Hölder space. -/
 private theorem continuityHolderPair_evalC2_eq_completed
@@ -442,7 +446,6 @@ private theorem continuityHolderPair_evalC2_eq_completed
   funext x
   rfl
 
-omit [ConnectedSpace M] in
 /-- The completed-jet identity and norm bound give finite `C²` regularity of the actual
 mean-zero evaluation. -/
 private theorem continuityHolderPair_evalC2_contMDiff_two
@@ -457,12 +460,7 @@ private theorem continuityHolderPair_evalC2_contMDiff_two
       smoothChartHolderContinuousMapExtension_completedJet_eq
         P.finiteChartCover α P.normedDataC2
         (u : LittleHolder P.finiteChartCover 2 α P.normedDataC2) j hj i z hz)
-    (fun j hj i z hz =>
-      smoothChartHolderContinuousMapExtension_completedJet_norm_le
-        P.finiteChartCover α P.normedDataC2
-        (u : LittleHolder P.finiteChartCover 2 α P.normedDataC2) j hj i z hz)
 
-omit [ConnectedSpace M] in
 /-- The same bridge bounds the actual second chart derivatives of the mean-zero evaluation. -/
 private theorem continuityHolderPair_evalC2_secondJet_norm_le
     {ω₁ : KahlerForm n M} {α : ℝ≥0} [P : ContinuityHolderPair ω₁ α]
@@ -481,7 +479,6 @@ private theorem continuityHolderPair_evalC2_secondJet_norm_le
     (u : LittleHolder P.finiteChartCover 2 α P.normedDataC2)
     2 (by omega) i z hz)
 
-omit [ConnectedSpace M] in
 /-- A sufficiently small mean-zero little `C^{2,α}` perturbation of a smooth potential remains a
 positive `C²` potential. -/
 theorem exists_c2Potential_radius (ω₀ ω₁ : KahlerForm n M) (α : ℝ≥0)

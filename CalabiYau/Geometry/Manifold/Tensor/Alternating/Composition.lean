@@ -7,18 +7,19 @@ Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
 module
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Composition
-public import CalabiYau.Analysis.Calculus.AnalyticTransfer
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Smoothness.LinearIsometry
-public import Mathlib.Analysis.Normed.Module.Alternating.Basic
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Multilinear.Composition
 public import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Analytic.IteratedFDeriv
+public import Mathlib.Analysis.Normed.Group.Real
+public import Mathlib.Analysis.Normed.Operator.LinearIsometry
+public import CalabiYau.Mathlib.Analysis.Calculus.ContDiff.LinearIsometry
+public import Mathlib.Analysis.Normed.Module.Alternating.Basic
 public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 public import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 open ContinuousAlternatingMap
 
@@ -35,7 +36,6 @@ variable
   {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
   {ι : Type*} [Fintype ι]
   {ι' : Type*} [Fintype ι']
-
 def compContinuousAlternatingMap₂ (f : N →L[𝕜] N' →L[𝕜] N'')
     (g : M [⋀^ι]→L[𝕜] N) (h : M' [⋀^ι']→L[𝕜] N') : M [⋀^ι]→L[𝕜] M' [⋀^ι']→L[𝕜] N'' := by
   let F₁ : MultilinearMap 𝕜 (fun _ ↦ M) (M' [⋀^ι']→L[𝕜] N'') := MultilinearMap.mk
@@ -96,32 +96,6 @@ theorem compContinuousAlternatingMap₂_lsmul_apply
     (ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h m m' = (g m) • (h m') :=
   rfl
 
-noncomputable def _root_.LinearIsometry.compLeft {𝕜 : Type*} {𝕜₂ : Type*}
-    {𝕜₃ : Type*} (E : Type*) {F : Type*} {G : Type*} [NormedAddCommGroup E]
-    [NormedAddCommGroup F] [NormedAddCommGroup G] [NontriviallyNormedField 𝕜]
-    [NontriviallyNormedField 𝕜₂] [NontriviallyNormedField 𝕜₃] [NormedSpace 𝕜 E]
-    [NormedSpace 𝕜₂ F] [NormedSpace 𝕜₃ G] (σ₁₂ : 𝕜 →+* 𝕜₂) {σ₂₃ : 𝕜₂ →+* 𝕜₃} {σ₁₃ : 𝕜 →+* 𝕜₃}
-    [RingHomCompTriple σ₁₂ σ₂₃ σ₁₃] [RingHomIsometric σ₁₂] [RingHomIsometric σ₂₃]
-    [RingHomIsometric σ₁₃] (f : F →ₛₗᵢ[σ₂₃] G) :
-    (E →SL[σ₁₂] F) →ₛₗᵢ[σ₂₃] (E →SL[σ₁₃] G) :=
-  { ContinuousLinearMap.compSL _ _ _ _ _ f.toContinuousLinearMap with
-    norm_map' := fun _ ↦ f.norm_toContinuousLinearMap_comp }
-
-omit [Fintype ι] in
-theorem compContinuousAlternatingMapCLM_cont [Finite ι] :
-    Continuous (ContinuousAlternatingMap.compContinuousLinearMapCLM :
-    (M →L[𝕜] M') → (M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)) := by
-  let := Fintype.ofFinite ι
-  let φ : (M [⋀^ι]→L[𝕜] N) →ₗᵢ[𝕜] _ := ContinuousAlternatingMap.toContinuousMultilinearMapLI
-  let Φ : ((M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)) →ₗᵢ[𝕜] _ := φ.compLeft _ (RingHom.id _)
-  rw [← Φ.comp_continuous_iff]
-  change Continuous (fun p : M →L[𝕜] M' ↦
-    (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ ↦ p) :
-    ContinuousMultilinearMap 𝕜 (fun _ ↦ M') N →L[𝕜]
-    ContinuousMultilinearMap 𝕜 (fun _ ↦ M) N).comp
-    (ContinuousAlternatingMap.toContinuousMultilinearMapCLM 𝕜))
-  exact Continuous.clm_comp compContinuousMultilinearMapL_diag_continuous continuous_const
-
 end ContinuousLinearMap
 
 namespace ContinuousAlternatingMap
@@ -135,7 +109,9 @@ variable
   {ι ι' : Type*}
 variable
   {M' : Type*} [NormedAddCommGroup M'] [NormedSpace 𝕜 M']
-  [Fintype ι] [Fintype ι']
+section
+
+variable [Fintype ι] [Fintype ι']
 
 def compContinuousAlternatingMap₂ (f : N →L[𝕜] N' →L[𝕜] N'')
     (g : M [⋀^ι]→L[𝕜] N) (h : M' [⋀^ι']→L[𝕜] N') : M [⋀^ι]→L[𝕜] M' [⋀^ι']→L[𝕜] N'' :=
@@ -156,24 +132,12 @@ theorem compContinuousAlternatingMap₂_lsmul_apply
     (ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h m m' = (g m) • (h m') :=
   rfl
 
-omit [Fintype ι] in
-theorem compContinuousLinearMap_compContinuousLinearMap
-    {E E' E'' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] [NormedAddCommGroup E''] [NormedSpace 𝕜 E'']
-    (L : E [⋀^ι]→L[𝕜] N) (A : E' →L[𝕜] E) (B : E'' →L[𝕜] E') :
-    (L.compContinuousLinearMap A).compContinuousLinearMap B =
-      L.compContinuousLinearMap (A ∘L B) := by
-  ext v
-  rfl
+end
 
-omit [Fintype ι] in
-theorem compContinuousLinearMap_id {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    (L : E [⋀^ι]→L[𝕜] N) :
-    L.compContinuousLinearMap (ContinuousLinearMap.id 𝕜 E) = L := by
-  ext v
-  rfl
+section
 
-omit [Fintype ι] in
+variable [Fintype ι']
+
 theorem compContinuousLinearMap_add {E E' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] (L₁ L₂ : E [⋀^ι]→L[𝕜] N)
     (A : E' →L[𝕜] E) :
@@ -182,7 +146,6 @@ theorem compContinuousLinearMap_add {E E' : Type*} [NormedAddCommGroup E] [Norme
   ext v
   rfl
 
-omit [Fintype ι] in
 theorem compContinuousLinearMap_smul {E E' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] (c : 𝕜) (L : E [⋀^ι]→L[𝕜] N)
     (A : E' →L[𝕜] E) :
@@ -190,12 +153,13 @@ theorem compContinuousLinearMap_smul {E E' : Type*} [NormedAddCommGroup E] [Norm
   ext v
   rfl
 
-omit [Fintype ι] in
 theorem compContinuousLinearMap_zero {E E' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] (A : E' →L[𝕜] E) :
     (0 : E [⋀^ι]→L[𝕜] N).compContinuousLinearMap A = 0 := by
   ext v
   rfl
+
+end
 
 end ContinuousAlternatingMap
 
@@ -207,31 +171,13 @@ variable
   (F₁ F₂ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [ContinuousAdd F₁]
 
-theorem ContinuousAlternatingMap.compContinuousLinearMapL_continuous :
-    Continuous (fun p : F₁ →L[𝕜] F₁ ↦
-    (ContinuousAlternatingMap.compContinuousLinearMapCLM p :
-    (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂))) := by
-  let := Fintype.ofFinite ι
-  let φ : (F₁ [⋀^ι]→L[𝕜] F₂) →ₗᵢ[𝕜] _ := ContinuousAlternatingMap.toContinuousMultilinearMapLI
-  let Φ : ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) →ₗᵢ[𝕜] _ := φ.compLeft _ (RingHom.id _)
-  rw [← Φ.comp_continuous_iff]
-  change Continuous (fun p : F₁ →L[𝕜] F₁ ↦
-    (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ ↦ p) :
-    ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂ →L[𝕜]
-    ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂).comp
-    (toContinuousMultilinearMapCLM 𝕜))
-  exact (ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous 𝕜 ι F₁ F₂).clm_comp
-    continuous_const
-
 end Continuous
 
 section Smooth
-variable {𝕜 ι F₁ F₂} [NontriviallyNormedField 𝕜] [CharZero 𝕜] [Fintype ι] [DecidableEq ι]
-  [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
-
+variable {𝕜 ι F₁ F₂} [NontriviallyNormedField 𝕜]
 open scoped Bundle Manifold
 
-omit [CharZero 𝕜] in
+variable [Fintype ι] [DecidableEq ι] [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] in
 private theorem norm_alternatization_le (f : ContinuousMultilinearMap 𝕜 (fun _ : ι => F₁) F₂) :
     ‖ContinuousMultilinearMap.alternatization f‖ ≤
       (Fintype.card (Equiv.Perm ι) : ℝ) * ‖f‖ := by
@@ -256,6 +202,10 @@ private theorem norm_alternatization_le (f : ContinuousMultilinearMap 𝕜 (fun 
     _ = (Fintype.card (Equiv.Perm ι) : ℝ) * (‖f‖ * ∏ i, ‖v i‖) := by
       rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     _ = (Fintype.card (Equiv.Perm ι) : ℝ) * ‖f‖ * ∏ i, ‖v i‖ := by ring
+
+section
+
+variable [CharZero 𝕜] [Fintype ι] [DecidableEq ι] [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
 
 noncomputable def ContinuousMultilinearMap.alternatizationCLM : (ContinuousMultilinearMap 𝕜
     (fun _ : ι => F₁) F₂) →L[𝕜]
@@ -338,25 +288,12 @@ theorem ContinuousMultilinearMap.alternatizationCLM_apply_toContinuousMultilinea
     Nat.factorial_ne_zero (Fintype.card ι)]
   simp
 
-omit [CharZero 𝕜] in
-theorem ContinuousMultilinearMap.alternatizationCLM_compContinuousLinearMap
-    {F₁' : Type*} [NormedAddCommGroup F₁'] [NormedSpace 𝕜 F₁']
-    (f : ContinuousMultilinearMap 𝕜 (fun _ : ι => F₁) F₂)
-    (A : F₁' →L[𝕜] F₁) :
-    ContinuousMultilinearMap.alternatizationCLM
-        (f.compContinuousLinearMap (fun _ => A)) =
-      (ContinuousMultilinearMap.alternatizationCLM f).compContinuousLinearMap A := by
-  ext v
-  simp only [ContinuousMultilinearMap.alternatizationCLM, LinearMap.mkContinuous_apply,
-    LinearMap.coe_mk, AddHom.coe_mk, ContinuousAlternatingMap.smul_apply]
-  rw [ContinuousAlternatingMap.compContinuousLinearMap_apply]
-  simp only [ContinuousAlternatingMap.smul_apply]
-  rw [ContinuousMultilinearMap.alternatization_apply_apply,
-    ContinuousMultilinearMap.alternatization_apply_apply]
-  simp only [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  congr 1
+end
 
-omit [DecidableEq ι] in
+section
+
+variable [CharZero 𝕜] [Fintype ι] [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
+
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff :
     ContDiff 𝕜 ⊤ (fun p : F₁ →L[𝕜] F₁ =>
       (compContinuousLinearMapCLM p : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜]
@@ -414,7 +351,6 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff :
   rw [ContinuousMultilinearMap.alternatizationCLM_apply_toContinuousMultilinearMap]
   rfl
 
-omit [DecidableEq ι] in
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff :
     let F : (F₁ →L[𝕜] F₁) → (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
       := fun p ↦ ContinuousAlternatingMap.compContinuousLinearMapCLM p
@@ -422,7 +358,6 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff :
   rw [contMDiff_iff_contDiff]
   exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff
 
-omit [DecidableEq ι] in
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space
     {F₁' : Type*} [NormedAddCommGroup F₁'] [NormedSpace 𝕜 F₁'] :
     ContDiff 𝕜 ⊤ (fun p : F₁ →L[𝕜] F₁' =>
@@ -486,36 +421,23 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space
   rw [ContinuousMultilinearMap.alternatizationCLM_apply_toContinuousMultilinearMap]
   rfl
 
-omit [DecidableEq ι] in
-theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_of_space
-    {F₁' : Type*} [NormedAddCommGroup F₁'] [NormedSpace 𝕜 F₁'] :
-    let F : (F₁ →L[𝕜] F₁') → (F₁' [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
-      := fun p ↦ ContinuousAlternatingMap.compContinuousLinearMapCLM p
-    ContMDiff (𝓘(𝕜, (F₁ →L[𝕜] F₁'))) (𝓘(𝕜,
-      ((F₁' [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)))) ⊤ F := by
-  rw [contMDiff_iff_contDiff]
-  exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space
+end
 
 end Smooth
 
 section Smooth
-variable {ι F₁ F₂} [Fintype ι]
-  [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [NormedAddCommGroup F₂] [NormedSpace ℝ F₂]
-
+variable {ι F₁ F₂}
 open scoped Bundle Manifold
+
+section
+
+variable [Fintype ι] [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [NormedAddCommGroup F₂] [NormedSpace ℝ F₂]
 
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_real :
     ContDiff ℝ ⊤ (fun p : F₁ →L[ℝ] F₁ =>
       (compContinuousLinearMapCLM p : (F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ]
         (F₁ [⋀^ι]→L[ℝ] F₂))) := by
   exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff
-
-theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_real :
-    let F : (F₁ →L[ℝ] F₁) → (F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)
-      := fun p ↦ ContinuousAlternatingMap.compContinuousLinearMapCLM p
-    ContMDiff (𝓘(ℝ, (F₁ →L[ℝ] F₁))) (𝓘(ℝ, ((F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)))) ⊤ F := by
-  rw [contMDiff_iff_contDiff]
-  exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_real
 
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space_real
     {F₁' : Type*} [NormedAddCommGroup F₁'] [NormedSpace ℝ F₁'] :
@@ -532,6 +454,8 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_of_space_r
       ((F₁' [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)))) ⊤ F := by
   rw [contMDiff_iff_contDiff]
   exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space_real
+
+end
 
 end Smooth
 

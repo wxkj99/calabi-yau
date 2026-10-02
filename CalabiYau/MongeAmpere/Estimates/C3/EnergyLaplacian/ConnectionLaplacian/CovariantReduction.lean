@@ -38,12 +38,12 @@ theorem c3Curvature_split_from_lifts
         ∑ l, (c3PerturbedMetricInChart ω₀ φ x z)⁻¹ l i *
           c3CurvatureCovariantZ (c3PerturbedMetricInChart ω₀ φ x) z p j q k l)
     (hRefLift : ∀ p i j q k,
-      c3PartialZ (fun w => c3RaisedReferenceCurvature ω₀ x w i j k q) z p +
-          ∑ r, c3ChristoffelInChart (fun w => ω₀.metricInChart x w) z i p r *
+      wirtingerDerivInChart (fun w => c3RaisedReferenceCurvature ω₀ x w i j k q) z p +
+          ∑ r, christoffelInChart (fun w => ω₀.metricInChart x w) z i p r *
             c3RaisedReferenceCurvature ω₀ x z r j k q -
-          ∑ r, c3ChristoffelInChart (fun w => ω₀.metricInChart x w) z r p j *
+          ∑ r, christoffelInChart (fun w => ω₀.metricInChart x w) z r p j *
             c3RaisedReferenceCurvature ω₀ x z i r k q -
-          ∑ r, c3ChristoffelInChart (fun w => ω₀.metricInChart x w) z r p k *
+          ∑ r, christoffelInChart (fun w => ω₀.metricInChart x w) z r p k *
             c3RaisedReferenceCurvature ω₀ x z i j r q =
         ∑ l, (ω₀.metricInChart x z)⁻¹ l i *
           c3ReferenceCurvatureCovariantDerivativeInChart ω₀ x z p j q k l)
@@ -66,25 +66,25 @@ theorem c3Curvature_split_from_lifts
   let g₀ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun w => ω₀.metricInChart x w
   let T : Fin n → Fin n → Fin n → ℂ :=
-    c3ConnectionDifferenceInChart ω₀ φ x z
+    connectionDifferenceInChart ω₀ φ x z
   have hGamma (a b c : Fin n) :
-      c3ChristoffelInChart g z a b c =
-        c3ChristoffelInChart g₀ z a b c + T a b c := by
-    change c3ChristoffelInChart
+      christoffelInChart g z a b c =
+        christoffelInChart g₀ z a b c + T a b c := by
+    change christoffelInChart
         (fun w => ω₀.metricInChart x w +
           complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w) z a b c =
-      c3ChristoffelInChart (fun w => ω₀.metricInChart x w) z a b c +
-        (c3ChristoffelInChart
+      christoffelInChart (fun w => ω₀.metricInChart x w) z a b c +
+        (christoffelInChart
             (fun w => ω₀.metricInChart x w +
               complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w)
             z a b c -
-          c3ChristoffelInChart (fun w => ω₀.metricInChart x w) z a b c)
+          christoffelInChart (fun w => ω₀.metricInChart x w) z a b c)
     ring
   have hPartial (p q : Fin n) :
-      c3PartialZ (fun w => -c3RaisedCurvatureInChart g w i j k q +
+      wirtingerDerivInChart (fun w => -c3RaisedCurvatureInChart g w i j k q +
         c3RaisedReferenceCurvature ω₀ x w i j k q) z p =
-      -c3PartialZ (fun w => c3RaisedCurvatureInChart g w i j k q) z p +
-        c3PartialZ (fun w => c3RaisedReferenceCurvature ω₀ x w i j k q) z p := by
+      -wirtingerDerivInChart (fun w => c3RaisedCurvatureInChart g w i j k q) z p +
+        wirtingerDerivInChart (fun w => c3RaisedReferenceCurvature ω₀ x w i j k q) z p := by
     have hpd : DifferentiableAt ℝ
         (fun w => c3RaisedCurvatureInChart g w i j k q) z := by
       simpa [g] using hPertDiff i j k q
@@ -105,7 +105,7 @@ theorem c3Curvature_split_from_lifts
               fderiv ℝ (fun w => c3RaisedReferenceCurvature ω₀ x w i j k q) z :=
                 fderiv_add hpd.neg hrd
         _ = _ := by rw [fderiv_fun_neg]
-    unfold c3PartialZ
+    unfold wirtingerDerivInChart
     rw [hfd]
     simp only [add_apply, neg_apply]
     ring

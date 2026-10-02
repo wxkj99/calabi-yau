@@ -8,8 +8,6 @@ public import Mathlib.Geometry.Manifold.ContMDiffMap
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

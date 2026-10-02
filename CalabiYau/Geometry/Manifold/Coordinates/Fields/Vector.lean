@@ -26,7 +26,7 @@ def chartCoeff (x₀ : M)
   fun x => (chartModelBasis E).repr
     ((trivializationAt E (TangentSpace I) x₀) ⟨x, X x⟩).2 i
 
-@[simp] lemma chartCoeff_def (x₀ : M)
+lemma chartCoeff_def (x₀ : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
     chartCoeff (I := I) x₀ X i x =

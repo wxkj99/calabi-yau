@@ -2,7 +2,6 @@ module
 
 public import CalabiYau.Geometry.Complex.Forms.OneOne
 public import CalabiYau.Geometry.Manifold.Tensor.Coordinates.ModelBasis
-import CalabiYau.LinearAlgebra.Matrix.Realification
 
 /-!
 # Inverse Kähler Gram contraction in a real chart-model basis

@@ -39,12 +39,10 @@ private theorem exists_finite_compact_patch_derivative_bound
 /-- A finite compact patch cover with local C²,α bounds gives one C²,α bound on the whole compact
 set.  The interiors cover `K` so that close pairs lie in one patch; the compactness of `K` yields
 a positive Lebesgue number, while the local zeroth-order bounds control far pairs. -/
-@[deprecated "unused hypotheses `hα` and `hpatch`; will be removed" (since := "2026-10-02")]
 theorem exists_holderBoundOn_of_finite_compact_patch
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {α : ℝ≥0} {K : Set E} {f : E → ℝ} {ι : Type*} [Fintype ι]
-    (hα : α ≤ 1) (hK : IsCompact K)
-    (patch : ι → Set E) (hpatch : ∀ i, IsCompact (patch i))
+    (hK : IsCompact K) (patch : ι → Set E)
     (hcover : K ⊆ ⋃ i, interior (patch i))
     (localBound : ∀ i, ∃ C : ℝ≥0, HolderBoundOn 2 α C (patch i) f) :
     ∃ C : ℝ≥0, HolderBoundOn 2 α C K f := by

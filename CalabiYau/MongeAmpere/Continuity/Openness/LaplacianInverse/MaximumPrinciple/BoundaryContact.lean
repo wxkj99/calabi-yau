@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # Boundary contact from a supplied strict barrier
@@ -17,7 +17,6 @@ open Set
 
 /-- Annular comparison with a given C² strict barrier forces a positive outward radial
 derivative at a boundary maximum that is strictly greater than every interior value. -/
-@[deprecated "unused hypothesis `hlam`; will be removed" (since := "2026-10-02")]
 theorem complexEllipticOp_boundary_contact_deriv_pos {n : ℕ}
     (A : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     {U : Set (EuclideanSpace ℂ (Fin n))} (hU : IsOpen U)
@@ -25,8 +24,7 @@ theorem complexEllipticOp_boundary_contact_deriv_pos {n : ℕ}
     (hu : ContDiffOn ℝ 2 u U) (hv : ContDiff ℝ 2 v)
     {c z : EuclideanSpace ℂ (Fin n)} {R : ℝ} (hR : 0 < R)
     (hball : Metric.closedBall c R ⊆ U) (hz : z ∈ Metric.sphere c R)
-    {lam : ℝ≥0} (hlam : 0 < lam)
-    (hEll : IsUniformlyEllipticOn A lam (Metric.ball c R))
+    {lam : ℝ≥0} (hEll : IsUniformlyEllipticOn A lam (Metric.ball c R))
     (hLu : ∀ y ∈ Metric.ball c R, 0 ≤ complexEllipticOp A u y)
     (hmax : ∀ y ∈ Metric.closedBall c R, u y ≤ u z)
     (hstrict : ∀ y ∈ Metric.ball c R, u y < u z)

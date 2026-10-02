@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 public import CalabiYau.Geometry.Complex.Forms.ComplexHessian
 public import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.DirectionalJets
 
@@ -18,32 +18,6 @@ open scoped Manifold ContDiff NNReal
 open ContinuousAlternatingMap
 
 namespace KahlerForm
-
-private theorem exists_holderBoundOn_second_directional_derivative_of_succ_succ
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {W K : Set E} {r : ℕ} {α C : ℝ≥0}
-    (hW : IsOpen W) (hKW : K ⊆ W) (hr : 2 ≤ r)
-    (f : E → ℝ) (hf : ContDiffOn ℝ ∞ f W) (hbound : HolderBoundOn r α C K f)
-    (u v : E) :
-    ∃ C' : ℝ≥0, HolderBoundOn (r - 2) α C' K
-      (fun z ↦ fderiv ℝ (fun w ↦ fderiv ℝ f w u) z v) := by
-  have hr0 : 1 ≤ r := by omega
-  have hr1 : 1 ≤ r - 1 := by omega
-  have hrFirst : (r - 1) + 1 = r := by omega
-  have hrSecond : (r - 2) + 1 = r - 1 := by omega
-  have hboundFirst : HolderBoundOn ((r - 1) + 1) α C K f := by
-    simpa [hrFirst] using hbound
-  let g : E → ℝ := fun z ↦ fderiv ℝ f z u
-  have hg : ContDiffOn ℝ ∞ g W := by
-    have hderiv := hf.fderiv_of_isOpen hW (m := ∞) (by simp)
-    exact hderiv.clm_apply contDiffOn_const
-  obtain ⟨C₁, hC₁⟩ := exists_holderBoundOn_fderiv_directional_of_succ
-    hW hKW (k := r - 1) f u hf hboundFirst
-  have hboundSecond : HolderBoundOn ((r - 2) + 1) α C₁ K g := by
-    simpa [g, hrSecond] using hC₁
-  obtain ⟨C₂, hC₂⟩ := exists_holderBoundOn_fderiv_directional_of_succ
-    hW hKW (k := r - 2) g v hg hboundSecond
-  exact ⟨C₂, by simpa [g] using hC₂⟩
 
 /-- A family with a common `C^{r,α}` bound has a common `C^{r-2,α}` bound on all complex
 Hessian entries. -/

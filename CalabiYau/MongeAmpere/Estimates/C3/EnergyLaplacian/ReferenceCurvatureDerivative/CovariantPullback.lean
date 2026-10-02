@@ -32,16 +32,13 @@ theorem c3_curvature_covariant_pullback {n : ℕ}
     (hmetric : ∀ w ∈ U,
       g w = Matrix.transpose (EuclideanSpace.clmMatrix (fderiv ℂ f w)) *
         g' (f w) * (EuclideanSpace.clmMatrix (fderiv ℂ f w)).map star)
-    (hkahler : ∀ w ∈ f '' U, ∀ i j k,
-      chartPartialZComplex (fun v => g' v j k) w i =
-        chartPartialZComplex (fun v => g' v i k) w j)
     (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ U)
     (hjac : IsUnit (EuclideanSpace.clmMatrix (fderiv ℂ f z)).det)
     (hgdet : IsUnit (g' (f z)).det) :
-    c3CovariantFourTensorZJet (c3ChristoffelInChart g z) (chartCurvature g z)
+    c3CovariantFourTensorZJet (christoffelInChart g z) (chartCurvature g z)
         (fun s p q j k => chartPartialZComplex (fun w => chartCurvature g w p q j k) z s) =
       c3FiveSlotFrameContraction (EuclideanSpace.clmMatrix (fderiv ℂ f z))
-        (c3CovariantFourTensorZJet (c3ChristoffelInChart g' (f z)) (chartCurvature g' (f z))
+        (c3CovariantFourTensorZJet (christoffelInChart g' (f z)) (chartCurvature g' (f z))
           (fun s p q j k => chartPartialZComplex
             (fun w => chartCurvature g' w p q j k) (f z) s)) := by
   apply c3_covariant_curvature_pullback_algebra
@@ -52,11 +49,11 @@ theorem c3_curvature_covariant_pullback {n : ℕ}
     (fun s p q j k => chartPartialZComplex
       (fun w => chartCurvature g' w p q j k) (f z) s)
     (fun s p q j k => chartPartialZComplex (fun w => chartCurvature g w p q j k) z s)
-    (c3ChristoffelInChart g' (f z)) (c3ChristoffelInChart g z)
+    (christoffelInChart g' (f z)) (christoffelInChart g z)
   · funext p q j k
-    exact chartCurvature_pullback U hU f hf hhol g g' hg' hmetric hkahler
+    exact chartCurvature_pullback U hU f hf hhol g g' hg' hmetric
       z hz hjac hgdet p q j k
-  · exact c3_curvature_pullback_first_jet U hU f hf hhol g g' hg' hmetric hkahler
+  · exact c3_curvature_pullback_first_jet U hU f hf hhol g g' hg' hmetric
       z hz hjac hgdet
   · exact c3_connection_pullback_lowered U hU f hf hhol g g' hg' hmetric z hz hjac hgdet
 
@@ -75,11 +72,11 @@ theorem c3_reference_curvature_derivative_frame_transition
     let gy := fun z => ω₀.metricInChart y z
     let gx := fun z => ω₀.metricInChart x z
     c3FiveSlotFrameContraction P
-        (c3CovariantFourTensorZJet (c3ChristoffelInChart gy zy) (chartCurvature gy zy)
+        (c3CovariantFourTensorZJet (christoffelInChart gy zy) (chartCurvature gy zy)
           (fun s p q j k => chartPartialZComplex
             (fun w => chartCurvature gy w p q j k) zy s)) =
       c3FiveSlotFrameContraction (referenceTransitionMatrix x y * P)
-        (c3CovariantFourTensorZJet (c3ChristoffelInChart gx zx) (chartCurvature gx zx)
+        (c3CovariantFourTensorZJet (christoffelInChart gx zx) (chartCurvature gx zx)
           (fun s p q j k => chartPartialZComplex
             (fun w => chartCurvature gx w p q j k) zx s)) := by
   dsimp only
@@ -96,7 +93,6 @@ theorem c3_reference_curvature_derivative_frame_transition
     (ω₀.metricInChart y) (ω₀.metricInChart x)
     (fun a b => (ω₀.contDiffOn_metricInChart x a b).mono himage)
     hmetric
-    (fun w hw i j k => ω₀.kahler_chart_metric_symmetry x (himage hw) i j k)
     z hz hjac
     ((Matrix.isUnit_iff_isUnit_det _).1
       (ω₀.posDef_metricInChart x (himage ⟨z, hz, rfl⟩)).isUnit)

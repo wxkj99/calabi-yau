@@ -23,7 +23,6 @@ namespace CalabiYau.DifferentialForm
 variable {d : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (Fin d → ℝ) M]
   [IsManifold 𝓘(ℝ, Fin d → ℝ) ∞ M]
-
 def smoothMulForm {k : ℕ}
     (f : C^∞⟮𝓘(ℝ, Fin d → ℝ), M; 𝓘(ℝ), ℝ⟯)
     (η : DifferentialForm 𝓘(ℝ, Fin d → ℝ) M k) :
@@ -122,8 +121,7 @@ theorem two_partition_refinement {ι κ : Type*} {k : ℕ}
 
 section ChartIntegral
 
-variable [T2Space M] [CompactSpace M]
-
+variable [CompactSpace M] in
 /-- A common refinement compares actual signed chart integrals term by term. -/
 theorem chart_sum_eq_of_common_refinement {ι κ : Type*}
     (s : Finset ι) (t : Finset κ)
@@ -163,12 +161,17 @@ theorem chart_sum_eq_of_common_refinement {ι κ : Type*}
       exact (signedChartIntegral_finsetSum (D j) s (fun i => Γ i j)
         (fun i hi => (hΓ i hi j hj).trans Set.inter_subset_right)).symm
 
+variable [T2Space M] [CompactSpace M] in
 /-- A finite sum of supported chart integrals, not yet a constructed global linear map. -/
 def partitionChartIntegral {ι : Type*}
     (C : ι → OrientedLocalChart d M)
     (ρ : SmoothPartitionOfUnity ι 𝓘(ℝ, Fin d → ℝ) M Set.univ)
     (s : Finset ι) (η : DifferentialForm 𝓘(ℝ, Fin d → ℝ) M d) : ℝ :=
   ∑ i ∈ s, signedChartIntegral (C i) (smoothMulForm (ρ i) η)
+
+section
+
+variable [CompactSpace M]
 
 /-- Finite sums associated with two compatible subordinate partitions agree. -/
 theorem partitionChartIntegral_eq {ι κ : Type*}
@@ -221,6 +224,8 @@ theorem partitionChartIntegral_eq_of_supported {ι : Type*}
       (signedChartIntegral_finsetSum D s (fun i => smoothMulForm (ρ i) η) hD).symm
     _ = signedChartIntegral D η := by
       rw [sum_smoothMulForm_eq ρ s hs η]
+
+end
 
 end ChartIntegral
 

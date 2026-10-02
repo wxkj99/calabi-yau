@@ -25,14 +25,14 @@ theorem hasWeakPartialDeriv_cutoff_sq_mul_diffQuot
       LocallyIntegrable u ((volume : Measure E).restrict Set.univ))
     (hg_j_localInt :
       LocallyIntegrable g_j ((volume : Measure E).restrict Set.univ))
-    (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) j g_j u Set.univ) :
-    DeGiorgi.HasWeakPartialDeriv (d := d) j
+    (hwp : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j g_j u Set.univ) :
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
       (fun y => (η y)^2 * diffQuot k h g_j y +
         ((fderiv ℝ (fun z => (η z)^2) y) (EuclideanSpace.single j 1)) *
           diffQuot k h u y)
       (fun y => (η y)^2 * diffQuot k h u y) Set.univ := by
   have h_wp_dq :
-      DeGiorgi.HasWeakPartialDeriv (d := d) j
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j
         (diffQuot k h g_j) (diffQuot k h u) Set.univ :=
     hasWeakPartialDeriv_diffQuot (d := d) k j h hu_localInt hg_j_localInt hwp
   have h_dq_u_localInt :
@@ -45,7 +45,7 @@ theorem hasWeakPartialDeriv_cutoff_sq_mul_diffQuot
         ((volume : Measure E).restrict Set.univ) := by
     rw [Measure.restrict_univ] at hg_j_localInt ⊢
     exact locallyIntegrable_diffQuot (d := d) k h hg_j_localInt
-  exact DeGiorgi.HasWeakPartialDeriv.mul_smooth (Ω := Set.univ) isOpen_univ
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.mul_smooth (Ω := Set.univ)
     h_wp_dq (hη.pow 2) h_dq_u_localInt h_dq_g_localInt
 
 end Sobolev.NirenbergTestFunction

@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.Geometry.Kahler.Sobolev
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Intrinsic
-public import CalabiYau.Geometry.Kahler.Sobolev.DimensionTwo.LpNormFourThirdsToTwo
+public import CalabiYau.Mathlib.MeasureTheory.Function.LpSpace.FiniteMeasureComparison
 
 /-!
 # The subcritical Sobolev inequality in complex dimension one
@@ -52,7 +52,7 @@ private theorem dimensionTwo_subcriticalLpNorm
   have hdimEq : Module.finrank ℝ (EuclideanSpace ℂ (Fin 1)) = 2 := by
     rw [finrank_real_of_complex]
     simp
-  haveI : NeZero (Module.finrank ℝ (EuclideanSpace ℂ (Fin 1))) :=
+  have : NeZero (Module.finrank ℝ (EuclideanSpace ℂ (Fin 1))) :=
     ⟨by rw [hdimEq]; norm_num⟩
   have hdim : (4 / 3 : ℝ) < (Module.finrank ℝ (EuclideanSpace ℂ (Fin 1)) : ℝ) := by
     rw [hdimEq]
@@ -105,7 +105,7 @@ private theorem subcriticalLpNorm_to_lpNormTwo
                 (riemannianVolumeMeasure 𝓘(ℝ, EuclideanSpace ℂ (Fin 1)) M g)) := by
   obtain ⟨A, hA, hsub⟩ := hsub
   let μ := riemannianVolumeMeasure 𝓘(ℝ, EuclideanSpace ℂ (Fin 1)) M g
-  haveI : IsFiniteMeasure μ := by
+  have : IsFiniteMeasure μ := by
     dsimp [μ]
     exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin 1))) (M := M) g
@@ -202,6 +202,7 @@ private theorem lpNorm_four_sq_eq_integral_norm_four
   rw [← Real.rpow_natCast, ← Real.rpow_mul hnonneg]
   norm_num
 
+omit [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
 private theorem riemannianGradNorm_continuous
     (g : CalabiYau.SmoothRiemannianMetric
       𝓘(ℝ, EuclideanSpace ℂ (Fin 1)) M)

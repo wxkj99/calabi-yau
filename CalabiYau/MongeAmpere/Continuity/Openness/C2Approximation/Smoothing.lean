@@ -74,58 +74,6 @@ private theorem iteratedFDeriv_finset_sum_bound
         _ ≤ ε * 1 := mul_le_mul_of_nonneg_left hratio hε
         _ = ε := by ring
 
-private theorem chartwise_finite_sum_jets_tendsto
-    {E M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [TopologicalSpace M] [ChartedSpace E M]
-    (cover : CompactChartCover E M)
-    (e : ℕ → cover.ι → M → ℝ)
-    (he : ∀ j i k z, z ∈ cover.piece k →
-      ContDiffAt ℝ 2 (e j i ∘ (extChartAt 𝓘(ℝ, E) (cover.base k)).symm) z)
-    (hsmall : ∀ ε : ℝ≥0, 0 < ε → ∀ i, ∃ N, ∀ j, N ≤ j → ∀ k, ∀ r ≤ 2,
-      ∀ z ∈ cover.piece k,
-        ‖iteratedFDeriv ℝ r
-          ((e j i) ∘ (extChartAt 𝓘(ℝ, E) (cover.base k)).symm) z‖ ≤
-            (ε : ℝ) / ((Fintype.card cover.ι : ℝ) + 1)) :
-    ∀ ε : ℝ≥0, 0 < ε → ∃ N, ∀ j, N ≤ j → ∀ k, ∀ r ≤ 2,
-      ∀ z ∈ cover.piece k,
-        ‖iteratedFDeriv ℝ r
-          ((fun x => ∑ i, e j i x) ∘
-            (extChartAt 𝓘(ℝ, E) (cover.base k)).symm) z‖ ≤ ε := by
-  classical
-  intro ε hε
-  let threshold : cover.ι → ℕ := fun i => Classical.choose (hsmall ε hε i)
-  have hthreshold (i : cover.ι) :
-      ∀ j, threshold i ≤ j → ∀ k, ∀ r ≤ 2, ∀ z ∈ cover.piece k,
-        ‖iteratedFDeriv ℝ r
-          ((e j i) ∘ (extChartAt 𝓘(ℝ, E) (cover.base k)).symm) z‖ ≤
-            (ε : ℝ) / ((Fintype.card cover.ι : ℝ) + 1) :=
-    Classical.choose_spec (hsmall ε hε i)
-  let N : ℕ := ∑ i ∈ Finset.univ, threshold i
-  have hthreshold_le (i : cover.ι) : threshold i ≤ N := by
-    dsimp [N]
-    exact Finset.single_le_sum (fun j hj => Nat.zero_le _) (Finset.mem_univ i)
-  refine ⟨N, ?_⟩
-  intro j hj k r hr z hz
-  let chart := extChartAt 𝓘(ℝ, E) (cover.base k)
-  let f : cover.ι → E → ℝ := fun i => e j i ∘ chart.symm
-  have hcont : ∀ i ∈ Finset.univ, ContDiffAt ℝ 2 (f i) z := by
-    intro i hi
-    exact he j i k z hz
-  have hbound : ∀ i ∈ Finset.univ,
-      ‖iteratedFDeriv ℝ r (f i) z‖ ≤
-        (ε : ℝ) / ((Fintype.card cover.ι : ℝ) + 1) := by
-    intro i hi
-    simpa [f, chart, Finset.card_univ] using
-      hthreshold i j (le_trans (hthreshold_le i) hj) k r hr z hz
-  have hsum := iteratedFDeriv_finset_sum_bound Finset.univ f z hr
-    (by exact_mod_cast (le_of_lt hε)) hcont hbound
-  have hfun : (∑ i ∈ Finset.univ, f i) =
-      fun x => ∑ i ∈ Finset.univ, f i x := by
-    funext x
-    simp
-  rw [hfun] at hsum
-  simpa [f, chart, Function.comp_def] using hsum
-
 /-- Hirsch's finite chart localization, obtained from a smooth partition of unity subordinate to
 chart neighborhoods with compact closure.  This is kept separate from the Euclidean density input. -/
 private theorem exists_compactChartC2Partition
@@ -212,46 +160,6 @@ private theorem exists_compactChartC2Partition
     change ContDiffAt ℝ 2
       (((ρ i : M → ℝ) ∘ chart.symm) * (φ ∘ chart.symm)) z
     exact hρAt.mul hφAt
-
-omit [T2Space M] [CompactSpace M] in
-private theorem contDiffAt_chart_of_contMDiff
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    {f : M → ℝ}
-    (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ f)
-    (k : cover.ι) {z : EuclideanSpace ℂ (Fin n)}
-    (hz : z ∈ cover.piece k) :
-    ContDiffAt ℝ 2
-      (f ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm) z := by
-  let chart := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)
-  have hzTarget : z ∈ chart.target := cover.piece_in_target k hz
-  have hopen : IsOpen chart.target := isOpen_extChartAt_target
-    (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (cover.base k)
-  have hOn : ContDiffOn ℝ ∞ (f ∘ chart.symm) chart.target := by
-    have h := (contMDiff_iff.mp hf).2 (cover.base k) 0
-    simpa [chart, extChartAt, chartAt_self_eq] using h
-  have htop : (2 : ℕ∞ω) ≤ ∞ := by
-    change ((2 : ℕ∞) : ℕ∞ω) ≤ ((⊤ : ℕ∞) : ℕ∞ω)
-    exact WithTop.coe_le_coe.mpr le_top
-  exact (hOn.contDiffAt (hopen.mem_nhds hzTarget)).of_le htop
-
-omit [T2Space M] [CompactSpace M] in
-private theorem contDiffAt_chart_sub_of_contMDiff
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    {f g : M → ℝ}
-    (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ f)
-    (hg : ∀ k (z : EuclideanSpace ℂ (Fin n)), z ∈ cover.piece k →
-      ContDiffAt ℝ 2
-        (g ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm) z)
-    (k : cover.ι) {z : EuclideanSpace ℂ (Fin n)}
-    (hz : z ∈ cover.piece k) :
-    ContDiffAt ℝ 2
-      ((f - g) ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm) z := by
-  have h₁ := contDiffAt_chart_of_contMDiff cover hf k hz
-  have h₂ := hg k z hz
-  change ContDiffAt ℝ 2
-    ((f ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm) -
-      (g ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm)) z
-  exact h₁.sub h₂
 
 theorem exists_chartwiseC2Smoothing (ω₀ : KahlerForm n M) {φ : M → ℝ}
     (hφ : ω₀.IsC2Potential φ) :

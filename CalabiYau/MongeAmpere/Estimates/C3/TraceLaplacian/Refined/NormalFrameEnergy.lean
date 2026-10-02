@@ -40,13 +40,13 @@ theorem c3RefinedTrace_normalFrame_energy_and_curvature
     let h := c3RefinedTracePulledPerturbedMetric ω₀ φ x frame.coord
     calabiEnergy ω₀ φ x =
       ∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-        ‖c3PartialZ (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
+        ‖wirtingerDerivInChart (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
           (frame.eigenvalue p * frame.eigenvalue j * frame.eigenvalue k) ∧
     c3RefinedTraceReferenceCurvatureSignedError ω₀ φ x =
       ∑ p : Fin n, ∑ j : Fin n,
         (frame.eigenvalue j / frame.eigenvalue p - 1) *
           RCLike.re (c3RefinedTraceReferenceCurvatureInChart g frame.center p p j j) := by
   exact ⟨c3RefinedTrace_normalFrame_connectionEnergy ω₀ G φ hsol x frame,
-    c3RefinedTrace_normalFrame_referenceCurvature ω₀ G φ hsol x frame⟩
+    c3RefinedTrace_normalFrame_referenceCurvature ω₀ φ x frame⟩
 
 end KahlerForm

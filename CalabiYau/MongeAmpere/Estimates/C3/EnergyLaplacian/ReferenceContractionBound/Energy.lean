@@ -39,7 +39,7 @@ theorem c3_diagonal_inverse {n : ℕ} (d : Fin n → ℝ)
 theorem c3_metric_frame_factorizations {n : ℕ}
     (G : Matrix (Fin n) (Fin n) ℂ) (P Q : Matrix (Fin n) (Fin n) ℂ)
     (d : Fin n → ℝ) (hd : ∀ i, 0 < d i)
-    (hPQ : P * Q = 1) (hQP : Q * P = 1)
+    (hPQ : P * Q = 1)
     (hdiag : c3PullbackMetric P G = Matrix.diagonal (fun i ↦ (d i : ℂ))) :
     (∀ i a, G i a = ∑ r,
       ((Real.sqrt (d r) : ℝ) : ℂ) * Q r i *
@@ -75,7 +75,7 @@ theorem c3_metric_frame_factorizations {n : ℕ}
     ring
   · intro b j
     rw [← hpull, c3_pullback_inverse_entry Q P
-      (Matrix.diagonal (fun i ↦ (d i : ℂ))) hQP hPQ b j, hinvD]
+      (Matrix.diagonal (fun i ↦ (d i : ℂ))) hPQ b j, hinvD]
     simp only [Matrix.diagonal_apply]
     have hterm (r : Fin n) :
         star (P b r) * ((d r)⁻¹ : ℂ) * P j r =
@@ -106,55 +106,55 @@ theorem c3_metric_frame_factorizations {n : ℕ}
 theorem c3_pair_diagonalized_frame_weighted {n : ℕ}
     (G : Matrix (Fin n) (Fin n) ℂ) (z : EuclideanSpace ℂ (Fin n))
     (P Q : Matrix (Fin n) (Fin n) ℂ) (d : Fin n → ℝ)
-    (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1) (hQP : Q * P = 1)
+    (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1)
     (hdiag : c3PullbackMetric P G = Matrix.diagonal (fun i ↦ (d i : ℂ)))
     (T : Fin n → Fin n → Fin n → ℂ) :
     c3Pair (fun _ : EuclideanSpace ℂ (Fin n) ↦ G) z T T =
       ∑ i, ∑ j, ∑ k,
         ((d i / (d j * d k) : ℝ) : ℂ) *
-          referenceContraction_tensorFrameTransform Q P T i j k *
-            star (referenceContraction_tensorFrameTransform Q P T i j k) := by
-  rcases c3_metric_frame_factorizations G P Q d hd hPQ hQP hdiag with
+          referenceContractionTensorFrameTransform Q P T i j k *
+            star (referenceContractionTensorFrameTransform Q P T i j k) := by
+  rcases c3_metric_frame_factorizations G P Q d hd hPQ hdiag with
     ⟨hUpper, hLower⟩
   exact c3_pair_arbitrary_frame_weighted d hd G z P Q T hUpper hLower
 
 theorem c3_pair_diagonalized_frame_energy {n : ℕ}
     (G : Matrix (Fin n) (Fin n) ℂ) (z : EuclideanSpace ℂ (Fin n))
     (P Q : Matrix (Fin n) (Fin n) ℂ) (d : Fin n → ℝ)
-    (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1) (hQP : Q * P = 1)
+    (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1)
     (hdiag : c3PullbackMetric P G = Matrix.diagonal (fun i ↦ (d i : ℂ)))
     (T : Fin n → Fin n → Fin n → ℂ) :
     (c3Pair (fun _ : EuclideanSpace ℂ (Fin n) ↦ G) z T T).re =
       ∑ i, ∑ j, ∑ k,
         (d i / (d j * d k)) *
-          ‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2 := by
-  rw [c3_pair_diagonalized_frame_weighted G z P Q d hd hPQ hQP hdiag T]
+          ‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2 := by
+  rw [c3_pair_diagonalized_frame_weighted G z P Q d hd hPQ hdiag T]
   have hterm (i j k : Fin n) :
       (((d i / (d j * d k) : ℝ) : ℂ) *
-          referenceContraction_tensorFrameTransform Q P T i j k *
-            star (referenceContraction_tensorFrameTransform Q P T i j k)).re =
-        (d i / (d j * d k)) * ‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2 := by
+          referenceContractionTensorFrameTransform Q P T i j k *
+            star (referenceContractionTensorFrameTransform Q P T i j k)).re =
+        (d i / (d j * d k)) * ‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2 := by
     have hz (i j k : Fin n) :
-        referenceContraction_tensorFrameTransform Q P T i j k *
-          star (referenceContraction_tensorFrameTransform Q P T i j k) =
-            ((‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2 : ℝ) : ℂ) := by
+        referenceContractionTensorFrameTransform Q P T i j k *
+          star (referenceContractionTensorFrameTransform Q P T i j k) =
+            ((‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2 : ℝ) : ℂ) := by
       simpa [Complex.star_def] using
-        Complex.mul_conj' (referenceContraction_tensorFrameTransform Q P T i j k)
+        Complex.mul_conj' (referenceContractionTensorFrameTransform Q P T i j k)
     calc
       _ = (((d i / (d j * d k) : ℝ) : ℂ) *
-          ((‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2 : ℝ) : ℂ)).re := by
+          ((‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2 : ℝ) : ℂ)).re := by
         rw [mul_assoc, hz]
       _ = ((((d i / (d j * d k)) *
-          ‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2 : ℝ) : ℂ)).re := by
+          ‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2 : ℝ) : ℂ)).re := by
         congr 1
         exact (Complex.ofReal_mul (d i / (d j * d k))
-          (‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2)).symm
+          (‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2)).symm
       _ = (d i / (d j * d k)) *
-          ‖referenceContraction_tensorFrameTransform Q P T i j k‖ ^ 2 := Complex.ofReal_re _
+          ‖referenceContractionTensorFrameTransform Q P T i j k‖ ^ 2 := Complex.ofReal_re _
   change RCLike.re (∑ i, ∑ j, ∑ k,
     ((d i / (d j * d k) : ℝ) : ℂ) *
-      referenceContraction_tensorFrameTransform Q P T i j k *
-        star (referenceContraction_tensorFrameTransform Q P T i j k)) = _
+      referenceContractionTensorFrameTransform Q P T i j k *
+        star (referenceContractionTensorFrameTransform Q P T i j k)) = _
   simp_rw [map_sum (RCLike.re : ℂ →+ ℝ)]
   simp_rw [← hterm]
   rfl

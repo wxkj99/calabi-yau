@@ -4,13 +4,28 @@ module
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.Preliminaries
 public import CalabiYau.Analysis.Sobolev.Tools.StrictStrongSupport
 public import CalabiYau.Analysis.Sobolev.Euclidean.SupportAndDomain.CrossChartBoundStrictMemWkp
-public import CalabiYau.Analysis.Sobolev.Chart.BanachCompleteness.BanachManifold
+public import CalabiYau.Analysis.Sobolev.Chart.Defs
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Normed.Group.NullSubmodule
+public import Mathlib.Analysis.Normed.Group.Uniform
+public import CalabiYau.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevBanach
+public import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
+public import Mathlib.Topology.UniformSpace.UniformEmbedding
+public import CalabiYau.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
+public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
+public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Closedness
+public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Basic
+public import CalabiYau.Analysis.Sobolev.Manifold.RiemannianRellich
+public import CalabiYau.Geometry.Riemannian.Volume.Family.Basic
+public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+public import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
+public import CalabiYau.Geometry.Riemannian.Volume.Basic
+public import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -96,31 +111,6 @@ lemma fun_eq_finset_sum_chartPullback_chartPushed
         (CalabiYau.RiemannianVolume.chartAtlasPOU I M α : M → ℝ) x) * u x
       from by rw [Finset.sum_mul]]
   rw [chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x, one_mul]
-
-private lemma exists_strict_strong_support_approx_with_compact_neighborhood
-    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
-    {u : M → ℝ} (hu : MemWkpChart (I := I) (M := M) 1 p u)
-    (α : M) :
-    ∃ K_α : Set M, IsCompact K_α ∧ K_α ⊆ (chartAt H α).source ∧
-      tsupport ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-        : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆ interior K_α ∧
-      ∀ ε_per > 0,
-        ∃ χ : EuclN → ℝ,
-          ContDiff ℝ (⊤ : ℕ∞) χ ∧ HasCompactSupport χ ∧
-          tsupport χ ⊆
-            (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α ∧
-          Sobolev.Euclidean.iteratedWeakSobolevNorm
-            (d := Module.finrank ℝ E) 1 p
-            (fun y => chartPushed (I := I) (M := M)
-                (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u y - χ y)
-            (chartTargetEuclid (I := I) (M := M) α) ≤
-            ENNReal.ofReal ε_per := by
-  obtain ⟨K_α, hK_compact, hK_chart, h_tsupp_in_int_K, hχ⟩ :=
-    exists_strict_strong_support_approx (I := I) (M := M) hp_one hp_top α
-  refine ⟨K_α, hK_compact, hK_chart, h_tsupp_in_int_K, ?_⟩
-  intro ε_per hε_per
-  exact hχ hu ε_per hε_per
 
 def tightenedChartPushed
     [T2Space M] [SigmaCompactSpace M]
@@ -940,7 +930,7 @@ theorem contMDiff_dense_in_WkpChart
       · rw [norm_iteratedFDeriv_one]; exact hC_grad_on_Ωα y hy
     obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
       Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-        1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hηE_smooth
+        1 (le_refl _) (d := Module.finrank ℝ E) hp_one hΩα_open hηE_smooth
         hC_nonneg hηE_iter_bound
     set ε_inner : ℝ := ε_per / (K_leib + 1) with hε_inner_def
     have hε_inner_pos : 0 < ε_inner := by

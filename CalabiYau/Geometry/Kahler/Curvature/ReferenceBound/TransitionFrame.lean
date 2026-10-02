@@ -26,7 +26,7 @@ holomorphic chart-transition Jacobian to the chart at `x`. -/
 theorem referenceFrame_transition (ω₀ : KahlerForm n M) (x y : M)
     (U : Set (EuclideanSpace ℂ (Fin n))) (hU : ω₀.IsReferenceChartOverlap x y U)
     (P : Matrix (Fin n) (Fin n) ℂ)
-    (hP : referenceOrthonormalFrameMatrix ω₀ y P) :
+    (hP : IsReferenceOrthonormalFrame ω₀ y P) :
     let Q := referenceTransitionMatrix x y * P
     Q.transpose * ω₀.metricInChart x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y) * Q.map star = 1 := by

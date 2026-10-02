@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.BufferedInterpolation
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.CompactHolder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.ComplexHessianJets
@@ -156,10 +156,10 @@ set_option maxHeartbeats 1000000 in
 private theorem exists_uniform_perturbed_metric_coefficient_lower_holder_on
     (ω₀ : KahlerForm n M) (S : Set ((M → ℝ) × (M → ℝ)))
     (hS : ∀ p ∈ S, ω₀.SolvesMongeAmpere p.1 p.2)
-    {x : M} {α : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1)
+    {x : M} {α : ℝ≥0} (hα₁ : α < 1)
     {r : ℕ} (hr : 2 ≤ r) {Cφ : ℝ≥0}
     {U L : Set (EuclideanSpace ℂ (Fin n))} {k : ℕ}
-    (hUopen : IsOpen U) (hLcompact : IsCompact L)
+    (hLcompact : IsCompact L)
     (hBuffer : closure U ⊆ interior L)
     (hLtarget : L ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (hk : k + 1 ≤ r - 2)
@@ -192,7 +192,7 @@ private theorem exists_uniform_perturbed_metric_coefficient_lower_holder_on
     have hbound := hcoef.1 j hj' z hz
     simpa [A, e] using hbound
   obtain ⟨Cinner, hInner⟩ := exists_uniform_holderBoundOn_family_of_buffered_derivative_bounds
-    T A hopen hUopen hLcompact hBuffer hLtarget hα₀ hα₁ hAsmooth hAbound
+    T A hopen hLcompact hBuffer hLtarget hα₁ hAsmooth hAbound
   refine ⟨Cinner, ?_⟩
   intro p hp i j
   have hq : (⟨⟨p, hp⟩, (i, j)⟩ : P) ∈ T := Set.mem_univ _
@@ -203,10 +203,10 @@ lower-order Hölder jet of the perturbed chart metric, uniformly in the solution
 theorem exists_uniform_perturbed_metric_coefficient_jets
     (ω₀ : KahlerForm n M) (S : Set ((M → ℝ) × (M → ℝ)))
     (hS : ∀ p ∈ S, ω₀.SolvesMongeAmpere p.1 p.2)
-    {x : M} {α : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1)
+    {x : M} {α : ℝ≥0} (hα₁ : α < 1)
     {r : ℕ} (hr : 2 ≤ r) {Cφ : ℝ≥0}
     {U L : Set (EuclideanSpace ℂ (Fin n))}
-    (hUopen : IsOpen U) (hLcompact : IsCompact L)
+    (hLcompact : IsCompact L)
     (hBuffer : closure U ⊆ interior L)
     (hLtarget : L ⊆
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
@@ -237,8 +237,8 @@ theorem exists_uniform_perturbed_metric_coefficient_jets
   obtain ⟨Cout, hOuter⟩ := exists_uniform_perturbed_metric_coefficient_holder_on
     ω₀ S hS hα₁ hr hLcompact hLtarget hCurrentOuter
   let Ck : ℕ → ℝ≥0 := fun k => if hk : k < r - 2 then
-    Classical.choose (exists_uniform_perturbed_metric_coefficient_lower_holder_on ω₀ S hS hα₀ hα₁ hr
-      hUopen hLcompact hBuffer hLtarget (Nat.succ_le_of_lt hk) hCurrentOuter) else 0
+    Classical.choose (exists_uniform_perturbed_metric_coefficient_lower_holder_on ω₀ S hS hα₁ hr
+      hLcompact hBuffer hLtarget (Nat.succ_le_of_lt hk) hCurrentOuter) else 0
   have hCk (k : ℕ) (hk : k < r - 2) :
       ∀ p ∈ S, ∀ i j, HolderBoundOn k α (Ck k) U (fun z ↦
         (ω₀.metricInChart x z + complexHessian
@@ -246,7 +246,7 @@ theorem exists_uniform_perturbed_metric_coefficient_jets
     dsimp [Ck]
     rw [dif_pos hk]
     exact Classical.choose_spec (exists_uniform_perturbed_metric_coefficient_lower_holder_on
-      ω₀ S hS hα₀ hα₁ hr hUopen hLcompact hBuffer hLtarget
+      ω₀ S hS hα₁ hr hLcompact hBuffer hLtarget
       (Nat.succ_le_of_lt hk) hCurrentOuter)
   let Cinner : ℝ≥0 := (Finset.range (r - 2)).sup Ck
   let CA : ℝ≥0 := max Cout Cinner

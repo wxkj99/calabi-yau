@@ -19,9 +19,8 @@ namespace Laplacian
 namespace ChartPushedWeakPartialOnVolume
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
@@ -43,16 +42,16 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
+variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H]
+  {I : ModelWithCorners ℝ E H} {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 private noncomputable def extChartAtSymmExt (α : M) : E → M := by
   classical
   exact (extChartAt I α).target.piecewise
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
-    [T2Space M] [CompactSpace M] in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -62,8 +61,6 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
-    [T2Space M] [CompactSpace M] in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical
@@ -74,8 +71,8 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (CalabiYau.RiemannianVolume.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 private lemma exists_density_inf_pos_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -96,8 +93,8 @@ private lemma exists_density_inf_pos_on_compact
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -144,8 +141,8 @@ private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
           ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y)
             ∂(volume : Measure EuclN) := by gcongr
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -196,8 +193,8 @@ theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
   rw [h_pow_eq, smul_eq_mul]
   exact mul_le_mul' (le_refl _) h_mono_target
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 private lemma memLp_of_chartPulledWeighted_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -216,7 +213,9 @@ private lemma memLp_of_chartPulledWeighted_on_compact
   refine lt_of_le_of_lt (hC_bd f) ?_
   exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hf_memLp.2
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 theorem chartPushedWeakPartialLp_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -239,7 +238,9 @@ theorem chartPushedWeakPartialLp_locally_memLp
   exact memLp_of_chartPulledWeighted_on_compact (I := I) (M := M) g α
     hK_compact hK_in hf_strong.aestronglyMeasurable hf_memLp_weighted
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private lemma exists_smoothApprox_seq
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) :
     ∃ v : ℕ → SmoothScalar g,
@@ -265,7 +266,9 @@ private lemma exists_smoothApprox_seq
   rw [h_eq]
   exact hxs_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private lemma chartPushed_lp_tendsto_of_smoothApprox
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} {v : ℕ → SmoothScalar g}
@@ -275,30 +278,30 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
       (fun y =>
         chartPushed (I := I) (M := M) (chartAtlasPOU I M) α (v n).toFun y -
           chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-            (((H1ComplToLp (I := I) (M := M) g u_h)) : M → ℝ) y) 2
+            (((h1ComplToLp (I := I) (M := M) g u_h)) : M → ℝ) y) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))) atTop (𝓝 0) := by
   classical
   have h_lp_tendsto : Tendsto (fun n =>
       smoothToLp (I := I) (M := M) g (v n)) atTop
-      (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) := by
-    have h_compose : Tendsto (fun n => H1ComplToLp (I := I) (M := M) g
+      (𝓝 (h1ComplToLp (I := I) (M := M) g u_h)) := by
+    have h_compose : Tendsto (fun n => h1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g (v n))) atTop
-        (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) :=
-      ((H1ComplToLp (I := I) (M := M) g).continuous.tendsto _).comp h_tendsto
-    have h_eq : (fun n => H1ComplToLp (I := I) (M := M) g
+        (𝓝 (h1ComplToLp (I := I) (M := M) g u_h)) :=
+      ((h1ComplToLp (I := I) (M := M) g).continuous.tendsto _).comp h_tendsto
+    have h_eq : (fun n => h1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g (v n))) =
         (fun n => smoothToLp (I := I) (M := M) g (v n)) := by
       funext n
-      exact H1ComplToLp_smoothToH1Compl (I := I) (M := M) g (v n)
+      exact h1ComplToLp_smoothToH1Compl (I := I) (M := M) g (v n)
     rw [← h_eq]; exact h_compose
   have h_norm_tendsto : Tendsto (fun n =>
         ‖smoothToLp (I := I) (M := M) g (v n) -
-          H1ComplToLp (I := I) (M := M) g u_h‖) atTop (𝓝 0) := by
+          h1ComplToLp (I := I) (M := M) g u_h‖) atTop (𝓝 0) := by
     have h_sub : Tendsto (fun n => smoothToLp (I := I) (M := M) g (v n) -
-        H1ComplToLp (I := I) (M := M) g u_h) atTop (𝓝 0) := by
+        h1ComplToLp (I := I) (M := M) g u_h) atTop (𝓝 0) := by
       have := h_lp_tendsto.sub
-        (tendsto_const_nhds (x := H1ComplToLp (I := I) (M := M) g u_h))
+        (tendsto_const_nhds (x := h1ComplToLp (I := I) (M := M) g u_h))
       simpa using this
     have hnorm := (continuous_norm.tendsto (0 :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))).comp h_sub
@@ -307,68 +310,68 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
   have h_lp_eLpNorm_tendsto :
       Tendsto (fun n => eLpNorm
         (((smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
+            h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
         (riemannianVolumeMeasure (I := I) (M := M) g)) atTop (𝓝 0) := by
     have h_eLpNorm_eq : ∀ n,
         eLpNorm (((smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
+            h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
           (riemannianVolumeMeasure (I := I) (M := M) g) =
           ENNReal.ofReal ‖smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h‖ := by
+            h1ComplToLp (I := I) (M := M) g u_h‖ := by
       intro n
       rw [Lp.norm_def]
       have h_sub_aeEq := MeasureTheory.Lp.coeFn_sub
         (smoothToLp (I := I) (M := M) g (v n))
-        (H1ComplToLp (I := I) (M := M) g u_h)
+        (h1ComplToLp (I := I) (M := M) g u_h)
       have h_eLp_congr := MeasureTheory.eLpNorm_congr_ae h_sub_aeEq (p := 2)
       rw [← h_eLp_congr]
       rw [ENNReal.ofReal_toReal
         ((Lp.memLp (smoothToLp (I := I) (M := M) g (v n) -
-          H1ComplToLp (I := I) (M := M) g u_h)).eLpNorm_lt_top.ne)]
+          h1ComplToLp (I := I) (M := M) g u_h)).eLpNorm_lt_top.ne)]
     have h_ofReal_tendsto :
         Tendsto (fun n => ENNReal.ofReal ‖smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h‖) atTop (𝓝 0) := by
+            h1ComplToLp (I := I) (M := M) g u_h‖) atTop (𝓝 0) := by
       have h_comp := (ENNReal.continuous_ofReal.tendsto 0).comp h_norm_tendsto
       simp only [Function.comp_def, ENNReal.ofReal_zero] at h_comp
       exact h_comp
     have h_funeq : (fun n => eLpNorm
         (((smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
+            h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
           (riemannianVolumeMeasure (I := I) (M := M) g)) =
         (fun n => ENNReal.ofReal ‖smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h‖) := funext h_eLpNorm_eq
+            h1ComplToLp (I := I) (M := M) g u_h‖) := funext h_eLpNorm_eq
     rw [h_funeq]; exact h_ofReal_tendsto
-  set u_lim : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
+  set u_lim : M → ℝ := ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
     with hu_lim_def
   have hu_lim_meas : Measurable u_lim := (Lp.stronglyMeasurable _).measurable
   have hu_meas : ∀ n, Measurable (v n).toFun := fun n =>
     (v n).smooth.continuous.measurable
   have h_aeEq_diff : ∀ n,
       (((smoothToLp (I := I) (M := M) g (v n) -
-          H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) =ᵐ[
+          h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
       fun x => (v n).toFun x - u_lim x := by
     intro n
     have h_sub_coeFn := MeasureTheory.Lp.coeFn_sub
       (smoothToLp (I := I) (M := M) g (v n))
-      (H1ComplToLp (I := I) (M := M) g u_h)
+      (h1ComplToLp (I := I) (M := M) g u_h)
     have h_smooth_coeFn : ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g] (v n).toFun :=
       MeasureTheory.MemLp.coeFn_toLp (v n).memLp_two
     have h_step1 : (fun x => ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) x -
-        ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x) =ᵐ[
+        ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
         fun x => (v n).toFun x - u_lim x := by
       filter_upwards [h_smooth_coeFn] with x hx
       show ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) x -
-        ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x =
+        ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x =
         (v n).toFun x - u_lim x
       rw [hx]
     have h_pi_form : (((smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) =ᵐ[
+            h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
         fun x => ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) x -
-          ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x := by
+          ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x := by
       filter_upwards [h_sub_coeFn] with x hx
       rfl
     exact h_pi_form.trans h_step1
@@ -377,7 +380,7 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
         (riemannianVolumeMeasure (I := I) (M := M) g)) atTop (𝓝 0) := by
     have h_funeq : (fun n => eLpNorm
         (((smoothToLp (I := I) (M := M) g (v n) -
-            H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
+            h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) 2
           (riemannianVolumeMeasure (I := I) (M := M) g)) =
         (fun n => eLpNorm (fun x => (v n).toFun x - u_lim x) 2
           (riemannianVolumeMeasure (I := I) (M := M) g)) := by
@@ -387,7 +390,9 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
   exact chartPushed_tendsto_chartPulledWeightedMeasure (I := I) (M := M) g α
     hu_meas hu_lim_meas h_diff_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -601,7 +606,9 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     funext h_eLpNorm_funeq
   rw [← h_funeq2]; exact h_lp_eLpNorm_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M] in
 private lemma chartPushed_eqOn_chartTarget_smoothChartExt
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     Set.EqOn (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun)
@@ -618,14 +625,16 @@ private lemma chartPushed_eqOn_chartTarget_smoothChartExt
   unfold chartPushed
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g)
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (hΩ_in : Ω ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
       (chartPushedPartial (I := I) (M := M) g α j v)
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun) Ω := by
   classical
@@ -644,11 +653,11 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
   have h_smooth_C1 : ContDiff ℝ 1 (smoothChartExt (I := I) (M := M) g α v) :=
     h_smooth_contDiff.of_le (by norm_cast)
   have h_weak_smooth :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
         (fun y => (fderiv ℝ (smoothChartExt (I := I) (M := M) g α v) y)
           (EuclideanSpace.single j 1))
         (smoothChartExt (I := I) (M := M) g α v) Ω :=
-    DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open h_smooth_C1
+    Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff h_smooth_C1
   have h_identity := h_weak_smooth φ hφ_smooth hφ_support hφ_sub
   have h_LHS_eq :
       ∫ x in Ω, chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun x *
@@ -673,7 +682,9 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
   unfold smoothChartExtPartial
   exact h_identity
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -682,12 +693,12 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     {K : Set EuclN} (hK_compact : IsCompact K)
     (hΩ_in_K : Ω ⊆ K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
       (((chartPushedWeakPartialLp (I := I) (M := M) g α j
         (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α j) u_h
        ) : EuclN → ℝ))
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-        ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) Ω := by
+        ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) Ω := by
   classical
   obtain ⟨v, h_tendsto⟩ :=
     exists_smoothApprox_seq (I := I) (M := M) g u_h
@@ -713,7 +724,7 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
         (fun y =>
           chartPushed (I := I) (M := M) (chartAtlasPOU I M) α (v n).toFun y -
             chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-              ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) y) 2
+              ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) y) 2
         ((volume : Measure EuclN).restrict Ω))
       atTop (𝓝 0) := by
     have h_const_mul_tendsto :
@@ -722,7 +733,7 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
             (fun y =>
               chartPushed (I := I) (M := M) (chartAtlasPOU I M) α (v n).toFun y -
                 chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-                  ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) y) 2
+                  ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) y) 2
             ((chartPulledWeightedMeasure (I := I) g α).restrict
               (chartTargetEuclid (I := I) (M := M) α))) atTop (𝓝 0) := by
       have h := ENNReal.Tendsto.const_mul (a := ENNReal.ofReal C_vol)
@@ -763,7 +774,7 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     with hu_n_chart_def
   set u_lim_chart : EuclN → ℝ :=
     chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-      ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
+      ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
     with hu_lim_chart_def
   set g_n_chart : ℕ → EuclN → ℝ :=
     fun n => chartPushedPartial (I := I) (M := M) g α j (v n)
@@ -851,7 +862,7 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     exact hψ_meas.aestronglyMeasurable.congr h_aeEq.symm
   have hu_lim_aestrong :
       AEStronglyMeasurable u_lim_chart ((volume : Measure EuclN).restrict Ω) := by
-    set u_lim_M : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
+    set u_lim_M : M → ℝ := ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
       with hu_lim_M_def
     have hu_lim_M_meas : Measurable u_lim_M :=
       (Lp.stronglyMeasurable _).measurable
@@ -922,10 +933,10 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     refine lt_of_le_of_lt (hC_vol_Ω _) ?_
     exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hg_lim_memLp_w.2
   have h_weak_n : ∀ n,
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
         (g_n_chart n) (u_n_chart n) Ω := by
     intro n
-    change DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
+    change Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
       (chartPushedPartial (I := I) (M := M) g α j (v n))
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α (v n).toFun) Ω
     refine hasWeakPartialDeriv_chartPushedPartial_smooth

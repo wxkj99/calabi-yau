@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Holder
-import CalabiYau.Geometry.Complex.Forms.Positive
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 import CalabiYau.MongeAmpere.Estimates.C3.MetricEquivalence
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian
 import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian
@@ -118,22 +117,6 @@ private theorem exists_bound_of_laplacian_pair (ω₀ : KahlerForm n M) [Nonempt
     nlinarith [hu_max, hAv_le]
   exact hu_le_P.trans (hP_le.trans hP_at_max)
 
-omit [T2Space M] in
-private theorem exists_bound_of_varying_laplacian_pair {ι : Type*} [Nonempty ι]
-    (α : ι → KahlerForm n M) [Nonempty M]
-    {u v : ι → M → ℝ} {Λ C c : ℝ}
-    (hu : ∀ i, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (u i))
-    (hv : ∀ i, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (v i))
-    (hv_nonneg : ∀ i x, 0 ≤ v i x)
-    (hv_le : ∀ i x, v i x ≤ Λ) (hC : 0 ≤ C) (hc : 0 < c)
-    (hLap_u : ∀ i x, -(C * u i x + C) ≤ (α i).laplacian (u i) x)
-    (hLap_v : ∀ i x, c * u i x - C ≤ (α i).laplacian (v i) x) :
-    ∃ B, ∀ i x, u i x ≤ B := by
-  refine ⟨C + ((C + 1) / c) * C + ((C + 1) / c) * Λ, ?_⟩
-  intro i x
-  exact exists_bound_of_laplacian_pair (α i) (hu i) (hv i)
-    (hv_nonneg i) (hv_le i) hC hc (hLap_u i) (hLap_v i) x
-
 omit [T2Space M] [CompactSpace M] in
 private theorem exists_fderiv_ddbar_bound_on_compact (φ : M → ℝ) (x₀ : M)
     (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
@@ -166,40 +149,6 @@ private theorem exists_fderiv_ddbar_bound_on_compact (φ : M → ℝ) (x₀ : M)
     hddbar.continuousOn_fderiv_of_isOpen
       (isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀) (by simp)
   exact hK.exists_bound_of_continuousOn (hderiv.mono hKt)
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_fderiv_metricInChart_entry_bound (ω₀ : KahlerForm n M) (x₀ : M)
-    (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
-    (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target) :
-    ∃ C, ∀ z ∈ K, ∀ j k,
-      ‖fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w j k) z‖ ≤ C := by
-  classical
-  have hentry : ∀ j k, ∃ C, ∀ z ∈ K,
-      ‖fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w j k) z‖ ≤ C := by
-    intro j k
-    have hderiv : ContinuousOn (fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w j k))
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target :=
-      (ω₀.contDiffOn_metricInChart x₀ j k).continuousOn_fderiv_of_isOpen
-        (isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀) (by simp)
-    exact hK.exists_bound_of_continuousOn (hderiv.mono hKt)
-  let Cjk : Fin n × Fin n → ℝ := fun jk ↦ Classical.choose (hentry jk.1 jk.2)
-  have hCjk (jk : Fin n × Fin n) : ∀ z ∈ K,
-      ‖fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w jk.1 jk.2) z‖ ≤ Cjk jk :=
-    Classical.choose_spec (hentry jk.1 jk.2)
-  have hCjk_range : (Set.range Cjk).Finite := Set.finite_range Cjk
-  obtain ⟨C, hC⟩ := hCjk_range.bddAbove
-  refine ⟨C, ?_⟩
-  intro z hz j k
-  exact (hCjk (j, k) z hz).trans (hC (Set.mem_range_self (j, k)))
-
-private theorem fderiv_apply_le_of_norm_le
-    {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F]
-    (f : E → F) (x : E) {C : ℝ} (hC : ‖fderiv ℝ f x‖ ≤ C) (v : E) :
-    ‖fderiv ℝ f x v‖ ≤ C * ‖v‖ := by
-  calc
-    ‖fderiv ℝ f x v‖ ≤ ‖fderiv ℝ f x‖ * ‖v‖ := ContinuousLinearMap.le_opNorm _ _
-    _ ≤ C * ‖v‖ := mul_le_mul_of_nonneg_right hC (norm_nonneg v)
 
 omit [T2Space M] [CompactSpace M] in
 private theorem exists_metricInvChart_entry_bound_on_compact
@@ -257,46 +206,6 @@ private theorem exists_metricInvChart_entry_bound_on_compact
   refine ⟨C, ?_⟩
   intro z hz j k
   exact (hCjk (j, k) z hz).trans (hC (Set.mem_range_self (j, k)))
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_metricDerivative_contraction_bound_on_compact
-    (ω₀ : KahlerForm n M) (x₀ : M)
-    (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
-    (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target) :
-    ∃ C, ∀ z ∈ K, ∀ j k (v : EuclideanSpace ℂ (Fin n)),
-      ‖((ω₀.metricInChart x₀ z)⁻¹ *
-        Matrix.of fun a b ↦ fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w a b) z v) j k‖ ≤
-          C * ‖v‖ := by
-  obtain ⟨Cinv, hCinv⟩ := exists_metricInvChart_entry_bound_on_compact ω₀ x₀ K hK hKt
-  obtain ⟨Cderiv, hCderiv⟩ := exists_fderiv_metricInChart_entry_bound ω₀ x₀ K hK hKt
-  let Cinv' := max Cinv 0
-  let Cderiv' := max Cderiv 0
-  have hCinv_nonneg : 0 ≤ Cinv' := le_max_right _ _
-  have hCderiv_nonneg : 0 ≤ Cderiv' := le_max_right _ _
-  have hinv_le (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ K) (j k : Fin n) :
-      ‖(ω₀.metricInChart x₀ z)⁻¹ j k‖ ≤ Cinv' :=
-    (hCinv z hz j k).trans (le_max_left _ _)
-  have hderiv_le (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ K) (j k : Fin n)
-      (v : EuclideanSpace ℂ (Fin n)) :
-      ‖fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w j k) z v‖ ≤ Cderiv' * ‖v‖ := by
-    exact (fderiv_apply_le_of_norm_le _ z (hCderiv z hz j k) v).trans
-      (mul_le_mul_of_nonneg_right (le_max_left _ _) (norm_nonneg _))
-  refine ⟨(Fintype.card (Fin n) : ℝ) * Cinv' * Cderiv', ?_⟩
-  intro z hz j k v
-  rw [Matrix.mul_apply]
-  calc
-    ‖∑ l : Fin n, (ω₀.metricInChart x₀ z)⁻¹ j l *
-        fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w l k) z v‖ ≤
-        ∑ l : Fin n, ‖(ω₀.metricInChart x₀ z)⁻¹ j l *
-          fderiv ℝ (fun w ↦ ω₀.metricInChart x₀ w l k) z v‖ := norm_sum_le _ _
-    _ ≤ ∑ _l : Fin n, Cinv' * (Cderiv' * ‖v‖) := by
-      apply Finset.sum_le_sum
-      intro l hl
-      rw [norm_mul]
-      exact mul_le_mul (hinv_le z hz j l) (hderiv_le z hz l k v)
-        (norm_nonneg _) hCinv_nonneg
-    _ = (Fintype.card (Fin n) : ℝ) * Cinv' * Cderiv' * ‖v‖ := by
-      simp [mul_assoc]
 
 private theorem fderiv_second_apply_comm {f : EuclideanSpace ℂ (Fin n) → ℝ}
     {z a b c : EuclideanSpace ℂ (Fin n)} (hf : ContDiffAt ℝ 3 f z) :
@@ -530,107 +439,6 @@ private theorem fderiv_complexHessian_direction {f : EuclideanSpace ℂ (Fin n) 
     simp [D, Complex.ofRealCLM_apply, hq₁eq, hq₂eq, hq₃eq, hq₄eq, a, b, ia, ib]
     ring_nf
   exact hleft.trans hright
-
-private theorem contDiffOn_complexHessian_entry_of_contDiffOn
-    {U : Set (EuclideanSpace ℂ (Fin n))} (hU : IsOpen U)
-    (f : EuclideanSpace ℂ (Fin n) → ℝ) (j k : Fin n)
-    (hf : ContDiffOn ℝ ∞ f U) :
-    ContDiffOn ℝ ∞ (fun z ↦ complexHessian f z j k) U := by
-  have hddbar : ContDiffOn ℝ ∞ (ddbar f) U := ContDiffOn.ddbar hU hf
-  let f₁ : EuclideanSpace ℂ (Fin n) → ℝ := fun z ↦
-    ddbar f z ![EuclideanSpace.single j 1, Complex.I • EuclideanSpace.single k 1]
-  let f₂ : EuclideanSpace ℂ (Fin n) → ℝ := fun z ↦
-    ddbar f z ![EuclideanSpace.single j 1, EuclideanSpace.single k 1]
-  have hf₁ : ContDiffOn ℝ ∞ f₁ U := by
-    dsimp [f₁]
-    exact ((ContinuousAlternatingMap.apply ℝ (EuclideanSpace ℂ (Fin n)) ℝ
-      ![EuclideanSpace.single j 1, Complex.I • EuclideanSpace.single k 1]).contDiff).comp_contDiffOn
-        hddbar
-  have hf₂ : ContDiffOn ℝ ∞ f₂ U := by
-    dsimp [f₂]
-    exact ((ContinuousAlternatingMap.apply ℝ (EuclideanSpace ℂ (Fin n)) ℝ
-      ![EuclideanSpace.single j 1, EuclideanSpace.single k 1]).contDiff).comp_contDiffOn hddbar
-  have hf₁c : ContDiffOn ℝ ∞ (fun z ↦ (f₁ z : ℂ)) U := by
-    convert Complex.ofRealCLM.contDiff.comp_contDiffOn hf₁ using 1
-    ext z
-    simp [f₁, Complex.ofRealCLM_apply]
-  have hf₂c : ContDiffOn ℝ ∞ (fun z ↦ (f₂ z : ℂ)) U := by
-    convert Complex.ofRealCLM.contDiff.comp_contDiffOn hf₂ using 1
-    ext z
-    simp [f₂, Complex.ofRealCLM_apply]
-  have hnum : ContDiffOn ℝ ∞ (fun z ↦ (f₁ z : ℂ) - Complex.I * (f₂ z : ℂ)) U :=
-    hf₁c.sub (contDiffOn_const.mul hf₂c)
-  change ContDiffOn ℝ ∞
-    (fun z ↦ ((f₁ z : ℂ) - Complex.I * (f₂ z : ℂ)) / 2) U
-  exact hnum.div_const (2 : ℂ)
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_fderiv_complexHessian_entry_bound_on_compact
-    (φ : M → ℝ) (x₀ : M) (K : Set (EuclideanSpace ℂ (Fin n)))
-    (hK : IsCompact K)
-    (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target)
-    (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ) :
-    ∃ C, ∀ z ∈ K, ∀ j k,
-      ‖fderiv ℝ (fun w ↦ complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) w j k) z‖ ≤ C := by
-  have hφ_on : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ Set.univ :=
-    hφ.contMDiffOn
-  have hsymm : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
-      𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target :=
-    contMDiffOn_extChartAt_symm (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀
-  have hchart_md : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
-      (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target :=
-    hφ_on.comp hsymm (fun _ _ ↦ Set.mem_univ _)
-  have hchart : ContDiffOn ℝ ∞
-      (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target := hchart_md.contDiffOn
-  have hentry : ∀ j k, ContDiffOn ℝ ∞
-      (fun z ↦ complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) z j k)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target := by
-    intro j k
-    exact contDiffOn_complexHessian_entry_of_contDiffOn
-      (isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀)
-      _ j k hchart
-  have hentry_bound : ∀ j k, ∃ C, ∀ z ∈ K,
-      ‖fderiv ℝ (fun w ↦ complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) w j k) z‖ ≤ C := by
-    intro j k
-    have hderiv : ContinuousOn (fderiv ℝ (fun w ↦ complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) w j k))
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target :=
-      (hentry j k).continuousOn_fderiv_of_isOpen
-        (isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀) (by simp)
-    exact hK.exists_bound_of_continuousOn (hderiv.mono hKt)
-  classical
-  let Cjk : Fin n × Fin n → ℝ := fun jk ↦ Classical.choose (hentry_bound jk.1 jk.2)
-  have hCjk (jk : Fin n × Fin n) : ∀ z ∈ K,
-      ‖fderiv ℝ (fun w ↦ complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) w jk.1 jk.2) z‖ ≤ Cjk jk :=
-    Classical.choose_spec (hentry_bound jk.1 jk.2)
-  obtain ⟨C, hC⟩ := (Set.finite_range Cjk).bddAbove
-  refine ⟨C, ?_⟩
-  intro z hz j k
-  exact (hCjk (j, k) z hz).trans (hC (Set.mem_range_self (j, k)))
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_complexHessian_directional_derivative_bound_on_compact
-    (φ : M → ℝ) (x₀ : M) (K : Set (EuclideanSpace ℂ (Fin n)))
-    (hK : IsCompact K)
-    (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target)
-    (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ) :
-    ∃ C, ∀ z ∈ K, ∀ j k (v : EuclideanSpace ℂ (Fin n)),
-      ‖fderiv ℝ (fun w ↦ complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) w j k) z v‖ ≤
-          C * ‖v‖ := by
-  obtain ⟨C, hC⟩ := exists_fderiv_complexHessian_entry_bound_on_compact
-    φ x₀ K hK hKt hφ
-  refine ⟨C, ?_⟩
-  intro z hz j k v
-  exact fderiv_apply_le_of_norm_le _ z (hC z hz j k) v
 
 /-- **Calabi's third-order estimate.** For a family of solutions with `G` bounded in `C³` and
 `tr_ω₀ ω_φ` bounded, the complex Hessians `i∂∂̄φ` are uniformly bounded in `C¹` in every chart. -/

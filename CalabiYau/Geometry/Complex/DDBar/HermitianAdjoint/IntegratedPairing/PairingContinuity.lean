@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.Geometry.Complex.DDBar.HermitianAdjoint
-import CalabiYau.Geometry.Complex.DDBar.TensorChartBridge
+import CalabiYau.Geometry.Complex.Forms.TensorCoordinates
 import CalabiYau.Geometry.Riemannian.TensorInner.ChartTensor.Inner.Defs
 import CalabiYau.Geometry.Riemannian.TensorInner.ChartTensor.Inner.InnerJointCont
 

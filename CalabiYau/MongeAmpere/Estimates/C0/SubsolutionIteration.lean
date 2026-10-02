@@ -12,9 +12,9 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [T2Space M] [CompactSpace M]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem gradNormSq_comp (ω₀ : KahlerForm n M) {f : M → ℝ}
     (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ f) {h : ℝ → ℝ}
     (hh : ContDiff ℝ ∞ h) (x : M) :
@@ -85,17 +85,14 @@ theorem gradNormSq_comp (ω₀ : KahlerForm n M) {f : M → ℝ}
         rw [hlap_q, hq' (f x), hq'' (f x), hlap_comp]
         ring
   nlinarith [htwice]
-omit [ConnectedSpace M] in
 theorem integrable_of_continuous_volume (ω₀ : KahlerForm n M) {f : M → ℝ}
     (hf : Continuous f) : Integrable f ω₀.volume :=
   hf.integrable_of_hasCompactSupport
     (HasCompactSupport.of_support_subset_isCompact isCompact_univ (Set.subset_univ _)
       )
-omit [ConnectedSpace M] in
-@[deprecated "unused hypothesis `hA`; will be removed" (since := "2026-10-02")]
 theorem sobolev_energy_step
     (ω₀ : KahlerForm n M) {κ C_S A : ℝ}
-    (hS : ω₀.SobolevInequality κ C_S) (hCS : 0 ≤ C_S) (hA : 0 ≤ A)
+    (hS : ω₀.SobolevInequality κ C_S) (hCS : 0 ≤ C_S)
     {f : M → ℝ} (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ f)
     (henergy : ∫ x, ω₀.gradNormSq f x ∂ω₀.volume ≤
       A * ∫ x, f x ^ 2 ∂ω₀.volume) :
@@ -120,7 +117,6 @@ theorem sobolev_energy_step
     _ ≤ C_S * ((A + 1) * ∫ x, f x ^ 2 ∂ω₀.volume) :=
       mul_le_mul_of_nonneg_left hbound hCS
     _ = (C_S * (A + 1)) * ∫ x, f x ^ 2 ∂ω₀.volume := by ring
-omit [ConnectedSpace M] in
 theorem integral_deriv_comp_laplacian_eq_neg_energy
     (ω₀ : KahlerForm n M) {u : M → ℝ}
     (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u)
@@ -156,7 +152,6 @@ theorem integral_deriv_comp_laplacian_eq_neg_energy
     integral_add hInt₁ hInt₂] at hzero
   linarith
 
-omit [ConnectedSpace M] in
 theorem subsolution_weighted_energy_bound
     (ω₀ : KahlerForm n M) {u : M → ℝ}
     (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u)
@@ -191,7 +186,6 @@ theorem subsolution_weighted_energy_bound
   rw [integral_const_mul] at hmono
   linarith
 
-omit [ConnectedSpace M] in
 theorem subsolution_sobolev_step
     (ω₀ : KahlerForm n M) {κ C_S A δ : ℝ}
     (hS : ω₀.SobolevInequality κ C_S) (hCS : 0 ≤ C_S) (hA : 0 ≤ A) (hδ : 0 < δ)
@@ -265,6 +259,6 @@ theorem subsolution_sobolev_step
       _ = (δ⁻¹ * ((n : ℝ) * A)) * ∫ x, f x ^ 2 ∂ω₀.volume := by ring
   have hA₀ : 0 ≤ δ⁻¹ * ((n : ℝ) * A) :=
     mul_nonneg (inv_nonneg.mpr hδ.le) (mul_nonneg (Nat.cast_nonneg _) hA)
-  simpa [f] using sobolev_energy_step ω₀ hS hCS hA₀ hf henergySq
+  simpa [f] using sobolev_energy_step ω₀ hS hCS hf henergySq
 
 end KahlerForm

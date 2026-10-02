@@ -26,6 +26,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] in
 /-- The order-two evaluation on each fixed chart piece satisfies the full `HolderBoundOn` gauge,
 including the top-jet Hölder seminorm, with the supplied completion norm as bound. -/
 theorem smoothChartHolderCompletedTopJetHolderBoundOn

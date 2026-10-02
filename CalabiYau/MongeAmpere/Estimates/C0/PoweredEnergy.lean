@@ -89,6 +89,7 @@ private theorem c0PowerExtension_deriv_deriv (p x : ℝ) (hx : 1 ≤ x) :
       rw [deriv_const_mul_field, Real.deriv_rpow_const]
       ring_nf
 
+omit [ConnectedSpace M] in
 /-- The full Monge–Ampère weighted energy estimate for powers of a normalized potential.
 
 The energy identity is obtained by testing along the segment of Kähler forms with a convex

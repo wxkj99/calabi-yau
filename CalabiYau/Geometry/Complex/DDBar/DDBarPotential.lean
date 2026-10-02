@@ -4,10 +4,12 @@ public import CalabiYau.Geometry.Complex.DDBar.Complexification
 public import CalabiYau.Geometry.Complex.DDBar.TypeDecomposition
 public import CalabiYau.Geometry.Kahler.Basic
 
-import CalabiYau.Geometry.Complex.DDBar.ScalarRoute
-import CalabiYau.Geometry.Complex.DDBar.ScalarRoute.Componentwise
-import CalabiYau.Geometry.Complex.DDBar.ScalarRoute.Componentwise.RestrictOpen
-import Comparator.PoissonSolvability
+import CalabiYau.Geometry.Complex.DDBar.ScalarPotential.MeanZero
+import CalabiYau.Geometry.Complex.DDBar.ScalarPotential.IntegralZero
+import CalabiYau.Geometry.Kahler.Poisson
+import CalabiYau.Geometry.Complex.DDBar.ScalarPotential.Componentwise
+import CalabiYau.Geometry.Complex.DDBar.ScalarPotential.Componentwise.RestrictOpen
+import CalabiYau.Geometry.Kahler.Poisson.Solvability
 
 /-!
 # The complex-valued `∂∂̄` lemma
@@ -67,16 +69,16 @@ private theorem component_poisson_solution [T2Space M] [CompactSpace M]
   let U := KahlerForm.componentOpen (n := n) c
   let ωU := ω₀.restrictOpen U
   let ηU := η.restrictOpen U
-  letI : CompactSpace U := by
+  let : CompactSpace U := by
     apply isCompact_iff_compactSpace.mp
-    letI : LocallyPathConnectedSpace M :=
+    let : LocallyPathConnectedSpace M :=
       ChartedSpace.locallyPathConnectedSpace (EuclideanSpace ℂ (Fin n)) M
     have hclopen : IsClopen (ConnectedComponents.mk ⁻¹' ({c} : Set (ConnectedComponents M))) :=
       (isClopen_discrete {c}).preimage ConnectedComponents.continuous_coe
     exact hclopen.isClosed.isCompact
-  letI : ConnectedSpace U := component_connected (M := M) (n := n) c
-  letI : MeasurableSpace U := borel U
-  letI : BorelSpace U := ⟨rfl⟩
+  let : ConnectedSpace U := component_connected (M := M) (n := n) c
+  let : MeasurableSpace U := borel U
+  let : BorelSpace U := ⟨rfl⟩
   have hηUsmooth : ηU.IsSmooth := (η.isSmooth_extDeriv_restrictOpen hηsmooth U).1
   have hηUone : ηU.IsOneOne := fun x => hηone x
   have hηUexact : ηU.IsExact := η.isExact_restrictOpen hηexact U

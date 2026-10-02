@@ -7,8 +7,6 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

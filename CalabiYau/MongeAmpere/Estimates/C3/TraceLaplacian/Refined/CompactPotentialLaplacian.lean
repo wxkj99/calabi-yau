@@ -163,7 +163,7 @@ theorem exists_uniform_c3RefinedTrace_compactChartPotentialLaplacian_bound
     (x₀ : M) (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
     (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target)
     (hMixed : ∃ C : ℝ, 0 ≤ C ∧ ∀ p ∈ S, ∀ z ∈ K, ∀ i j : Fin n,
-      ‖c3PartialZ
+      ‖wirtingerDerivInChart
         (fun w ↦ c3RefinedTracePartialBar
           (fun v ↦ ((p.1 ∘ (extChartAt
             𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) v : ℂ)) w j) z i‖ ≤ C) :
@@ -201,7 +201,7 @@ theorem exists_uniform_c3RefinedTrace_compactChartPotentialLaplacian_bound
       simpa [c3RefinedTracePartialBar, chartPartialBar, ContinuousLinearMap.comp_apply,
         Complex.ofRealCLM_apply] using hbar
     have hbarDeriv := hbarEq.fderiv_eq (𝕜 := ℝ)
-    have hmixedEq : c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    have hmixedEq : wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
         (fun v ↦ ((F v : ℝ) : ℂ)) w j) z i =
         chartPartialZComplex (fun w ↦ chartPartialBar F w j) z i := by
       change chartPartialZComplex (fun w ↦ c3RefinedTracePartialBar
@@ -213,7 +213,7 @@ theorem exists_uniform_c3RefinedTrace_compactChartPotentialLaplacian_bound
     calc
       ‖complexHessian F z i j‖ =
           ‖chartPartialZComplex (fun w ↦ chartPartialBar F w j) z i‖ := by rw [← hbridge]
-      _ = ‖c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+      _ = ‖wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
           (fun v ↦ ((F v : ℝ) : ℂ)) w j) z i‖ := by rw [← hmixedEq]
       _ ≤ C := hbound
   have hy : ψ.symm z ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source := by

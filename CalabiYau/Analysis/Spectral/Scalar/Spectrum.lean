@@ -34,18 +34,18 @@ variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 lemma norm_H1ComplToLp_apply_le (g : SmoothRiemannianMetric I M)
     (v : H1Compl g) :
-    ‖H1ComplToLp (I := I) (M := M) g v‖ ≤ ‖v‖ := by
+    ‖h1ComplToLp (I := I) (M := M) g v‖ ≤ ‖v‖ := by
   refine UniformSpace.Completion.induction_on (α := SmoothScalar g) v ?_ ?_
   · have h_cont_lhs : Continuous (fun w : H1Compl g =>
-        ‖H1ComplToLp (I := I) (M := M) g w‖) :=
-      (H1ComplToLp (I := I) (M := M) g).continuous.norm
+        ‖h1ComplToLp (I := I) (M := M) g w‖) :=
+      (h1ComplToLp (I := I) (M := M) g).continuous.norm
     have h_cont_rhs : Continuous (fun w : H1Compl g => ‖w‖) := continuous_norm
     exact isClosed_le h_cont_lhs h_cont_rhs
   · intro a
-    have h_eq : H1ComplToLp (I := I) (M := M) g
+    have h_eq : h1ComplToLp (I := I) (M := M) g
           ((a : H1Compl g)) =
         smoothToLp (I := I) (M := M) g a := by
-      have h := H1ComplToLp_smoothToH1Compl (I := I) (M := M) g a
+      have h := h1ComplToLp_smoothToH1Compl (I := I) (M := M) g a
       simpa using h
     have h_norm : ‖((a : H1Compl g) : H1Compl g)‖ = ‖a‖ := by
       change ‖(UniformSpace.Completion.toCompl a : H1Compl g)‖ = ‖a‖
@@ -96,7 +96,7 @@ private lemma mul_norm_sq_eq_h1Norm_resolvent_sq
     (mem_resolventEigenspace_iff (I := I) (M := M) g μ u).mp hu
   have h_h1 : ⟪resolvent (I := I) (M := M) g u,
         resolvent (I := I) (M := M) g u⟫_ℝ =
-      ⟪H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g u),
+      ⟪h1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g u),
         u⟫_ℝ :=
     resolvent_inner_eq_lpFunctional (I := I) (M := M) g u
       (resolvent (I := I) (M := M) g u)
@@ -104,7 +104,7 @@ private lemma mul_norm_sq_eq_h1Norm_resolvent_sq
         resolvent (I := I) (M := M) g u⟫_ℝ =
       ‖resolvent (I := I) (M := M) g u‖ ^ 2 :=
     real_inner_self_eq_norm_sq _
-  have h_replace : H1ComplToLp (I := I) (M := M) g
+  have h_replace : h1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g u) =
       resolventL2 (I := I) (M := M) g u := by
     rw [resolventL2_apply]
@@ -134,16 +134,16 @@ theorem resolvent_eigenvalue_le_one
     μ ≤ 1 := by
   have h_var := mul_norm_sq_eq_h1Norm_resolvent_sq (I := I) (M := M) g hu
   have h_norm_bound :
-      ‖H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g u)‖ ≤
+      ‖h1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g u)‖ ≤
         ‖resolvent (I := I) (M := M) g u‖ :=
     norm_H1ComplToLp_apply_le (I := I) (M := M) g
       (resolvent (I := I) (M := M) g u)
-  have hRu_eq_smul : H1ComplToLp (I := I) (M := M) g
+  have hRu_eq_smul : h1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g u) = μ • u := by
-    rw [show H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g u) =
+    rw [show h1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g u) =
         resolventL2 (I := I) (M := M) g u from by rw [resolventL2_apply]]
     exact (mem_resolventEigenspace_iff (I := I) (M := M) g μ u).mp hu
-  have h_norm_smul : ‖H1ComplToLp (I := I) (M := M) g
+  have h_norm_smul : ‖h1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g u)‖ = |μ| * ‖u‖ := by
     rw [hRu_eq_smul, norm_smul]
     rfl
@@ -201,12 +201,12 @@ theorem laplacianOp_of_resolventEigenvector_lift
     apply Subtype.ext
     exact h_eq]
   rw [laplacianOp_resolvent]
-  have h_HRl : H1ComplToLp (I := I) (M := M) g
+  have h_HRl : h1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g (μ⁻¹ • u)) =
       u := by
     rw [(resolvent (I := I) (M := M) g).map_smul]
-    rw [(H1ComplToLp (I := I) (M := M) g).map_smul]
-    have h_replace : H1ComplToLp (I := I) (M := M) g
+    rw [(h1ComplToLp (I := I) (M := M) g).map_smul]
+    have h_replace : h1ComplToLp (I := I) (M := M) g
           (resolvent (I := I) (M := M) g u) =
         resolventL2 (I := I) (M := M) g u := by
       rw [resolventL2_apply]

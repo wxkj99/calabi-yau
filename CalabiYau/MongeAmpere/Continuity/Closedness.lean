@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Basic
 public import CalabiYau.Geometry.Kahler.Sobolev
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.C0
 import CalabiYau.MongeAmpere.Estimates.C2
 import CalabiYau.MongeAmpere.Estimates.C3

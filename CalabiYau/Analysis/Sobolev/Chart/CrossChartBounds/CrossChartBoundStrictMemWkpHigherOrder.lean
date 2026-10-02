@@ -219,14 +219,14 @@ theorem crossChartJointK
     intro j hj y _; exact hC_combined_bound y j hj
   obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-      k hp_one hp_top hΩγα_open hη_combined_smooth hC_combined_nn
+      k hp_one hΩγα_open hη_combined_smooth hC_combined_nn
       hη_combined_iter_bound
   have hη_α_local_iter_bound :
       ∀ j ≤ k, ∀ y ∈ Ωα_target, ‖iteratedFDeriv ℝ j η_α_local y‖ ≤ C_α := by
     intro j hj y _; exact hC_α_bound y j hj
   obtain ⟨K_leib_α, hK_leib_α_pos, hK_leib_α_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-      k hp_one hp_top hΩα_target_open hη_α_local_smooth hC_α_nn
+      k hp_one hΩα_target_open hη_α_local_smooth hC_α_nn
       hη_α_local_iter_bound
   set K_chain : ℝ := Φ.wkpCompositionConstant k p with hK_chain_def
   have hK_chain_pos : 0 < K_chain := by

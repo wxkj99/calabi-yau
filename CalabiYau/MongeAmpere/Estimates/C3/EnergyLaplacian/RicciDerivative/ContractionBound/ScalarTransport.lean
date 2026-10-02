@@ -110,7 +110,7 @@ theorem c3_error_eq_general_frame_action
       Matrix.diagonal (fun i ↦ (d i : ℂ))) :
     c3RicciDerivativeError ω₀ G φ x =
       let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
-      let T := c3ConnectionDifferenceInChart ω₀ φ x
+      let T := connectionDifferenceInChart ω₀ φ x
       let R := c3RicciInChart (ω₀.metricInChart x)
       let H := c3ForcingHessianInChart G x
       let S : Fin n → Fin n → Fin n → ℂ := fun a b c ↦
@@ -123,7 +123,7 @@ theorem c3_error_eq_general_frame_action
   classical
   let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   let R := c3RicciInChart (ω₀.metricInChart x)
   let H := c3ForcingHessianInChart (n := n) G x
   let S : Fin n → Fin n → Fin n → ℂ := fun a b c ↦

@@ -1,8 +1,6 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetMatrixRemainder
-import Mathlib.Analysis.Calculus.MeanValue
-import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 
 /-!
 # Mixed-base difference of log-determinant Taylor remainders

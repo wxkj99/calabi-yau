@@ -17,7 +17,7 @@ namespace Sobolev
 namespace SubstitutionDischargeIBPExpand
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -38,7 +38,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_at_v_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -107,7 +106,6 @@ theorem variational_identity_at_v_h
     v_h_seq h_v_seq_smooth h_v_seq_cs h_v_seq_support h_v_seq_l2
     h_v_seq_grad_l2
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_ibp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -324,7 +322,6 @@ theorem variational_identity_after_ibp
   rw [h_int_swap_before, h_per_ij_eq, ← h_int_swap_after] at h_expanded
   exact h_expanded
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_product_rule
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

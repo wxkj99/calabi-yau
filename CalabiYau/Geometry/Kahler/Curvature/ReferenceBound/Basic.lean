@@ -24,7 +24,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 
 /-- The coordinate matrix of an orthonormal complex frame at `x`, using the metric coefficient
 matrix in the chart centered at `x`. -/
-def referenceOrthonormalFrameMatrix (ω₀ : KahlerForm n M) (x : M)
+def IsReferenceOrthonormalFrame (ω₀ : KahlerForm n M) (x : M)
     (P : Matrix (Fin n) (Fin n) ℂ) : Prop :=
   Matrix.transpose P *
       ω₀.metricInChart x (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) * P.map star = 1

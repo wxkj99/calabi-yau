@@ -1,12 +1,8 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
-import CalabiYau.Geometry.Complex.Forms.Positive
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.Higher.LinearizedMongeAmpere
-import CalabiYau.Mathlib.Analysis.Matrix.Order
-import CalabiYau.LinearAlgebra.Hermitian.EigenvalueBound
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseHolder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.LinearizedContinuation
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.UniformEllipticity
 
@@ -34,6 +30,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- One Schauder bootstrap step, uniformly over a family of Monge–Ampère solutions and over
 compact chart pieces. -/
 theorem exists_uniform_chart_holder_bound_succ (hSch : InteriorSchauderEstimate n)

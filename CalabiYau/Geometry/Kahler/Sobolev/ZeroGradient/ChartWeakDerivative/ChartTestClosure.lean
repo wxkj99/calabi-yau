@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.WeakDerivatives
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.WeakDerivative
 public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 public import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
@@ -107,7 +107,7 @@ theorem euclidean_test_integral_eq_zero_of_l2_tendsto
     {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
     [MeasurableSpace V] [BorelSpace V]
     {Ω : Set V} (hΩ : IsOpen Ω)
-    {K : Set V} (hKcompact : IsCompact K) (hK : K ⊆ Ω)
+    {K : Set V} (hK : K ⊆ Ω)
     (v : V) (F : ℕ → V → ℝ) (U φ : V → ℝ)
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)
     (hφ_support : HasCompactSupport φ)
@@ -124,11 +124,8 @@ theorem euclidean_test_integral_eq_zero_of_l2_tendsto
       (ENNReal.ofReal 2) (volume.restrict K))
     (hDlim : Tendsto
       (fun k => eLpNorm (fun y => fderiv ℝ (F k) y v)
-        (ENNReal.ofReal 2) (volume.restrict K)) atTop (𝓝 0))
-    (hUtest : IntegrableOn (fun y => U y * fderiv ℝ φ y v) Ω) :
+        (ENNReal.ofReal 2) (volume.restrict K)) atTop (𝓝 0)) :
     ∫ y in Ω, U y * fderiv ℝ φ y v = 0 := by
-  let _ := hKcompact
-  let _ := hUtest
   let μ : Measure V := volume.restrict K
   let dφ : V → ℝ := fun y => fderiv ℝ φ y v
   have hφmem : MemLp φ (ENNReal.ofReal 2) μ := by

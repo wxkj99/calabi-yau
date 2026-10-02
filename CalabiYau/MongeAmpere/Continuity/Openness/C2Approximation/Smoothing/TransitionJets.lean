@@ -22,13 +22,10 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [T2Space M] [CompactSpace M]
 
 -- The target-chart piece and each source-supported overlap have compact images.
 -- Neither lemma
 -- assumes smoothness of a partial chart map outside its open domain.
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem compact_chart_piece_image
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M) (k : cover.ι) :
     IsCompact ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm ''
@@ -36,26 +33,7 @@ private theorem compact_chart_piece_image
   apply (cover.isCompact_piece k).image_of_continuousOn
   exact (continuousOn_extChartAt_symm (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n)))
     (cover.base k)).mono (cover.piece_in_target k)
-
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [CompactSpace M] in
-private theorem compact_support_overlap_in_chart
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    {f : M → ℝ} (hcompact : IsCompact (tsupport f)) (i k : cover.ι)
-    (hsupport : tsupport f ⊆
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).source) :
-    IsCompact ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)) ''
-      (tsupport f ∩ ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm ''
-        cover.piece k))) := by
-  have hcover : IsCompact ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
-      (cover.base k)).symm '' cover.piece k) := compact_chart_piece_image cover k
-  have hoverlap : IsCompact (tsupport f ∩
-      ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base k)).symm ''
-        cover.piece k)) := hcompact.inter hcover
-  apply hoverlap.image_of_continuousOn
-  apply (continuousOn_extChartAt (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n)))
-    (cover.base i)).mono
-  intro x hx
-  exact hsupport hx.1
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 
 private def chart_overlap {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
@@ -64,7 +42,6 @@ private def chart_overlap {φ : M → ℝ}
     (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base k)).symm ⁻¹'
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base i)).source
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem chart_overlap_open {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (i k : L.cover.ι) : IsOpen (chart_overlap L i k) := by
@@ -74,7 +51,7 @@ private theorem chart_overlap_open {φ : M → ℝ}
       (isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (L.cover.base k))
       (isOpen_extChartAt_source (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (L.cover.base i))
 
-omit [T2Space M] [CompactSpace M] in
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 private theorem chart_transition_contDiffOn {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (i k : L.cover.ι) :
@@ -104,6 +81,10 @@ private theorem chart_transition_contDiffOn {φ : M → ℝ}
       simpa [ci, ck, extChartAt_source] using hz.2)
   exact hcomp.contDiffOn.of_le
     (inferInstance : ENat.LEInfty (2 : ℕ∞ω)).out
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+
 
 -- Ordinary Fréchet chain rule on an open overlap. The second term retains the
 -- derivative of the source error multiplied by the second transition derivative.
@@ -273,44 +254,6 @@ private theorem norm_iteratedFDerivWithin_one_comp_le
 
 -- Each zero extension has its support in the image of the fixed Euclidean
 -- support bound. This compact set is independent of the convolution index.
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [CompactSpace M] in
-private theorem approximation_tsupport_compact
-    {φ : M → ℝ} (L : CompactChartC2Localization (n := n) (M := M) φ)
-    (A : ∀ i, EuclideanC2MollificationData
-      (EuclideanSpace ℂ (Fin n)) (L.localFunction i)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base i)).target)
-    (S : ChartwiseSourceMollificationData L A)
-    (i : L.cover.ι) (j : ℕ) :
-    IsCompact (tsupport (S.approximation i j)) := by
-  let c := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base i)
-  let K : Set M := c.symm '' (A i).supportBound
-  have hK : IsCompact K := by
-    dsimp [K, c]
-    exact (A i).supportBound_compact.image_of_continuousOn
-      ((continuousOn_extChartAt_symm (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n)))
-        (L.cover.base i)).mono (A i).supportBound_subset)
-  have hKclosed : IsClosed K := hK.isClosed
-  have hsupp : Function.support (S.approximation i j) ⊆ K := by
-    intro x hx
-    change S.approximation i j x ≠ 0 at hx
-    have hxs : x ∈ c.source := by
-      by_contra hxs
-      have hnot : x ∉ tsupport (S.approximation i j) :=
-        fun ht => hxs (S.support_in_source i j ht)
-      exact hnot (subset_closure (Function.mem_support.mpr hx))
-    have hxt : c x ∈ c.target := c.map_source hxs
-    have heq := S.coordinate_eq i j (c x) hxt
-    have hzsup : c x ∈ Function.support ((A i).approximation j) := by
-      apply Function.mem_support.mpr
-      rw [← heq, c.left_inv hxs]
-      exact hx
-    have hzb : c x ∈ (A i).supportBound :=
-      (A i).support_in_bound j (subset_tsupport _ hzsup)
-    exact ⟨c x, hzb, c.left_inv hxs⟩
-  have htsupp : tsupport (S.approximation i j) ⊆ K := by
-    change closure (Function.support (S.approximation i j)) ⊆ K
-    exact (closure_mono hsupp).trans hKclosed.closure_subset
-  exact hK.of_isClosed_subset (isClosed_tsupport _) htsupp
 
 private def fixed_error_support {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
@@ -321,7 +264,9 @@ private def fixed_error_support {φ : M → ℝ}
   (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base i)).symm ''
       (A i).supportBound ∪ tsupport (L.localizedFunction i)
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] in
+end
+
+variable [CompactSpace M] in
 private theorem fixed_error_support_compact {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -335,7 +280,6 @@ private theorem fixed_error_support_compact {φ : M → ℝ}
   · exact isCompact_univ.of_isClosed_subset (isClosed_tsupport _)
       (Set.subset_univ _)
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem fixed_error_support_subset_source {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -350,7 +294,7 @@ private theorem fixed_error_support_subset_source {φ : M → ℝ}
       ((A i).supportBound_subset hz)
   · exact L.localizedSupportInSource i hx
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [CompactSpace M] in
+variable [T2Space M] in
 private theorem approximation_tsupport_subset_fixed_image {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -390,6 +334,7 @@ private theorem approximation_tsupport_subset_fixed_image {φ : M → ℝ}
     change closure (Function.support (S.approximation i j)) ⊆ K
     exact (closure_mono hsupp).trans hKclosed.closure_subset
   simpa [K, c] using htsupp
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 
 private def chart_transition_piece_coordinates {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
@@ -400,7 +345,7 @@ private def chart_transition_piece_coordinates {φ : M → ℝ}
   let ck := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base k)
   ck '' (fixed_error_support L A i ∩ ck.symm '' L.cover.piece k)
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
+variable [T2Space M] [CompactSpace M] in
 private theorem chart_transition_piece_coordinates_compact {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -417,7 +362,6 @@ private theorem chart_transition_piece_coordinates_compact {φ : M → ℝ}
   rintro x ⟨_, ⟨z, hz, rfl⟩⟩
   exact ck.map_target (L.cover.piece_in_target k hz)
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem chart_transition_piece_coordinates_subset_overlap {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -437,6 +381,7 @@ private theorem chart_transition_piece_coordinates_subset_overlap {φ : M → �
   · exact hyT
   · change ck.symm y ∈ ci.source
     exact fixed_error_support_subset_source L A i hxK
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 
 private theorem transition_derivative_bounds_on_piece {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
@@ -489,7 +434,6 @@ private theorem transition_derivative_bounds_on_piece {φ : M → ℝ}
           norm_iteratedFDerivWithin_fderivWithin hs.uniqueDiffOn hzS
       _ ≤ D := hDz
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem chart_error_eq_source_transition {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -519,7 +463,7 @@ private theorem chart_error_eq_source_transition {φ : M → ℝ}
     (A i).approximation j (ci (ck.symm z)) - L.localFunction i (ci (ck.symm z))
   rw [hS, hL]
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [CompactSpace M] in
+variable [T2Space M] in
 private theorem chart_error_zero_eventually {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -539,7 +483,7 @@ private theorem chart_error_zero_eventually {φ : M → ℝ}
   filter_upwards [hA, hL] with y hyA hyL
   simp [hyA, hyL]
 
-omit [CompactSpace M] in
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] in
 private theorem chart_error_zero_jets_at {φ : M → ℝ}
     (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -568,7 +512,7 @@ private theorem chart_error_zero_jets_at {φ : M → ℝ}
   have hderiv := (hcomp.iteratedFDeriv ℝ r).eq_of_nhds
   simpa using hderiv
 
-omit [T2Space M] [CompactSpace M] in
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 private theorem chartwise_error_contDiffAt
     {φ : M → ℝ} (L : CompactChartC2Localization (n := n) (M := M) φ)
     (A : ∀ i, EuclideanC2MollificationData
@@ -601,6 +545,10 @@ private theorem chartwise_error_contDiffAt
       ((S.approximation i j - L.localizedFunction i) ∘ c.symm) z := by
     simpa [c] using hcomp
   exact hgoal.contDiffAt
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+
 
 private theorem transition_error_scale {ε C D : ℝ≥0} (hε : 0 < ε) :
     let η : ℝ≥0 := ε / (C ^ 2 + D + 1)
@@ -765,7 +713,7 @@ private theorem exists_chartwise_pair_transition_jets
   · have hzero := chart_error_zero_jets_at L A S i k j r
       (L.cover.piece_in_target k hzPiece) hx
     rw [hzero]
-    simpa using hε.le
+    simp
 
 private theorem uniform_chartwise_transition_jets
     {φ : M → ℝ} (L : CompactChartC2Localization (n := n) (M := M) φ)
@@ -793,17 +741,11 @@ private theorem uniform_chartwise_transition_jets
   intro j hj i k r hr z hz
   exact hN (i, k) j (le_trans (Finset.le_sup (Finset.mem_univ (i, k))) hj) r hr z hz
 
+end
+
 -- Boundedness of the iterated derivatives on compact sets. For actual partial
 -- chart transitions, first restrict to their open overlap or use a cutoff;
 -- this global smoothness hypothesis must not be assumed for a partial map.
-private theorem iteratedFDeriv_norm_bddAbove_on_isCompact
-    {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F]
-    {K : Set E} (hK : IsCompact K) (f : E → F)
-    (hf : ContDiff ℝ 2 f) (r : ℕ) (hr : r ≤ 2) :
-    BddAbove ((fun x : E => ‖iteratedFDeriv ℝ r f x‖) '' K) := by
-  apply hK.bddAbove_image
-  exact (hf.continuous_iteratedFDeriv (by exact_mod_cast hr)).norm.continuousOn
 
 /-- The regularity and uniform full-jet estimate after passing an actual
 zero-extended local convolution through every chart of a fixed finite cover.
@@ -825,6 +767,7 @@ structure ChartwiseTransitionJetsData {φ : M → ℝ}
           (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (L.cover.base k)).symm) z‖ ≤ ε
 
 set_option maxHeartbeats 800000 in
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 /-- Bounded transition jets on the relevant compact overlaps convert uniform
 source-chart C² approximation to all-chart C² approximation. At points away
 from the fixed compact support, the error vanishes in a neighborhood. -/

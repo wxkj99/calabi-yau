@@ -14,8 +14,6 @@ public import Mathlib.Topology.Algebra.Support
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -43,33 +41,6 @@ lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
   have : IsFiniteMeasureOnCompacts (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact hf.integrable_of_hasCompactSupport hcs
-
-omit [Module.Finite ℝ E] in
-theorem tangentSectionAction_mul
-    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    {f h : M → ℝ}
-    (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ) ∞ h) (x : M) :
-    tangentSectionAction (I := I) X (f * h) x =
-      tangentSectionAction (I := I) X f x * h x +
-        f x * tangentSectionAction (I := I) X h x := by
-  have hf_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) f x :=
-    hf.mdifferentiableAt (by simp)
-  have hh_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) h x :=
-    hh.mdifferentiableAt (by simp)
-  set f' : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) f x
-  set h' : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) h x
-  set fh' : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) (f * h) x
-  have hf_hasMF : HasMFDerivAt I 𝓘(ℝ, ℝ) f x f' := hf_mdiff.hasMFDerivAt
-  have hh_hasMF : HasMFDerivAt I 𝓘(ℝ, ℝ) h x h' := hh_mdiff.hasMFDerivAt
-  have hmul : HasMFDerivAt I 𝓘(ℝ, ℝ) (f * h) x (f x • h' + h x • f') :=
-    hf_hasMF.mul hh_hasMF
-  have hmfderiv_eq : fh' = f x • h' + h x • f' := hmul.mfderiv
-  change fh' (X x) = f' (X x) * h x + f x * h' (X x)
-  rw [hmfderiv_eq]
-  rw [add_apply, smul_apply,
-      smul_apply]
-  rw [smul_eq_mul, smul_eq_mul]
-  ring
 
 theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -150,36 +121,5 @@ theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
     rw [← h_int_split, ← h_div_Y_split]; exact h_div_Y_zero
   linarith [h_sum_zero]
-
-theorem integral_tangentSectionAction_mul_add_eq_neg
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ) ∞ h)
-    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    (hX : HasCompactSupport X) :
-    ∫ x, (tangentSectionAction (I := I) X f x * h x +
-            f x * tangentSectionAction (I := I) X h x)
-        ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      -∫ x, f x * h x * divergenceG (I := I) g X x
-        ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  classical
-  have hfh : ContMDiff I 𝓘(ℝ) ∞ (f * h) := hf.mul hh
-  have h_a := integral_tangentSectionAction_eq_neg_integral_smul_divergence
-    (I := I) g hfh X hX
-  have h_leibniz : ∀ x : M,
-      tangentSectionAction (I := I) X (f * h) x =
-        tangentSectionAction (I := I) X f x * h x +
-          f x * tangentSectionAction (I := I) X h x := fun x =>
-    tangentSectionAction_mul (I := I) X hf hh x
-  have h_lhs_eq :
-      ∫ x, tangentSectionAction (I := I) X (f * h) x
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-        ∫ x, (tangentSectionAction (I := I) X f x * h x +
-                f x * tangentSectionAction (I := I) X h x)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-    refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact h_leibniz x
-  rw [← h_lhs_eq, h_a]
-  rfl
 
 end CalabiYau.DivergenceTheorem

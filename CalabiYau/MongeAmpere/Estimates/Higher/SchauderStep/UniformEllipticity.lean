@@ -1,10 +1,10 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.Geometry.Complex.Forms.Positive
 import CalabiYau.Mathlib.Analysis.Matrix.Order
-import CalabiYau.LinearAlgebra.Hermitian.EigenvalueBound
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.EigenvalueBounds
 
 /-!
 # Uniform ellipticity of the inverse perturbed metric
@@ -140,7 +140,7 @@ theorem exists_uniform_inverse_metric_ellipticity
         simp [β, sub_eq_add_neg]
       rw [hfield, FormField.chartRep_add]
       simp only [FormField.chartRep_smul]
-      simpa [sub_eq_add_neg]
+      simp [sub_eq_add_neg]
     have hβchartEq : β.chartRep x z =
         Λ • (ω₀.toFormField.chartRep x z) - ωφ.toFormField.chartRep x z :=
       congrFun hβchartEqFun z

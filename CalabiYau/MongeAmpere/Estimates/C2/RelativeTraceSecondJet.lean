@@ -2,7 +2,6 @@ module
 
 public import CalabiYau.Geometry.Kahler.Curvature.Chart.Basic
 import CalabiYau.MongeAmpere.Estimates.C2.InverseMetricJet
-import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.LinearAlgebra.Matrix.Trace
 
 open scoped ContDiff Matrix.Norms.Elementwise

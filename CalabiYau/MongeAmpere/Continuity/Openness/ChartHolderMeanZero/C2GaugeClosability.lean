@@ -23,13 +23,13 @@ open scoped Manifold ContDiff NNReal ENNReal Topology
 namespace KahlerForm
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E]
-  {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
-  [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
 open Filter CalabiYau.Schauder
 
-omit [CompactSpace M] in
+section
+
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace E M] [IsManifold 𝓘(ℝ, E) ∞ M]
+
 private theorem smoothChartHolderC2TopJetSeminorm_eventually_le_of_pointwise_tendsto
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α) :
@@ -138,7 +138,6 @@ private theorem smoothChartHolderC2TopJetSeminorm_eventually_le_of_pointwise_ten
   filter_upwards [eventually_ge_atTop Nδ] with n hn
   exact hseminorm n hn
 
-omit [CompactSpace M] in
 private theorem smoothChartHolderC2SpatialJet_eventually_le_of_pointwise_tendsto
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α) :
@@ -328,6 +327,11 @@ private theorem smoothChartHolderCoreNorm_tendsto_zero_of_pointwiseJets_tendsto_
   have hnormlt : ‖f n‖ < ε := lt_of_le_of_lt hnorm hsmall
   simpa [Real.dist_eq] using hnormlt
 
+end
+
+variable [FiniteDimensional ℝ E] {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+  [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderCoreCauchySeq_pointwiseJets_tendsto_zero_on_interior_of_uniformEvaluation_tendsto_zero
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α) :
@@ -388,7 +392,7 @@ private theorem smoothChartHolderCoreCauchySeq_pointwiseJets_tendsto_zero_on_int
     simp [J, xz, smoothChartHolderJetData]
   exact hJpointZero.congr' (Filter.Eventually.of_forall hcoreJet)
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] in
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace E M] [IsManifold 𝓘(ℝ, E) ∞ M] in
 private theorem smoothChartHolderTransition_contDiffAt
     (cover : CompactChartCover E M) (i j : cover.ι) (z w : E)
     (hz : z ∈ cover.piece i) (hw : w ∈ interior (cover.piece j))
@@ -413,7 +417,8 @@ private theorem smoothChartHolderTransition_contDiffAt
     contMDiffAt_extChartAt' (I := 𝓘(ℝ, E)) hxSource
   exact (hchart.comp z hsymm).contDiffAt
 
-omit [FiniteDimensional ℝ E] in
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace E M] [IsManifold 𝓘(ℝ, E) ∞ M]
+  [CompactSpace M] in
 private theorem smoothChartHolderChartTransitionJet_tendsto_zero
     (G : ℕ → E → ℝ) (τ : E → E) (z : E) (r : ℕ) (hr : r ≤ 2)
     (hG : ∀ n, ContDiffAt ℝ (∞ : ℕ∞ω) (G n) (τ z))
@@ -498,7 +503,7 @@ private theorem smoothChartHolderChartTransitionJet_tendsto_zero
       exact WithTop.coe_le_coe.mpr le_top)
   exact hcomp.congr' (Filter.Eventually.of_forall fun n => (hEq n).symm)
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] in
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace E M] [IsManifold 𝓘(ℝ, E) ∞ M] in
 private theorem smoothChartHolderCoreCauchySeq_pointwiseJets_tendsto_zero_across_chart_transition
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (f : ℕ → SmoothChartHolderCore cover 2 α)
@@ -575,6 +580,12 @@ private theorem smoothChartHolderCoreCauchySeq_pointwiseJets_tendsto_zero_across
   exact hcomp.congr' (Filter.Eventually.of_forall fun n =>
     ((hlocalEq n).iteratedFDeriv ℝ r).self_of_nhds.symm)
 
+section
+
+variable [FiniteDimensional ℝ E] {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+  [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
+
+omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderCoreCauchySeq_pointwiseJets_tendsto_zero_of_uniformEvaluation_tendsto_zero
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α) :
@@ -615,6 +626,7 @@ private theorem smoothChartHolderCoreCauchySeq_pointwiseJets_tendsto_zero_of_uni
       cover α f i q z w hz hw hcoord.symm hjetj
     exact htransfer j hj
 
+omit [FiniteDimensional ℝ E] in
 /-- If a sequence is Cauchy in the order-two finite-chart gauge and its smooth evaluations converge
 uniformly to zero on the compact manifold, then its full `C^{2,α}` gauge norm tends to zero. The
 proof uses local uniform derivative limits and closability of the top-order Hölder seminorm; it does
@@ -645,5 +657,7 @@ theorem smoothChartHolderCoreCauchySeq_tendsto_zero_of_uniformEvaluation_tendsto
     cover α N f hfCauchy hEval
   exact smoothChartHolderCoreNorm_tendsto_zero_of_pointwiseJets_tendsto_zero
     cover α N f hfCoreCauchy hjets
+
+end
 
 end KahlerForm

@@ -4,7 +4,7 @@ public import CalabiYau.Geometry.Kahler.Sobolev
 public import CalabiYau.Geometry.Kahler.Sobolev.RellichCompactness
 public import CalabiYau.Geometry.Kahler.Sobolev.ZeroGradient
 import CalabiYau.Geometry.Kahler.Sobolev.PoincareExistence.DimensionZero
-import CalabiYau.Geometry.Kahler.Sobolev.PoincareExistence.LimitMoments
+import CalabiYau.Mathlib.MeasureTheory.Function.LpSpace.IntegralMoments
 import CalabiYau.Geometry.Kahler.Sobolev.PoincareExistence.NormalizedSequence
 
 /-!

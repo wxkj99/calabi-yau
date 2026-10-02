@@ -81,26 +81,6 @@ private lemma chartDensity_lower_bound_on_compact
     intro y hy
     exact (hne ⟨y, hy⟩).elim
 
-private lemma lintegral_le_weighted_lintegral_of_density_lower_bound
-    {X : Type*} [MeasurableSpace X] (μ : Measure X) (K : Set X)
-    (d F : X → ENNReal) (c : ENNReal)
-    (hK : MeasurableSet K) (hc₀ : c ≠ 0) (hcTop : c ≠ ⊤)
-    (hd : ∀ y ∈ K, c ≤ d y) :
-    ∫⁻ y in K, F y ∂μ ≤
-      ∫⁻ y in K, c⁻¹ * (d y * F y) ∂μ := by
-  apply MeasureTheory.setLIntegral_mono' hK
-  intro y hy
-  have hmul : 1 ≤ c⁻¹ * d y := by
-    calc
-      1 = c⁻¹ * c := by rw [ENNReal.inv_mul_cancel hc₀ hcTop]
-      _ ≤ c⁻¹ * d y := by
-        gcongr
-        exact hd y hy
-  calc
-    F y = 1 * F y := by simp
-    _ ≤ (c⁻¹ * d y) * F y := by gcongr
-    _ = c⁻¹ * (d y * F y) := by ac_rfl
-
 private lemma restrict_le_inv_density_smul
     {X : Type*} [MeasurableSpace X] (μ : Measure X) (K : Set X)
     (d : X → ENNReal) (c : ENNReal)

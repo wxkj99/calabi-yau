@@ -4,7 +4,7 @@ module
 public import CalabiYau.Analysis.Sobolev.Euclidean.ChainRule.Defs
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Closedness
-public import CalabiYau.Analysis.DeGiorgi.BallExtension.RoughInput
+public import CalabiYau.Analysis.Sobolev.Euclidean.Ball.Extension.RoughInput
 public import Mathlib.Analysis.Calculus.ContDiff.Bounds
 public import Mathlib.MeasureTheory.Function.Jacobian
 

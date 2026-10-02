@@ -7,8 +7,6 @@ public import Mathlib.Topology.MetricSpace.HolderNorm
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -19,19 +17,25 @@ namespace HeatEquation
 
 section HalfMoment
 
-variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
-  [Nontrivial V]
+variable {V : Type*} [NormedAddCommGroup V]
+
+section
+
+variable [InnerProductSpace ℝ V]
 
 def baseHeatHalf (x : V) : ℝ :=
   Real.sqrt ‖x‖ * baseHeat x
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem baseHeatHalf_nonneg (x : V) : 0 ≤ baseHeatHalf x := by
   unfold baseHeatHalf
   exact mul_nonneg (Real.sqrt_nonneg _) (baseHeat_nonneg x)
+
+end
+
+section
+
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V]
 
 private theorem baseHeatFirst_int :
     Integrable (fun x : V => ‖x‖ * baseHeat x) := by
@@ -66,30 +70,20 @@ theorem baseHeatHalf_int : Integrable (baseHeatHalf : V → ℝ) := by
     exact ⟨by positivity, by nlinarith [norm_nonneg x]⟩
   exact mul_le_mul_of_nonneg_right hsqrt (baseHeat_nonneg x)
 
+end
+
 def heatC0Half (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] : ℝ :=
   ∫ x : V, baseHeatHalf x
 
-omit [Nontrivial V] in
-theorem heatC0Half_nonneg : 0 ≤ heatC0Half V :=
-  integral_nonneg baseHeatHalf_nonneg
+section
+
+variable [InnerProductSpace ℝ V]
 
 def heatHalf (t : ℝ) (x : V) : ℝ :=
   ((heatScale t) ^ Module.finrank ℝ V)⁻¹ * Real.sqrt (heatScale t) *
     baseHeatHalf ((heatScale t)⁻¹ • x)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
-theorem heatHalf_nonneg {t : ℝ} (ht : 0 < t) (x : V) :
-    0 ≤ heatHalf t x := by
-  unfold heatHalf
-  exact mul_nonneg
-    (mul_nonneg (inv_nonneg.mpr (pow_nonneg (heatScale_pos ht).le _))
-      (Real.sqrt_nonneg _))
-    (baseHeatHalf_nonneg _)
-
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatHalf_eq {t : ℝ} (ht : 0 < t) (x : V) :
     heatHalf t x = Real.sqrt ‖x‖ * heatKernel t x := by
   have hr : 0 < heatScale t := heatScale_pos ht
@@ -108,13 +102,17 @@ theorem heatHalf_eq {t : ℝ} (ht : 0 < t) (x : V) :
   rw [hsqrt]
   ring
 
+end
+
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] in
 theorem heatHalf_int {t : ℝ} (ht : 0 < t) :
     Integrable (heatHalf t : V → ℝ) := by
   unfold heatHalf
   exact (baseHeatHalf_int (V := V)).comp_smul
     (inv_ne_zero (heatScale_pos ht).ne') |>.const_mul _
 
-omit [Nontrivial V] in
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] in
 theorem integral_heatHalf {t : ℝ} (ht : 0 < t) :
     ∫ x : V, heatHalf t x = Real.sqrt (heatScale t) * heatC0Half V := by
   have hr : 0 < heatScale t := heatScale_pos ht
@@ -128,14 +126,9 @@ end HalfMoment
 
 section ApproxIdentity
 
-variable {V F : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
-  [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+variable {V F : Type*} [NormedAddCommGroup V]
 
-omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V]
-  [BorelSpace V] [Nontrivial V] [NormedSpace ℝ F] [CompleteSpace F] in
+variable [NormedAddCommGroup F] in
 private theorem holder_half {K : ℝ≥0} {u : V → F}
     (hu : HolderWith K (1 / 2 : ℝ≥0) u) (x y : V) :
     ‖u (x - y) - u x‖ ≤ (K : ℝ) * Real.sqrt ‖y‖ := by
@@ -147,8 +140,7 @@ private theorem holder_half {K : ℝ≥0} {u : V → F}
   rw [dist_eq_norm, hxy] at h
   simpa [Real.sqrt_eq_rpow] using h
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
-omit [FiniteDimensional ℝ V] in
+variable [InnerProductSpace ℝ V] [NormedAddCommGroup F] [NormedSpace ℝ F] in
 private theorem approx_integrand {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     {u : V → F} (hu : HolderWith K (1 / 2 : ℝ≥0) u) (x y : V) :
     ‖heatKernel t y • (u (x - y) - u x)‖ ≤
@@ -162,6 +154,8 @@ private theorem approx_integrand {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       rw [heatHalf_eq ht]
       ring
 
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] in
 theorem heatSup_id_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     {u : BoundedContinuousFunction V F} (hu : HolderWith K (1 / 2 : ℝ≥0) u) (x : V) :
     ‖heatSup t u x - u x‖ ≤
@@ -201,15 +195,17 @@ theorem heatSup_id_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       rw [integral_const_mul, integral_heatHalf ht]
     _ = (K : ℝ) * Real.sqrt (heatScale t) * heatC0Half V := by ring
 
+variable [InnerProductSpace ℝ V] in
 def baseHeatHolder (alpha : NNReal) (x : V) : Real :=
   ‖x‖ ^ (alpha : Real) * baseHeat x
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
+variable [InnerProductSpace ℝ V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] in
 theorem baseHeatHolder_nonneg (alpha : NNReal) (x : V) :
     0 ≤ baseHeatHolder alpha x :=
   mul_nonneg (Real.rpow_nonneg (norm_nonneg x) _) (baseHeat_nonneg x)
 
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] in
 theorem baseHeatHolder_int {alpha : NNReal} (halpha : alpha ≤ 1) :
     Integrable (baseHeatHolder alpha : V → Real) := by
   have hmajor : Integrable (fun x : V => (1 + ‖x‖) * baseHeat x) := by
@@ -238,32 +234,17 @@ theorem baseHeatHolder_int {alpha : NNReal} (halpha : alpha ≤ 1) :
         (le_add_of_nonneg_left zero_le_one)
   exact mul_le_mul_of_nonneg_right hrpow (baseHeat_nonneg x)
 
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] in
 def heatC0Holder (alpha : NNReal) : Real :=
   ∫ x : V, baseHeatHolder alpha x
 
-omit [Nontrivial V] in
-theorem heatC0Holder_nonneg (alpha : NNReal) :
-    0 ≤ heatC0Holder (V := V) alpha :=
-  integral_nonneg (baseHeatHolder_nonneg alpha)
-
+variable [InnerProductSpace ℝ V] in
 def heatHolder (alpha : NNReal) (t : Real) (x : V) : Real :=
   ((heatScale t) ^ Module.finrank Real V)⁻¹ *
     (heatScale t) ^ (alpha : Real) *
       baseHeatHolder alpha ((heatScale t)⁻¹ • x)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
-theorem heatHolder_nonneg (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
-    0 ≤ heatHolder alpha t x := by
-  unfold heatHolder
-  exact mul_nonneg
-    (mul_nonneg
-      (inv_nonneg.mpr (pow_nonneg (heatScale_pos ht).le _))
-      (Real.rpow_nonneg (heatScale_pos ht).le _))
-    (baseHeatHolder_nonneg alpha _)
-
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
+variable [InnerProductSpace ℝ V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] in
 theorem heatHolder_eq (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
     heatHolder alpha t x = ‖x‖ ^ (alpha : Real) * heatKernel t x := by
   have hr : 0 < heatScale t := heatScale_pos ht
@@ -285,6 +266,8 @@ theorem heatHolder_eq (alpha : NNReal) {t : Real} (ht : 0 < t) (x : V) :
   rw [hrpow]
   ring
 
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] in
 theorem heatHolder_int {alpha : NNReal} (halpha : alpha ≤ 1)
     {t : Real} (ht : 0 < t) :
     Integrable (heatHolder (V := V) alpha t) := by
@@ -292,7 +275,8 @@ theorem heatHolder_int {alpha : NNReal} (halpha : alpha ≤ 1)
   exact (baseHeatHolder_int (V := V) halpha).comp_smul
     (inv_ne_zero (heatScale_pos ht).ne') |>.const_mul _
 
-omit [Nontrivial V] in
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] in
 theorem integral_heatHolder (alpha : NNReal) {t : Real} (ht : 0 < t) :
     ∫ x : V, heatHolder alpha t x =
       (heatScale t) ^ (alpha : Real) * heatC0Holder (V := V) alpha := by
@@ -304,8 +288,7 @@ theorem integral_heatHolder (alpha : NNReal) {t : Real} (ht : 0 < t) :
   simp only [smul_eq_mul]
   field_simp [hr.ne']
 
-omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V]
-  [BorelSpace V] [Nontrivial V] [NormedSpace ℝ F] [CompleteSpace F] in
+variable [NormedAddCommGroup F] in
 private theorem holder_shift {alpha K : NNReal} {u : V → F}
     (hu : HolderWith K alpha u) (x y : V) :
     ‖u (x - y) - u x‖ ≤ (K : Real) * ‖y‖ ^ (alpha : Real) := by
@@ -317,8 +300,7 @@ private theorem holder_shift {alpha K : NNReal} {u : V → F}
   rw [dist_eq_norm, hxy] at h
   exact h
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
-omit [FiniteDimensional ℝ V] in
+variable [InnerProductSpace ℝ V] [NormedAddCommGroup F] [NormedSpace ℝ F] in
 private theorem holder_approx_integrand {alpha K : NNReal}
     {t : Real} (ht : 0 < t) {u : V → F} (hu : HolderWith K alpha u)
     (x y : V) :
@@ -332,6 +314,11 @@ private theorem holder_approx_integrand {alpha K : NNReal}
     _ = (K : Real) * heatHolder alpha t y := by
       rw [heatHolder_eq alpha ht]
       ring
+
+section
+
+variable [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 theorem heatSup_id_norm_of_holder {alpha K : NNReal}
     (halpha : alpha ≤ 1) {t : Real} (ht : 0 < t)
@@ -404,6 +391,8 @@ theorem heatSup_zero_of_holder {alpha K : NNReal} (halpha0 : 0 < alpha)
   refine squeeze_zero' (Filter.Eventually.of_forall fun t => norm_nonneg _) ?_ hupper
   filter_upwards [self_mem_nhdsWithin] with t ht
   exact heatSup_id_norm_of_holder halpha1 ht hu x
+
+end
 
 end ApproxIdentity
 

@@ -30,17 +30,17 @@ theorem referenceContraction_drift_frame {n : ℕ}
     (hd : ∀ i, 0 < d i) (hPQ : P * Q = 1) (hQP : Q * P = 1)
     (hframe : linearPullbackMetric P G₀ = 1)
     (hdiag : linearPullbackMetric P G = Matrix.diagonal (fun i ↦ (d i : ℂ))) :
-    referenceContraction_tensorFrameTransform Q P
+    referenceContractionTensorFrameTransform Q P
       (fun i j k => linearReferenceDrift G₀ G X i j k +
         referenceAction_contract G⁻¹ T (fun a b c e => ∑ l, G₀⁻¹ l a * R b e c l) i j k) =
-      referenceContraction_diagonal_drift d
-        (referenceContraction_fiveSlotTransform P X)
-        (referenceContraction_fourSlotTransform P R)
-        (referenceContraction_tensorFrameTransform Q P T) := by
+      referenceContractionDiagonalDrift d
+        (referenceContractionFiveSlotTransform P X)
+        (referenceContractionFourSlotTransform P R)
+        (referenceContractionTensorFrameTransform Q P T) := by
   classical
   let U := fun a b c e => ∑ l, G₀⁻¹ l a * R b e c l
   have hU : referenceAction_tauU P Q U =
-      (fun i j k q => referenceContraction_fourSlotTransform P R j q k i) := by
+      (fun i j k q => referenceContractionFourSlotTransform P R j q k i) := by
     funext i j k q
     exact referenceContraction_raised_frame P Q G₀ R hPQ hQP hframe i j k q
   have hmetric := linear_pullback_first_contraction P Q G hPQ hQP
@@ -55,7 +55,7 @@ theorem referenceContraction_drift_frame {n : ℕ}
     simp only [linearPullbackThreeTensor, mul_add, Finset.sum_add_distrib]
   rw [hadd, linearReferenceDrift_pullback_covariant P Q G₀ G X hPQ hQP i j k]
   have ha := referenceAction_action_covariance P Q G⁻¹
-    (linearPullbackMetric P G)⁻¹ T U hPQ hQP hmetric i j k
+    (linearPullbackMetric P G)⁻¹ T U hPQ hmetric i j k
   change referenceAction_tauT P Q (referenceAction_contract G⁻¹ T U) i j k = _ at ha
   change linearReferenceDrift (linearPullbackMetric P G₀) (linearPullbackMetric P G)
     (linearPullbackFiveTensor P X) i j k +
@@ -63,8 +63,8 @@ theorem referenceContraction_drift_frame {n : ℕ}
   rw [ha, hU, hframe, hdiag]
   simp only [linearReferenceDrift, inv_one, c3_diagonal_inverse d hd,
     Matrix.diagonal_apply, Matrix.one_apply, linearPullbackFiveTensor,
-    referenceAction_contract, referenceAction_tauT, referenceContraction_diagonal_drift,
-    referenceContraction_fiveSlotTransform, referenceContraction_tensorFrameTransform]
+    referenceAction_contract, referenceAction_tauT, referenceContractionDiagonalDrift,
+    referenceContractionFiveSlotTransform, referenceContractionTensorFrameTransform]
   simp only [ite_mul, mul_ite, zero_mul, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
     if_true, mul_one]
   rw [← Finset.sum_add_distrib]

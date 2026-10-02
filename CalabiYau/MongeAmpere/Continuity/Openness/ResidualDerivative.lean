@@ -52,7 +52,7 @@ theorem exists_centeredResidual_strictDerivative (ω₀ : KahlerForm n M) (F : M
     have h := integral_exp_pos (μ := ω₁.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
     simp at h ⊢
   obtain ⟨b, hb⟩ := exists_centeredResidual_meanZeroDirection
-    ω₁ F hF α hα₀ hα₁ hvol
+    ω₁ F hF α hvol
   let B : ℝ →L[ℝ] P.C0 := (1 : ℝ →L[ℝ] ℝ).smulRight b
   let T : (P.C2 × ℝ) →L[ℝ] P.C0 :=
     L.toContinuousLinearMap.comp (ContinuousLinearMap.fst ℝ P.C2 ℝ) +
@@ -67,7 +67,7 @@ theorem exists_centeredResidual_strictDerivative (ω₀ : KahlerForm n M) (F : M
     ext z
     exact congrFun hxy z
   obtain ⟨C, r, hr, hrem⟩ := exists_centeredResidual_logDetRemainder
-    ω₀ F hF t φ hsol α hα₀ hα₁ D L hL b hb hEval
+    ω₀ F hF t φ hsol α hα₁ D L hL b hb
   refine ⟨b, hb, T, hT, ?_⟩
   rw [hasStrictFDerivAt_iff_isLittleO]
   apply Asymptotics.isLittleO_iff.2

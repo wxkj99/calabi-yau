@@ -9,12 +9,12 @@ public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Defs
 public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Fiber
 public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Defs
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Composition
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Composition
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Multilinear.Composition
 public import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 public import Mathlib.Analysis.Calculus.ContDiff.Basic
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
 public import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Smoothness.LinearIsometry
+public import CalabiYau.Mathlib.Analysis.Calculus.ContDiff.LinearIsometry
 public import Mathlib.Analysis.Calculus.ContDiff.Comp
 public import Mathlib.Analysis.Normed.Module.FiniteDimension
 public import Mathlib.Analysis.Normed.Module.Alternating.Basic
@@ -32,7 +32,7 @@ public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Curry.Basic
 public import Mathlib.Geometry.Manifold.VectorBundle.Hom
 public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Coordinates.BundleBasis
 public import CalabiYau.Geometry.Manifold.Tensor.Product.Defs
-public import CalabiYau.Geometry.Manifold.Tensor.Product.HomEquiv
+public import CalabiYau.Mathlib.LinearAlgebra.TensorProduct.HomEquiv
 public import Mathlib.LinearAlgebra.Dual.Defs
 public import Mathlib.LinearAlgebra.Dual.Lemmas
 public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
@@ -49,14 +49,14 @@ public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.Restrict
 public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.RestrictScalars
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Curry
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Flip
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Flip
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Multilinear.Flip
 public import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 public import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 public import Mathlib.Analysis.Normed.Operator.Mul
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.Domain
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Alternating.DomCongr
 public import Mathlib.LinearAlgebra.Alternating.Basic
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Decomposition
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Split
+public import CalabiYau.Mathlib.LinearAlgebra.Alternating.ShuffleSplit
 public import Mathlib.GroupTheory.Perm.Option
 public import Mathlib.LinearAlgebra.Alternating.DomCoprod
 public import Mathlib.GroupTheory.Perm.Finite
@@ -93,25 +93,26 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
-variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
-
+variable (n : WithTop ℕ∞)
 section ApplyInput
 
-variable {r s : ℕ} [CompleteSpace 𝕜]
-
+variable {r s : ℕ}
+variable [IsManifold I (n + 1) M] [CompleteSpace 𝕜] in
 noncomputable def modelApplyInputBilinear (r s : ℕ) :
     Tensor0SModel r 𝕜 E →L[𝕜]
       (TensorRSModel r s 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E) :=
   ContinuousLinearMap.flip
     (ContinuousLinearMap.id 𝕜 (TensorRSModel r s 𝕜 E))
 
-omit [CompleteSpace 𝕜] in
+section
+
+variable [IsManifold I (n + 1) M]
+
 @[simp]
 theorem model_applyInput_bilinear_apply (r s : ℕ)
     (θ : Tensor0SModel r 𝕜 E) (T : TensorRSModel r s 𝕜 E) :
     modelApplyInputBilinear (𝕜 := 𝕜) (E := E) r s θ T = T θ := rfl
 
-omit [CompleteSpace 𝕜] in
 theorem tensor0SModelAt_applyInput_eq
     (r s : ℕ) {x₀ x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -152,6 +153,12 @@ theorem tensor0SModelAt_applyInput_eq
       (fun x => Tensor0SSpace r I x) x₀).symmL_continuousLinearMapAt
         (R := 𝕜) hx θ
   rw [hθ]
+
+end
+
+section
+
+variable [IsManifold I (n + 1) M] [CompleteSpace 𝕜]
 
 noncomputable def tensorRSFieldApplyInputFun
     (T : (x : M) ->
@@ -194,8 +201,8 @@ noncomputable def tensorRSFieldApplyInput
   exact tensor0SModelAt_applyInput_eq (𝕜 := 𝕜) (E := E) (I := I)
     (M := M) r s hx (T x) (θ x)
 
-omit [IsManifold I (n + 1) M] in
-omit [CompleteSpace 𝕜] in
+end
+
 @[simp]
 theorem tensorRSField_applyInput_apply
     (T : TensorRSField n r s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
@@ -211,15 +218,14 @@ end ApplyInput
 
 section SmulByFun
 
-variable {r s : ℕ} [CompleteSpace 𝕜]
-
+variable {r s : ℕ}
 end SmulByFun
 
+variable [IsManifold I (n + 1) M] in
 noncomputable def Tensor0SField.one0 [CompleteSpace 𝕜] :
     Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) :=
   Tensor0SField.fromScalarField n (fun _ : M => (1 : 𝕜)) contMDiff_const
 
-omit [IsManifold I (n + 1) M] in
 @[simp]
 theorem Tensor0SField.one0_apply [CompleteSpace 𝕜]
     (x : M) (v : Fin 0 → E) :
@@ -238,15 +244,13 @@ open Bundle Set IsManifold ContinuousLinearMap
 
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 variable {s q : ℕ}
-
 variable (n : WithTop ℕ∞)
-
 end
 end Tensor0SBundle
 end CalabiYau

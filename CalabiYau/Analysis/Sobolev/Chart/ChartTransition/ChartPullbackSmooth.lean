@@ -8,8 +8,6 @@ public import CalabiYau.Geometry.Riemannian.Volume.Invariance
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -22,11 +20,10 @@ namespace Chart
 variable {E H : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [IsManifold I ∞ M] in
 private theorem isCompact_chartInverse_prod_image
     {P : Type*} [TopologicalSpace P] (α : M) {K : Set (P × EuclN)}
     (hK : IsCompact K) (hKt : K ⊆ univ ×ˢ chartTargetEuclid (I := I) α) :
@@ -40,7 +37,6 @@ private theorem isCompact_chartInverse_prod_image
   have ht := (hKt hp).2
   rwa [chartTargetEuclid_eq_preimage_symm] at ht
 
-omit [IsManifold I ∞ M] in
 theorem tsupport_chartPullback_prod_subset
     [T2Space M] {P : Type*} [TopologicalSpace P] [T2Space P]
     (α : M) {φ : P × EuclN → ℝ} (hφc : HasCompactSupport φ)
@@ -59,7 +55,6 @@ theorem tsupport_chartPullback_prod_subset
       exact (extChartAt I α).left_inv (by simpa only [extChartAt_source] using hx)
   · exact (hp (chartPullback_apply_of_notMem (I := I) α _ hx)).elim
 
-omit [IsManifold I ∞ M] in
 lemma tsupport_chartPullback_subset
     [T2Space M]
     (α : M)
@@ -86,7 +81,6 @@ lemma tsupport_chartPullback_subset
     rwa [tsupport_comp_eq_preimage] at hz
   exact ⟨_, ⟨z.2, hzs, rfl⟩, congrArg Prod.snd heq⟩
 
-omit [IsManifold I ∞ M] in
 private lemma tsupport_chartPullback_image_subset_chartAt_source
     (α : M)
     {ψ : EuclN → ℝ}
@@ -106,6 +100,7 @@ private lemma tsupport_chartPullback_image_subset_chartAt_source
   rw [extChartAt_source (I := I)] at hx_in_source
   exact hx_in_source
 
+variable [IsManifold I ∞ M] in
 theorem chartPullback_contMDiff
     [T2Space M]
     (α : M)
@@ -174,7 +169,6 @@ def chartTransitionEuclid (γ α : M) :
   (toEuclidean (E := E)) (extChartAt I α
     ((extChartAt I γ).symm ((toEuclidean (E := E)).symm y)))
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclid_eq_chartα_image
     (γ α : M) {x : M}
     (hx_γ : x ∈ (chartAt H γ).source) :
@@ -197,7 +191,6 @@ def chartTransitionExtended
     (c : EuclN) : EuclN → EuclN := fun y =>
   η y • chartTransitionEuclid (I := I) (M := M) γ α y + (1 - η y) • c
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionExtended_sub_const
     (γ α : M)
     (η : EuclN → ℝ)
@@ -207,7 +200,6 @@ lemma chartTransitionExtended_sub_const
   unfold chartTransitionExtended
   module
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionExtended_eq_chartTransition_on_eta_eq_one
     (γ α : M)
     {η : EuclN → ℝ}
@@ -221,7 +213,6 @@ lemma chartTransitionExtended_eq_chartTransition_on_eta_eq_one
 def chartOverlapEuclid (γ α : M) : Set EuclN :=
   (toEuclidean (E := E)) '' (extChartAt I γ '' ((chartAt H γ).source ∩ (chartAt H α).source))
 
-omit [IsManifold I ∞ M] in
 lemma chartOverlapEuclid_subset_chartTarget
     (γ α : M) :
     chartOverlapEuclid (I := I) (M := M) γ α ⊆
@@ -235,7 +226,6 @@ lemma chartOverlapEuclid_subset_chartTarget
     exact hx.1
   exact (extChartAt I γ).map_source hx_source
 
-omit [IsManifold I ∞ M] in
 lemma chartOverlapEuclid_isOpen
     [I.Boundaryless]
     (γ α : M) :
@@ -263,7 +253,6 @@ lemma chartOverlapEuclid_isOpen
     exact I.toHomeomorph.isOpenMap _ h_image_chart_open
   exact (toEuclidean (E := E)).toHomeomorph.isOpenMap _ h_I_image
 
-omit [IsManifold I ∞ M] in
 lemma kEuclid_subset_overlap
     (γ α : M) {K : Set M}
     (hK_γ : K ⊆ (chartAt H γ).source)
@@ -275,7 +264,6 @@ lemma kEuclid_subset_overlap
   refine ⟨extChartAt I γ x, ?_, hxy⟩
   exact ⟨x, ⟨hK_γ hx_in, hK_α hx_in⟩, rfl⟩
 
-omit [IsManifold I ∞ M] in
 lemma kEuclid_compact
     (γ : M) {K : Set M} (hK_compact : IsCompact K)
     (hK_γ : K ⊆ (chartAt H γ).source) :
@@ -294,6 +282,7 @@ lemma kEuclid_compact
       (hcont_extChart x hx) (Set.mapsTo_univ _ _)
   exact hcomp.mono hK_γ
 
+variable [IsManifold I ∞ M] in
 lemma chartTransitionEuclid_contDiffOn_overlap
     (γ α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionEuclid (I := I) (M := M) γ α)
@@ -366,7 +355,6 @@ def chartTransitionCutoffShifted
     (c : EuclN) : EuclN → EuclN := fun y =>
   η y • (chartTransitionEuclid (I := I) (M := M) γ α y - c)
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionExtensionSubC_zero_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
@@ -377,7 +365,6 @@ lemma chartTransitionExtensionSubC_zero_off_tsupport
   rw [hη_zero]
   simp
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionExtensionSubC_contDiffOn_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
@@ -393,6 +380,9 @@ lemma chartTransitionExtensionSubC_contDiffOn_off_tsupport
     contDiffOn_const
   exact h_const.congr (fun y hy => h_zero hy)
 
+section
+
+variable [IsManifold I ∞ M]
 lemma chartTransitionExtensionSubC_contDiffOn_overlap
     (γ α : M)
     {η : EuclN → ℝ}
@@ -459,7 +449,8 @@ lemma chartTransitionExtended_contDiff
   exact contDiff_const.add (chartTransitionExtensionSubC_contDiff (I := I) (M := M)
     γ α hη_smooth hη_support c)
 
-omit [IsManifold I ∞ M] in
+end
+
 lemma chartTransitionExtended_hasCompactSupport_sub
     (γ α : M)
     {η : EuclN → ℝ}
@@ -488,6 +479,7 @@ lemma chartTransitionExtended_hasCompactSupport_sub
     exact hy (h_support_sub hy_support)
   simpa [Function.mem_support, not_not] using hy_not
 
+variable [IsManifold I ∞ M] in
 lemma chartTransitionExtended_iter_deriv_bound
     [I.Boundaryless]
     (γ α : M)
@@ -509,7 +501,6 @@ lemma chartTransitionExtended_iter_deriv_bound
     Sobolev.Euclidean.iter_deriv_bound_of_eq_const_offCompactSupport_atOrder
     (d := Module.finrank ℝ E) hT_smooth hT_diff_compact kmax
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclid_mapsTo_overlap
     (γ α : M) {y : EuclN}
     (hy : y ∈ chartOverlapEuclid (I := I) (M := M) γ α) :
@@ -524,7 +515,6 @@ lemma chartTransitionEuclid_mapsTo_overlap
   refine ⟨extChartAt I α x, ?_, rfl⟩
   refine ⟨x, ⟨hx_in.2, hx_in.1⟩, rfl⟩
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclid_left_inv
     (γ α : M) {y : EuclN}
     (hy : y ∈ chartOverlapEuclid (I := I) (M := M) γ α) :
@@ -544,7 +534,6 @@ lemma chartTransitionEuclid_left_inv
     chartTransitionEuclid_eq_chartα_image (I := I) (M := M) α γ hx_in.2
   rw [h_T2, hy_eq]
 
-omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclid_injOn_overlap
     (γ α : M) :
     Set.InjOn (chartTransitionEuclid (I := I) (M := M) γ α)

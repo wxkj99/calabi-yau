@@ -6,8 +6,6 @@ public import CalabiYau.Analysis.Parabolic.Euclidean.HeatPotential.TimeRealizati
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -18,12 +16,9 @@ namespace HeatEquation
 
 open CalabiYau.Schauder
 
-variable {V F : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
-  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+variable {V F : Type*} [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+  [MeasurableSpace V] [BorelSpace V] [NormedAddCommGroup F] [NormedSpace Real F]
 
-omit [Nontrivial V] [CompleteSpace F] in
 private theorem integral_time_aestronglyMeasurable_of_continuousOn
     {t : Real} {G : Real × V → F}
     (hG : ContinuousOn G (Ioo (0 : Real) t ×ˢ (Set.univ : Set V))) :
@@ -50,7 +45,6 @@ private theorem integral_time_aestronglyMeasurable_of_continuousOn
     (aestronglyMeasurable_indicator_iff measurableSet_Ioo).mp hint
   rwa [Measure.restrict_congr_set Ioo_ae_eq_Ioc] at hIoo
 
-omit [Nontrivial V] [CompleteSpace F] in
 theorem heatSup_timeSource_aestronglyMeasurable_of_continuousOn
     {t : Real} (ht : 0 ≤ t)
     (f : Real → BoundedContinuousFunction V F)
@@ -87,7 +81,6 @@ theorem heatSup_timeSource_aestronglyMeasurable_of_continuousOn
   unfold G heatKernel
   exact (((hr.pow _).inv₀ (fun q => pow_ne_zero _ (hr0 q))).mul hbase).smul hf
 
-omit [Nontrivial V] [CompleteSpace F] in
 theorem heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
     {alpha K : NNReal} (halpha0 : 0 < alpha)
     {S t : Real} (ht : t ∈ Ioc (0 : Real) S)
@@ -109,7 +102,6 @@ theorem heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
     fun_prop
   exact ((hsource.continuous halpha0).comp hphi).congr fun _ => rfl
 
-omit [Nontrivial V] [CompleteSpace F] in
 theorem heatSupGradient_timeSource_aestronglyMeasurable_of_continuousOn
     {t : Real} (ht : 0 ≤ t)
     (f : Real → BoundedContinuousFunction V F)
@@ -152,7 +144,6 @@ theorem heatSupGradient_timeSource_aestronglyMeasurable_of_continuousOn
   unfold G heatD1Map
   exact (ContinuousLinearMap.smulRightL Real V F).continuous₂.comp₂ hmap hf
 
-omit [Nontrivial V] [CompleteSpace F] in
 theorem heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
     {alpha K : NNReal} (halpha0 : 0 < alpha)
     {S t : Real} (ht : t ∈ Ioc (0 : Real) S)
@@ -175,7 +166,6 @@ theorem heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
     fun_prop
   exact ((hsource.continuous halpha0).comp hphi).congr fun _ => rfl
 
-omit [Nontrivial V] [CompleteSpace F] in
 theorem heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
     {alpha K : NNReal} (halpha0 : 0 < alpha)
     {S t : Real} (ht : t ∈ Ioc (0 : Real) S)

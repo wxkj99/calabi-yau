@@ -30,7 +30,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 private theorem c3RefinedTrace_mixedPotentialDerivative_eq_complexHessian
     {n : ℕ} (u : EuclideanSpace ℂ (Fin n) → ℝ) {z : EuclideanSpace ℂ (Fin n)}
     (hu : ContDiffAt ℝ 2 u z) (i j : Fin n) :
-    c3PartialZ (fun w ↦ c3RefinedTracePartialBar (fun v ↦ (u v : ℂ)) w j) z i =
+    wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar (fun v ↦ (u v : ℂ)) w j) z i =
       complexHessian u z i j := by
   let ei : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single i 1
   let ej : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single j 1
@@ -96,7 +96,7 @@ private theorem c3RefinedTrace_mixedPotentialDerivative_eq_complexHessian
       fderiv_fun_add hAcomplex (hBcomplex.const_mul Complex.I),
       fderiv_const_mul hBcomplex Complex.I]
     simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul, hAc, hBc]
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hpartial ei, hpartial (Complex.I • ei)]
   rw [complexHessian_apply hu i j]
   simp only [ei, ej, div_eq_mul_inv]
@@ -187,13 +187,12 @@ the expression invariant. -/
 theorem c3RefinedTrace_normalFrame_potentialHessian
     (ω₀ : KahlerForm n M) (G φ : M → ℝ)
     (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
-    (hsol : ω₀.SolvesMongeAmpere G φ) (x : M)
+    (x : M)
     (frame : C3RefinedTraceNormalCoordinateFrame ω₀ φ x) :
     let H := c3RefinedTracePulledPotential G x frame.coord
     ω₀.laplacian G x =
       ∑ p : Fin n, RCLike.re
-        (c3PartialZ (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p) := by
-  have _hsol := hsol
+        (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p) := by
   let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
   let z₀ := e x
   let u : EuclideanSpace ℂ (Fin n) → ℝ := fun z ↦ G (e.symm z)
@@ -238,7 +237,7 @@ theorem c3RefinedTrace_normalFrame_potentialHessian
   have hcomp := c3RefinedTrace_complexHessian_comp_holomorphic u F huF0 hFnear
   have huF : ContDiffAt ℝ 2 (u ∘ F) frame.center := huF0.comp frame.center hFreal
   have hpartial (p : Fin n) :
-      c3PartialZ (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p =
+      wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p =
         complexHessian (u ∘ F) frame.center p p := by
     dsimp [H, c3RefinedTracePulledPotential, u, F, e]
     exact c3RefinedTrace_mixedPotentialDerivative_eq_complexHessian (u ∘ F) huF p p
@@ -273,7 +272,7 @@ theorem c3RefinedTrace_normalFrame_potentialHessian
     simp
   have hsum :
       (∑ p : Fin n, RCLike.re
-        (c3PartialZ (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p)) =
+        (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p)) =
         RCLike.re (complexHessian (u ∘ F) frame.center).trace := by
     rw [Finset.sum_congr rfl (fun p _ ↦ congrArg RCLike.re (hpartial p))]
     simp [Matrix.trace]

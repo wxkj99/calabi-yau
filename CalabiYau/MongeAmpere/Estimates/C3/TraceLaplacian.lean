@@ -5,7 +5,6 @@ import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.EnergyLowerBoun
 import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.PotentialError
 import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.ReferenceCurvatureError
 import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.TraceRegularity
-import CalabiYau.Geometry.Complex.Forms.Positive
 
 /-!
 # Refined Laplacian inequality for the relative trace
@@ -42,8 +41,7 @@ private theorem trace_of_normalized_pullback {n : ℕ}
       g * (J.map star * J.transpose) = (g * J.map star) * J.transpose := by rw [Matrix.mul_assoc]
       _ = J.transpose⁻¹ * J.transpose := by rw [hmul]
       _ = 1 := by
-        simpa using Matrix.inv_mul_cancel_left_of_invertible
-          (A := J.transpose) (B := (1 : Matrix (Fin n) (Fin n) ℂ))
+        simp
   have hginv : g⁻¹ = J.map star * J.transpose := Matrix.inv_eq_right_inv hRight
   rw [hginv]
   rw [← Matrix.trace_mul_cycle J.transpose B (J.map star)]
@@ -52,6 +50,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] in
 /-- The positive third-derivative term in the Laplacian of the trace controls the Calabi energy.
 The scalar trace is smooth and nonnegative for each solution, including in dimension zero. -/
 theorem exists_uniform_relTrace_laplacian_calabi_lower (ω₀ : KahlerForm n M)

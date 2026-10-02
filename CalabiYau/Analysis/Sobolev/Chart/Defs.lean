@@ -3,7 +3,28 @@
 module
 public import CalabiYau.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 public import CalabiYau.Geometry.Riemannian.Volume.Properties
-public import CalabiYau.Geometry.Riemannian.L2.CompactSupport
+public import Mathlib.Geometry.Manifold.DerivationBundle
+public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
+public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
+public import Mathlib.Geometry.Manifold.VectorField.LieBracket
+public import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.Analysis.InnerProductSpace.Dual
+public import CalabiYau.Geometry.Manifold.Bundle.Section
+public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Defs
+public import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
+public import Mathlib.Geometry.Manifold.VectorBundle.Hom
+public import Mathlib.RingTheory.Derivation.Lie
+public import CalabiYau.Geometry.Riemannian.L2.Basic
+public import Mathlib.Topology.Algebra.Support
+public import Mathlib.Geometry.Manifold.VectorBundle.ContMDiffSection
+public import Mathlib.Geometry.Manifold.ContMDiffMap
+public import Mathlib.Geometry.Manifold.SmoothApprox
+public import Mathlib.MeasureTheory.Function.SimpleFuncDenseLp
+public import Mathlib.MeasureTheory.Function.ContinuousMapDense
+public import Mathlib.MeasureTheory.Function.LpSpace.Basic
+public import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
 @[expose] public section
@@ -33,11 +54,6 @@ def chartTargetEuclid (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean '' (extChartAt I α).target
 
-def chartLebesgueMeasure (α : M) :
-    Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
-  (volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
-    (chartTargetEuclid (I := I) (M := M) α)
-
 def MemWkpChart [T2Space M] [SigmaCompactSpace M]
     (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) : Prop :=
   ∀ α : M,
@@ -57,28 +73,6 @@ def wkpNormChart [T2Space M] [SigmaCompactSpace M]
       (chartPushed (I := I) (M := M)
         (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α)
-
-theorem wkpNormChart_eq_tsum
-    [T2Space M] [SigmaCompactSpace M] (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) :
-    wkpNormChart (I := I) (M := M) k p u =
-      ∑' α : M,
-        Sobolev.Euclidean.iteratedWeakSobolevNorm
-          (d := Module.finrank ℝ E)
-          k p
-          (chartPushed (I := I) (M := M)
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u)
-          (chartTargetEuclid (I := I) (M := M) α) := rfl
-
-theorem MemWkpChart_iff
-    [T2Space M] [SigmaCompactSpace M] (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) :
-    MemWkpChart (I := I) (M := M) k p u ↔
-      ∀ α : M,
-        Sobolev.Euclidean.MemWkp
-          (d := Module.finrank ℝ E)
-          k p
-          (chartPushed (I := I) (M := M)
-            (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u)
-          (chartTargetEuclid (I := I) (M := M) α) := Iff.rfl
 
 omit [IsManifold I ∞ M] in
 theorem chartPushed_zero
@@ -106,26 +100,6 @@ theorem MemWkpChart_zero_fun
   rw [chartPushed_zero]
   exact Sobolev.Euclidean.MemWkp_zero_fun
     (d := Module.finrank ℝ E) hp (chartTargetEuclid_isOpen (I := I) (M := M) α)
-
-theorem wkpNormChart_zero_fun
-    [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) :
-    wkpNormChart (I := I) (M := M) k p (fun _ : M => (0 : ℝ)) = 0 := by
-  unfold wkpNormChart
-  have hpt : ∀ α : M,
-      Sobolev.Euclidean.iteratedWeakSobolevNorm
-        (d := Module.finrank ℝ E) k p
-        (chartPushed (I := I) (M := M)
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α
-          (fun _ : M => (0 : ℝ)))
-        (chartTargetEuclid (I := I) (M := M) α) = 0 := by
-    intro α
-    rw [chartPushed_zero]
-    exact Sobolev.Euclidean.wkpNorm_zero_fun_zero
-      (d := Module.finrank ℝ E) hp
-      (chartTargetEuclid_isOpen (I := I) (M := M) α)
-  rw [tsum_congr hpt]
-  exact tsum_zero
 
 omit [IsManifold I ∞ M] in
 theorem chartPushed_add
@@ -201,14 +175,6 @@ theorem MemWkpChart_sub
     funext x; ring
   rw [hEq] at h
   exact h
-
-def wkpChartAddSubgroup
-    [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p) : AddSubgroup (M → ℝ) where
-  carrier := { u | MemWkpChart (I := I) (M := M) k p u }
-  zero_mem' := MemWkpChart_zero_fun (I := I) (M := M) hp
-  add_mem' := fun hu hv => MemWkpChart_add (I := I) (M := M) hp hu hv
-  neg_mem' := fun hu => MemWkpChart_neg (I := I) (M := M) hp hu
 
 def wkpChartSubmodule
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -301,20 +267,6 @@ theorem MemWkpChart_congr_chartPushed_ae
       (d := Module.finrank ℝ E) hp
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       (huv α).symm).mp (h α)
-
-theorem wkpNormChart_congr_chartPushed_ae
-    [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
-    {u v : M → ℝ} (huv : ChartPushedAEEq (I := I) (M := M) u v) :
-    wkpNormChart (I := I) (M := M) k p u =
-      wkpNormChart (I := I) (M := M) k p v := by
-  unfold wkpNormChart
-  refine tsum_congr ?_
-  intro α
-  exact Sobolev.Euclidean.wkpNorm_congr_ae
-    (d := Module.finrank ℝ E) hp
-    (chartTargetEuclid_isOpen (I := I) (M := M) α)
-    (huv α)
 
 theorem wkpNormChart_add_le
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

@@ -3,8 +3,8 @@ module
 public import CalabiYau.Geometry.Kahler.Laplacian.Cofactor
 public import CalabiYau.Geometry.Complex.Forms.Positive
 public import CalabiYau.Geometry.Complex.Forms.OneOne
-public import CalabiYau.LinearAlgebra.Hermitian.SimultaneousDiagonalization
-public import CalabiYau.LinearAlgebra.Hermitian.NormalJet
+public import CalabiYau.Mathlib.Analysis.Matrix.Hermitian.SimultaneousDiagonalization
+public import CalabiYau.Mathlib.LinearAlgebra.Matrix.SymmetricTensor
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates.HolomorphicPatch
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates.PullbackDerivative
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates.JetCancellation
@@ -70,13 +70,13 @@ theorem exists_yau_normal_frame (ω₀ ω₁ : KahlerForm n M) (x : M) :
     Nonempty (YauNormalFrame ω₀ ω₁ x) := by
   let z₀ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
   have hz₀ : z₀ ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
-    simpa [z₀] using mem_extChartAt_target x
+    simp [z₀]
   let G := ω₀.metricInChart x z₀
   let H := ω₁.metricInChart x z₀
   have hG : G.PosDef := by
-    exact ω₀.posDef_metricInChart x (by simpa [z₀] using hz₀)
+    exact ω₀.posDef_metricInChart x (by simp [z₀])
   have hH : H.PosDef := by
-    exact ω₁.posDef_metricInChart x (by simpa [z₀] using hz₀)
+    exact ω₁.posDef_metricInChart x (by simp [z₀])
   obtain ⟨P, eigenvalue, hPG, hPH⟩ :=
     Matrix.PosDef.exists_simultaneous_diagonalization hG hH.isHermitian
   have heigenvalue : ∀ j, 0 < eigenvalue j :=
@@ -129,7 +129,7 @@ theorem exists_yau_normal_frame (ω₀ ω₁ : KahlerForm n M) (x : M) :
     simpa [D] using
       (kahler_chart_metric_symmetry (ω₀ := ω₀) x hz₀ p a b)
   obtain ⟨Q, hQ, hcancel⟩ :=
-    exists_quadratic_pullback_jet_cancellation G J D hG.isHermitian hNorm hD
+    exists_quadratic_pullback_jet_cancellation G J D hNorm hD
   let U := (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target
   obtain ⟨V, hVopen, h0, hmap, hVsmooth, hVhol, hf0, hfDeriv⟩ :=
     exists_quadratic_chart_patch U z₀ (isOpen_extChartAt_target x) hz₀ A Q hQ
@@ -175,5 +175,41 @@ theorem exists_yau_normal_frame (ω₀ ω₁ : KahlerForm n M) (x : M) :
     varying_diagonal := hVarying
     reference_first_derivative_zero := hFirst
   }⟩
+
+/-- The holomorphic Jacobian of a Yau normal frame at its center is invertible. -/
+theorem YauNormalFrame.exists_jacobian_equiv {ω₀ ω₁ : KahlerForm n M} {x : M}
+    (F : YauNormalFrame ω₀ ω₁ x) :
+    ∃ A : EuclideanSpace ℂ (Fin n) ≃L[ℂ] EuclideanSpace ℂ (Fin n),
+      (A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)) =
+        fderiv ℂ F.map F.center := by
+  let A := fderiv ℂ F.map F.center
+  have hmatrix : (EuclideanSpace.clmMatrix A).det ≠ 0 := by
+    simpa [A, holomorphicJacobianMatrix] using F.jacobian_det_ne_zero
+  have hclmMatrix : EuclideanSpace.clmMatrix A =
+      LinearMap.toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
+        (EuclideanSpace.basisFun (Fin n) ℂ).toBasis A.toLinearMap := by
+    ext i j
+    simp [EuclideanSpace.clmMatrix, LinearMap.toMatrix_apply,
+      EuclideanSpace.basisFun_apply]
+  have hdetEq : LinearMap.det A.toLinearMap = (EuclideanSpace.clmMatrix A).det := by
+    calc
+      LinearMap.det A.toLinearMap =
+          Matrix.det (LinearMap.toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
+            (EuclideanSpace.basisFun (Fin n) ℂ).toBasis A.toLinearMap) :=
+        (LinearMap.det_toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
+          A.toLinearMap).symm
+      _ = (EuclideanSpace.clmMatrix A).det := by rw [← hclmMatrix]
+  have hdet : LinearMap.det A.toLinearMap ≠ 0 := fun h ↦ hmatrix (hdetEq ▸ h)
+  have hker : LinearMap.ker A.toLinearMap = ⊥ := by
+    by_contra hk
+    have hzero : LinearMap.det A.toLinearMap = 0 :=
+      (LinearMap.det_eq_zero_iff_ker_ne_bot).2 hk
+    exact hdet hzero
+  have hinj : Function.Injective A.toLinearMap := LinearMap.ker_eq_bot.mp hker
+  have hsurj : Function.Surjective A.toLinearMap :=
+    LinearMap.surjective_of_injective hinj
+  let eLin := LinearEquiv.ofBijective A.toLinearMap ⟨hinj, hsurj⟩
+  exact ⟨eLin.toContinuousLinearEquivOfContinuous
+    eLin.toLinearMap.continuous_of_finiteDimensional, rfl⟩
 
 end KahlerForm

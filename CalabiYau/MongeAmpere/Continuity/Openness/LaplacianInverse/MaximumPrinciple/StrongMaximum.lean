@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.MaximumPrinciple.TangentBall
+public import CalabiYau.Mathlib.Topology.MetricSpace.TangentBall
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.MaximumPrinciple.Barrier
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.MaximumPrinciple.BoundaryContact
 public import Mathlib.Analysis.Calculus.LocalExtr.Basic
@@ -39,7 +39,7 @@ theorem eqOn_of_complexEllipticOp_nonneg_of_isMaxOn {n : ℕ}
     exists_complexEllipticOp_exponential_barrier A hR hlam hEllBall
       (fun y hy => hbound y (hballU hy))
   have hpos := complexEllipticOp_boundary_contact_deriv_pos A hU hu hv hR hball hz
-    hlam hEllBall (fun y hy => hLu y (hballU hy))
+    hEllBall (fun y hy => hLu y (hballU hy))
     (fun y hy => by rw [hzx]; exact hmax (hball hy))
     (fun y hy => by rw [hzx]; exact hstrict y hy)
     hvzero hLv (hvderiv z hz)

@@ -13,8 +13,6 @@ public import Mathlib.Analysis.Real.Sqrt
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -653,14 +651,6 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
         exact tensorInnerPointwise_0s_zero_left
           (I := I) (M := M) g x (s + 1) 0
 
-theorem tensorInnerPointwise_symm
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S T : TensorRSModel r s ℝ E) :
-    tensorInnerPointwise (I := I) (M := M) g r s x S T =
-      tensorInnerPointwise (I := I) (M := M) g r s x T S := by
-  unfold tensorInnerPointwise
-  exact tensorInnerPointwise_0s_symm (I := I) (M := M) g x (r + s) _ _
-
 theorem tensorInnerPointwise_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S₁ S₂ T : TensorRSModel r s ℝ E) :
@@ -671,34 +661,6 @@ theorem tensorInnerPointwise_add_left
   rw [ContinuousLinearMap.map_add]
   exact tensorInnerPointwise_0s_add_left (I := I) (M := M) g x (r + s) _ _ _
 
-theorem tensorInnerPointwise_add_right
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S T₁ T₂ : TensorRSModel r s ℝ E) :
-    tensorInnerPointwise (I := I) (M := M) g r s x S (T₁ + T₂) =
-      tensorInnerPointwise (I := I) (M := M) g r s x S T₁ +
-        tensorInnerPointwise (I := I) (M := M) g r s x S T₂ := by
-  unfold tensorInnerPointwise
-  rw [ContinuousLinearMap.map_add]
-  exact tensorInnerPointwise_0s_add_right (I := I) (M := M) g x (r + s) _ _ _
-
-theorem tensorInnerPointwise_smul_left
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (c : ℝ) (S T : TensorRSModel r s ℝ E) :
-    tensorInnerPointwise (I := I) (M := M) g r s x (c • S) T =
-      c * tensorInnerPointwise (I := I) (M := M) g r s x S T := by
-  unfold tensorInnerPointwise
-  rw [ContinuousLinearMap.map_smul]
-  exact tensorInnerPointwise_0s_smul_left (I := I) (M := M) g x (r + s) c _ _
-
-theorem tensorInnerPointwise_smul_right
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (c : ℝ) (S T : TensorRSModel r s ℝ E) :
-    tensorInnerPointwise (I := I) (M := M) g r s x S (c • T) =
-      c * tensorInnerPointwise (I := I) (M := M) g r s x S T := by
-  unfold tensorInnerPointwise
-  rw [ContinuousLinearMap.map_smul]
-  exact tensorInnerPointwise_0s_smul_right (I := I) (M := M) g x (r + s) c _ _
-
 theorem tensorInnerPointwise_zero_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -708,153 +670,6 @@ theorem tensorInnerPointwise_zero_left
   have h₀ : (0 : TensorRSModel r s ℝ E) + 0 = 0 := add_zero _
   rw [h₀] at h
   linarith
-
-theorem tensorInnerPointwise_zero_right
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S : TensorRSModel r s ℝ E) :
-    tensorInnerPointwise (I := I) (M := M) g r s x S 0 = 0 := by
-  rw [tensorInnerPointwise_symm]
-  exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x S
-
-theorem tensorInnerPointwise_nonneg
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S : TensorRSModel r s ℝ E) :
-    0 ≤ tensorInnerPointwise (I := I) (M := M) g r s x S S := by
-  unfold tensorInnerPointwise
-  exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x (r + s) _
-
-theorem tensorInnerPointwise_eq_zero_iff
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S : TensorRSModel r s ℝ E) :
-    tensorInnerPointwise (I := I) (M := M) g r s x S S = 0 ↔ S = 0 := by
-  unfold tensorInnerPointwise
-  rw [tensorInnerPointwise_0s_eq_zero_iff]
-  refine ⟨fun h => ?_, fun h => ?_⟩
-  · exact lowerAllUpperIndices_injective (I := I) (M := M) g r s x
-      (h.trans (map_zero _).symm)
-  · rw [h, map_zero]
-
-theorem tensorInnerPointwise_0s_sq_le_mul
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
-    (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    (covariantTensorInnerPointwise (I := I) (M := M) s g x S T) ^ 2 ≤
-      covariantTensorInnerPointwise (I := I) (M := M) s g x S S *
-        covariantTensorInnerPointwise (I := I) (M := M) s g x T T := by
-  set a := covariantTensorInnerPointwise (I := I) (M := M) s g x S S with ha_def
-  set b := covariantTensorInnerPointwise (I := I) (M := M) s g x S T with hb_def
-  set c := covariantTensorInnerPointwise (I := I) (M := M) s g x T T with hc_def
-  have ha_nn : 0 ≤ a :=
-    tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s S
-  have hc_nn : 0 ≤ c :=
-    tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s T
-  have hbilin_pair :
-      ∀ u v : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ,
-        ∀ p q : ℝ,
-          covariantTensorInnerPointwise (I := I) (M := M) s g x (p • u) (q • v) =
-            (p * q) *
-              covariantTensorInnerPointwise (I := I) (M := M) s g x u v := by
-    intro u v p q
-    rw [tensorInnerPointwise_0s_smul_left,
-        tensorInnerPointwise_0s_smul_right]
-    ring
-  have hquad : ∀ t : ℝ, 0 ≤ a + 2 * (t * b) + t ^ 2 * c := by
-    intro t
-    have h0 : 0 ≤
-        covariantTensorInnerPointwise (I := I) (M := M) s g x (S + t • T) (S + t • T) :=
-      tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s _
-    have hexpand :
-        covariantTensorInnerPointwise (I := I) (M := M) s g x (S + t • T) (S + t • T) =
-          a + 2 * (t * b) + t ^ 2 * c := by
-      have hT_smul_S :
-          covariantTensorInnerPointwise (I := I) (M := M) s g x (t • T) S = t * b := by
-        rw [tensorInnerPointwise_0s_smul_left]
-        congr 1
-        rw [hb_def]
-        exact (tensorInnerPointwise_0s_symm (I := I) (M := M) g x s S T).symm
-      have hS_smul_T :
-          covariantTensorInnerPointwise (I := I) (M := M) s g x S (t • T) = t * b := by
-        rw [tensorInnerPointwise_0s_smul_right]
-      have hSmul_smul :
-          covariantTensorInnerPointwise (I := I) (M := M) s g x (t • T) (t • T) =
-            t ^ 2 * c := by
-        rw [hbilin_pair T T t t, hc_def]
-        ring_nf
-      rw [tensorInnerPointwise_0s_add_left,
-          tensorInnerPointwise_0s_add_right,
-          tensorInnerPointwise_0s_add_right]
-      rw [hS_smul_T, hT_smul_S, hSmul_smul]
-      change a + t * b + (t * b + t ^ 2 * c) = _
-      ring
-    rw [hexpand] at h0
-    exact h0
-  rcases (lt_or_eq_of_le hc_nn) with hc_pos | hc_zero
-  · have hc_ne : c ≠ 0 := ne_of_gt hc_pos
-    have h := hquad (-b / c)
-    have hsimp : a + 2 * (-b / c * b) + (-b / c) ^ 2 * c = a - b ^ 2 / c := by
-      field_simp
-      ring
-    rw [hsimp] at h
-    have hmul : 0 * c ≤ (a - b ^ 2 / c) * c :=
-      mul_le_mul_of_nonneg_right h (le_of_lt hc_pos)
-    rw [zero_mul] at hmul
-    have hrhs : (a - b ^ 2 / c) * c = a * c - b ^ 2 := by
-      field_simp
-    rw [hrhs] at hmul
-    linarith
-  · have hc_eq : c = 0 := hc_zero.symm
-    have hT_zero : T = 0 :=
-      (tensorInnerPointwise_0s_eq_zero_iff (I := I) (M := M) g x s T).mp hc_eq
-    have hb_zero : b = 0 := by
-      rw [hb_def, hT_zero]
-      exact tensorInnerPointwise_0s_zero_right (I := I) (M := M) g x s S
-    rw [hb_zero, hc_eq, mul_zero]
-    simp
-
-theorem tensorInnerPointwise_sq_le_mul
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S T : TensorRSModel r s ℝ E) :
-    (tensorInnerPointwise (I := I) (M := M) g r s x S T) ^ 2 ≤
-      tensorInnerPointwise (I := I) (M := M) g r s x S S *
-        tensorInnerPointwise (I := I) (M := M) g r s x T T := by
-  unfold tensorInnerPointwise
-  exact tensorInnerPointwise_0s_sq_le_mul (I := I) (M := M) g (r + s) x _ _
-
-theorem abs_tensorInnerPointwise_le_mul
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (S T : TensorRSModel r s ℝ E) :
-    |tensorInnerPointwise (I := I) (M := M) g r s x S T| ≤
-      tensorPointwiseNorm (I := I) (M := M) g r s x S *
-        tensorPointwiseNorm (I := I) (M := M) g r s x T := by
-  unfold tensorPointwiseNorm
-  have hcs := tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r s x S T
-  have hSS_nn :
-      0 ≤ tensorInnerPointwise (I := I) (M := M) g r s x S S :=
-    tensorInnerPointwise_nonneg (I := I) (M := M) g r s x S
-  have hTT_nn :
-      0 ≤ tensorInnerPointwise (I := I) (M := M) g r s x T T :=
-    tensorInnerPointwise_nonneg (I := I) (M := M) g r s x T
-  have h1 : |tensorInnerPointwise (I := I) (M := M) g r s x S T| ≤
-      Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s x S S *
-        tensorInnerPointwise (I := I) (M := M) g r s x T T) := by
-    have hb_sq :
-        (tensorInnerPointwise (I := I) (M := M) g r s x S T) ^ 2 ≤
-          tensorInnerPointwise (I := I) (M := M) g r s x S S *
-            tensorInnerPointwise (I := I) (M := M) g r s x T T := hcs
-    have habs_sq :
-        |tensorInnerPointwise (I := I) (M := M) g r s x S T| =
-          Real.sqrt
-            ((tensorInnerPointwise (I := I) (M := M) g r s x S T) ^ 2) := by
-      rw [Real.sqrt_sq_eq_abs]
-    rw [habs_sq]
-    exact Real.sqrt_le_sqrt hb_sq
-  have h2 :
-      Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s x S S *
-        tensorInnerPointwise (I := I) (M := M) g r s x T T) =
-          Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s x S S) *
-            Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s x T T) :=
-    Real.sqrt_mul hSS_nn _
-  rw [h2] at h1
-  exact h1
 
 end CalabiYau.L2
 

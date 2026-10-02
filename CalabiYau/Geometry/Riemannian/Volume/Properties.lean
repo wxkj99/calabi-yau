@@ -12,7 +12,7 @@ public import Mathlib.Topology.Compactness.LocallyFinite
 public import Mathlib.Topology.Algebra.Support
 public import Mathlib.MeasureTheory.Measure.Regular
 public import Mathlib.Geometry.Manifold.Metrizable
-public import CalabiYau.Topology.Manifold.InteriorBoundary
+public import CalabiYau.Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 @[expose] public section
 
@@ -209,25 +209,6 @@ private lemma pou_term_le_chartLocalMeasure
           rw [lintegral_indicator htsup_meas, Measure.restrict_restrict htsup_meas,
               setLIntegral_const, one_mul, Set.inter_comm]
 
-theorem vol_le_tsum_support
-    [T2Space M] [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    {S : Set M} (hS : MeasurableSet S) :
-    riemannianVolumeMeasure (I := I) (M := M) g S ≤
-      ∑' α : M, chartLocalMeasure (I := I) g α (S ∩ tsupport (chartAtlasPOU I M α)) := by
-  rw [riemannianVolumeMeasure_def, riemannianMeasure_def, Measure.sum_apply _ hS]
-  exact ENNReal.tsum_le_tsum
-    (fun α => pou_term_le_chartLocalMeasure g (chartAtlasPOU I M) hS α)
-
-theorem vol_le_tsum_chart
-    [T2Space M] [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    {S : Set M} (hS : MeasurableSet S) :
-    riemannianVolumeMeasure (I := I) (M := M) g S ≤
-      ∑' α : M, chartLocalMeasure (I := I) g α S :=
-  (vol_le_tsum_support g hS).trans
-    (ENNReal.tsum_le_tsum (fun _ => measure_mono Set.inter_subset_left))
-
 theorem riemannianMeasure_compact_lt_top
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -320,24 +301,6 @@ theorem riemannianVolumeMeasure_isLocallyFiniteMeasure
   exact riemannianMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-theorem riemannianMeasure_sigmaFinite
-    [T2Space M] [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    (ρ : SmoothPartitionOfUnity M I M univ)
-    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source)) :
-    SigmaFinite (riemannianMeasure (I := I) g ρ) :=
-  haveI : IsFiniteMeasureOnCompacts (riemannianMeasure (I := I) g ρ) :=
-    riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g ρ hρ
-  SigmaFinite.of_isFiniteMeasureOnCompacts _
-
-theorem riemannianVolumeMeasure_sigmaFinite
-    [T2Space M] [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M) :
-    SigmaFinite (riemannianVolumeMeasure (I := I) (M := M) g) := by
-  rw [riemannianVolumeMeasure_def]
-  exact riemannianMeasure_sigmaFinite (I := I) (M := M) g
-    (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
-
 theorem riemannianMeasure_isFiniteMeasure_of_compactSpace
     [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -355,48 +318,6 @@ theorem riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
   rw [riemannianVolumeMeasure_def]
   exact riemannianMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
-
-omit [Module.Finite ℝ E] in
-private lemma interior_isInteriorPoint_dense :
-    Dense ({x : M | I.IsInteriorPoint x} : Set M) := by
-  rw [dense_iff_inter_open]
-  intro V hVopen hVne
-  obtain ⟨x, hxV⟩ := hVne
-  have hxsrc : x ∈ (chartAt H x).source := mem_chart_source H x
-  have hxext : x ∈ (extChartAt I x).source := by
-    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hxsrc
-  set s : Set M := V ∩ (chartAt H x).source with hs_def
-  have hs_open : IsOpen s := hVopen.inter (chartAt H x).open_source
-  have hxs : x ∈ s := ⟨hxV, hxsrc⟩
-  have hs_nhd : s ∈ 𝓝 x := hs_open.mem_nhds hxs
-  have h_image_nhdW :
-      (extChartAt I x) '' s ∈ 𝓝[range I] (extChartAt I x x) := by
-    rw [← map_extChartAt_nhds (x := x)]
-    exact Filter.image_mem_map hs_nhd
-  rcases mem_nhdsWithin.mp h_image_nhdW with ⟨U, hU_open, hU_mem, hU_sub⟩
-  have hxImage_inRange : extChartAt I x x ∈ range I :=
-    extChartAt_target_subset_range (I := I) x ((extChartAt I x).map_source hxext)
-  have hxImage_inClosure :
-      extChartAt I x x ∈ closure (interior (range I)) := by
-    rw [← I.range_eq_closure_interior]; exact hxImage_inRange
-  rcases mem_closure_iff.mp hxImage_inClosure U hU_open hU_mem with ⟨p, hp_U, hp_int⟩
-  have hp_inRange : p ∈ range I := interior_subset hp_int
-  have hp_inImage : p ∈ (extChartAt I x) '' s := hU_sub ⟨hp_U, hp_inRange⟩
-  rcases hp_inImage with ⟨y, hys, hyEq⟩
-  refine ⟨y, hys.1, ?_⟩
-  have hy_chartSource : y ∈ (chartAt H x).source := hys.2
-  have hyEq' : ((chartAt H x).extend I) y = p := hyEq
-  have hp_inExtTarget :
-      ((chartAt H x).extend I) y ∈ interior ((chartAt H x).extend I).target := by
-    have hy_chartTarget : (chartAt H x) y ∈ (chartAt H x).target :=
-      (chartAt H x).map_source hy_chartSource
-    have hI_inInterior : I ((chartAt H x) y) ∈ interior (range I) := by
-      change ((chartAt H x).extend I) y ∈ interior (range I)
-      rw [hyEq']; exact hp_int
-    exact (chartAt H x).mem_interior_extend_target hy_chartTarget hI_inInterior
-  have hntop : (∞ : WithTop ℕ∞) ≠ 0 := by simp
-  exact (I.isInteriorPoint_iff_of_mem_atlas hntop (chart_mem_atlas H x) hy_chartSource).mpr
-    hp_inExtTarget
 
 private lemma chartLocalMeasure_open_pos_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)

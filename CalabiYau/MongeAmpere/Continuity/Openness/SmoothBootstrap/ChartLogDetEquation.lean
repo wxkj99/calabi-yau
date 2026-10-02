@@ -1,8 +1,8 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.C2MassNormalization
-public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderNorm
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Geometry.Manifold.Holder.ChartNorm
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # The chartwise log-determinant equation

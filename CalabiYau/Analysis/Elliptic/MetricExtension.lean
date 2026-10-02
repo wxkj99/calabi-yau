@@ -1,18 +1,25 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/MetricExtension.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Calculus.Cutoff.Compact
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
 public import CalabiYau.Analysis.Sobolev.Nirenberg.H2Regularity.Defs
-public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Global.Family
-public import CalabiYau.Geometry.Riemannian.Operator.Hessian.Basic
+public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Global.CompactSupport
+public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Global.Support
+public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Global.IntegrationByParts
+public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Green.Identities
+public import CalabiYau.Geometry.Riemannian.Operator.Gradient.Basic
+public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.Basic
+public import CalabiYau.Geometry.Riemannian.Volume.Family.Basic
+public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.VossWeylFormula
+public import Mathlib.Algebra.Order.Chebyshev
+public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 public import CalabiYau.Analysis.Elliptic.Schauder.CompactEllipticity
 public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 public import Mathlib.Topology.Order.Compact
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 open CalabiYau.Riemannian
 
@@ -261,7 +268,7 @@ lemma exists_uniform_lower_bound_on_compact
     ∃ lamK : ℝ, 0 < lamK ∧
       ∀ y ∈ K, ∀ ξ : EuclN,
         lamK * ‖ξ‖ ^ 2 ≤
-          ⟪ξ, DeGiorgi.matMulE
+          ⟪ξ, Sobolev.Euclidean.matMulE
             (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
               weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ := by
   obtain ⟨c, hc, hbound⟩ := Schauder.exists_uniform_matrix_quadratic_lower_bound hK_compact
@@ -271,11 +278,11 @@ lemma exists_uniform_lower_bound_on_compact
     (fun _ hy => weightedInvGramOnEuclid_posDef (I := I) g α (hK_target hy))
   refine ⟨c, hc, ?_⟩
   intro y hy ξ
-  change c * ‖ξ‖ ^ 2 ≤ (DeGiorgi.matMulE _ ξ).ofLp ⬝ᵥ star ξ.ofLp
-  rw [DeGiorgi.matMulE_ofLp, dotProduct_comm]
+  change c * ‖ξ‖ ^ 2 ≤ (Sobolev.Euclidean.matMulE _ ξ).ofLp ⬝ᵥ star ξ.ofLp
+  rw [Sobolev.Euclidean.matMulE_ofLp, dotProduct_comm]
   exact hbound y hy ξ
 
-private def kronDelta (i j : Fin (Module.finrank ℝ E)) : ℝ := if i = j then 1 else 0
+def kronDelta (i j : Fin (Module.finrank ℝ E)) : ℝ := if i = j then 1 else 0
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma kronDelta_self (i : Fin (Module.finrank ℝ E)) :
@@ -378,21 +385,21 @@ omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_quad_decomp
     (g : SmoothRiemannianMetric I M) (α : M)
     (χ : EuclN → ℝ) (y : EuclN) (ξ : EuclN) :
-    ⟪ξ, DeGiorgi.matMulE
+    ⟪ξ, Sobolev.Euclidean.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ =
-      χ y * ⟪ξ, DeGiorgi.matMulE
+      χ y * ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ +
       (1 - χ y) * ‖ξ‖ ^ 2 := by
   classical
-  have h_ext : ⟪ξ, DeGiorgi.matMulE
+  have h_ext : ⟪ξ, Sobolev.Euclidean.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ =
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         extendedMatrix (I := I) g α χ i j y * ξ.ofLp i * ξ.ofLp j := by
-    change (DeGiorgi.matMulE _ ξ).ofLp ⬝ᵥ star ξ.ofLp = _
-    rw [DeGiorgi.matMulE_ofLp]
+    change (Sobolev.Euclidean.matMulE _ ξ).ofLp ⬝ᵥ star ξ.ofLp = _
+    rw [Sobolev.Euclidean.matMulE_ofLp]
     have hstar : star ξ.ofLp = ξ.ofLp := by funext i; exact star_trivial _
     rw [hstar]
     simp only [dotProduct, Matrix.mulVec, Matrix.of_apply]
@@ -402,13 +409,13 @@ lemma extendedMatrix_quad_decomp
     refine Finset.sum_congr rfl ?_
     intro j _
     ring
-  have h_w : ⟪ξ, DeGiorgi.matMulE
+  have h_w : ⟪ξ, Sobolev.Euclidean.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ =
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramOnEuclid (I := I) g α i j y * ξ.ofLp i * ξ.ofLp j := by
-    change (DeGiorgi.matMulE _ ξ).ofLp ⬝ᵥ star ξ.ofLp = _
-    rw [DeGiorgi.matMulE_ofLp]
+    change (Sobolev.Euclidean.matMulE _ ξ).ofLp ⬝ᵥ star ξ.ofLp = _
+    rw [Sobolev.Euclidean.matMulE_ofLp]
     have hstar : star ξ.ofLp = ξ.ofLp := by funext i; exact star_trivial _
     rw [hstar]
     simp only [dotProduct, Matrix.mulVec, Matrix.of_apply]
@@ -478,12 +485,12 @@ lemma extendedMatrix_coercive_on_chart
     {lamK : ℝ}
     (h_uniform : ∀ ξ : EuclN,
         lamK * ‖ξ‖ ^ 2 ≤
-          ⟪ξ, DeGiorgi.matMulE
+          ⟪ξ, Sobolev.Euclidean.matMulE
             (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
               weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ)
     (ξ : EuclN) :
     min (1 : ℝ) lamK * ‖ξ‖ ^ 2 ≤
-      ⟪ξ, DeGiorgi.matMulE
+      ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ := by
   classical
@@ -496,7 +503,7 @@ lemma extendedMatrix_coercive_on_chart
   rw [h_decomp]
   have h_uniform_ξ := h_uniform ξ
   have h_first : χ y * (lamK * ‖ξ‖ ^ 2) ≤
-      χ y * ⟪ξ, DeGiorgi.matMulE
+      χ y * ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ :=
     mul_le_mul_of_nonneg_left h_uniform_ξ hχ_nn
@@ -531,7 +538,7 @@ lemma extendedMatrix_eq_kronDelta_off_tsupport
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma kronDelta_quad_eq_norm_sq (ξ : EuclN) :
-    ⟪ξ, DeGiorgi.matMulE
+    ⟪ξ, Sobolev.Euclidean.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         kronDelta (E := E) i j)) ξ⟫_ℝ = ‖ξ‖ ^ 2 := by
   classical
@@ -543,10 +550,10 @@ lemma kronDelta_quad_eq_norm_sq (ξ : EuclN) :
     · subst h; simp [kronDelta]
     · simp [kronDelta, h]
   rw [h_eq]
-  have hmul1 : DeGiorgi.matMulE
+  have hmul1 : Sobolev.Euclidean.matMulE
       (1 : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ) ξ = ξ := by
     apply WithLp.ofLp_injective 2
-    rw [DeGiorgi.matMulE_ofLp]
+    rw [Sobolev.Euclidean.matMulE_ofLp]
     exact Matrix.one_mulVec _
   rw [hmul1]
   rw [real_inner_self_eq_norm_sq]
@@ -560,19 +567,19 @@ lemma extendedMatrix_coercive
     {lamK : ℝ} (hlamK_le : lamK ≤ 1)
     (h_uniform : ∀ y ∈ tsupport χ, ∀ ξ : EuclN,
         lamK * ‖ξ‖ ^ 2 ≤
-          ⟪ξ, DeGiorgi.matMulE
+          ⟪ξ, Sobolev.Euclidean.matMulE
             (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
               weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ)
     (y : EuclN) (ξ : EuclN) :
     lamK * ‖ξ‖ ^ 2 ≤
-      ⟪ξ, DeGiorgi.matMulE
+      ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ := by
   classical
   by_cases hy : y ∈ tsupport χ
   · have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hχ_support hy
     have h_uniform_y : ∀ ξ : EuclN, lamK * ‖ξ‖ ^ 2 ≤
-        ⟪ξ, DeGiorgi.matMulE
+        ⟪ξ, Sobolev.Euclidean.matMulE
           (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
             weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ :=
       fun ξ => h_uniform y hy ξ
@@ -581,7 +588,7 @@ lemma extendedMatrix_coercive
       (χ := χ) hχ_range (y := y) h_uniform_y ξ
     rw [h_min_eq] at h
     exact h
-  · have h_eq : ⟪ξ, DeGiorgi.matMulE
+  · have h_eq : ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ = ‖ξ‖ ^ 2 := by
       have h_mat_eq : (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
@@ -645,7 +652,7 @@ theorem exists_smooth_metric_extension
   have hlamK_le_lamK0 : lamK ≤ lamK0 := min_le_right _ _
   have hlamK0_bound_for_lamK : ∀ y ∈ tsupport χ, ∀ ξ : EuclN,
       lamK * ‖ξ‖ ^ 2 ≤
-        ⟪ξ, DeGiorgi.matMulE
+        ⟪ξ, Sobolev.Euclidean.matMulE
           (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
             weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ := by
     intro y hy ξ
@@ -670,10 +677,10 @@ theorem exists_smooth_metric_extension
     exact extendedMatrix_symm (I := I) g α
       (χ := χ) hχ_tsupp_chart i j y
   have h_a_coercive : ∀ y ∈ (Set.univ : Set EuclN), ∀ ξ : EuclN,
-      lamK * ‖ξ‖ ^ 2 ≤ ⟪ξ, DeGiorgi.matMulE (aFun y) ξ⟫_ℝ := by
+      lamK * ‖ξ‖ ^ 2 ≤ ⟪ξ, Sobolev.Euclidean.matMulE (aFun y) ξ⟫_ℝ := by
     intro y _ ξ
     change lamK * ‖ξ‖ ^ 2 ≤
-      ⟪ξ, DeGiorgi.matMulE
+      ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ
     exact extendedMatrix_coercive (I := I) g α

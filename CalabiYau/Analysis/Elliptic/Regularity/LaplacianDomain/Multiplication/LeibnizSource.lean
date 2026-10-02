@@ -19,8 +19,7 @@ namespace CalabiYau
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -39,7 +38,6 @@ noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) 
   ⟨ΔG (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯),
     Δ_g_contMDiff (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)⟩
 
-omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma laplacianOfChartPOU_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
@@ -49,28 +47,26 @@ noncomputable def leibnizCompensatedSource (g : SmoothRiemannianMetric I M) (α 
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-      (H1ComplToLp (I := I) (M := M) g u_h -
+      (h1ComplToLp (I := I) (M := M) g u_h -
         laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)
     - (2 : ℝ) • gradInnerCLM (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h
     - smoothMulLp (I := I) (M := M) g
         (laplacianOfChartPOU (I := I) (M := M) g α)
-        (H1ComplToLp (I := I) (M := M) g u_h)
+        (h1ComplToLp (I := I) (M := M) g u_h)
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h =
       smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-          (H1ComplToLp (I := I) (M := M) g u_h -
+          (h1ComplToLp (I := I) (M := M) g u_h -
             laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)
         - (2 : ℝ) • gradInnerCLM (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h
         - smoothMulLp (I := I) (M := M) g
             (laplacianOfChartPOU (I := I) (M := M) g α)
-            (H1ComplToLp (I := I) (M := M) g u_h) := rfl
+            (h1ComplToLp (I := I) (M := M) g u_h) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     leibnizCompensatedSource (I := I) (M := M) g α
@@ -85,17 +81,17 @@ theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
             (smoothToLp (I := I) (M := M) g v) := by
   rw [fHLeibniz_def]
   have h_oneSubLap :
-      H1ComplToLp (I := I) (M := M) g
+      h1ComplToLp (I := I) (M := M) g
           (smoothToH1Compl (I := I) (M := M) g v) -
         laplacianOp (I := I) (M := M) g
           ⟨smoothToH1Compl (I := I) (M := M) g v,
             smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v⟩ =
       smoothToLp (I := I) (M := M) g v.oneSubLapClassical := by
-    rw [H1ComplToLp_smoothToH1Compl, laplacianOp_smoothToH1Compl]
+    rw [h1ComplToLp_smoothToH1Compl, laplacianOp_smoothToH1Compl]
     abel
   rw [h_oneSubLap]
   rw [gradInnerCLM_smoothToH1Compl]
-  rw [H1ComplToLp_smoothToH1Compl]
+  rw [h1ComplToLp_smoothToH1Compl]
 
 end Laplacian
 end Analysis

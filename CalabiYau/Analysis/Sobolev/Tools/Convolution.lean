@@ -5,8 +5,6 @@ public import CalabiYau.Analysis.Sobolev.Tools.Mollification.Kernel
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -15,11 +13,10 @@ open scoped ENNReal NNReal Convolution Pointwise
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 lemma exists_norm_bound_of_continuous_compactSupport
     {η : E → ℝ} (hη_cont : Continuous η) (hη_compact : HasCompactSupport η) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y, ‖η y‖ ≤ C := by
@@ -27,7 +24,6 @@ lemma exists_norm_bound_of_continuous_compactSupport
   refine ⟨max C 0, le_max_right _ _, fun y => ?_⟩
   exact (hC y).trans (le_max_left _ _)
 
-omit [NeZero d] in
 lemma lipschitz_of_contDiff_compactSupport
     {η : E → ℝ} (hη_C1 : ContDiff ℝ 1 η) (hη_compact : HasCompactSupport η) :
     ∃ L : ℝ, 0 ≤ L ∧ ∀ x y, ‖η x - η y‖ ≤ L * ‖x - y‖ := by
@@ -53,7 +49,6 @@ lemma lipschitz_of_contDiff_compactSupport
     show ‖x - y‖ = dist x y from (dist_eq_norm _ _).symm]
   exact hdist
 
-omit [NeZero d] in
 private lemma measurePreserving_constSub (z : E) :
     MeasurePreserving (fun t : E => z - t) volume volume := by
   have h_neg : MeasurePreserving (fun t : E => -t) volume volume :=
@@ -65,7 +60,6 @@ private lemma measurePreserving_constSub (z : E) :
   rw [heq]
   exact h_addL.comp h_neg
 
-omit [NeZero d] in
 theorem convolution_sup_le_holder
     {f η : E → ℝ}
     (hf_int : Integrable f volume)
@@ -103,7 +97,6 @@ theorem convolution_sup_le_holder
   refine hint_pt.trans ?_
   rw [integral_const_mul]
 
-omit [NeZero d] in
 theorem convolution_lipschitz_with
     {f η : E → ℝ}
     (hf_int : Integrable f volume)

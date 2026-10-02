@@ -110,11 +110,6 @@ theorem l2_limit_has_zero_weak_derivative_in_charts
       exact (toEuclidean (E := EuclideanSpace ℂ (Fin n))).symm_apply_apply z
     rw [hyz]
     exact hz'
-  let dφ : V → ℝ := fun y => fderiv ℝ φ y (EuclideanSpace.single i 1)
-  let : (ENNReal.ofReal 2).HolderTriple (ENNReal.ofReal 2) 1 :=
-    ENNReal.HolderConjugate.of_toReal <| by
-      simpa using (Real.holderConjugate_iff.mpr ⟨by norm_num, by norm_num⟩ :
-        (2 : ℝ).HolderConjugate 2)
   have hDmem : ∀ k, MemLp (fun y => fderiv ℝ (F k) y (EuclideanSpace.single i 1))
       (ENNReal.ofReal 2) μ := by
     intro k
@@ -149,33 +144,8 @@ theorem l2_limit_has_zero_weak_derivative_in_charts
       exact hC ⟨y, hy, rfl⟩
     have hFk : MemLp (F k) (ENNReal.ofReal 2) μ := MemLp.of_bound hFae C hbound
     exact hFk.sub hUmem
-  have hφmem : MemLp φ (ENNReal.ofReal 2) μ :=
-    (hφ.continuous.memLp_of_hasCompactSupport hφ_support).restrict K
-  have hdφcont : Continuous dφ := by
-    dsimp [dφ]
-    exact (hφ.continuous_fderiv (by simp)).clm_apply continuous_const
-  have hdφsupport : HasCompactSupport dφ := by
-    dsimp [dφ]
-    exact hφ_support.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)
-  have hdφmem : MemLp dφ (ENNReal.ofReal 2) μ :=
-    (hdφcont.memLp_of_hasCompactSupport hdφsupport).restrict K
-  have hdφK : tsupport dφ ⊆ K := by
-    dsimp [dφ, K]
-    exact (tsupport_fderiv_apply_subset ℝ _).trans (Set.Subset.rfl)
-  have hdφzero : ∀ y, y ∉ K → dφ y = 0 := by
-    intro y hy
-    exact image_eq_zero_of_notMem_tsupport (fun hs => hy (hdφK hs))
-  have hUφlocal : IntegrableOn (fun y => U y * dφ y) K
-      (MeasureTheory.volume : Measure V) := by
-    change Integrable (fun y => U y * dφ y) μ
-    exact hUmem.integrable_mul hdφmem
-  have hUφglobal : Integrable (fun y => U y * dφ y) (MeasureTheory.volume : Measure V) :=
-    hUφlocal.integrable_of_forall_notMem_eq_zero (fun y hyK => by simp [hdφzero y hyK])
-  have hUtest : IntegrableOn (fun y => U y * fderiv ℝ φ y (EuclideanSpace.single i 1)) Ω := by
-    have h := hUφglobal.integrableOn (s := Ω)
-    simpa [dφ] using h
-  simpa [Ω, U, F, dφ, c] using euclidean_test_integral_eq_zero_of_l2_tendsto
-    hΩ hKcompact hK (EuclideanSpace.single i 1) F U φ hφ hφ_support
-    (by intro y hy; exact hy) hF hUmeas hUmem hFmem hFlim hDmem hDlim hUtest
+  simpa [Ω, U, F, c] using euclidean_test_integral_eq_zero_of_l2_tendsto
+    hΩ hK (EuclideanSpace.single i 1) F U φ hφ hφ_support
+    (by intro y hy; exact hy) hF hUmeas hUmem hFmem hFlim hDmem hDlim
 
 end KahlerForm

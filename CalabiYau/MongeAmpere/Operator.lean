@@ -404,7 +404,7 @@ theorem hasDerivAt_mongeAmpere (hφ : ω₀.IsPotential φ)
   have hα : ((ω₀ x + mddbar n φ x) + (0 : ℝ) • mddbar n ψ x).IsPositive := by
     simpa using hφ.2 x
   simpa [mongeAmpere, laplacian, perturb_apply] using
-    (hasDerivAt_relDet_add_smul (ω₀.isPositive x) (isOneOne_mddbar hψ x) hα
+    (hasDerivAt_relDet_add_smul (ω₀.isPositive x) hα
       (α := ω₀ x + mddbar n φ x) (β := mddbar n ψ x) (s := 0))
 
 /-- The linearization of `log MA` at `φ` is the Laplacian of `ω_φ = ω₀ + i∂∂̄φ`. -/
@@ -430,7 +430,7 @@ theorem hasDerivAt_log_mongeAmpere (hφ : ω₀.IsPotential φ)
     rw [congrFun hEq t]
   rw [hlogEq]
   simpa [laplacian, perturb_apply] using
-    (hasDerivAt_log_relDet (ω₀.isPositive x) (hφ.2 x) (isOneOne_mddbar hψ x)
+    (hasDerivAt_log_relDet (ω₀.isPositive x) (hφ.2 x)
       (α := ω₀ x + mddbar n φ x) (β := mddbar n ψ x))
 
 /-- `C²` version of `hasDerivAt_log_mongeAmpere`, with positivity of `ω₀ + i∂∂̄φ` only at `x`:
@@ -487,7 +487,7 @@ theorem hasDerivAt_log_mongeAmpere_of_contMDiff_two
     rw [congrFun hEq t]
   rw [hlogEq]
   simpa using
-    (hasDerivAt_log_relDet (ω₀.isPositive x) hx hβ
+    (hasDerivAt_log_relDet (ω₀.isPositive x) hx
       (α := ω₀ x + mddbar n φ x) (β := mddbar n ψ x))
 
 /-- Segment formula: `MA(φ) - 1 = ∫₀¹ (ω_s)ⁿ/ω₀ⁿ · tr_{ω_s} (i∂∂̄φ) ds`, `ω_s = ω₀ + s i∂∂̄φ`.

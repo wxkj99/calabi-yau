@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
@@ -643,11 +643,9 @@ set_option maxHeartbeats 1000000 in
 control of all matrix jets through order `r` to the top jet of the inverse.
 The inverse jets are assumed uniformly bounded on the open set; no derivative
 of order `r + 1` is required. -/
-@[deprecated "unused hypothesis `hr`; will be removed" (since := "2026-10-02")]
 theorem matrix_inverse_top_jet_holder_from_jets
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {n r : ℕ} {α N C : ℝ≥0} {V : Set E}
-    (hr : 0 < r) (hV : IsOpen V)
+    {n r : ℕ} {α N C : ℝ≥0} {V : Set E} (hV : IsOpen V)
     (B : E → Matrix (Fin n) (Fin n) ℂ)
     (hB : ∀ i j, ContDiffOn ℝ r (fun x ↦ B x i j) V)
     (hUnit : ∀ x ∈ V, IsUnit (B x))

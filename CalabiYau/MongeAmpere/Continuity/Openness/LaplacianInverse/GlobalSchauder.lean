@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
 public import CalabiYau.Geometry.Kahler.Poisson
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.GlobalSchauder.LocalEstimate
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.GlobalSchauder.MeanZeroC0Control
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.GlobalSchauder.LaplacianCore
@@ -62,7 +62,7 @@ theorem exists_global_meanZero_laplacian_holder_bound [Nonempty M]
   refine ⟨C₁ * (1 + C₀), ?_⟩
   intro f hfMeanZero
   obtain ⟨g, hgMap, hgMeanZero, hgFinite⟩ :=
-    exists_smooth_laplacian_core ω₁ cover α hα₀ hα₁
+    exists_smooth_laplacian_core ω₁ cover α hα₁
       f.smoothMap f.smoothMap.contMDiff
   have hfLapFinite : finiteChartHolderGauge cover 0 α (ω₁.laplacian f.smoothMap) < ⊤ := by
     rw [← hgMap]

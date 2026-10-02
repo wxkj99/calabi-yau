@@ -243,7 +243,7 @@ theorem c3RefinedTrace_normalFrame_connectionEnergy
     let h := c3RefinedTracePulledPerturbedMetric ω₀ φ x frame.coord
     calabiEnergy ω₀ φ x =
       ∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-        ‖c3PartialZ (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
+        ‖wirtingerDerivInChart (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
           (frame.eigenvalue p * frame.eigenvalue j * frame.eigenvalue k) := by
   let g := c3RefinedTracePulledReferenceMetric ω₀ x frame.coord
   let h := c3RefinedTracePulledPerturbedMetric ω₀ φ x frame.coord
@@ -264,23 +264,23 @@ theorem c3RefinedTrace_normalFrame_connectionEnergy
     ext i j
     simp [Matrix.diagonal_apply, hinv]
   have hCoefficient : ∀ i j k : Fin n,
-      c3ChristoffelInChart h frame.center i j k -
-          c3ChristoffelInChart g frame.center i j k =
-        c3PartialZ (fun w ↦ h w k i) frame.center j / frame.eigenvalue i := by
+      christoffelInChart h frame.center i j k -
+          christoffelInChart g frame.center i j k =
+        wirtingerDerivInChart (fun w ↦ h w k i) frame.center j / frame.eigenvalue i := by
     intro i j k
-    dsimp [c3ChristoffelInChart, h, g]
+    dsimp [christoffelInChart, h, g]
     rw [frame.perturbed_diagonal, hInvDiagonal, frame.reference_normal]
     simp [Matrix.diagonal_apply, Matrix.one_apply, frame.reference_first]
     rw [div_eq_mul_inv]
     ring
   have hEnergyTransport :
       (∀ i j k : Fin n,
-        c3ChristoffelInChart h frame.center i j k -
-            c3ChristoffelInChart g frame.center i j k =
-          c3PartialZ (fun w ↦ h w k i) frame.center j / frame.eigenvalue i) →
+        christoffelInChart h frame.center i j k -
+            christoffelInChart g frame.center i j k =
+          wirtingerDerivInChart (fun w ↦ h w k i) frame.center j / frame.eigenvalue i) →
       calabiEnergy ω₀ φ x =
         ∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-          ‖c3PartialZ (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
+          ‖wirtingerDerivInChart (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
             (frame.eigenvalue p * frame.eigenvalue j * frame.eigenvalue k) := by
     intro hCoeff
     classical
@@ -342,13 +342,13 @@ theorem c3RefinedTrace_normalFrame_connectionEnergy
     let Hc : Matrix (Fin n) (Fin n) ℂ := H₀ (F frame.center)
     let Hci : Matrix (Fin n) (Fin n) ℂ := Hc⁻¹
     let T : Fin n → Fin n → Fin n → ℂ := fun i j k ↦
-      c3ChristoffelInChart H₀ (F frame.center) i j k -
-        c3ChristoffelInChart G₀ (F frame.center) i j k
+      christoffelInChart H₀ (F frame.center) i j k -
+        christoffelInChart G₀ (F frame.center) i j k
     let T' : Fin n → Fin n → Fin n → ℂ := fun i j k ↦
-      c3ChristoffelInChart h frame.center i j k - c3ChristoffelInChart g frame.center i j k
+      christoffelInChart h frame.center i j k - christoffelInChart g frame.center i j k
     have hT : T' = nfTensorChange A B T := by
       funext i j k
-      simpa [T, T', nfTensorChange, c3ChristoffelInChart, A, B, F, U, V,
+      simpa [T, T', nfTensorChange, christoffelInChart, A, B, F, U, V,
         G₀, H₀, g, h, Fintype.sum_prod_type] using
         (KahlerForm.ChartInvariance.calabiEnergy_connectionDifference_transition_generic
           F H₀ G₀ h g U V frame.open_domain (isOpen_extChartAt_target x)
@@ -386,21 +386,21 @@ theorem c3RefinedTrace_normalFrame_connectionEnergy
             (KahlerForm.metricInChart_perturb hφ x hFcenter).symm
           _ = Hc := by simp [Hc, H₀, F]
       have hconn (i j k : Fin n) :
-          c3ConnectionDifferenceInChart ω₀ φ x (F frame.center) i j k = T i j k := by
-        change c3ChristoffelInChart
+          connectionDifferenceInChart ω₀ φ x (F frame.center) i j k = T i j k := by
+        change christoffelInChart
             (fun w ↦ ω₀.metricInChart x w +
               complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w)
             (F frame.center) i j k -
-          c3ChristoffelInChart (fun w ↦ ω₀.metricInChart x w) (F frame.center) i j k =
-          c3ChristoffelInChart H₀ (F frame.center) i j k -
-            c3ChristoffelInChart G₀ (F frame.center) i j k
+          christoffelInChart (fun w ↦ ω₀.metricInChart x w) (F frame.center) i j k =
+          christoffelInChart H₀ (F frame.center) i j k -
+            christoffelInChart G₀ (F frame.center) i j k
         rw [KahlerForm.ChartInvariance.calabiEnergy_c3Christoffel_perturb
           ω₀ hφ x (F frame.center) hFcenter i j k]
       simp only [calabiEnergy]
       rw [← frame.center_eq]
       simp only [calabiEnergyInChart, Hc, Hci, T]
       rw [hbase]
-      have hTvalue : ∀ i j k, c3ConnectionDifferenceInChart ω₀ φ x
+      have hTvalue : ∀ i j k, connectionDifferenceInChart ω₀ φ x
           (frame.coord frame.center) i j k = T i j k := by
         simpa [F] using hconn
       simp_rw [hTvalue]
@@ -413,13 +413,13 @@ theorem c3RefinedTrace_normalFrame_connectionEnergy
     have hhdiag : h frame.center =
         Matrix.diagonal (fun j ↦ (frame.eigenvalue j : ℂ)) := frame.perturbed_diagonal
     have hCoeff' (i j k : Fin n) : T' i j k =
-        c3PartialZ (fun w ↦ h w k i) frame.center j / (frame.eigenvalue i : ℂ) := by
+        wirtingerDerivInChart (fun w ↦ h w k i) frame.center j / (frame.eigenvalue i : ℂ) := by
       simpa [T', h, g, F] using hCoeff i j k
     let D : Fin n → Fin n → Fin n → ℂ :=
-      fun i j k ↦ c3PartialZ (fun w ↦ h w k i) frame.center j
+      fun i j k ↦ wirtingerDerivInChart (fun w ↦ h w k i) frame.center j
     have hRightReindex :
         (∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-          ‖c3PartialZ (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
+          ‖wirtingerDerivInChart (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
             (frame.eigenvalue p * frame.eigenvalue j * frame.eigenvalue k)) =
         ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           ‖D i j k‖ ^ (2 : ℕ) /
@@ -439,7 +439,7 @@ theorem c3RefinedTrace_normalFrame_connectionEnergy
     have hDiag : RCLike.re (nfTensorContract (fun i j ↦ h frame.center i j)
         (fun i j ↦ (h frame.center)⁻¹ i j) T') =
         ∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-          ‖c3PartialZ (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
+          ‖wirtingerDerivInChart (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
             (frame.eigenvalue p * frame.eigenvalue j * frame.eigenvalue k) := by
       rw [← nfTensorContractReindex (fun i j ↦ h frame.center i j)
         (fun i j ↦ (h frame.center)⁻¹ i j) T']

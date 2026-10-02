@@ -8,9 +8,7 @@ public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Integral.Bochner.Set
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 public import Mathlib.MeasureTheory.Measure.Map
-import CalabiYau.Geometry.Kahler.Laplacian.EuclideanDivergence
-import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
-import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import CalabiYau.Mathlib.Analysis.Calculus.Divergence.CompactSupport
 @[expose] public section
 open scoped Manifold ContDiff ComplexOrder
 open Set MeasureTheory ContinuousAlternatingMap
@@ -20,8 +18,6 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
   (ω₀ : KahlerForm n M)
 variable {ω₀}
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M]
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem chart_integral_by_parts
     (x : M) (χ u v : EuclideanSpace ℂ (Fin n) → ℝ)
     (hχ : ContDiff ℝ ∞ χ) (hu : ContDiff ℝ ∞ u) (hv : ContDiff ℝ ∞ v)
@@ -971,6 +967,7 @@ theorem chart_integral_by_parts_comm (ω₀ : KahlerForm n M) (i : M)
   rw [hleft, hright, hpair]
   ring
 
+variable [MeasurableSpace M] [BorelSpace M] in
 /-- Change variables from a chart-volume measure with a smooth nonnegative weight to its
 Euclidean chart integral. -/
 theorem integral_chartVolume_withDensity (ω₀ : KahlerForm n M) (i : M)
@@ -1045,6 +1042,7 @@ theorem integral_chartVolume_withDensity (ω₀ : KahlerForm n M) (i : M)
       rw [hden, show ψ (c.symm z) = r (c.symm z) * F (c.symm z) by rfl]
       ring
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- A chart cutoff-gradient term is the global mixed polarization integrated against the
 Kähler volume. The extension witness also supplies the two chart functions needed by the
 coordinate Green formula. -/
@@ -1119,7 +1117,7 @@ theorem exists_chart_cutoff_extensions_with_residual (ω₀ : KahlerForm n M)
         ∫ y, u y * P v y ∂ω₀.volume := by
     have hPzero : ∀ y ∉ (chartAt (EuclideanSpace ℂ (Fin n)) i).source, P v y = 0 := by
       intro y hy
-      apply chartPolarization_zero_of_not_source ω₀ i r v hr hv
+      apply chartPolarization_zero_of_not_source ω₀ r v hr hv
       intro hySupport
       exact hy (hsource hySupport)
     have hglobal :
@@ -1242,7 +1240,7 @@ theorem exists_chart_cutoff_extensions_with_residual (ω₀ : KahlerForm n M)
             exact c.right_inv hz
           exact hzImage
         have hPz : P v (c.symm z) = 0 := by
-          apply chartPolarization_zero_of_not_source ω₀ i r v hr hv
+          apply chartPolarization_zero_of_not_source ω₀ r v hr hv
           exact hnotSupport
         simp [hpair, hPz]
     have hcoord' :

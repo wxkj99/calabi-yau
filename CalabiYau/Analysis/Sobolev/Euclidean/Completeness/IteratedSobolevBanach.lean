@@ -7,8 +7,6 @@ public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Closedness
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

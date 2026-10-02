@@ -7,15 +7,13 @@ Authors: Jack McCarthy
 -/
 module
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Decomposition
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.FiniteEquivalence
+public import CalabiYau.Mathlib.Logic.Equiv.FinReindexing
 public import Mathlib.GroupTheory.Perm.Fin
 public import Mathlib.GroupTheory.Perm.Subgroup
 public import Mathlib.Tactic
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 open Equiv
 
@@ -202,7 +200,7 @@ theorem derivShuffleLeftInsertRepresentative_leftRel_injective (k : Fin (m + n +
     have := (s_l (Fin.succ a)).isLt
     omega
 
-private noncomputable def derivShuffleInsert :
+noncomputable def derivShuffleInsert :
     Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n) →
     Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) × Fin (m + 1) :=
   fun p => Quotient.liftOn p.2
@@ -412,7 +410,7 @@ private theorem derivShuffleLeftSet_eq_of_rel
     simp only [Equiv.apply_symm_apply] at h_eval
     rw [h_eval, hi]
 
-private theorem derivShuffleInsert_injective :
+theorem derivShuffleInsert_injective :
     Function.Injective (@derivShuffleInsert m n) := by
   intro ⟨k₁, q₁⟩ ⟨k₂, q₂⟩ h
   refine Quotient.inductionOn₂ q₁ q₂ (fun σ₁ σ₂ (h : derivShuffleInsert (k₁, ⟦σ₁⟧) =
@@ -463,7 +461,7 @@ private theorem modSumCongr_range_card_fin (m n : ℕ) :
     simp [Fintype.card_perm]
   simpa [Equiv.Perm.sumCongrHom_apply] using h
 
-private theorem derivShuffleInsert_card :
+theorem derivShuffleInsert_card :
     Fintype.card
       (Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n)) =
     Fintype.card
@@ -593,11 +591,5 @@ theorem derivShuffleLeftInsertRankedRepresentative_inr
   simp only [Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply, Sum.map_inr]
   rw [show (1 : Equiv.Perm (Fin n)) b = b from rfl]
   rw [derivShuffleLeftInsertRepresentative_inr]
-
-theorem derivShuffleEquivLeft_sign_mk
-    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
-    Equiv.Perm.sign (derivShuffleLeftInsertRepresentative k σ) =
-      (-1 : ℤˣ) ^ k.val * Equiv.Perm.sign σ :=
-  derivShuffleLeftInsertRepresentative_sign k σ
 
 end ContinuousAlternatingMap

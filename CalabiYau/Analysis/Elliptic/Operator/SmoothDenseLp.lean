@@ -19,7 +19,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
+
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -30,33 +30,29 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
+
 
 def SmoothScalar.toContinuousMap {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) : C(M, ℝ) :=
   ⟨f.toFun, f.smooth.continuous⟩
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_smul {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f : SmoothScalar g) :
     (c • f).toContinuousMap = c • f.toContinuousMap := by
   ext x
   rfl
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_add {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     (f + h).toContinuousMap = f.toContinuousMap + h.toContinuousMap := by
   ext x
   rfl
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_zero {g : SmoothRiemannianMetric I M} :
     (0 : SmoothScalar g).toContinuousMap = (0 : C(M, ℝ)) := by
   ext x
   rfl
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_apply {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) (x : M) :
     f.toContinuousMap x = f.toFun x := rfl
@@ -65,7 +61,6 @@ def SmoothScalar.one (g : SmoothRiemannianMetric I M) : SmoothScalar g where
   toFun := fun _ => (1 : ℝ)
   smooth := contMDiff_const
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.one_toFun (g : SmoothRiemannianMetric I M) :
     (SmoothScalar.one g).toFun = fun _ : M => (1 : ℝ) := rfl
 
@@ -74,7 +69,6 @@ def SmoothScalar.mul {g : SmoothRiemannianMetric I M} (f h : SmoothScalar g) :
   toFun := fun x => f.toFun x * h.toFun x
   smooth := f.smooth.mul h.smooth
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.mul_toFun {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     (SmoothScalar.mul f h).toFun = fun x => f.toFun x * h.toFun x := rfl
@@ -113,13 +107,15 @@ def smoothScalarSubalgebra (g : SmoothRiemannianMetric I M) :
     change c = (c • (1 : C(M, ℝ))) x
     rw [ContinuousMap.smul_apply, ContinuousMap.one_apply, smul_eq_mul, mul_one]
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] lemma mem_smoothScalarSubalgebra_iff {g : SmoothRiemannianMetric I M}
     {φ : C(M, ℝ)} :
     φ ∈ smoothScalarSubalgebra (I := I) (M := M) g ↔
       ∃ f : SmoothScalar g, f.toContinuousMap = φ := Iff.rfl
 
-omit [I.Boundaryless] [CompactSpace M] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] in
 private lemma exists_smooth_separating
     (x y : M) (hxy : x ≠ y) :
     ∃ f : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ f ∧ f x = 1 ∧ f y = 0 := by
@@ -140,7 +136,10 @@ private lemma exists_smooth_separating
     have hy_in_compl : y ∈ ({y}ᶜ : Set M) := hφ_tsupp hy_support
     exact hy_in_compl rfl
 
-omit [I.Boundaryless] [CompactSpace M] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] in
 theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) :
     (smoothScalarSubalgebra (I := I) (M := M) g).SeparatesPoints := by
   intro x y hxy
@@ -151,7 +150,10 @@ theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) 
   · rw [hfx, hfy]
     exact one_ne_zero
 
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] [CompactSpace M] in
 theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
     (φ : C(M, ℝ)) {ε : ℝ} (hε : 0 < ε) :
     ∃ f : SmoothScalar g, ‖f.toContinuousMap - φ‖ < ε := by
@@ -164,7 +166,10 @@ theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
   rw [hf]
   exact hg'_lt
 
-omit [I.Boundaryless] [CompactSpace M] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] in
 private lemma eLpNorm_two_le_of_norm_le [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (_hφ : Continuous φ) (K : ℝ)
     (hK : ∀ x, ‖φ x‖ ≤ K) :
@@ -177,7 +182,10 @@ private lemma eLpNorm_two_le_of_norm_le [CompactSpace M]
   exact MeasureTheory.eLpNorm_le_of_ae_bound (μ := riemannianVolumeMeasure (I := I) (M := M) g)
     (f := φ) (C := K) (Filter.Eventually.of_forall hK)
 
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] [CompactSpace M] in
 private lemma eLpNorm_smooth_sub_bc_le
     (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) (ψ : M →ᵇ ℝ) (δ : ℝ)
@@ -193,14 +201,20 @@ private lemma eLpNorm_smooth_sub_bc_le
     f.smooth.continuous.sub ψ.continuous
   exact eLpNorm_two_le_of_norm_le (I := I) (M := M) g _ h_diff_cont δ h_pt
 
-omit [T2Space M] [CompactSpace M] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [I.Boundaryless] in
 private lemma edist_toLp_eq_eLpNorm
     {μ : Measure M} (a b : M → ℝ) (ha : MemLp a 2 μ) (hb : MemLp b 2 μ) :
     edist (ha.toLp a) (hb.toLp b) = eLpNorm (fun x : M => a x - b x) 2 μ := by
   rw [Lp.edist_toLp_toLp]
   rfl
 
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] [CompactSpace M] in
 private lemma exists_smoothToLp_close_to_memLp
     (g : SmoothRiemannianMetric I M)
     [hμ_fin : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g)]
@@ -282,6 +296,10 @@ private lemma exists_smoothToLp_close_to_memLp
     _ ≤ ε / 2 + ε / 2 := add_le_add h1 h2_bound
     _ = ε := ENNReal.add_halves _
 
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M] in
 theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToLp (I := I) (M := M) g) := by
   classical
@@ -302,12 +320,16 @@ theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
   conv_lhs => rw [show v = (Lp.memLp v).toLp (v : M → ℝ) from h_v_eq]
   exact hf
 
+variable [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M] in
 theorem denseRange_H1ComplToLp (g : SmoothRiemannianMetric I M) :
-    DenseRange (H1ComplToLp (I := I) (M := M) g) := by
+    DenseRange (h1ComplToLp (I := I) (M := M) g) := by
   refine Dense.mono ?_ (denseRange_smoothToLp (I := I) (M := M) g)
   rintro y ⟨u, hu⟩
   refine ⟨smoothToH1Compl (I := I) (M := M) g u, ?_⟩
-  rw [H1ComplToLp_smoothToH1Compl]
+  rw [h1ComplToLp_smoothToH1Compl]
   exact hu
 
 end Laplacian

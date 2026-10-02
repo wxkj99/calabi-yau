@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderNorm
+public import CalabiYau.Geometry.Manifold.Holder.ChartNorm
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 
 /-!

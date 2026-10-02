@@ -4,12 +4,11 @@ module
 public import CalabiYau.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 public import CalabiYau.Analysis.Elliptic.Regularity.GradInner.CLM.ChartFormula
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushforwardBound
-public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
+public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.HigherOrder
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Iterated
-public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 public import CalabiYau.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBoundSmoothRepPieces
-public import CalabiYau.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBoundChartInvGramPartialCoeff
 public import CalabiYau.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBoundGradInnerCoeffExtension
 public import CalabiYau.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBoundChartPushedPartialDeriv
 
@@ -28,7 +27,7 @@ namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -51,8 +50,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+variable [CompactSpace M] [T2Space M]
 
+variable [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -92,7 +95,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV
       ‖iteratedFDeriv ℝ j Λ y‖ ≤ C := fun j hj y _ => hC_bound j hj y
   obtain ⟨K, hK_pos, hK_bound⟩ :=
     _root_.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-      (d := Module.finrank ℝ E) 1 (p := 2) (by norm_num) (by norm_num)
+      (d := Module.finrank ℝ E) 1 (p := 2) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       hΛ_smooth hC_nn hΛ_bound
   refine ⟨K, hK_pos, ?_⟩
@@ -133,7 +136,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV
     have h_support : tsupport (etaTimesV (I := I) (M := M) α v.toFun) ⊆
         (chartAt H α).source :=
       tsupport_etaTimesV_subset (I := I) (M := M) α v.toFun
-    have h_w1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
+    have h_w1p : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) 2
         (chartPushedRaw (I := I) (M := M) α
           (etaTimesV (I := I) (M := M) α v.toFun))
         (chartTargetEuclid (I := I) (M := M) α) :=
@@ -142,7 +145,9 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV
     exact (_root_.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
   exact hK_bound hH_W12
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M]  [T2Space M] [SigmaCompactSpace M] in
 private lemma Λgrad_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -160,7 +165,9 @@ private lemma Λgrad_apply_of_mem
     else 0) = _
   rw [if_pos h_target]
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma Λgrad_iteratedFDeriv_bound
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -171,7 +178,9 @@ private lemma Λgrad_iteratedFDeriv_bound
     (gradInnerCoefI_M_smooth (I := I) (M := M) g α i)
     (tsupport_gradInnerCoefI_M_subset (I := I) (M := M) g α i) 1
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPushedRaw_gradInnerPiece_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -372,7 +381,11 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
 
 section HeadlineAssembly
 
-omit [NeZero (Module.finrank ℝ E)] in
+section
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (smoothRep (I := I) (M := M) g α v) := by
@@ -380,43 +393,6 @@ lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
   exact ((gradInnerPiece_smooth (I := I) (M := M) g α v).neg).sub
     (lapPiece_smooth (I := I) (M := M) g α v)
 
-omit [NeZero (Module.finrank ℝ E)] in
-lemma tsupport_smoothRep_subset_source
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    tsupport (smoothRep (I := I) (M := M) g α v) ⊆ (chartAt H α).source := by
-  classical
-  have h_eq := smoothRep_eq_pieces (I := I) (M := M) g α v
-  have h_support_sub : Function.support (smoothRep (I := I) (M := M) g α v) ⊆
-      tsupport (gradInnerPiece (I := I) (M := M) g α v.toFun) ∪
-        tsupport (lapPiece (I := I) (M := M) g α v.toFun) := by
-    intro x hx
-    by_contra hx_off
-    apply hx
-    rw [h_eq]
-    have h_or : ¬ (x ∈ tsupport (gradInnerPiece (I := I) (M := M) g α v.toFun) ∨
-        x ∈ tsupport (lapPiece (I := I) (M := M) g α v.toFun)) := hx_off
-    have h_and : x ∉ tsupport (gradInnerPiece (I := I) (M := M) g α v.toFun) ∧
-        x ∉ tsupport (lapPiece (I := I) (M := M) g α v.toFun) := not_or.mp h_or
-    obtain ⟨h1, h2⟩ := h_and
-    have h_grad_zero : gradInnerPiece (I := I) (M := M) g α v.toFun x = 0 := by
-      by_contra hne
-      exact h1 (subset_tsupport _ hne)
-    have h_lap_zero : lapPiece (I := I) (M := M) g α v.toFun x = 0 := by
-      by_contra hne
-      exact h2 (subset_tsupport _ hne)
-    change -gradInnerPiece (I := I) (M := M) g α v.toFun x -
-        lapPiece (I := I) (M := M) g α v.toFun x = 0
-    rw [h_grad_zero, h_lap_zero]; ring
-  have h_tsupp_sub : tsupport (smoothRep (I := I) (M := M) g α v) ⊆
-      tsupport (gradInnerPiece (I := I) (M := M) g α v.toFun) ∪
-        tsupport (lapPiece (I := I) (M := M) g α v.toFun) :=
-    closure_minimal h_support_sub
-      ((isClosed_tsupport _).union (isClosed_tsupport _))
-  refine h_tsupp_sub.trans (Set.union_subset ?_ ?_)
-  · exact tsupport_gradInnerPiece_subset_source (I := I) (M := M) g α v.toFun
-  · exact tsupport_lapPiece_subset_source (I := I) (M := M) g α v.toFun
-
-omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     CalabiYau.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -495,22 +471,6 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     exact (ENNReal.ofReal_pos.mpr h_pos).ne'
   exact h_vol_abs_weighted.ae_le h_fChart_smooth_ae
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma memWkp_chartPushedRaw_smoothRep
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    _root_.Sobolev.Euclidean.MemWkp
-      (d := Module.finrank ℝ E) 1 2
-      (chartPushedRaw (I := I) (M := M) α
-        (smoothRep (I := I) (M := M) g α v))
-      (chartTargetEuclid (I := I) (M := M) α) := by
-  have h_w1p :=
-    memW1p_chartPushedRaw_of_contMDiff_tsupport
-      (I := I) (M := M) (f := smoothRep (I := I) (M := M) g α v) (α := α)
-      (smoothRep_contMDiff (I := I) (M := M) g α v)
-      (tsupport_smoothRep_subset_source (I := I) (M := M) g α v) 2
-  exact (_root_.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
-
-omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_smoothRep_eq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (y : EuclN) :
     chartPushedRaw (I := I) (M := M) α
@@ -530,8 +490,11 @@ lemma chartPushedRaw_smoothRep_eq
         chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
     ring
 
-omit [SigmaCompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+end
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] in
 private lemma memWkp_chartPushedRaw_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     _root_.Sobolev.Euclidean.MemWkp
@@ -562,8 +525,9 @@ private lemma memWkp_chartPushedRaw_etaTimesV
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (by exact hCP_smooth) hCP_compact hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) 2
 
-omit [SigmaCompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] in
 private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (i : Fin (Module.finrank ℝ E)) :
@@ -597,6 +561,12 @@ private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae).mpr h_chosen_mem
 
+section
+
+variable [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 private lemma wkpNorm_chartPushedRaw_etaTimesV_le
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -734,7 +704,7 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
     obtain ⟨C_Λ, hC_Λ_nn, hC_Λ_bound⟩ :=
       Λgrad_iteratedFDeriv_bound (I := I) (M := M) g α i
     exact _root_.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-      (d := Module.finrank ℝ E) 1 (p := 2) (by norm_num) (by norm_num)
+      (d := Module.finrank ℝ E) 1 (p := 2) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       (Λgrad_contDiff (I := I) (M := M) g α i)
       hC_Λ_nn (fun j hj y _ => hC_Λ_bound j hj y)
@@ -1131,6 +1101,8 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
     _ = ENNReal.ofReal Cfinal *
             wkpNormChart (I := I) (M := M) 2 2 v.toFun := by
           rw [hCfinal_def]
+
+end
 
 end HeadlineAssembly
 

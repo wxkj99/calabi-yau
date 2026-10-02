@@ -1,13 +1,13 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.GlobalSchauder.LocalEstimate
-public import CalabiYau.Geometry.Complex.Schauder.FiniteChart.Bounds
-public import CalabiYau.Geometry.Complex.Schauder.FiniteChart.ValueLimit
-public import CalabiYau.Geometry.Complex.Schauder.FiniteChart.JetIdentification
-public import CalabiYau.Geometry.Complex.Schauder.FiniteChart.Globalization
+public import CalabiYau.Analysis.Elliptic.Schauder.FiniteChart.Bounds
+public import CalabiYau.Analysis.Elliptic.Schauder.FiniteChart.ValueLimit
+public import CalabiYau.Analysis.Elliptic.Schauder.FiniteChart.JetIdentification
+public import CalabiYau.Analysis.Elliptic.Schauder.FiniteChart.Globalization
 public import CalabiYau.Geometry.Kahler.Laplacian.FiniteRegularityChart
 public import CalabiYau.Geometry.Kahler.Laplacian.JetLimit
-public import CalabiYau.Analysis.Holder.Compactness.Normalization
+public import CalabiYau.Mathlib.Analysis.Holder.Compactness.Normalization
 
 /-!
 # Finite-chart C² compactness and passage to a harmonic limit
@@ -72,7 +72,7 @@ theorem exists_normalized_meanZero_laplacian_C2_compactness [Nonempty M]
   classical
   obtain ⟨balls⟩ := exists_finiteChartBallRefinement cover
   obtain ⟨B, hB⟩ := huC2
-  obtain ⟨C, hC⟩ := exists_uniform_holderBoundOn_refinement cover balls α hα₀ hα₁
+  obtain ⟨C, hC⟩ := exists_uniform_holderBoundOn_refinement cover balls α hα₁
     u huSmooth B (fun j => (hB j).1) (fun j => (hB j).2)
   obtain ⟨s, hs, ⟨limits⟩⟩ := exists_common_subsequence_finiteChartJetLimits
     cover balls α hα₀ hα₁ u C hC
@@ -80,7 +80,7 @@ theorem exists_normalized_meanZero_laplacian_C2_compactness [Nonempty M]
     exists_uniform_value_limit_of_finiteChartJetLimits cover balls u s
       (fun j => (huSmooth j).continuous) limits
   have hlocal (p : balls.ι) := identify_uniform_jet_limits_on_nested_balls
-    (balls.inner_pos p) (balls.inner_lt_middle p) (balls.middle_lt_outer p)
+    (balls.inner_lt_middle p) (balls.middle_lt_outer p)
     (fun j => u (s j) ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
       (cover.base (balls.chart p))).symm)
     (f ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))

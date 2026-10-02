@@ -79,16 +79,6 @@ theorem riemannianMeasure_lintegral_eq
       (f := fun x : M => ENNReal.ofReal (ρ α x)) hρ (g := f) hf
   simpa [Pi.mul_apply] using h
 
-theorem riemannianMeasure_lintegral_finset_le
-    (g : SmoothRiemannianMetric I M)
-    (ρ : SmoothPartitionOfUnity M I M univ)
-    {f : M → ℝ≥0∞} (hf : Measurable f) (s : Finset M) :
-    ∑ α ∈ s, ∫⁻ x, ENNReal.ofReal (ρ α x) * f x
-        ∂(chartLocalMeasure (I := I) g α)
-      ≤ ∫⁻ x, f x ∂(riemannianMeasure (I := I) g ρ) := by
-  rw [riemannianMeasure_lintegral_eq (I := I) g ρ hf]
-  exact ENNReal.sum_le_tsum s
-
 theorem chartLocalMeasure_withDensity_le_riemannianMeasure
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ) (α : M) :

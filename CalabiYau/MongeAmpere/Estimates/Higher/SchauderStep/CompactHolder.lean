@@ -1,7 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
-import Mathlib.Data.Matrix.Basic
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 import Mathlib.Topology.Algebra.MetricSpace.Lipschitz
 

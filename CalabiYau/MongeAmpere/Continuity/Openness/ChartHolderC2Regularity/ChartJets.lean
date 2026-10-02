@@ -36,9 +36,9 @@ private theorem exists_smoothChartHolderCore_seq_tendsto
     ∃ fseq : ℕ → SmoothChartHolderCore cover 2 α,
       Filter.Tendsto (fun n => (fseq n : LittleHolder cover 2 α N))
         Filter.atTop (𝓝 u) := by
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   have hmem : u ∈ closure (Set.range
       (fun f : SmoothChartHolderCore cover 2 α =>
@@ -62,11 +62,11 @@ private theorem exists_smoothChartHolderCore_seq_tendsto
   filter_upwards [hsmall.eventually (gt_mem_nhds hε)] with n hn
   exact (hdist n).trans hn
 
+omit [FiniteDimensional ℝ E] in
 /-- Pointwise C² regularity of the continuous evaluation extension. The finite-chart gauge controls
 all coordinate jets through order two uniformly on a chart piece; convergence of those jets and the
 line-segment fundamental theorem of calculus identify the limiting jets with derivatives of the
 extended evaluation in a neighborhood of the point. -/
-@[deprecated "unused hypothesis `hJetNorm`; will be removed" (since := "2026-10-02")]
 theorem smoothChartHolderContinuousMapExtension_contMDiffAt_orderTwo
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α)
@@ -77,17 +77,13 @@ theorem smoothChartHolderContinuousMapExtension_contMDiffAt_orderTwo
         ((smoothChartHolderContinuousMapExtension cover 2 α N u : M → ℝ) ∘
           (extChartAt 𝓘(ℝ, E) (cover.base i)).symm) z =
         smoothChartHolderJetCanonicalExtension cover 2 α N j hj u i
-          ⟨z, interior_subset hz⟩)
-    (hJetNorm : ∀ (j : ℕ) (hj : j ≤ 2) (i) (z : E)
-      (hz : z ∈ interior (cover.piece i)),
-      ‖smoothChartHolderJetCanonicalExtension cover 2 α N j hj u i
-        ⟨z, interior_subset hz⟩‖ ≤ ‖u‖) :
+          ⟨z, interior_subset hz⟩) :
     ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ) 2
       (smoothChartHolderContinuousMapExtension cover 2 α N u) x := by
   classical
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   obtain ⟨fseq, hfseq⟩ :=
     exists_smoothChartHolderCore_seq_tendsto cover α N u
@@ -302,6 +298,7 @@ theorem smoothChartHolderContinuousMapExtension_contMDiffAt_orderTwo
   simpa [F, e, extChartAt, chartAt_self_eq, Set.range, Function.comp_def,
     Function.comp_apply] using hzF.contDiffWithinAt
 
+omit [FiniteDimensional ℝ E] in
 /-- Global order-two regularity follows from the completed chart-jet identity and bound. This
 all-exponent regularity is conditional on the supplied normed data and makes no claim that such data exist
 for every exponent. -/
@@ -315,15 +312,11 @@ theorem smoothChartHolderContinuousMapExtension_contMDiff_orderTwo_of_completedJ
         ((smoothChartHolderContinuousMapExtension cover 2 α N u : M → ℝ) ∘
           (extChartAt 𝓘(ℝ, E) (cover.base i)).symm) z =
         smoothChartHolderJetCanonicalExtension cover 2 α N j hj u i
-          ⟨z, interior_subset hz⟩)
-    (hJetNorm : ∀ (j : ℕ) (hj : j ≤ 2) (i) (z : E)
-      (hz : z ∈ interior (cover.piece i)),
-      ‖smoothChartHolderJetCanonicalExtension cover 2 α N j hj u i
-        ⟨z, interior_subset hz⟩‖ ≤ ‖u‖) :
+          ⟨z, interior_subset hz⟩) :
     ContMDiff 𝓘(ℝ, E) 𝓘(ℝ) 2
       (smoothChartHolderContinuousMapExtension cover 2 α N u) := by
   intro x
   exact smoothChartHolderContinuousMapExtension_contMDiffAt_orderTwo
-    cover α N u x hJet hJetNorm
+    cover α N u x hJet
 
 end KahlerForm

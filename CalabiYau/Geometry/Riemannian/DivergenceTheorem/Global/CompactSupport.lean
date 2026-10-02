@@ -15,8 +15,6 @@ public import Mathlib.Topology.Algebra.Support
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -53,45 +51,5 @@ lemma chartLocalMeasure_integral_eq_of_support_in_overlap
   change ∫ x, f x ∂((chartLocalMeasure (I := I) g x₀).restrict U)
       = ∫ x, f x ∂((chartLocalMeasure (I := I) g x₁).restrict U)
   rw [chartLocalMeasure_restrict_overlap_eq (I := I) g x₀ x₁]
-
-private lemma integrable_of_compactSupport_subset_chartSource
-    [CompactSpace M] [T2Space M]
-    (g : SmoothRiemannianMetric I M) (α : M)
-    {f : M → ℝ} (hf_cont : Continuous f)
-    (hf_support : tsupport f ⊆ (chartAt H α).source) :
-    Integrable f (chartLocalMeasure (I := I) g α) := by
-  classical
-  have hsupp_compact : IsCompact (tsupport f) :=
-    .of_isClosed_subset isCompact_univ (isClosed_tsupport _) (Set.subset_univ _)
-  have hμ_support : chartLocalMeasure (I := I) g α (tsupport f) < ⊤ :=
-    chartLocalMeasure_compact_lt_top (I := I) g α hsupp_compact hf_support
-  obtain ⟨C, hC⟩ : ∃ C, ∀ x, ‖f x‖ ≤ C := by
-    have hCpt := (isCompact_univ (X := M)).image hf_cont.norm
-    obtain ⟨C, hCmem⟩ := hCpt.bddAbove
-    exact ⟨C, fun x => hCmem ⟨x, Set.mem_univ _, rfl⟩⟩
-  have hbnd : ∀ᵐ x ∂(chartLocalMeasure (I := I) g α),
-      ENNReal.ofReal ‖f x‖ ≤
-        ENNReal.ofReal C * (tsupport f).indicator (fun _ => (1 : ℝ≥0∞)) x := by
-    refine Filter.Eventually.of_forall (fun x => ?_)
-    by_cases hx : x ∈ tsupport f
-    · rw [Set.indicator_of_mem hx, mul_one]
-      exact ENNReal.ofReal_le_ofReal (hC x)
-    · rw [Set.indicator_of_notMem hx, mul_zero]
-      have hfx_zero : f x = 0 := by
-        by_contra hne
-        exact hx (subset_tsupport _ hne)
-      rw [hfx_zero]; simp
-  refine ⟨hf_cont.aestronglyMeasurable, ?_⟩
-  rw [hasFiniteIntegral_iff_norm]
-  calc ∫⁻ x, ENNReal.ofReal ‖f x‖ ∂(chartLocalMeasure (I := I) g α)
-      ≤ ∫⁻ x, ENNReal.ofReal C *
-            (tsupport f).indicator (fun _ => (1 : ℝ≥0∞)) x
-            ∂(chartLocalMeasure (I := I) g α) := lintegral_mono_ae hbnd
-    _ = ENNReal.ofReal C * chartLocalMeasure (I := I) g α (tsupport f) := by
-          rw [lintegral_const_mul _ ((measurable_const).indicator
-            (isClosed_tsupport _).measurableSet)]
-          rw [lintegral_indicator (isClosed_tsupport _).measurableSet]
-          rw [setLIntegral_const, one_mul]
-    _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_support
 
 end CalabiYau.DivergenceTheorem

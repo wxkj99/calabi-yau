@@ -27,11 +27,10 @@ open Filter CalabiYau.Schauder
 section CompletedRegularity
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
-omit [FiniteDimensional ℝ E] [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M] in
+omit [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M] in
 private theorem exists_smoothChartHolderCore_seq_tendsto
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α)
@@ -305,9 +304,8 @@ end CompletedRegularity
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M]
 
-omit [ConnectedSpace M] in
 private theorem completed_evalC2_contMDiff_two [Nonempty M]
     (ω₁ : KahlerForm n M) (α : ℝ≥0) [P : ContinuityHolderPair ω₁ α]
     (u : P.C2) : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2
@@ -339,21 +337,14 @@ private theorem completed_evalC2_contMDiff_two [Nonempty M]
 
 open Complex ContinuousAlternatingMap
 
-omit [ConnectedSpace M] in
 /-- A bounded forward map that agrees with the Laplacian on the smooth mean-zero core agrees with
 the pointwise Laplacian of completed evaluation. The proof consumes the C2Regularity completed-jet
 identity and norm bound; it does not reprove either low-level statement. -/
 theorem completed_forward_laplacian_formula [Nonempty M]
     (ω₁ : KahlerForm n M) (α : ℝ≥0)
-    (hα₀ : 0 < α) (hα₁ : α < 1)
     [P : ContinuityHolderPair ω₁ α]
     (A : P.C2 →L[ℝ] P.C0)
     (hCore : IsSmoothMeanZeroForwardExtension P A)
-    (hSmoothDense : closure (Set.range fun f :
-      smoothMeanZeroChartHolderCore ω₁ P.finiteChartCover 0 α P.normedDataC0 =>
-        ((f : SmoothChartHolderCore P.finiteChartCover 0 α) :
-          LittleHolder P.finiteChartCover 0 α P.normedDataC0)) =
-      (P.C0 : Set (LittleHolder P.finiteChartCover 0 α P.normedDataC0)))
     (hvol : 0 < ω₁.volume.real Set.univ) :
     ∀ u, P.evalC0 (A u) = ω₁.laplacian (P.evalC2 u) := by
   classical
@@ -519,7 +510,7 @@ theorem completed_forward_laplacian_formula [Nonempty M]
     intro ε hε
     have hu : (u : LittleHolder cover 2 α N) ∈ closure (Set.range fun f : core2 =>
         ((f : SmoothChartHolderCore cover 2 α) : LittleHolder cover 2 α N)) := by
-      rw [closure_smoothMeanZeroChartHolderCore_coe ω₁ cover 2 α hα₀ hα₁ N hvol]
+      rw [closure_smoothMeanZeroChartHolderCore_coe ω₁ cover 2 α N hvol]
       exact u.property
     obtain ⟨v, hv, hdist⟩ := Metric.mem_closure_iff.mp hu ε hε
     rcases hv with ⟨f, rfl⟩
@@ -623,8 +614,5 @@ theorem completed_forward_laplacian_formula [Nonempty M]
     _ = ω₁.laplacian (P.evalC2 u) x := by
       rw [← hx]
       exact (hLapFormula u).symm
-
-attribute [deprecated "unused hypothesis `hSmoothDense`; will be removed" (since := "2026-10-02")]
-  completed_forward_laplacian_formula
 
 end KahlerForm

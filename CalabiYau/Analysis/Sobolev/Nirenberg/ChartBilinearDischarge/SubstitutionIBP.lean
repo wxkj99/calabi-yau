@@ -5,7 +5,8 @@ public import CalabiYau.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.Substi
 public import CalabiYau.Analysis.Elliptic.Operator.ChartLocalLaplacian
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.Basic
-public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.TranslatedCutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.CutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
 
 @[expose] public section
 
@@ -21,7 +22,7 @@ namespace Sobolev
 namespace SubstitutionDischargeIBP
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -43,7 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 private lemma exists_bound_of_contDiff_compactSupport
     {η : EuclN → ℝ} (hη_cont : Continuous η) (hη_cs : HasCompactSupport η) :
     ∃ M_η : ℝ, 0 ≤ M_η ∧ ∀ x, |η x| ≤ M_η := by
@@ -64,7 +65,7 @@ private lemma exists_bound_of_contDiff_compactSupport
     · have hηx : η x = 0 := image_eq_zero_of_notMem_tsupport hx
       rw [hηx, abs_zero]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 private lemma exists_bound_partial_eta
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_cs : HasCompactSupport η)
     (j : Fin (Module.finrank ℝ E)) :
@@ -81,7 +82,6 @@ private lemma exists_bound_partial_eta
   exact exists_bound_of_contDiff_compactSupport h_partial_eta_cont
     h_partial_eta_cs
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_bound_weightedInvGram
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -90,7 +90,6 @@ private lemma exists_bound_weightedInvGram
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, |weightedInvGramOnEuclid (I := I) g α i j y| ≤ C :=
   weightedInvGramOnEuclid_bounded_on_compact (I := I) (M := M) g α i j hK hK_in
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma F_ij_memLp_restrict
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -141,6 +140,7 @@ private lemma F_ij_memLp_restrict
     h_weight_aesm.mul hwp_lp.aestronglyMeasurable
   exact MemLp.mono (hwp_lp.const_mul C) h_prod_aesm h_pt_bound
 
+variable [NeZero (Module.finrank ℝ E)] in
 private noncomputable def F_ij_extended
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -151,7 +151,6 @@ private noncomputable def F_ij_extended
     (fun y => weightedInvGramOnEuclid (I := I) g α i j y *
       D.weakPartial i y)
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma F_ij_extended_memLp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -172,7 +171,6 @@ private lemma F_ij_extended_memLp
   exact (MeasureTheory.memLp_indicator_iff_restrict h_thick_meas).mpr
     (F_ij_memLp_restrict (I := I) (M := M) D hK_0_compact h_thick i j)
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma u_chart_indicator_memLp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -192,7 +190,6 @@ private lemma u_chart_indicator_memLp
   exact memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     D.u_chart_memLp_weighted h_thick_compact h_thick_meas h_thick
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma weak_partial_indicator_memLp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -213,7 +210,7 @@ private lemma weak_partial_indicator_memLp
   exact D.weak_partial_locally_memLp j (Metric.cthickening |h| K_0)
     h_thick_compact h_thick
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 private lemma memLp_diffQuot_of_memLp
     {F : EuclN → ℝ} (hF_lp : MemLp F 2 (volume : Measure EuclN))
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) :
@@ -251,6 +248,10 @@ private lemma memLp_diffQuot_of_memLp
     hτF_lp.sub hF_lp
   exact (h_diff_lp.const_smul h⁻¹).eLpNorm_lt_top
 
+section
+
+variable [NeZero (Module.finrank ℝ E)]
+
 private noncomputable def testFactor
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -279,7 +280,8 @@ private noncomputable def testFactorExtended
         (d := Module.finrank ℝ E) k h
         ((Metric.cthickening |h| K_0).indicator D.uChart) z
 
-omit [NeZero (Module.finrank ℝ E)] in
+end
+
 private lemma testFactorExtended_memLp_two
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -419,7 +421,6 @@ private lemma testFactorExtended_memLp_two
       (Filter.Eventually.of_forall ht2'_pt_bd)
   exact ht1'_lp.add ht2'_lp
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma testFactor_eq_testFactorExtended_on_tsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -474,7 +475,6 @@ private lemma testFactor_eq_testFactorExtended_on_tsupport
   unfold testFactor testFactorExtended
   rw [h_dq_wp, h_dq_u]
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma testFactor_eq_zero_outside_tsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -489,7 +489,6 @@ private lemma testFactor_eq_zero_outside_tsupport
   rw [show 2 * η z = 0 from by rw [hηz]; ring]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma testFactorExtended_eq_zero_outside_tsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -504,7 +503,6 @@ private lemma testFactorExtended_eq_zero_outside_tsupport
   rw [show 2 * η z = 0 from by rw [hηz]; ring]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma testFactor_eq_testFactorExtended
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -523,7 +521,6 @@ private lemma testFactor_eq_testFactorExtended
   · rw [testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hz,
       testFactorExtended_eq_zero_outside_tsupport (I := I) (M := M) D k K_0 j hz]
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma testFactor_memLp_two
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -543,7 +540,6 @@ private lemma testFactor_memLp_two
   exact testFactorExtended_memLp_two (I := I) (M := M) D hK_0_compact hη hη_support
     k hh h_thick j
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_factor_integrable
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -627,7 +623,6 @@ theorem chartBilinear_factor_integrable
   rw [h_assoc]
   exact h_int_prod
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_factor_integrable_after
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -752,89 +747,6 @@ theorem chartBilinear_factor_integrable_after
       rw [h_rhs_test, mul_zero, mul_zero]
   exact h_int_prod_restrict.congr h_pointwise_eq
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma diffQuot_testFactor_support_subset
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN}
-    {η : EuclN → ℝ} (hη_support_in_K_0 : tsupport η ⊆ K_0)
-    (k : Fin (Module.finrank ℝ E))
-    {h : ℝ}
-    (j : Fin (Module.finrank ℝ E)) :
-    Function.support (Sobolev.diffQuot
-      (d := Module.finrank ℝ E) k (-h)
-      (testFactor (I := I) (M := M) D η k h j)) ⊆
-        Metric.cthickening |h| K_0 := by
-  intro y hy
-  rw [Function.mem_support] at hy
-  by_cases hh_eq : h = 0
-  · subst hh_eq
-    have : Sobolev.diffQuot
-        (d := Module.finrank ℝ E) k (-(0:ℝ))
-        (testFactor (I := I) (M := M) D η k (0:ℝ) j) y = 0 := by
-      simp [Sobolev.diffQuot]
-    exact absurd this hy
-  · rw [Sobolev.diffQuot_apply_of_ne
-        (d := Module.finrank ℝ E) k (neg_ne_zero.mpr hh_eq)] at hy
-    have h_num_ne : testFactor (I := I) (M := M) D η k h j
-        (y + (-h) • EuclideanSpace.single k 1) -
-        testFactor (I := I) (M := M) D η k h j y ≠ 0 := by
-      intro hnum
-      apply hy
-      rw [hnum, zero_div]
-    have h_or :
-        testFactor (I := I) (M := M) D η k h j
-          (y + (-h) • EuclideanSpace.single k 1) ≠ 0 ∨
-        testFactor (I := I) (M := M) D η k h j y ≠ 0 := by
-      by_contra h_neither
-      have h1 : testFactor (I := I) (M := M) D η k h j
-          (y + (-h) • EuclideanSpace.single k 1) = 0 := by
-        by_contra hne
-        exact h_neither (Or.inl hne)
-      have h2 : testFactor (I := I) (M := M) D η k h j y = 0 := by
-        by_contra hne
-        exact h_neither (Or.inr hne)
-      apply h_num_ne
-      rw [h1, h2, sub_self]
-    rcases h_or with h_shift | h_at
-    · have h_in_support : y + (-h) • EuclideanSpace.single k 1 ∈ tsupport η := by
-        by_contra hnot
-        exact h_shift
-          (testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hnot)
-      have h_in_K_0 : y + (-h) • EuclideanSpace.single k 1 ∈ K_0 :=
-        hη_support_in_K_0 h_in_support
-      refine Metric.mem_cthickening_of_dist_le _ _ |h| K_0 h_in_K_0 ?_
-      rw [dist_eq_norm]
-      have hcalc : y - (y + (-h) • EuclideanSpace.single k 1) =
-          h • EuclideanSpace.single k 1 := by
-        rw [sub_add_eq_sub_sub, sub_self, zero_sub, ← neg_smul, neg_neg]
-      rw [hcalc, norm_smul]
-      simp [Real.norm_eq_abs]
-    · have h_in_support : y ∈ tsupport η := by
-        by_contra hnot
-        exact h_at (testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hnot)
-      exact Metric.self_subset_cthickening _ (hη_support_in_K_0 h_in_support)
-
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma diffQuot_testFactor_eq_zero_outside_cthickening
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN}
-    {η : EuclN → ℝ} (hη_support_in_K_0 : tsupport η ⊆ K_0)
-    (k : Fin (Module.finrank ℝ E))
-    {h : ℝ}
-    (j : Fin (Module.finrank ℝ E))
-    {y : EuclN} (hy : y ∉ Metric.cthickening |h| K_0) :
-    Sobolev.diffQuot
-      (d := Module.finrank ℝ E) k (-h)
-      (testFactor (I := I) (M := M) D η k h j) y = 0 := by
-  by_contra hne
-  exact hy (diffQuot_testFactor_support_subset (I := I) (M := M) D
-    hη_support_in_K_0 k j hne)
-
-omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_diffQuot_ibp_per_ij
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -1076,7 +988,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
   rw [← h_rhs_eq, ← h_lhs_eq]
   linarith
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_ibp_of_compact_support
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

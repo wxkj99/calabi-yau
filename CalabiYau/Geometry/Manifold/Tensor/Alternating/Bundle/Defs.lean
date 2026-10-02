@@ -20,8 +20,6 @@ public import Mathlib.Data.Bundle
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -144,21 +142,6 @@ open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem curryLeft_contMDiff {m : ℕ} :
-    ContMDiff 𝓘(ℝ, E [⋀^Fin (m + 1)]→L[ℝ] ℝ)
-      𝓘(ℝ, E →L[ℝ] E [⋀^Fin m]→L[ℝ] ℝ) ∞
-      (fun a : E [⋀^Fin (m + 1)]→L[ℝ] ℝ => a.curryLeft) := by
-  rw [contMDiff_iff_contDiff]
-  have hlin : IsLinearMap ℝ
-      (fun a : E [⋀^Fin (m + 1)]→L[ℝ] ℝ => a.curryLeft) :=
-    { map_add := ContinuousAlternatingMap.curryLeft_add
-      map_smul := ContinuousAlternatingMap.curryLeft_smul }
-  have hbound : ∀ a : E [⋀^Fin (m + 1)]→L[ℝ] ℝ,
-      ‖a.curryLeft‖ ≤ 1 * ‖a‖ := by
-    intro a
-    simp
-  exact IsBoundedLinearMap.contDiff (n := ∞) (hlin.with_bound 1 hbound)
-
 end ContinuousAlternatingMap
 
 open scoped Topology Manifold ContDiff
@@ -258,73 +241,6 @@ noncomputable local instance curryFiber (m : ℕ) :
   Bundle.ContinuousLinearMap.fiberBundle (RingHom.id ℝ)
     F V (F [⋀^Fin m]→L[ℝ] ℝ)
       (fun x : M => V x [⋀^Fin m]→L[ℝ] ℝ)
-
-theorem contMDiffOn_curryLeft
-    {m : ℕ} {W : Set M}
-    (form : (x : M) → V x [⋀^Fin (m + 1)]→L[ℝ] ℝ)
-    (hform : ContMDiffOn I (I.prod 𝓘(ℝ, F [⋀^Fin (m + 1)]→L[ℝ] ℝ)) ∞
-      (fun x => TotalSpace.mk' (F [⋀^Fin (m + 1)]→L[ℝ] ℝ) x (form x)) W) :
-    ContMDiffOn I (I.prod 𝓘(ℝ, F →L[ℝ] F [⋀^Fin m]→L[ℝ] ℝ)) ∞
-      (fun x => (⟨x, ContinuousAlternatingMap.curryLeft (form x)⟩ :
-        TotalSpace (F →L[ℝ] F [⋀^Fin m]→L[ℝ] ℝ)
-          (fun y : M => V y →L[ℝ] V y [⋀^Fin m]→L[ℝ] ℝ))) W := by
-  intro x hx
-  let e := trivializationAt F V x
-  let ea := trivializationAt (F [⋀^Fin m]→L[ℝ] ℝ)
-    (Bundle.continuousAlternatingMap ℝ (Fin m) F V ℝ
-      (Bundle.Trivial M ℝ)) x
-  let eh := e.continuousLinearMap (RingHom.id ℝ) ea
-  have he : x ∈ e.baseSet := mem_baseSet_trivializationAt F V x
-  have hea : x ∈ ea.baseSet := by
-    change x ∈ e.baseSet ∩ Set.univ
-    exact ⟨he, Set.mem_univ x⟩
-  have heh : x ∈ eh.baseSet := ⟨he, hea⟩
-  apply (eh.contMDiffWithinAt_section W heh).mpr
-  let ef := trivializationAt (F [⋀^Fin (m + 1)]→L[ℝ] ℝ)
-    (Bundle.continuousAlternatingMap ℝ (Fin (m + 1)) F V ℝ
-      (Bundle.Trivial M ℝ)) x
-  have hef : x ∈ ef.baseSet := by
-    change x ∈ e.baseSet ∩ Set.univ
-    exact ⟨he, Set.mem_univ x⟩
-  have hcoord : ContMDiffWithinAt I 𝓘(ℝ, F [⋀^Fin (m + 1)]→L[ℝ] ℝ) ∞
-      (fun y => (ef ⟨y, form y⟩).2) W x :=
-    (ef.contMDiffWithinAt_section W hef).mp (hform x hx)
-  have hcurry : ContMDiffWithinAt I 𝓘(ℝ, F →L[ℝ] F [⋀^Fin m]→L[ℝ] ℝ) ∞
-      (fun y => (ContinuousAlternatingMap.curryLeftLI (𝕜 := ℝ) (E := F)
-        (F := ℝ) (n := m)) ((ef ⟨y, form y⟩).2)) W x := by
-    have hcomp :=
-      (ContinuousAlternatingMap.curryLeft_contMDiff (E := F) (m := m)).contMDiffAt
-        |>.comp_contMDiffWithinAt x hcoord
-    apply hcomp.congr_of_eventuallyEq_of_mem
-    · filter_upwards with a
-      rfl
-    · exact hx
-  apply hcurry.congr_of_eventuallyEq_of_mem
-  · have heventually : ∀ᶠ y in 𝓝[W] x, y ∈ e.baseSet :=
-      Filter.Eventually.filter_mono inf_le_left (e.open_baseSet.mem_nhds he)
-    filter_upwards [heventually] with y hy
-    change (eh ⟨y, (form y).curryLeft⟩).2 =
-      (ContinuousAlternatingMap.curryLeftLI (𝕜 := ℝ) (E := F)
-        (F := ℝ) (n := m)) ((ef ⟨y, form y⟩).2)
-    rw [Bundle.Trivialization.continuousLinearMap_apply]
-    apply ContinuousLinearMap.ext
-    intro v
-    apply ContinuousAlternatingMap.ext
-    intro w
-    rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
-    have hya : y ∈ ea.baseSet := by
-      change y ∈ e.baseSet ∩ Set.univ
-      exact ⟨hy, Set.mem_univ y⟩
-    rw [ea.continuousLinearMapAt_apply_of_mem (R := ℝ) hya]
-    rw [trivializationAt_apply (m := m) (F := F) (V := V)
-      (M := M) (x₀ := x) (x := y)]
-    rw [trivializationAt_apply (m := m + 1) (F := F) (V := V)
-      (M := M) (x₀ := x) (x := y)]
-    simpa only [ContinuousAlternatingMap.curryLeftLI_apply, e] using
-      (congrArg (fun L : F [⋀^Fin m]→L[ℝ] ℝ => L w)
-        (ContinuousAlternatingMap.curryLeft_compContinuousLinearMap
-          (form y) ((trivializationAt F V x).symmL ℝ y) v)).symm
-  · exact hx
 
 end ContinuousAlternatingMap
 

@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.Geometry.Kahler.Curvature.Chart
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 
 set_option maxHeartbeats 1000000
@@ -27,32 +27,6 @@ open scoped ContDiff Matrix.Norms.Elementwise
 open Filter Topology
 
 namespace KahlerForm
-
-private theorem fderiv_det_complex (n : ℕ) (A B : Matrix (Fin n) (Fin n) ℂ) :
-    fderiv ℝ Matrix.det A B = Matrix.trace (Matrix.adjugate A * B) := by
-  have hdetCD : ContDiff ℝ ∞ (fun C : Matrix (Fin n) (Fin n) ℂ => C.det) := by
-    simp_rw [Matrix.det_apply']
-    refine ContDiff.sum fun σ _ => ?_
-    exact contDiff_const.mul (contDiff_prod fun i _ =>
-      contDiff_pi.mp (contDiff_pi.mp contDiff_id (σ i)) i)
-  have hfd : HasFDerivAt (fun C : Matrix (Fin n) (Fin n) ℂ => C.det)
-      (fderiv ℝ (fun C : Matrix (Fin n) (Fin n) ℂ => C.det) A) A :=
-    (hdetCD.differentiable (by norm_num) A).hasFDerivAt
-  have hline : HasDerivAt (fun t : ℝ => A + t • B) B 0 := by
-    exact (((hasDerivAt_id (0 : ℝ)).smul_const B).const_add A).congr_deriv (one_smul ℝ B)
-  have hchain := hfd.comp_hasDerivAt_of_eq 0 hline (by simp)
-  have hcomplex := Matrix.hasDerivAt_det_add_smul (K := ℂ) A B 0
-  have hcomplex' : HasDerivAt (fun t : ℂ => (A + t • B).det)
-      (Matrix.trace (Matrix.adjugate A * B)) 0 := by
-    simpa using hcomplex
-  have hrealparam : HasDerivAt (fun t : ℝ => (t : ℂ)) 1 0 := by
-    simpa using (RCLike.ofRealCLM : ℝ →L[ℝ] ℂ).hasDerivAt
-  have hcomp := hcomplex'.hasFDerivAt.restrictScalars ℝ |>.comp_hasDerivAt_of_eq
-    0 hrealparam (by simp)
-  have hcomp' : HasDerivAt (fun t : ℝ => (A + t • B).det)
-      (Matrix.trace (Matrix.adjugate A * B)) 0 := by
-    simpa [Function.comp_def] using hcomp
-  exact hchain.unique hcomp'
 
 private theorem fderiv_log_det_hermitian {n : ℕ} (A B : Matrix (Fin n) (Fin n) ℂ)
     (hHerm : A.IsHermitian) (hpos : 0 < A.det.re) :

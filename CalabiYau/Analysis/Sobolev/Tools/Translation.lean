@@ -1,12 +1,10 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Tools/Translation.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -15,11 +13,10 @@ open scoped ENNReal NNReal Convolution Pointwise
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private theorem sub_translate_eq_integral_fderiv
     {φ : E → ℝ} (hφ : ContDiff ℝ 1 φ) (x h : E) :
     φ x - φ (x - h) =
@@ -64,7 +61,6 @@ private theorem sub_translate_eq_integral_fderiv
     _ = ∫ s in (0 : ℝ)..1, (fderiv ℝ φ (γ s)) h := hftc.symm
     _ = ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ φ (γ s)) h := hint
 
-omit [NeZero d] in
 private theorem rpow_abs_sub_translate_le
     {φ : E → ℝ} (hφ : ContDiff ℝ 1 φ)
     {p : ℝ} (hp_one : 1 ≤ p) (x h : E) :
@@ -183,7 +179,6 @@ private theorem rpow_abs_sub_translate_le
             Real.rpow_nonneg (norm_nonneg _) p
           exact mul_le_mul_of_nonneg_left hJensen hh_pow_nn
 
-omit [NeZero d] in
 private theorem lintegral_rpow_translate_sub_le
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr) (h : E) :
@@ -396,7 +391,6 @@ private theorem lintegral_rpow_translate_sub_le
           ∫⁻ x : E, (‖fderiv ℝ φ x‖ₑ : ℝ≥0∞) ^ pr := by
           rw [hPostSwap]
 
-omit [NeZero d] in
 theorem eLpNorm_translate_sub_le_smul_eLpNorm_fderiv
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)

@@ -23,8 +23,6 @@ public import CalabiYau.Geometry.Riemannian.Operator.Gradient.Basic
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 open CalabiYau.Riemannian
 
 noncomputable section
@@ -146,49 +144,6 @@ lemma chartTensorInnerPointwise_0s_succ
             (S.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i))
             (T.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j)) := rfl
 
-lemma chartTensorInnerPointwise_0s_contMDiffOn
-    (g : SmoothRiemannianMetric I M) (α : M) :
-    ∀ (s : ℕ) (S T : Tensor0SModel s ℝ E),
-      ContMDiffOn I 𝓘(ℝ) ∞
-        (fun b : M =>
-          chartTensorInnerPointwise0s (I := I) (M := M) s g α b S T)
-        (trivializationAt E (TangentSpace I) α).baseSet := by
-  intro s
-  induction s with
-  | zero =>
-      intro S T
-      have heq :
-          (fun b : M =>
-              chartTensorInnerPointwise0s (I := I) (M := M) 0 g α b S T)
-            = fun _ : M =>
-              S (fun i => Fin.elim0 i) * T (fun i => Fin.elim0 i) := by
-        funext b
-        rw [chartTensorInnerPointwise_0s_zero]
-      rw [heq]
-      exact contMDiffOn_const
-  | succ s ih =>
-      intro S T
-      have heq :
-          (fun b : M =>
-              chartTensorInnerPointwise0s (I := I) (M := M) (s + 1) g α b S T)
-            = fun b : M =>
-              ∑ i : Fin (Module.finrank ℝ E),
-                ∑ j : Fin (Module.finrank ℝ E),
-                  (CalabiYau.Tensor.Coordinates.chartGramMatrix g α b)⁻¹ i j *
-                    chartTensorInnerPointwise0s (I := I) (M := M) s g α b
-                      (S.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i))
-                      (T.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j)) := by
-        funext b
-        rw [chartTensorInnerPointwise_0s_succ]
-      rw [heq]
-      refine contMDiffOn_finsetSum (fun i _ => ?_)
-      refine contMDiffOn_finsetSum (fun j _ => ?_)
-      refine ContMDiffOn.mul ?_ ?_
-      · exact chartGramMatrix_inv_entry_contMDiffOn (I := I) g α i j
-      · exact ih
-          (S.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i))
-          (T.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j))
-
 lemma chartTensorInnerPointwise_0s_add_left
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (S₁ S₂ T : Tensor0SModel s ℝ E) :
@@ -240,63 +195,6 @@ lemma chartTensorInnerPointwise_0s_smul_left
       have hcurry :
           (c • S).curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) =
             c • S.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i) := by
-        ext m
-        simp [ContinuousMultilinearMap.curryLeft_apply,
-              smul_apply]
-      rw [hcurry, ih]
-      ring
-
-lemma chartTensorInnerPointwise_0s_add_right
-    (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
-    (S T₁ T₂ : Tensor0SModel s ℝ E) :
-    chartTensorInnerPointwise0s (I := I) (M := M) s g α b S (T₁ + T₂) =
-      chartTensorInnerPointwise0s (I := I) (M := M) s g α b S T₁ +
-        chartTensorInnerPointwise0s (I := I) (M := M) s g α b S T₂ := by
-  induction s with
-  | zero =>
-      change S _ * (T₁ + T₂) _ = S _ * T₁ _ + S _ * T₂ _
-      rw [add_apply]; ring
-  | succ s ih =>
-      rw [chartTensorInnerPointwise_0s_succ,
-          chartTensorInnerPointwise_0s_succ,
-          chartTensorInnerPointwise_0s_succ]
-      rw [← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl ?_
-      intro i _
-      rw [← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl ?_
-      intro j _
-      have hcurry :
-          (T₁ + T₂).curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) =
-            T₁.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) +
-              T₂.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) := by
-        ext m
-        simp [ContinuousMultilinearMap.curryLeft_apply,
-              add_apply]
-      rw [hcurry, ih]
-      ring
-
-lemma chartTensorInnerPointwise_0s_smul_right
-    (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
-    (c : ℝ) (S T : Tensor0SModel s ℝ E) :
-    chartTensorInnerPointwise0s (I := I) (M := M) s g α b S (c • T) =
-      c * chartTensorInnerPointwise0s (I := I) (M := M) s g α b S T := by
-  induction s with
-  | zero =>
-      change S _ * (c • T) _ = c * (S _ * T _)
-      rw [smul_apply, smul_eq_mul]; ring
-  | succ s ih =>
-      rw [chartTensorInnerPointwise_0s_succ,
-          chartTensorInnerPointwise_0s_succ,
-          Finset.mul_sum]
-      refine Finset.sum_congr rfl ?_
-      intro i _
-      rw [Finset.mul_sum]
-      refine Finset.sum_congr rfl ?_
-      intro j _
-      have hcurry :
-          (c • T).curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) =
-            c • T.curryLeft ((CalabiYau.Tensor.Coordinates.chartModelBasis E) j) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               smul_apply]

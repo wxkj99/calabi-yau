@@ -4,10 +4,10 @@ module
 public import CalabiYau.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 public import CalabiYau.Analysis.Elliptic.Regularity.GradInner.CLM.ChartFormula
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushforwardBound
-public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
+public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.HigherOrder
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Iterated
-public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 @[expose] public section
 
@@ -22,10 +22,9 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
@@ -45,15 +44,15 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 section ChartDirectionPartialBound
 
+variable [IsManifold I ∞ M] in
+variable [CompactSpace M] [I.Boundaryless] in
 private def euclSupport (α : M) (u : M → ℝ) : Set EuclN :=
   (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport u))
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
+variable [CompactSpace M] in
 private lemma euclSupport_isCompact {α : M} {u : M → ℝ}
     (hu_support : tsupport u ⊆ (chartAt H α).source) :
     IsCompact (euclSupport (I := I) (M := M) α u) := by
@@ -68,8 +67,6 @@ private lemma euclSupport_isCompact {α : M} {u : M → ℝ}
     exact hsrc
   exact h_tsupp_compact.image_of_continuousOn h_cont_on
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
 private lemma euclSupport_subset_chartTargetEuclid {α : M} {u : M → ℝ}
     (hu_support : tsupport u ⊆ (chartAt H α).source) :
     euclSupport (I := I) (M := M) α u ⊆ chartTargetEuclid (I := I) (M := M) α := by
@@ -82,8 +79,6 @@ private lemma euclSupport_subset_chartTargetEuclid {α : M} {u : M → ℝ}
     rw [← hxz]; exact (extChartAt I α).map_source hx_ext
   exact ⟨z, hz_target, hzy⟩
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
 private lemma chartPushedRaw_eq_zero_off_euclSupport {α : M} {u : M → ℝ}
     {y : EuclN} (hy : y ∉ euclSupport (I := I) (M := M) α u) :
     chartPushedRaw (I := I) (M := M) α u y = 0 := by
@@ -93,8 +88,10 @@ private lemma chartPushedRaw_eq_zero_off_euclSupport {α : M} {u : M → ℝ}
       (I := I) (M := M) (u := u) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
+section
+
+variable [CompactSpace M]
+
 lemma chartPushedRaw_smooth_hasCompactSupport_local
     {α : M} {u : M → ℝ} (hu_support : tsupport u ⊆ (chartAt H α).source) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α u) := by
@@ -107,8 +104,6 @@ lemma chartPushedRaw_smooth_hasCompactSupport_local
     (chartPushedRaw_eq_zero_off_euclSupport (I := I) (M := M)
       (α := α) (u := u) hy_off)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
 lemma tsupport_chartPushedRaw_subset_chartTargetEuclid
     {α : M} {u : M → ℝ} (hu_support : tsupport u ⊆ (chartAt H α).source) :
     tsupport (chartPushedRaw (I := I) (M := M) α u) ⊆
@@ -129,7 +124,10 @@ lemma tsupport_chartPushedRaw_subset_chartTargetEuclid
     (euclSupport_subset_chartTargetEuclid (I := I) (M := M)
       (α := α) (u := u) hu_support)
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
+end
+
+variable [IsManifold I ∞ M] in
+variable [CompactSpace M] [I.Boundaryless] in
 lemma chartPushedRaw_contDiff
     {α : M} {u : M → ℝ}
     (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -179,7 +177,8 @@ lemma chartPushedRaw_contDiff
     exact chartPushedRaw_eq_zero_off_euclSupport (I := I) (M := M)
       (α := α) (u := u) hz
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+variable [IsManifold I ∞ M] in
+variable [I.Boundaryless] in
 private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
     {α : M} (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ}
@@ -248,7 +247,11 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
   rw [h_basis]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
+section
+
+variable [IsManifold I ∞ M]
+variable [CompactSpace M] [I.Boundaryless]
+
 lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
     {α : M} (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -280,7 +283,7 @@ lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
     _root_.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hΩ_open hΛ_smoothTop hΛ_compact
       hΛ_tsupp_in_Ω hp_one 1
-  have hΛ_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p Λ Ω :=
+  have hΛ_W1p : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) p Λ Ω :=
     _root_.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp
       hΛ_W1
   have h_chosen_ae :=
@@ -301,7 +304,6 @@ lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
     exact h_pointwise y hy
   exact h_pointwise_ae.trans h_chosen_ae.symm
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem wkpNorm_partialDerivOnEuclid_le_wkpNorm_chartPushedRaw_succ
     (α : M) (i : Fin (Module.finrank ℝ E))
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) :
@@ -335,6 +337,8 @@ theorem wkpNorm_partialDerivOnEuclid_le_wkpNorm_chartPushedRaw_succ
     simp
   rw [h_one, one_mul]
   exact h_bound
+
+end
 
 end ChartDirectionPartialBound
 

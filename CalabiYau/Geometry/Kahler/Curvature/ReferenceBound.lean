@@ -43,7 +43,7 @@ variable [CompactSpace M]
 frames are uniformly bounded on a compact Kähler manifold. -/
 theorem exists_uniform_reference_curvature_component_bound (ω₀ : KahlerForm n M) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ (x : M) (P : Matrix (Fin n) (Fin n) ℂ),
-      referenceOrthonormalFrameMatrix ω₀ x P → ∀ p q j k,
+      IsReferenceOrthonormalFrame ω₀ x P → ∀ p q j k,
       ‖referenceCurvatureComponent ω₀ x P p q j k‖ ≤ B := by
   have hCompactUpperBound (K : Set (Matrix (Fin n) (Fin n) ℂ))
       (hK : IsCompact K) (f : Matrix (Fin n) (Fin n) ℂ → ℝ)
@@ -158,16 +158,16 @@ theorem exists_uniform_reference_curvature_component_bound (ω₀ : KahlerForm n
       exact isClosed_singleton.preimage hcont
     exact hK.of_isClosed_subset hclosed hsubset
   have hFiberCompact (x : M) :
-      IsCompact {P : Matrix (Fin n) (Fin n) ℂ | referenceOrthonormalFrameMatrix ω₀ x P} := by
-    simpa [referenceOrthonormalFrameMatrix] using
+      IsCompact {P : Matrix (Fin n) (Fin n) ℂ | IsReferenceOrthonormalFrame ω₀ x P} := by
+    simpa [IsReferenceOrthonormalFrame] using
       hFrameCompact (ω₀.metricInChart x (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
   have hFiberBound (x : M) :
       ∃ B : ℝ, 0 ≤ B ∧ ∀ (P : Matrix (Fin n) (Fin n) ℂ),
-        referenceOrthonormalFrameMatrix ω₀ x P → ∀ p q j k,
+        IsReferenceOrthonormalFrame ω₀ x P → ∀ p q j k,
           ‖referenceCurvatureComponent ω₀ x P p q j k‖ ≤ B := by
     classical
     let S : Set (Matrix (Fin n) (Fin n) ℂ) :=
-      {P | referenceOrthonormalFrameMatrix ω₀ x P}
+      {P | IsReferenceOrthonormalFrame ω₀ x P}
     have hcompact : IsCompact S := hFiberCompact x
     have hcomponentBound (p q j k : Fin n) :
         ∃ C : ℝ, 0 ≤ C ∧ ∀ P, P ∈ S →
@@ -216,7 +216,7 @@ theorem exists_uniform_reference_curvature_component_bound (ω₀ : KahlerForm n
       exact (hCbound y x hxy).trans (by simpa [B] using hsingle)
   have hLocalBound : ∀ x : M, ∃ U : Set M, IsOpen U ∧ x ∈ U ∧
       ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ U, ∀ (P : Matrix (Fin n) (Fin n) ℂ),
-        referenceOrthonormalFrameMatrix ω₀ y P → ∀ p q j k,
+        IsReferenceOrthonormalFrame ω₀ y P → ∀ p q j k,
           ‖referenceCurvatureComponent ω₀ y P p q j k‖ ≤ C := by
     intro x
     obtain ⟨U, hUopen, hx, hUsource, C, hCnonneg, hC⟩ :=

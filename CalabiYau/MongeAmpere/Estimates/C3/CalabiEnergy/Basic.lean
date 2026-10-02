@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Holder
-import CalabiYau.Geometry.Complex.Forms.Positive
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 
 /-!
 # Definitions for the Calabi third-order energy
@@ -25,20 +24,20 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
 /-- Holomorphic coordinate derivative, `∂/∂z_j = (∂/∂x_j - i∂/∂y_j)/2`. -/
-noncomputable def c3PartialZ (f : EuclideanSpace ℂ (Fin n) → ℂ)
+noncomputable def wirtingerDerivInChart (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (j : Fin n) : ℂ :=
   (fderiv ℝ f z (EuclideanSpace.single j 1) -
     Complex.I * fderiv ℝ f z (Complex.I • EuclideanSpace.single j 1)) / 2
 
 /-- Holomorphic Christoffel coefficients, determined by
 `∑ᵢ Γⁱⱼₖ gᵢₗ̄ = ∂ⱼ gₖₗ̄`. The inverse entry is `(g⁻¹)ₗᵢ`, not `(g⁻¹)ᵢₗ`. -/
-noncomputable def c3ChristoffelInChart
+noncomputable def christoffelInChart
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (i j k : Fin n) : ℂ :=
-  ∑ l, (g z)⁻¹ l i * c3PartialZ (fun w ↦ g w k l) z j
+  ∑ l, (g z)⁻¹ l i * wirtingerDerivInChart (fun w ↦ g w k l) z j
 
 /-- Components of the difference between the perturbed and reference Kähler connections. -/
-noncomputable def c3ConnectionDifferenceInChart (ω₀ : KahlerForm n M)
+noncomputable def connectionDifferenceInChart (ω₀ : KahlerForm n M)
     (φ : M → ℝ) (x₀ : M) (z : EuclideanSpace ℂ (Fin n))
     (i j k : Fin n) : ℂ :=
   let ψ := (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm
@@ -46,7 +45,7 @@ noncomputable def c3ConnectionDifferenceInChart (ω₀ : KahlerForm n M)
     fun w ↦ ω₀.metricInChart x₀ w
   let gφ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun w ↦ g₀ w + complexHessian (φ ∘ ψ) w
-  c3ChristoffelInChart gφ z i j k - c3ChristoffelInChart g₀ z i j k
+  christoffelInChart gφ z i j k - christoffelInChart g₀ z i j k
 
 /-- The squared norm of the connection-difference tensor in a holomorphic chart.
 For `Tⁱⱼₖ`, the Hermitian contractions are `gᵢₐ̄ (g⁻¹)ᵦⱼ (g⁻¹)ᶜₖ Tⁱⱼₖ · conj(Tᵃᵦᶜ)`;
@@ -57,7 +56,7 @@ noncomputable def calabiEnergyInChart (ω₀ : KahlerForm n M) (φ : M → ℝ)
   let g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ := fun w ↦
     ω₀.metricInChart x₀ w + complexHessian (φ ∘ ψ) w
   let T : Fin n → Fin n → Fin n → ℂ := fun i j k ↦
-    c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k
+    connectionDifferenceInChart ω₀ φ x₀ z i j k
   exact RCLike.re <| ∑ i, ∑ j, ∑ k, ∑ a, ∑ b, ∑ c,
     g z i a * (g z)⁻¹ b j * (g z)⁻¹ c k * T i j k * star (T a b c)
 

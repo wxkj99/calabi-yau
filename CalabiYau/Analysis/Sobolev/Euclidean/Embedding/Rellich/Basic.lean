@@ -6,8 +6,6 @@ public import CalabiYau.Analysis.Sobolev.Tools.FrechetKolmogorov
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -16,12 +14,10 @@ open scoped ENNReal NNReal Convolution Pointwise
 
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
-omit [NeZero d] in
 lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ ‖v‖ := by
   rw [EuclideanSpace.norm_eq]
   have : ‖v i‖ ^ 2 ≤ ∑ j, ‖v j‖ ^ 2 := by
@@ -36,18 +32,6 @@ lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ ‖v‖ :=
     ‖v i‖ = Real.sqrt (‖v i‖ ^ 2) := (Real.sqrt_sq hnorm_nn).symm
     _ ≤ Real.sqrt (∑ j, ‖v j‖ ^ 2) := Real.sqrt_le_sqrt this
 
-omit [NeZero d] in
-theorem eLpNorm_weakGrad_component_le
-    {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
-    (hw : DeGiorgi.MemW1pWitness p u Ω) (i : Fin d) :
-    eLpNorm (fun x => hw.weakGrad x i) p (volume.restrict Ω) ≤
-      eLpNorm (fun x => ‖hw.weakGrad x‖) p (volume.restrict Ω) := by
-  refine eLpNorm_mono_ae_real ?_
-  filter_upwards with x
-  exact euclidean_component_norm_le (hw.weakGrad x) i
-
-omit [NeZero d] in
-omit [NeZero d] in
 lemma fderiv_norm_le_sum_components
     {φ : E → ℝ} (x : E) :
     ‖fderiv ℝ φ x‖ ≤ ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| := by
@@ -88,8 +72,6 @@ lemma fderiv_norm_le_sum_components
             rw [hcongr]
       _ = (∑ i : Fin d, |L (EuclideanSpace.single i 1)|) * ‖v‖ := by ring
 
-omit [NeZero d] in
-omit [NeZero d] in
 lemma eLpNorm_fderiv_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
@@ -201,8 +183,6 @@ lemma eLpNorm_fderiv_le_sum_components
     exact (Real.norm_eq_abs _).symm
   rw [hcongr, eLpNorm_norm]
 
-omit [NeZero d] in
-omit [NeZero d] in
 lemma eLpNorm_translate_sub_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (h : E) :
@@ -236,9 +216,10 @@ lemma eLpNorm_translate_sub_le_sum_components
     eLpNorm_fderiv_le_sum_components (d := d) hp_one hφ
   gcongr
 
+variable [NeZero d] in
 private lemma eLpNorm_grad_eq_restrict
     {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
-    {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
+    {φ : E → ℝ}
     (hφ_sub : tsupport φ ⊆ Ω)
     {p : ℝ≥0∞} (i : Fin d) :
     eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume =
@@ -251,15 +232,14 @@ private lemma eLpNorm_grad_eq_restrict
     by_cases hx : x ∈ Ω
     · simp [hx]
     · have hzero :=
-        DeGiorgi.fderiv_apply_zero_outside_of_tsupport_subset
-          (Ω := Ω) (hf := hφ_smooth) (hsub := hφ_sub) hx i
+        Sobolev.Euclidean.fderiv_apply_zero_outside_of_tsupport_subset
+          (Ω := Ω) (hsub := hφ_sub) hx i
       simp [hx, hzero]
   conv_lhs => rw [hgrad_eq_indicator]
   exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict
     (μ := volume) (s := Ω) (p := p)
     (f := fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) hΩ_meas
 
-omit [NeZero d] in
 private lemma eLpNorm_phi_sub_indicator_eq
     {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
     {φ u : E → ℝ}
@@ -274,17 +254,18 @@ private lemma eLpNorm_phi_sub_indicator_eq
     by_cases hx : x ∈ Ω
     · simp [hx]
     · have hφx : φ x = 0 :=
-        DeGiorgi.zero_outside_of_tsupport_subset (Ω := Ω) hφ_sub hx
+        Sobolev.Euclidean.zero_outside_of_tsupport_subset (Ω := Ω) hφ_sub hx
       simp [hx, hφx]
   conv_lhs => rw [hEq]
   exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict
     (μ := volume) (s := Ω) (p := p) (f := fun x => φ x - u x) hΩ_meas
 
+variable [NeZero d] in
 theorem eLpNorm_translate_sub_le_of_memW01p
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {u : E → ℝ}
-    (hu : DeGiorgi.MemW01p p u Ω)
+    (hu : Sobolev.Euclidean.MemW01p p u Ω)
     (h : E) :
     eLpNorm (fun x => Ω.indicator u (x - h) - Ω.indicator u x) p volume ≤
       ENNReal.ofReal ‖h‖ *
@@ -293,7 +274,7 @@ theorem eLpNorm_translate_sub_le_of_memW01p
             p (volume.restrict Ω) := by
   classical
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  set hw : DeGiorgi.MemW1pWitness p u Ω := Classical.choose hu.2 with hw_def
+  set hw : Sobolev.Euclidean.MemW1pWitness p u Ω := Classical.choose hu.2 with hw_def
   have hSpec := Classical.choose_spec hu.2
   set φ : ℕ → E → ℝ := Classical.choose hSpec with hφ_def
   have hSpec' := Classical.choose_spec hSpec
@@ -438,7 +419,7 @@ theorem eLpNorm_translate_sub_le_of_memW01p
           eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) p
             (volume.restrict Ω) := by
     intro n i
-    exact eLpNorm_grad_eq_restrict (d := d) hΩ_meas (hφ_smooth n) (hφ_sub n) i
+    exact eLpNorm_grad_eq_restrict (d := d) hΩ_meas (hφ_sub n) i
   have hcomp_aesm_restrict : ∀ n i,
       AEStronglyMeasurable
         (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
@@ -559,13 +540,11 @@ theorem eLpNorm_translate_sub_le_of_memW01p
     simpa using h2
   exact le_of_tendsto_of_tendsto' tendsto_const_nhds h_sum_tendsto hLHS_le
 
-omit [NeZero d] in
 private lemma isCompact_closure_of_bounded
     {Ω : Set E} (hΩ_bdd : Bornology.IsBounded Ω) :
     IsCompact (closure Ω) :=
   hΩ_bdd.isCompact_closure
 
-omit [NeZero d] in
 private lemma indicator_support_subset_closure
     {Ω : Set E} {u : E → ℝ} (x : E) (hx : x ∉ closure Ω) :
     Ω.indicator u x = 0 := by
@@ -573,12 +552,13 @@ private lemma indicator_support_subset_closure
   intro hxΩ
   exact hx (subset_closure hxΩ)
 
+variable [NeZero d] in
 theorem rellich_kondrachov_W01p_seq
     {Ω : Set E}
     (hΩ_open : IsOpen Ω) (hΩ_bdd : Bornology.IsBounded Ω)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {u : ℕ → E → ℝ}
-    (hu_mem : ∀ n, DeGiorgi.MemW01p p (u n) Ω)
+    (hu_mem : ∀ n, Sobolev.Euclidean.MemW01p p (u n) Ω)
     {R : ℝ}
     (hu_bdd_fun : ∀ n, eLpNorm (u n) p (volume.restrict Ω) ≤ ENNReal.ofReal R)
     (hu_bdd_grad : ∀ n,

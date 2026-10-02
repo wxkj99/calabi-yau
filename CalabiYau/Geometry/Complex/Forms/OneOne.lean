@@ -4,7 +4,7 @@ public import CalabiYau.Geometry.Complex.Forms.Basic
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Matrix.Order
 
-import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 import Mathlib.Analysis.SpecialFunctions.Exponential
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
@@ -688,8 +688,7 @@ theorem relDet_mul_relDet (hω : ω.IsPositive) (hα : α.IsPositive) :
     RCLike.re β.coeffMatrix.det / RCLike.re ω.coeffMatrix.det
   field_simp
 
-theorem relDet_smul (hω : ω.IsPositive) (c : ℝ) : relDet ω (c • α) = c ^ n * relDet ω α := by
-  have _hω := hω
+theorem relDet_smul (c : ℝ) : relDet ω (c • α) = c ^ n * relDet ω α := by
   change RCLike.re ((coeffMatrix (c • α)).det) / RCLike.re ((coeffMatrix ω).det) =
     c ^ n * (RCLike.re ((coeffMatrix α).det) / RCLike.re ((coeffMatrix ω).det))
   rw [coeffMatrix_smul, RCLike.real_smul_eq_coe_smul (K := ℂ) c, Matrix.det_smul]
@@ -927,8 +926,7 @@ theorem relTrace_compContinuousLinearMap (hω : ω.IsOneOne) (hα : α.IsOneOne)
   exact congrArg RCLike.re (Matrix.trace_conj' hBunit (ω.coeffMatrix⁻¹ * α.coeffMatrix))
 
 /-- Linearization of the Monge–Ampère ratio: `d/dt|₀ log ((α + tβ)ⁿ/ωⁿ) = tr_α β`. -/
-@[deprecated "unused hypothesis `hβ`; will be removed" (since := "2026-10-02")]
-theorem hasDerivAt_log_relDet (hω : ω.IsPositive) (hα : α.IsPositive) (hβ : β.IsOneOne) :
+theorem hasDerivAt_log_relDet (hω : ω.IsPositive) (hα : α.IsPositive) :
     HasDerivAt (fun t : ℝ ↦ Real.log (relDet ω (α + t • β))) (relTrace α β) 0 := by
   change HasDerivAt
     (fun t : ℝ ↦ Real.log
@@ -963,12 +961,12 @@ theorem hasDerivAt_log_relDet (hω : ω.IsPositive) (hα : α.IsPositive) (hβ :
   exact hlog'.congr_of_eventuallyEq heq
 
 /-- Along a segment, `d/ds ((α + sβ)ⁿ/ωⁿ) = (α + sβ)ⁿ/ωⁿ · tr_{α+sβ} β` wherever `α + sβ > 0`. -/
-theorem hasDerivAt_relDet_add_smul (hω : ω.IsPositive) (hβ : β.IsOneOne) {s : ℝ}
+theorem hasDerivAt_relDet_add_smul (hω : ω.IsPositive) {s : ℝ}
     (hs : (α + s • β).IsPositive) :
     HasDerivAt (fun t : ℝ ↦ relDet ω (α + t • β))
       (relDet ω (α + s • β) * relTrace (α + s • β) β) s := by
   let f : ℝ → ℝ := fun t ↦ relDet ω (α + t • β)
-  have hlog0 := hasDerivAt_log_relDet (ω := ω) (α := α + s • β) hω hs hβ
+  have hlog0 := hasDerivAt_log_relDet (ω := ω) (α := α + s • β) (β := β) hω hs
   have hshift : HasDerivAt (fun t : ℝ ↦ t - s) 1 s := by
     simpa using (hasDerivAt_id s).sub_const s
   have hlogShift := hlog0.comp_of_eq s hshift (by simp)
@@ -1058,33 +1056,6 @@ theorem coeffMatrix_dWedgeDBar (ℓ : EuclideanSpace ℂ (Fin n) →L[ℝ] ℝ) 
   simp [map_neg]
   ring_nf
   simp [Complex.I_sq]
-
-theorem relTrace_dWedgeDBar_nonneg (hω : ω.IsPositive) (ℓ : EuclideanSpace ℂ (Fin n) →L[ℝ] ℝ) :
-    0 ≤ relTrace ω (dWedgeDBar ℓ) := by
-  have hωA : ω.coeffMatrix.PosDef := (isPositive_iff (α := ω)).mp hω |>.2
-  have hInv : (ω.coeffMatrix⁻¹).PosDef := hωA.inv
-  have hpsd : (ω.coeffMatrix⁻¹).PosSemidef := hInv.posSemidef
-  let z : Fin n → ℂ := fun j ↦
-    ((ℓ (EuclideanSpace.single j 1) : ℂ) - I * ℓ (I • EuclideanSpace.single j 1)) / 2
-  have hstar :
-      (fun k ↦ ((ℓ (EuclideanSpace.single k 1) : ℂ) +
-        I * ℓ (I • EuclideanSpace.single k 1)) / 2) = star z := by
-    funext k
-    simp [z]
-  change 0 ≤ RCLike.re ((ω.coeffMatrix)⁻¹ * coeffMatrix (dWedgeDBar ℓ)).trace
-  rw [coeffMatrix_dWedgeDBar, hstar]
-  have hmul : ω.coeffMatrix⁻¹ * Matrix.vecMulVec z (star z) =
-      Matrix.vecMulVec (ω.coeffMatrix⁻¹ *ᵥ z) (star z) := by
-    ext i j
-    simp [Matrix.mul_apply, Matrix.vecMulVec, Matrix.mulVec_eq_sum, Finset.sum_mul]
-    apply Finset.sum_congr rfl
-    intro k hk
-    ring
-  have htrace : ((ω.coeffMatrix)⁻¹ * Matrix.vecMulVec z (star z)).trace =
-      star z ⬝ᵥ ((ω.coeffMatrix)⁻¹ *ᵥ z) := by
-    rw [hmul, Matrix.trace_vecMulVec, dotProduct_comm]
-  rw [htrace]
-  exact (RCLike.nonneg_iff.mp (hpsd.dotProduct_mulVec_nonneg z)).1
 
 /-- `|∂f|²_ω = tr_ω (i ∂f ∧ ∂̄f)` vanishes only if `df = 0`. -/
 theorem relTrace_dWedgeDBar_eq_zero_iff (hω : ω.IsPositive)

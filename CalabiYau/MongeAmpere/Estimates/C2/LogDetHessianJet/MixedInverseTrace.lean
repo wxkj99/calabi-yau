@@ -1,7 +1,6 @@
 module
 
 public import CalabiYau.Geometry.Kahler.Curvature.Chart
-import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
 
 /-!
 # Differentiating the varying inverse-trace expression

@@ -40,29 +40,21 @@ def IsSmoothMeanZeroForwardExtension {ω₁ : KahlerForm n M} {α : ℝ≥0}
 omit [ConnectedSpace M] in
 /-- The bounded forward core map extends continuously to the mean-zero completions and agrees
 with the pointwise Laplacian on the dense smooth mean-zero order-two core. -/
-@[deprecated "unused hypotheses `hα₀`, `hα₁`, `hSmoothDense`, and `hvol`; will be removed" (since := "2026-10-02")]
 theorem exists_smoothCore_laplacian_extension [Nonempty M]
-    (ω₁ : KahlerForm n M) (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
-    [P : ContinuityHolderPair ω₁ α]
-    (hForward : HasBoundedForwardLaplacian ω₁ P.finiteChartCover α)
-    (hSmoothDense : closure (Set.range fun f :
-      smoothMeanZeroChartHolderCore ω₁ P.finiteChartCover 0 α P.normedDataC0 =>
-        ((f : SmoothChartHolderCore P.finiteChartCover 0 α) :
-          LittleHolder P.finiteChartCover 0 α P.normedDataC0)) =
-      (P.C0 : Set (LittleHolder P.finiteChartCover 0 α P.normedDataC0)))
-    (hvol : 0 < ω₁.volume.real Set.univ) :
+    (ω₁ : KahlerForm n M) (α : ℝ≥0) [P : ContinuityHolderPair ω₁ α]
+    (hForward : HasBoundedForwardLaplacian ω₁ P.finiteChartCover α) :
     ∃ A : P.C2 →L[ℝ] P.C0, IsSmoothMeanZeroForwardExtension P A := by
   classical
   let cover := P.finiteChartCover
   let N₂ := P.normedDataC2
   let N₀ := P.normedDataC0
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N₂
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N₂
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 0 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 0 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 0 α N₀
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 0 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 0 α) :=
     smoothChartHolderCoreNormedSpace cover 0 α N₀
   rcases hForward with ⟨C, hC⟩
   have hTcore₀ (g : SmoothChartHolderCore cover 0 α) :

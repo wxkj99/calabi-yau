@@ -3,24 +3,24 @@ module
 public import CalabiYau.MongeAmpere.Existence
 public import CalabiYau.Yau.RicciFlat
 import CalabiYau.MongeAmpere.Uniqueness
-import Comparator.SobolevInequality
-import Comparator.PoincareInequality
-import Comparator.InteriorSchauderEstimate
-import Comparator.PoissonSolvability
-import Comparator.DDBarLemma
+import CalabiYau.Geometry.Kahler.Sobolev.Compact
+import CalabiYau.Geometry.Kahler.Sobolev.Poincare
+import CalabiYau.Analysis.Elliptic.Schauder.InteriorEstimate
+import CalabiYau.Geometry.Kahler.Poisson.Solvability
+import CalabiYau.Geometry.Complex.DDBar.Compact
 
 /-!
 # Assembly of the Calabi–Yau theorem
 
-The five global analytic inputs are stated separately in `Comparator`. This module assembles
-those inputs with the conditional Monge–Ampère existence theorem, Calabi's uniqueness theorem,
-and the conditional Ricci and cohomological theorems in `CalabiYau.Yau`. No global input is
-silently assumed and none of the proofs below uses a placeholder.
+This module combines the global analytic inputs (Poisson solvability, the interior Schauder
+estimate, the Sobolev and Poincaré inequalities, and the compact `∂∂̄` lemma) with the conditional
+Monge–Ampère existence theorem, Calabi's uniqueness theorem, and the conditional Ricci and
+cohomological theorems in `CalabiYau.Yau`.
 
 For the potential and cohomological statements, the Borel measurable structure is installed
-locally: the frozen target statements do not have measurable-space parameters. The T3 statement
-retains its explicit closedness hypothesis even though the Chern-class condition already implies
-closedness in the conditional existence theorem.
+locally, since the statements in `Comparator.Challenge` have no measurable-space parameters.
+Closedness of `ρ` is not needed in the cohomological statement: it follows from the condition on
+the first Chern class.
 -/
 
 @[expose] public section
@@ -72,8 +72,8 @@ theorem calabiConjecture_of_sub_eq_mddbar_assembled (ω₀ : KahlerForm n M)
     ∃ (φ : M → ℝ) (hφ : ω₀.IsPotential φ), (ω₀.perturb φ hφ).ricciForm = ρ ∧
       ∀ (ψ : M → ℝ) (hψ : ω₀.IsPotential ψ), (ω₀.perturb ψ hψ).ricciForm = ρ →
         ω₀.perturb ψ hψ = ω₀.perturb φ hφ := by
-  letI : MeasurableSpace M := borel M
-  letI : BorelSpace M := ⟨rfl⟩
+  let : MeasurableSpace M := borel M
+  let : BorelSpace M := ⟨rfl⟩
   obtain ⟨φ, hφ, hRic⟩ := KahlerForm.exists_ricciForm_eq_of_sub_eq_mddbar ω₀
     (mongeAmpereSolvable_of_compact ω₀) hF hρ
   refine ⟨φ, hφ, hRic, ?_⟩
@@ -87,8 +87,8 @@ theorem ricciFlat_of_ricciForm_eq_mddbar_assembled (ω₀ : KahlerForm n M) (F :
     ∃ (φ : M → ℝ) (hφ : ω₀.IsPotential φ), (ω₀.perturb φ hφ).IsRicciFlat ∧
       ∀ (ψ : M → ℝ) (hψ : ω₀.IsPotential ψ), (ω₀.perturb ψ hψ).IsRicciFlat →
         ω₀.perturb ψ hψ = ω₀.perturb φ hφ := by
-  letI : MeasurableSpace M := borel M
-  letI : BorelSpace M := ⟨rfl⟩
+  let : MeasurableSpace M := borel M
+  let : BorelSpace M := ⟨rfl⟩
   obtain ⟨φ, hφ, hRic⟩ := KahlerForm.exists_isRicciFlat_of_ricciForm_eq_mddbar ω₀
     (mongeAmpereSolvable_of_compact ω₀) hF h
   refine ⟨φ, hφ, hRic, ?_⟩
@@ -103,13 +103,13 @@ theorem ricciFlat_of_ricciForm_eq_mddbar_assembled (ω₀ : KahlerForm n M) (F :
 existence and for uniqueness in the whole Kähler class. -/
 theorem calabiConjecture_assembled (ω₀ : KahlerForm n M)
     (ρ : FormField (EuclideanSpace ℂ (Fin n)) M 2)
-    (hρs : ρ.IsSmooth) (hρ : ρ.IsOneOne) (hρc : ρ.IsClosed)
+    (hρs : ρ.IsSmooth) (hρ : ρ.IsOneOne)
     (hc₁ : ((2 * Real.pi)⁻¹ • ρ).RepresentsFirstChernClass) :
     ∃ ω₁ : KahlerForm n M, (ω₁.toFormField - ω₀.toFormField).IsExact ∧ ω₁.ricciForm = ρ ∧
       ∀ ω₂ : KahlerForm n M, (ω₂.toFormField - ω₀.toFormField).IsExact →
         ω₂.ricciForm = ρ → ω₂ = ω₁ := by
-  letI : MeasurableSpace M := borel M
-  letI : BorelSpace M := ⟨rfl⟩
+  let : MeasurableSpace M := borel M
+  let : BorelSpace M := ⟨rfl⟩
   have hdd : SatisfiesDDBarLemma n M := satisfiesDDBarLemma_of_compact ω₀
   obtain ⟨ω₁, hExact, hRic⟩ :=
     KahlerForm.exists_ricciForm_eq_of_representsFirstChernClass ω₀
@@ -118,7 +118,8 @@ theorem calabiConjecture_assembled (ω₀ : KahlerForm n M)
   intro ω₂ h₂Exact h₂Ric
   have hDiff : (ω₁.toFormField - ω₂.toFormField).IsExact := by
     have h := hExact.sub h₂Exact
-    convert h using 1 <;> abel
+    convert h using 1
+    abel
   exact KahlerForm.eq_of_ricciForm_eq_of_isExact hdd hDiff (h₂Ric.trans hRic.symm)
 
 /-- The Ricci-flat cohomological consequence, with uniqueness in the whole Kähler class. -/
@@ -127,8 +128,8 @@ theorem ricciFlat_of_firstChernClass_eq_zero_assembled (ω₀ : KahlerForm n M)
     ∃ ω₁ : KahlerForm n M, (ω₁.toFormField - ω₀.toFormField).IsExact ∧ ω₁.IsRicciFlat ∧
       ∀ ω₂ : KahlerForm n M, (ω₂.toFormField - ω₀.toFormField).IsExact →
         ω₂.IsRicciFlat → ω₂ = ω₁ := by
-  letI : MeasurableSpace M := borel M
-  letI : BorelSpace M := ⟨rfl⟩
+  let : MeasurableSpace M := borel M
+  let : BorelSpace M := ⟨rfl⟩
   exact KahlerForm.existsUnique_isRicciFlat_of_firstChernClass_eq_zero ω₀
     (mongeAmpereSolvable_of_compact ω₀) (satisfiesDDBarLemma_of_compact ω₀) hc₁
 

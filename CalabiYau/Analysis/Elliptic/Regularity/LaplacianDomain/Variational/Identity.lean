@@ -12,7 +12,7 @@ public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.GradientH1LipschitzBound
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
 public import CalabiYau.Analysis.Elliptic.Operator.VariationalLaplacian
-public import CalabiYau.Analysis.Elliptic.Operator.SmoothBridge
+public import CalabiYau.Analysis.Elliptic.Operator.SmoothResolvent
 public import CalabiYau.Analysis.Elliptic.Operator.Variational
 public import CalabiYau.Geometry.Riemannian.Operator.Gradient.NormSquared
 
@@ -31,7 +31,7 @@ namespace Laplacian
 namespace LaplacianDomainVariationalIdentity
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -55,9 +55,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 lemma densityPsi_cont
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -82,8 +81,6 @@ lemma densityPsi_cont
     refine ContinuousAt.congr ?_ h_ev.symm
     exact continuousAt_const
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 lemma densityPsi_cs
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ) :
@@ -93,8 +90,6 @@ lemma densityPsi_cs
   change densityOnEuclid (I := I) g α y * ψ y = 0
   rw [hψ_y, mul_zero]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 lemma densityPsi_support
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ}
@@ -110,26 +105,29 @@ lemma densityPsi_support
   change densityOnEuclid (I := I) g α y * ψ y = 0
   rw [hψ_y, mul_zero]
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [I.Boundaryless] [T2Space M] [CompactSpace M] in
 lemma smoothToLp_tendsto_H1ComplToLp_of_h1_tendsto
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl g} {v : ℕ → SmoothScalar g}
     (h_tendsto : Tendsto (fun n => smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h)) :
     Tendsto (fun n => smoothToLp (I := I) (M := M) g (v n)) atTop
-      (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) := by
+      (𝓝 (h1ComplToLp (I := I) (M := M) g u_h)) := by
   classical
-  have h_compose : Tendsto (fun n => H1ComplToLp (I := I) (M := M) g
+  have h_compose : Tendsto (fun n => h1ComplToLp (I := I) (M := M) g
       (smoothToH1Compl (I := I) (M := M) g (v n))) atTop
-      (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) :=
-    ((H1ComplToLp (I := I) (M := M) g).continuous.tendsto _).comp h_tendsto
-  have h_eq : (fun n => H1ComplToLp (I := I) (M := M) g
+      (𝓝 (h1ComplToLp (I := I) (M := M) g u_h)) :=
+    ((h1ComplToLp (I := I) (M := M) g).continuous.tendsto _).comp h_tendsto
+  have h_eq : (fun n => h1ComplToLp (I := I) (M := M) g
       (smoothToH1Compl (I := I) (M := M) g (v n))) =
       (fun n => smoothToLp (I := I) (M := M) g (v n)) := by
     funext n
-    exact H1ComplToLp_smoothToH1Compl (I := I) (M := M) g (v n)
+    exact h1ComplToLp_smoothToH1Compl (I := I) (M := M) g (v n)
   rw [← h_eq]; exact h_compose
 
+variable [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private noncomputable def gradInnerSmoothScalar
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) : SmoothScalar g where
@@ -148,112 +146,17 @@ private noncomputable def gradInnerSmoothScalar
     rw [grad_g_apply, grad_g_apply]
     rfl
 
-omit [T2Space M] [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+variable [I.Boundaryless] in
 @[simp] private lemma gradInnerSmoothScalar_toFun
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (gradInnerSmoothScalar (I := I) (M := M) g ρα v).toFun =
       fun x : M => g.inner x (gradFun (I := I) g ρα x)
         (gradFun (I := I) g v.toFun x) := rfl
+section
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma gradInnerSmooth_eq_smoothToLp
-    (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
-    gradInnerSmooth (I := I) (M := M) g ρα v =
-      smoothToLp (I := I) (M := M) g
-        (gradInnerSmoothScalar (I := I) (M := M) g ρα v) := by
-  classical
-  apply MeasureTheory.Lp.ext
-  have h_grad := gradInnerSmooth_coeFn (I := I) (M := M) g ρα v
-  have h_lp_h : ((smoothToLp (I := I) (M := M) g
-        (gradInnerSmoothScalar (I := I) (M := M) g ρα v) :
-        Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
-        riemannianVolumeMeasure (I := I) (M := M) g]
-      (gradInnerSmoothScalar (I := I) (M := M) g ρα v).toFun :=
-    MemLp.coeFn_toLp (gradInnerSmoothScalar (I := I) (M := M) g ρα v).memLp_two
-  filter_upwards [h_grad, h_lp_h] with x hx_grad hx_lp_h
-  rw [hx_grad, hx_lp_h]
-  rfl
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
-private noncomputable def rhoOneSubLapSmoothScalar
-    (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
-    SmoothScalar g where
-  toFun := fun x : M => (ρα : M → ℝ) x * v.oneSubLapClassical.toFun x
-  smooth := ρα.contMDiff.mul v.oneSubLapClassical.smooth
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma smoothMulLp_oneSubLap_eq_smoothToLp
-    (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
-    smoothMulLp (I := I) (M := M) g ρα
-        (smoothToLp (I := I) (M := M) g v.oneSubLapClassical) =
-      smoothToLp (I := I) (M := M) g
-        (rhoOneSubLapSmoothScalar (I := I) (M := M) g ρα v) := by
-  classical
-  apply MeasureTheory.Lp.ext
-  have h_mul := smoothMulLp_apply_coeFn (I := I) (M := M) g ρα
-    (smoothToLp (I := I) (M := M) g v.oneSubLapClassical)
-  have h_lp1 : ((smoothToLp (I := I) (M := M) g v.oneSubLapClassical
-        : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
-        riemannianVolumeMeasure (I := I) (M := M) g] v.oneSubLapClassical.toFun :=
-    MemLp.coeFn_toLp v.oneSubLapClassical.memLp_two
-  have h_lp_h : ((smoothToLp (I := I) (M := M) g
-        (rhoOneSubLapSmoothScalar (I := I) (M := M) g ρα v) :
-        Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
-        riemannianVolumeMeasure (I := I) (M := M) g]
-      (rhoOneSubLapSmoothScalar (I := I) (M := M) g ρα v).toFun :=
-    MemLp.coeFn_toLp (rhoOneSubLapSmoothScalar (I := I) (M := M) g ρα v).memLp_two
-  refine h_mul.trans ?_
-  filter_upwards [h_lp1, h_lp_h] with x hx_lp1 hx_lp_h
-  change (ρα : M → ℝ) x * ((smoothToLp (I := I) (M := M) g v.oneSubLapClassical
-        : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x =
-    ((smoothToLp (I := I) (M := M) g
-        (rhoOneSubLapSmoothScalar (I := I) (M := M) g ρα v) :
-        Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
-  rw [hx_lp1, hx_lp_h]
-  rfl
-
-private noncomputable def laplacianRhoMulSmoothScalar
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    SmoothScalar g where
-  toFun := fun x : M =>
-    (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
-  smooth :=
-    (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul v.smooth
-
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma smoothMulLp_laplacianRho_eq_smoothToLp
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    smoothMulLp (I := I) (M := M) g (laplacianOfChartPOU (I := I) (M := M) g α)
-        (smoothToLp (I := I) (M := M) g v) =
-      smoothToLp (I := I) (M := M) g
-        (laplacianRhoMulSmoothScalar (I := I) (M := M) g α v) := by
-  classical
-  apply MeasureTheory.Lp.ext
-  have h_mul := smoothMulLp_apply_coeFn (I := I) (M := M) g
-    (laplacianOfChartPOU (I := I) (M := M) g α)
-    (smoothToLp (I := I) (M := M) g v)
-  have h_lp1 : ((smoothToLp (I := I) (M := M) g v
-        : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
-        riemannianVolumeMeasure (I := I) (M := M) g] v.toFun :=
-    MemLp.coeFn_toLp v.memLp_two
-  have h_lp_h : ((smoothToLp (I := I) (M := M) g
-        (laplacianRhoMulSmoothScalar (I := I) (M := M) g α v) :
-        Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
-        riemannianVolumeMeasure (I := I) (M := M) g]
-      (laplacianRhoMulSmoothScalar (I := I) (M := M) g α v).toFun :=
-    MemLp.coeFn_toLp (laplacianRhoMulSmoothScalar (I := I) (M := M) g α v).memLp_two
-  refine h_mul.trans ?_
-  filter_upwards [h_lp1, h_lp_h] with x hx_lp1 hx_lp_h
-  change (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x *
-      ((smoothToLp (I := I) (M := M) g v
-        : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x =
-    ((smoothToLp (I := I) (M := M) g
-        (laplacianRhoMulSmoothScalar (I := I) (M := M) g α v) :
-        Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
-  rw [hx_lp1, hx_lp_h]
-  rfl
-
-omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPulledIntegralCLM_gradInnerSmooth_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -305,7 +208,6 @@ lemma chartPulledIntegralCLM_gradInnerSmooth_tendsto
     (((gradInnerCLM (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)).continuous.tendsto _).comp h_tendsto)
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPulledIntegralCLM_smoothMulLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -328,10 +230,10 @@ lemma chartPulledIntegralCLM_smoothMulLp_tendsto
         (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
         (smoothMulLp (I := I) (M := M) g
           (laplacianOfChartPOU (I := I) (M := M) g α)
-          (H1ComplToLp (I := I) (M := M) g u_h)))) := by
+          (h1ComplToLp (I := I) (M := M) g u_h)))) := by
   classical
   have h_lp_tendsto : Tendsto (fun n => smoothToLp (I := I) (M := M) g (v n))
-      atTop (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) :=
+      atTop (𝓝 (h1ComplToLp (I := I) (M := M) g u_h)) :=
     smoothToLp_tendsto_H1ComplToLp_of_h1_tendsto (I := I) (M := M) g h_tendsto
   have h_smoothMul_tendsto : Tendsto (fun n =>
       smoothMulLp (I := I) (M := M) g
@@ -339,7 +241,7 @@ lemma chartPulledIntegralCLM_smoothMulLp_tendsto
           (smoothToLp (I := I) (M := M) g (v n))) atTop
       (𝓝 (smoothMulLp (I := I) (M := M) g
         (laplacianOfChartPOU (I := I) (M := M) g α)
-        (H1ComplToLp (I := I) (M := M) g u_h))) :=
+        (h1ComplToLp (I := I) (M := M) g u_h))) :=
     ((smoothMulLp (I := I) (M := M) g
         (laplacianOfChartPOU (I := I) (M := M) g α)).continuous.tendsto _).comp
       h_lp_tendsto
@@ -349,56 +251,13 @@ lemma chartPulledIntegralCLM_smoothMulLp_tendsto
     (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
     h_smoothMul_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma chartPulledIntegralCLM_smoothToLp_eq_lpInner
-    (g : SmoothRiemannianMetric I M) (α : M)
-    {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
-    (hθ_support : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α)
-    (h_smooth : SmoothScalar g) :
-    chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_support
-        (smoothToLp (I := I) (M := M) g h_smooth) =
-      ⟪chartPulledIntegralWeightLp (I := I) (M := M) g α hθ_cont hθ_cs hθ_support,
-        smoothToLp (I := I) (M := M) g h_smooth⟫_ℝ := by
-  unfold chartPulledIntegralCLM
-  rw [innerSL_apply_apply]
-
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_eq_lpInner
-    (g : SmoothRiemannianMetric I M) (α : M)
-    {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    (hψ_cs : HasCompactSupport ψ)
-    (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α)
-    (v : SmoothScalar g) :
-    chartPulledIntegralCLM (I := I) (M := M) g α
-        (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
-        (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
-        (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
-        (smoothMulLp (I := I) (M := M) g
-          (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-          (smoothToLp (I := I) (M := M) g v.oneSubLapClassical)) =
-      ⟪chartPulledIntegralWeightLp (I := I) (M := M) g α
-          (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
-          (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
-          (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support),
-        smoothToLp (I := I) (M := M) g
-          (rhoOneSubLapSmoothScalar (I := I) (M := M) g
-            (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) v)⟫_ℝ := by
-  rw [smoothMulLp_oneSubLap_eq_smoothToLp]
-  exact chartPulledIntegralCLM_smoothToLp_eq_lpInner (I := I) (M := M) g α
-    (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
-    (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
-    (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
-    (rhoOneSubLapSmoothScalar (I := I) (M := M) g
-      (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) v)
-
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma h1Inner_smoothToH1Compl_eq_lpInner_oneSubLap_of_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
     (w : SmoothScalar g) :
     ⟪u_h, smoothToH1Compl (I := I) (M := M) g w⟫_ℝ =
       ⟪smoothToLp (I := I) (M := M) g w,
-        H1ComplToLp (I := I) (M := M) g u_h -
+        h1ComplToLp (I := I) (M := M) g u_h -
           laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩⟫_ℝ := by
   classical
   set f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -414,8 +273,8 @@ private lemma h1Inner_smoothToH1Compl_eq_lpInner_oneSubLap_of_laplacianDomain
     rw [show u_h = (⟨u_h, hu_h⟩ : laplacianDomain (I := I) (M := M) g).val from rfl,
       h_u_eq]
   rw [h_subst, h_res]
-  rw [H1ComplToLp_smoothToH1Compl]
-  have h_f_eq : f = H1ComplToLp (I := I) (M := M) g u_h -
+  rw [h1ComplToLp_smoothToH1Compl]
+  have h_f_eq : f = h1ComplToLp (I := I) (M := M) g u_h -
       laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩ := by
     have h_lap_apply :=
       laplacianOp_apply (I := I) (M := M) g ⟨u_h, hu_h⟩
@@ -423,6 +282,11 @@ private lemma h1Inner_smoothToH1Compl_eq_lpInner_oneSubLap_of_laplacianDomain
     abel
   rw [← h_f_eq]
 
+end
+
+variable [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private noncomputable def rhoChartWeightSmoothScalarOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ}
@@ -519,7 +383,7 @@ private noncomputable def rhoChartWeightSmoothScalarOn
       refine (ContMDiffAt.congr_of_eventuallyEq ?_ h_eq_evt)
       exact contMDiffAt_const
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [I.Boundaryless] [T2Space M] [CompactSpace M] in
 @[simp] private lemma rhoChartWeightSmoothScalarOn_toFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ}
@@ -532,7 +396,7 @@ omit [NeZero (Module.finrank ℝ E)] in
       fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
         chartPulledIntegralWeight (I := I) (M := M) g α θ x := rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [I.Boundaryless] [T2Space M] [CompactSpace M] in
 private lemma smoothMulLp_chartWeight_eq_smoothToLp_rhoWeightOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ}
@@ -581,16 +445,17 @@ private lemma smoothMulLp_chartWeight_eq_smoothToLp_rhoWeightOn
   rw [hx_w, hx_rhs]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma densityPsi_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ContDiffOn ℝ ∞ (fun y : EuclN => densityOnEuclid (I := I) g α y * ψ y)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityOnEuclid_contDiffOn (I := I) g α).mul hψ.contDiffOn
+section
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
+
+
 lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -613,7 +478,7 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
         (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
         (smoothMulLp (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-          (H1ComplToLp (I := I) (M := M) g u_h -
+          (h1ComplToLp (I := I) (M := M) g u_h -
             laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)))) := by
   classical
   set θ : EuclN → ℝ := fun y : EuclN =>
@@ -747,17 +612,17 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
   have h_res :
       ⟪u_h, smoothToH1Compl (I := I) (M := M) g w_smooth⟫_ℝ =
         ⟪smoothToLp (I := I) (M := M) g w_smooth,
-          H1ComplToLp (I := I) (M := M) g u_h -
+          h1ComplToLp (I := I) (M := M) g u_h -
             laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩⟫_ℝ :=
     h1Inner_smoothToH1Compl_eq_lpInner_oneSubLap_of_laplacianDomain
       (I := I) (M := M) g hu_h w_smooth
   have h_target_eq :
       ⟪smoothToLp (I := I) (M := M) g w_smooth,
-        H1ComplToLp (I := I) (M := M) g u_h -
+        h1ComplToLp (I := I) (M := M) g u_h -
           laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩⟫_ℝ =
         chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_support
           (smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-            (H1ComplToLp (I := I) (M := M) g u_h -
+            (h1ComplToLp (I := I) (M := M) g u_h -
               laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) := by
     rw [← smoothMulLp_chartWeight_eq_smoothToLp_rhoWeightOn (I := I) (M := M) g α
       hθ_cont hθ_contDiffOn hθ_cs hθ_support]
@@ -765,12 +630,12 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
         ⟪smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
             (chartPulledIntegralWeightLp (I := I) (M := M) g α
               hθ_cont hθ_cs hθ_support),
-          H1ComplToLp (I := I) (M := M) g u_h -
+          h1ComplToLp (I := I) (M := M) g u_h -
             laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩⟫_ℝ =
         ⟪chartPulledIntegralWeightLp (I := I) (M := M) g α
             hθ_cont hθ_cs hθ_support,
           smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-            (H1ComplToLp (I := I) (M := M) g u_h -
+            (h1ComplToLp (I := I) (M := M) g u_h -
               laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)⟫_ℝ := by
       rw [L2.inner_def, L2.inner_def]
       have h_lhs_mul := smoothMulLp_apply_coeFn (I := I) (M := M) g
@@ -779,7 +644,7 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
           hθ_cont hθ_cs hθ_support)
       have h_rhs_mul := smoothMulLp_apply_coeFn (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-        (H1ComplToLp (I := I) (M := M) g u_h -
+        (h1ComplToLp (I := I) (M := M) g u_h -
           laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)
       refine integral_congr_ae ?_
       filter_upwards [h_lhs_mul, h_rhs_mul] with x hx_lhs hx_rhs
@@ -789,10 +654,10 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
                 (chartPulledIntegralWeightLp (I := I) (M := M) g α
                   hθ_cont hθ_cs hθ_support) :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x,
-            ((H1ComplToLp (I := I) (M := M) g u_h -
+            ((h1ComplToLp (I := I) (M := M) g u_h -
                 laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩ :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x⟫_ℝ =
-          ((H1ComplToLp (I := I) (M := M) g u_h -
+          ((h1ComplToLp (I := I) (M := M) g u_h -
                 laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩ :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x *
             ((smoothMulLp (I := I) (M := M) g
@@ -807,12 +672,12 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x,
             ((smoothMulLp (I := I) (M := M) g
                 (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-                (H1ComplToLp (I := I) (M := M) g u_h -
+                (h1ComplToLp (I := I) (M := M) g u_h -
                   laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩) :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x⟫_ℝ =
           ((smoothMulLp (I := I) (M := M) g
                 (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-                (H1ComplToLp (I := I) (M := M) g u_h -
+                (h1ComplToLp (I := I) (M := M) g u_h -
                   laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩) :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x *
             ((chartPulledIntegralWeightLp (I := I) (M := M) g α
@@ -834,13 +699,12 @@ lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
       funext h_per_n]
   rw [show chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_support
       (smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-        (H1ComplToLp (I := I) (M := M) g u_h -
+        (h1ComplToLp (I := I) (M := M) g u_h -
           laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) =
       ⟪u_h, smoothToH1Compl (I := I) (M := M) g w_smooth⟫_ℝ from ?_]
   · exact h_lim_lhs
   · rw [h_res, h_target_eq]
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_variational_identity_clm_form
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -853,7 +717,7 @@ theorem laplacianDomain_variational_identity_clm_form
         (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
         (smoothMulLp (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-          (H1ComplToLp (I := I) (M := M) g u_h -
+          (h1ComplToLp (I := I) (M := M) g u_h -
             laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) -
       (2 : ℝ) *
         chartPulledIntegralCLM (I := I) (M := M) g α
@@ -868,7 +732,7 @@ theorem laplacianDomain_variational_identity_clm_form
         (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
         (smoothMulLp (I := I) (M := M) g
           (laplacianOfChartPOU (I := I) (M := M) g α)
-          (H1ComplToLp (I := I) (M := M) g u_h)) =
+          (h1ComplToLp (I := I) (M := M) g u_h)) =
     chartPulledIntegralCLM (I := I) (M := M) g α
       (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
       (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
@@ -911,7 +775,7 @@ theorem laplacianDomain_variational_identity_clm_form
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g
               (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-              (H1ComplToLp (I := I) (M := M) g u_h -
+              (h1ComplToLp (I := I) (M := M) g u_h -
                 laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) -
           (2 : ℝ) *
             chartPulledIntegralCLM (I := I) (M := M) g α
@@ -926,7 +790,7 @@ theorem laplacianDomain_variational_identity_clm_form
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g
               (laplacianOfChartPOU (I := I) (M := M) g α)
-              (H1ComplToLp (I := I) (M := M) g u_h)))) := by
+              (h1ComplToLp (I := I) (M := M) g u_h)))) := by
     refine (h_lim_1.sub ?_).sub h_lim_3
     exact (tendsto_const_nhds.mul h_lim_2 : Tendsto _ _ _)
   have h_smooth_eq_n : ∀ n,
@@ -977,7 +841,7 @@ theorem laplacianDomain_variational_identity_clm_form
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g
               (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-              (H1ComplToLp (I := I) (M := M) g u_h -
+              (h1ComplToLp (I := I) (M := M) g u_h -
                 laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) -
           (2 : ℝ) *
             chartPulledIntegralCLM (I := I) (M := M) g α
@@ -992,7 +856,7 @@ theorem laplacianDomain_variational_identity_clm_form
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g
               (laplacianOfChartPOU (I := I) (M := M) g α)
-              (H1ComplToLp (I := I) (M := M) g u_h)))) := by
+              (h1ComplToLp (I := I) (M := M) g u_h)))) := by
     have h_fun_eq : (fun n =>
         chartPulledIntegralCLM (I := I) (M := M) g α
           (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
@@ -1038,7 +902,7 @@ theorem laplacianDomain_variational_identity_clm_form
           (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
           (smoothMulLp (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-            (H1ComplToLp (I := I) (M := M) g u_h -
+            (h1ComplToLp (I := I) (M := M) g u_h -
               laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) -
         (2 : ℝ) *
           chartPulledIntegralCLM (I := I) (M := M) g α
@@ -1053,11 +917,13 @@ theorem laplacianDomain_variational_identity_clm_form
           (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
           (smoothMulLp (I := I) (M := M) g
             (laplacianOfChartPOU (I := I) (M := M) g α)
-            (H1ComplToLp (I := I) (M := M) g u_h)) := by
+            (h1ComplToLp (I := I) (M := M) g u_h)) := by
     rw [fHLeibniz_def]
     simp only [ContinuousLinearMap.map_sub, ContinuousLinearMap.map_smul,
       smul_eq_mul]
   exact h_rhs_eq.symm
+
+end
 
 end LaplacianDomainVariationalIdentity
 end Laplacian

@@ -19,12 +19,11 @@ section SupKernel
 variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
   [MeasurableSpace V] [BorelSpace V]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+  [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 def supKernel (η : V → ℝ) (u : BoundedContinuousFunction V F) (x : V) : F :=
   ∫ y, η y • u (x - y)
 
-omit [CompleteSpace F] in
 theorem supKernel_int {η : V → ℝ} (hη : Integrable η)
     (u : BoundedContinuousFunction V F) (x : V) :
     Integrable (fun y : V => η y • u (x - y)) := by
@@ -35,7 +34,6 @@ theorem supKernel_int {η : V → ℝ} (hη : Integrable η)
     rw [norm_smul]
     exact mul_le_mul_of_nonneg_left (u.norm_coe_le_norm (x - y)) (norm_nonneg _)
 
-omit [CompleteSpace F] in
 theorem supKernel_norm {η : V → ℝ} (hη : Integrable η)
     (u : BoundedContinuousFunction V F) (x : V) :
     ‖supKernel η u x‖ ≤ (∫ y, ‖η y‖) * ‖u‖ := by
@@ -50,7 +48,6 @@ theorem supKernel_norm {η : V → ℝ} (hη : Integrable η)
             (norm_nonneg _))
     _ = (∫ y, ‖η y‖) * ‖u‖ := by rw [integral_mul_const]
 
-omit [CompleteSpace F] in
 theorem supKernel_contract {η : V → ℝ} (hη : Integrable η)
     (hη0 : ∀ y, 0 ≤ η y) (hη1 : ∫ y, η y = 1)
     (u : BoundedContinuousFunction V F) (x : V) :
@@ -69,12 +66,11 @@ variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
   [MeasurableSpace V] [BorelSpace V]
   [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+  [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 def heatSup (t : ℝ) (u : BoundedContinuousFunction V F) (x : V) : F :=
   supKernel (heatKernel t) u x
 
-omit [CompleteSpace F] in
 theorem heatSup_contract {t : ℝ} (ht : 0 < t)
     (u : BoundedContinuousFunction V F) (x : V) :
     ‖heatSup t u x‖ ≤ ‖u‖ := by
@@ -87,7 +83,6 @@ def heatD1Sup (t : ℝ) (v : V) (u : BoundedContinuousFunction V F) (x : V) : F 
 def heatD2Sup (t : ℝ) (v w : V) (u : BoundedContinuousFunction V F) (x : V) : F :=
   supKernel (heatD2 t v w) u x
 
-omit [CompleteSpace F] in
 theorem heatD1Sup_norm {t : ℝ} (ht : 0 < t) (v : V)
     (u : BoundedContinuousFunction V F) (x : V) :
     ‖heatD1Sup t v u x‖ ≤
@@ -95,7 +90,6 @@ theorem heatD1Sup_norm {t : ℝ} (ht : 0 < t) (v : V)
   refine (supKernel_norm (heatD1_int ht v) u x).trans ?_
   exact mul_le_mul_of_nonneg_right (integral_norm_D1 ht v) (norm_nonneg _)
 
-omit [CompleteSpace F] in
 theorem heatD2Sup_norm {t : ℝ} (ht : 0 < t) (v w : V)
     (u : BoundedContinuousFunction V F) (x : V) :
     ‖heatD2Sup t v w u x‖ ≤

@@ -45,23 +45,17 @@ def HasBoundedSmoothMeanZeroPoissonInverse (ω₁ : KahlerForm n M)
 /-- The smooth mean-zero Poisson solver is unique and obeys one uniform inverse bound in the
 finite-chart gauges. The proof combines the smooth solver with the global estimate; merely knowing
 smooth solvability would not imply boundedness. -/
-@[deprecated "unused hypotheses `hα₀`, `hα₁`, and `hSch`; will be removed" (since := "2026-10-02")]
 theorem exists_bounded_smooth_meanZero_poisson_inverse [Nonempty M]
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
-    (hSch : InteriorSchauderEstimate n)
-    (hPoisson : ω₁.PoissonSolvable)
+    (α : ℝ≥0) (hPoisson : ω₁.PoissonSolvable)
     (hGlobal : HasGlobalMeanZeroLaplacianBound ω₁ cover α) :
     HasBoundedSmoothMeanZeroPoissonInverse ω₁ cover α := by
   classical
-  have := hα₀
-  have := hα₁
-  have := hSch
   obtain ⟨C, hGlobal⟩ := hGlobal
   have hvol : 0 < ω₁.volume.real Set.univ := by
     have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₁.volume := by
-      simpa using (integrable_const (1 : ℝ) : Integrable (fun _ : M ↦ (1 : ℝ)) ω₁.volume)
-    simpa using integral_exp_pos (μ := ω₁.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
+      simp
+    simp
   refine ⟨C, ?_⟩
   intro f hf hfm
   obtain ⟨u₀, hu₀, hlap₀⟩ := hPoisson f hf hfm

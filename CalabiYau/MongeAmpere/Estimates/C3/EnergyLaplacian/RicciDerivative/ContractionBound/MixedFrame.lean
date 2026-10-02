@@ -30,7 +30,7 @@ abbrev C3PairTriple (n : ℕ) :=
     (i j k : Fin n) : ℂ :=
   ∑ p : C3Pair n, B i p.1 * A p.2.1 j * A p.2.2 k * T p.1 p.2.1 p.2.2
 
-theorem c3SumThreeFactor
+theorem sum_mul_mul_eq_mul_sum
     {α β γ : Type*} [Fintype α] [Fintype β] [Fintype γ]
     (f : α → ℂ) (g : β → ℂ) (h : γ → ℂ) :
     (∑ a, ∑ b, ∑ c, f a * g b * h c) =
@@ -46,7 +46,7 @@ theorem c3SumThreeFactor
       _ = _ := by simp only [Fintype.sum_prod_type]
   exact hp.symm
 
-theorem c3SumPairTripleFactor {n : ℕ}
+theorem sum_prod_pairs_mul_mul_mul_const {n : ℕ}
     (f g h : Fin n × Fin n → ℂ) (d : ℂ) :
     (∑ z : C3PairTriple n, f z.1 * g z.2.1 * h z.2.2 * d) =
       (∑ z, f z) * (∑ z, g z) * (∑ z, h z) * d := by
@@ -54,7 +54,7 @@ theorem c3SumPairTripleFactor {n : ℕ}
   have hh :
       (∑ z : C3PairTriple n, f z.1 * g z.2.1 * h z.2.2) =
         (∑ z, f z) * (∑ z, g z) * (∑ z, h z) := by
-    simpa only [Fintype.sum_prod_type] using c3SumThreeFactor f g h
+    simpa only [Fintype.sum_prod_type] using sum_mul_mul_eq_mul_sum f g h
   exact congrArg (fun z : ℂ => z * d) hh
 
 end KahlerForm

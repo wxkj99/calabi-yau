@@ -4,10 +4,8 @@ public import CalabiYau.MongeAmpere.Continuity.Openness.ResidualNormalization
 public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderC2Regularity.CompletedChartJets
 public import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetMatrixRemainder
 public import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetBaseVariation
-public import CalabiYau.Analysis.Holder.Bilinear
+public import CalabiYau.Mathlib.Analysis.Holder.Bilinear
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetRemainder.MixedBaseVariation
-import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetRemainder.PointwiseDifference
 import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetRemainder.RawMatrixIdentity
 import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetRemainder.CompactControl
 import CalabiYau.MongeAmpere.Continuity.Openness.ResidualDerivative.LogDetRemainder.PairwiseHolderEstimate
@@ -28,51 +26,6 @@ open MeasureTheory
 
 namespace Matrix
 
-set_option maxHeartbeats 200000 in
-private theorem inverse_norm_le_of_small_add {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (A X : Matrix ι ι ℂ) (B : ℝ≥0)
-    (hA : A.PosDef) (hAX : (A + X).PosDef)
-    (hAinv : ‖A⁻¹‖ ≤ (B : ℝ))
-    (hsmall : (B : ℝ) * ‖X‖ ≤ 1 / 2) :
-    ‖(A + X)⁻¹‖ ≤ 2 * (B : ℝ) := by
-  let V := (A + X)⁻¹
-  have hAunit : IsUnit A.det := (ne_of_gt hA.det_pos).isUnit
-  have hAXunit : IsUnit (A + X).det := (ne_of_gt hAX.det_pos).isUnit
-  have hAinvA : A⁻¹ * A = 1 := Matrix.nonsing_inv_mul A hAunit
-  have hAXAXinv : (A + X) * V = 1 := by
-    dsimp [V]
-    exact Matrix.mul_nonsing_inv (A + X) hAXunit
-  have hident : (1 + A⁻¹ * X) * V = A⁻¹ := by
-    calc
-      (1 + A⁻¹ * X) * V = (A⁻¹ * A + A⁻¹ * X) * V := by rw [hAinvA]
-      _ = A⁻¹ * (A + X) * V := by rw [Matrix.mul_add]
-      _ = A⁻¹ := by rw [Matrix.mul_assoc, hAXAXinv]; simp
-  have hsum : V + A⁻¹ * X * V = A⁻¹ := by
-    simpa only [Matrix.add_mul, Matrix.one_mul, Matrix.mul_assoc] using hident
-  have hsub : V = A⁻¹ - A⁻¹ * X * V := by
-    calc
-      V = (V + A⁻¹ * X * V) - A⁻¹ * X * V := by module
-      _ = A⁻¹ - A⁻¹ * X * V := by rw [hsum]
-  have hmul : ‖A⁻¹ * X * V‖ ≤ ‖A⁻¹‖ * ‖X‖ * ‖V‖ := by
-    calc
-      _ ≤ ‖A⁻¹ * X‖ * ‖V‖ := Matrix.frobenius_norm_mul _ _
-      _ ≤ (‖A⁻¹‖ * ‖X‖) * ‖V‖ := by
-        gcongr
-        exact Matrix.frobenius_norm_mul _ _
-  have hmulB : ‖A⁻¹ * X * V‖ ≤ (B : ℝ) * ‖X‖ * ‖V‖ := by
-    calc
-      ‖A⁻¹ * X * V‖ ≤ ‖A⁻¹‖ * ‖X‖ * ‖V‖ := hmul
-      _ ≤ (B : ℝ) * ‖X‖ * ‖V‖ := by gcongr
-  have hV : ‖V‖ ≤ (B : ℝ) + ((B : ℝ) * ‖X‖) * ‖V‖ := by
-    calc
-      ‖V‖ = ‖A⁻¹ - A⁻¹ * X * V‖ := congrArg norm hsub
-      _ ≤ ‖A⁻¹‖ + ‖A⁻¹ * X * V‖ := norm_sub_le _ _
-      _ ≤ (B : ℝ) + ((B : ℝ) * ‖X‖) * ‖V‖ := by
-        calc
-          ‖A⁻¹‖ + ‖A⁻¹ * X * V‖ ≤ (B : ℝ) + ‖A⁻¹ * X * V‖ := by nlinarith [hAinv]
-          _ ≤ (B : ℝ) + ((B : ℝ) * ‖X‖) * ‖V‖ := by nlinarith [hmulB]
-  have hnonneg : 0 ≤ ‖V‖ := norm_nonneg _
-  nlinarith
 set_option maxHeartbeats 200000 in
 /-- Positive definiteness persists along an affine segment, including its endpoints. -/
 private theorem posDef_affine_segment {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -105,10 +58,9 @@ end Matrix
 namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
-
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem holderBoundOn_of_contDiffOn_compact
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
@@ -181,7 +133,9 @@ private theorem holderBoundOn_of_contDiffOn_compact
         _ ≤ (Ctot : ℝ) := by exact_mod_cast (le_max_left (2 * C) Cα))
   · exact hHolderJet.mono_const (le_max_right _ _)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 private theorem exists_metricInChartInverseEntryHolderBound
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α : ℝ≥0) (hα₁ : α < 1) (i : cover.ι) (j k : Fin n) :
@@ -237,92 +191,12 @@ private theorem exists_metricInChartInverseEntryHolderBound
     (cover.isCompact_piece i) (cover.piece_in_target i) (hInv_entry j k)
     (le_of_lt hα₁)
 
-private theorem frobenius_norm_le_of_entry_bound_finite {ι : Type*} [Fintype ι]
-    (A : Matrix ι ι ℂ) (B : ℝ) (hB : 0 ≤ B)
-    (hA : ∀ i j, ‖A i j‖ ≤ B) :
-    ‖A‖ ≤ Real.sqrt (Fintype.card (ι × ι) : ℝ) * B := by
-  rw [Matrix.frobenius_norm_def, ← Real.sqrt_eq_rpow]
-  simp only [Real.rpow_two, pow_two]
-  calc
-    Real.sqrt (∑ i, ∑ j, ‖A i j‖ * ‖A i j‖) ≤
-        Real.sqrt ((Fintype.card ι : ℝ) * (Fintype.card ι : ℝ) * (B * B)) := by
-      apply Real.sqrt_le_sqrt
-      calc
-        (∑ i, ∑ j, ‖A i j‖ * ‖A i j‖) ≤
-            ∑ i, ∑ j, B * B := by
-          apply Finset.sum_le_sum
-          intro i hi
-          apply Finset.sum_le_sum
-          intro j hj
-          exact mul_le_mul (hA i j) (hA i j) (norm_nonneg _) hB
-        _ = (Fintype.card ι : ℝ) * (Fintype.card ι : ℝ) * (B * B) := by
-          simp [mul_assoc]
-    _ = Real.sqrt (Fintype.card (ι × ι) : ℝ) * B := by
-      rw [Fintype.card_prod, Nat.cast_mul, Real.sqrt_mul (by positivity),
-        Real.sqrt_mul (by positivity), Real.sqrt_mul_self hB]
+section
 
-private theorem exists_uniform_frobenius_bound {κ ι X : Type*}
-    [Fintype κ] [Fintype ι] [PseudoMetricSpace X]
-    (K : κ → Set X) (A : κ → X → Matrix ι ι ℂ)
-    (hentry : ∀ k i j, ∃ c : ℝ≥0, ∀ x ∈ K k, ‖A k x i j‖ ≤ c) :
-    ∃ B : ℝ≥0, ∀ k x, x ∈ K k → ‖A k x‖ ≤ B := by
-  classical
-  let c : κ × ι × ι → ℝ≥0 := fun kij => Classical.choose (hentry kij.1 kij.2.1 kij.2.2)
-  have hc (k : κ) (i j : ι) (x : X) (hx : x ∈ K k) :
-      ‖A k x i j‖ ≤ c (k, i, j) :=
-    Classical.choose_spec (hentry k i j) x hx
-  let Cmax : ℝ≥0 := Finset.univ.sup c
-  have hcmax (k : κ) (i j : ι) : c (k, i, j) ≤ Cmax := by
-    exact Finset.le_sup (Finset.mem_univ (k, i, j))
-  let B : ℝ≥0 :=
-    (Real.sqrt (Fintype.card (ι × ι) : ℝ) * (Cmax : ℝ)).toNNReal
-  refine ⟨B, ?_⟩
-  intro k x hx
-  have hmat := frobenius_norm_le_of_entry_bound_finite (A k x) (Cmax : ℝ)
-    (NNReal.coe_nonneg Cmax) (by
-      intro i j
-      exact (hc k i j x hx).trans (by exact_mod_cast hcmax k i j))
-  calc
-    ‖A k x‖ ≤ Real.sqrt (Fintype.card (ι × ι) : ℝ) * (Cmax : ℝ) := hmat
-    _ = (B : ℝ) := (Real.coe_toNNReal _
-      (mul_nonneg (Real.sqrt_nonneg _) (NNReal.coe_nonneg Cmax))).symm
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem exists_uniform_metricInChartInverse_norm_bound
-    (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (α : ℝ≥0) (hα₁ : α < 1) :
-    ∃ B : ℝ≥0, ∀ i z, z ∈ cover.piece i →
-      ‖(ω₁.metricInChart (cover.base i) z)⁻¹‖ ≤ B := by
-  classical
-  apply exists_uniform_frobenius_bound (fun i => cover.piece i)
-    (fun i z => (ω₁.metricInChart (cover.base i) z)⁻¹)
-  intro i j k
-  obtain ⟨C, hC⟩ := exists_metricInChartInverseEntryHolderBound ω₁ cover α hα₁ i j k
-  refine ⟨C, ?_⟩
-  intro z hz
-  have h := hC.1 0 (by omega) z hz
-  simpa [norm_iteratedFDeriv_zero] using h
-
-private theorem holderBoundOn_zero_of_holderWith
-    {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F]
-    {α K : ℝ≥0} {s : Set E} {f : E → F}
-    (hf : HolderWith K α f)
-    (hbound : ∀ x ∈ s, ‖f x‖ ≤ K) :
-    HolderBoundOn 0 α K s f := by
-  refine ⟨?_, ?_⟩
-  · intro j hj x hx
-    have hj0 : j = 0 := Nat.eq_zero_of_le_zero hj
-    subst j
-    simpa [iteratedFDeriv_zero_eq_comp] using hbound x hx
-  · intro x hx y hy
-    let e := continuousMultilinearCurryFin0 ℝ E F
-    change edist (e.symm (f x)) (e.symm (f y)) ≤ _
-    calc
-      edist (e.symm (f x)) (e.symm (f y)) = edist (f x) (f y) :=
-        (IsometryClass.isometry e.symm).edist_eq _ _
-      _ ≤ _ := hf x y
-
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 private theorem holderBoundOn_zero_sub
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -703,18 +577,13 @@ private theorem hessian_entry_holderBoundOn_zero_of_orderTwoBound
   intro z hz
   exact hessian_entry_norm_le_of_orderTwoBound hf hSmooth i j hz
 
-omit [ConnectedSpace M] in
-private theorem centered_endpoint_eval_norm_bound
-    (ω₁ : KahlerForm n M) (α : ℝ≥0)
-    [P : ContinuityHolderPair ω₁ α] (v : P.C0) (x : M) :
-    ‖P.evalC0 v x‖ ≤
-      ‖smoothChartHolderContinuousMapExtension P.finiteChartCover 0 α
-        P.normedDataC0 v‖ := by
-  let F := smoothChartHolderContinuousMapExtension P.finiteChartCover 0 α P.normedDataC0
-  change ‖F v x‖ ≤ ‖F v‖
-  exact (F v).norm_coe_le_norm x
+end
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+section
+
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 private theorem laplacian_eq_inChart_c2
     (ω₁ : KahlerForm n M) {f : M → ℝ}
     (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 f) (x : M)
@@ -825,7 +694,6 @@ private theorem laplacian_eq_inChart_c2
       rw [← hrep ω₁.toFormField, ← hrep (mddbar n f), hddbar]
       rfl
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem logMongeAmpere_eq_chart_logdet_of_c2
     (ω₁ : KahlerForm n M) (ψ : M → ℝ)
     (hψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 ψ)
@@ -859,7 +727,6 @@ private theorem logMongeAmpere_eq_chart_logdet_of_c2
     exact (div_pos_iff_of_pos_right hAdet).mp hMApos
   rw [hMA, Real.log_div (ne_of_gt hBdet) (ne_of_gt hAdet)]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem logMongeAmpere_sub_laplacian_eq_logDetTaylorRemainder
     (ω₁ : KahlerForm n M) (ψ : M → ℝ)
     (hψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 ψ)
@@ -874,140 +741,6 @@ private theorem logMongeAmpere_sub_laplacian_eq_logDetTaylorRemainder
   rw [logMongeAmpere_eq_chart_logdet_of_c2 ω₁ ψ hψ hpositive x hy, hLap]
   rfl
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem mongeAmpere_add_of_contMDiff_two
-    (ω₀ : KahlerForm n M) (φ u : M → ℝ) (hφ : ω₀.IsPotential φ)
-    (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 u) (x : M) :
-    ω₀.mongeAmpere (φ + u) x =
-      ω₀.mongeAmpere φ x * (ω₀.perturb φ hφ).mongeAmpere u x := by
-  have hφtwo : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 φ :=
-    hφ.1.of_le (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top))
-  change ContinuousAlternatingMap.relDet (ω₀ x) (ω₀ x + mddbar n (φ + u) x) = _
-  rw [mddbar_add_of_contMDiff_two hφtwo hu]
-  rw [show (mddbar n φ + mddbar n u) x = mddbar n φ x + mddbar n u x by rfl]
-  rw [show ω₀.mongeAmpere φ x =
-      ContinuousAlternatingMap.relDet (ω₀ x) (ω₀.toFormField x + mddbar n φ x) by rfl]
-  change _ = ContinuousAlternatingMap.relDet (ω₀ x)
-    (ω₀.toFormField x + mddbar n φ x) *
-      ContinuousAlternatingMap.relDet ((ω₀.perturb φ hφ).toFormField x)
-        ((ω₀.perturb φ hφ).toFormField x + mddbar n u x)
-  rw [KahlerForm.perturb_apply hφ x]
-  simpa [add_assoc] using
-    (@ContinuousAlternatingMap.relDet_mul_relDet n
-      (ω₀.toFormField x + mddbar n φ x)
-      (ω₀.toFormField x + mddbar n φ x + mddbar n u x)
-      (ω₀.toFormField x)
-      (ω₀.isPositive x) (hφ.2 x)).symm
-
-omit [BorelSpace M] [ConnectedSpace M] in
-private theorem uncenteredPathResidual_eq_laplacian_add_Taylor
-    (ω₀ : KahlerForm n M) (F : M → ℝ) (t : ℝ) (φ : M → ℝ)
-    (hsol : ω₀.SolvesMongeAmpere
-      (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (u : M → ℝ)
-    (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 u)
-    (hpositive : (ω₀.perturb φ hsol.1).IsC2Potential u)
-    (δ : ℝ) (c : M) {y : M}
-    (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) c).source) :
-    uncenteredContinuityPathResidual ω₀ F t φ hsol u δ y =
-      (ω₀.perturb φ hsol.1).laplacian u y +
-        Matrix.logDetTaylorRemainder
-          ((ω₀.perturb φ hsol.1).metricInChart c
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c y))
-          (complexHessian (u ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c).symm)
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c y)) -
-        (δ * F y + (ω₀.pathConstant F (t + δ) - ω₀.pathConstant F t)) := by
-  have hcocycle := mongeAmpere_add_of_contMDiff_two ω₀ φ u hsol.1 hu y
-  have hbasepos : 0 < ω₀.mongeAmpere φ y := ω₀.mongeAmpere_pos hsol.1 y
-  have hratio : ω₀.mongeAmpere (φ + u) y / ω₀.mongeAmpere φ y =
-      (ω₀.perturb φ hsol.1).mongeAmpere u y := by
-    rw [hcocycle]
-    exact mul_div_cancel_left₀ _ hbasepos.ne'
-  have hlog : Real.log (ω₀.mongeAmpere (φ + u) y / ω₀.mongeAmpere φ y) =
-      Real.log ((ω₀.perturb φ hsol.1).mongeAmpere u y) := congrArg Real.log hratio
-  have hTaylor := logMongeAmpere_sub_laplacian_eq_logDetTaylorRemainder
-    (ω₀.perturb φ hsol.1) u hu hpositive c hy
-  change Real.log (ω₀.mongeAmpere (φ + u) y / ω₀.mongeAmpere φ y) -
-    (δ * F y + (ω₀.pathConstant F (t + δ) - ω₀.pathConstant F t)) = _
-  rw [hlog]
-  linarith
-
-private theorem complexHessian_sub_at
-    {f g : EuclideanSpace ℂ (Fin n) → ℝ} {z : EuclideanSpace ℂ (Fin n)}
-    (hf : ContDiffAt ℝ 2 f z) (hg : ContDiffAt ℝ 2 g z) :
-    complexHessian (f - g) z = complexHessian f z - complexHessian g z := by
-  simp only [complexHessian, ddbar_sub hf hg, ContinuousAlternatingMap.coeffMatrix_sub]
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem laplacian_sub_of_contMDiff_two
-    (ω₁ : KahlerForm n M) (f g : M → ℝ)
-    (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 f)
-    (hg : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 g) (y : M) :
-    ω₁.laplacian (f - g) y = ω₁.laplacian f y - ω₁.laplacian g y := by
-  let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y
-  have hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) y).source := by simp
-  have heSource : y ∈ e.source := by simp [e]
-  have hz : e y ∈ e.target := e.map_source heSource
-  have heSymmInf : ContMDiffAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
-      𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞ e.symm (e y) :=
-    (contMDiffOn_extChartAt_symm (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) y).contMDiffAt
-      ((isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) y).mem_nhds hz)
-  have heSymm : ContMDiffAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
-      𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 2 e.symm (e y) :=
-    heSymmInf.of_le (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top))
-  have hfChart : ContDiffAt ℝ 2 (f ∘ e.symm) (e y) :=
-    (hf.contMDiffAt.comp (e y) heSymm).contDiffAt
-  have hgChart : ContDiffAt ℝ 2 (g ∘ e.symm) (e y) :=
-    (hg.contMDiffAt.comp (e y) heSymm).contDiffAt
-  have hsub : complexHessian ((f - g) ∘ e.symm) (e y) =
-      complexHessian (f ∘ e.symm) (e y) - complexHessian (g ∘ e.symm) (e y) := by
-    convert complexHessian_sub_at hfChart hgChart using 1; ext z; rfl
-  have hLapSub := laplacian_eq_inChart_c2 ω₁ (hf.sub hg) y hy
-  have hLapF := laplacian_eq_inChart_c2 ω₁ hf y hy
-  have hLapG := laplacian_eq_inChart_c2 ω₁ hg y hy
-  have hfg : f - g = (fun x => f x - g x) := rfl
-  have hsub' : complexHessian ((fun x => f x - g x) ∘ e.symm) (e y) =
-      complexHessian (f ∘ e.symm) (e y) - complexHessian (g ∘ e.symm) (e y) := by
-    simpa [hfg] using hsub
-  rw [hfg, hLapSub, hLapF, hLapG, hsub']
-  simp [e, Matrix.mul_sub, Matrix.trace_sub, map_sub]
-
-omit [BorelSpace M] [ConnectedSpace M] in
-private theorem uncentered_pairwiseTaylor_error
-    (ω₀ : KahlerForm n M) (F : M → ℝ) (t : ℝ) (φ : M → ℝ)
-    (hsol : ω₀.SolvesMongeAmpere
-      (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (u v : M → ℝ)
-    (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 u)
-    (hv : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 v)
-    (hpositiveU : (ω₀.perturb φ hsol.1).IsC2Potential u)
-    (hpositiveV : (ω₀.perturb φ hsol.1).IsC2Potential v)
-    (m δ ε : ℝ) (c : M) {y : M}
-    (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) c).source) :
-    (uncenteredContinuityPathResidual ω₀ F t φ hsol u δ y -
-      uncenteredContinuityPathResidual ω₀ F t φ hsol v ε y) -
-      ((ω₀.perturb φ hsol.1).laplacian (u - v) y + (δ - ε) * (m - F y)) =
-      (Matrix.logDetTaylorRemainder
-          ((ω₀.perturb φ hsol.1).metricInChart c
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c y))
-          (complexHessian (u ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c).symm)
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c y)) -
-        Matrix.logDetTaylorRemainder
-          ((ω₀.perturb φ hsol.1).metricInChart c
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c y))
-          (complexHessian (v ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c).symm)
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c y))) -
-      ((δ - ε) * m +
-        (ω₀.pathConstant F (t + δ) - ω₀.pathConstant F (t + ε))) := by
-  have hTaylorU := uncenteredPathResidual_eq_laplacian_add_Taylor
-    ω₀ F t φ hsol u hu hpositiveU δ c hy
-  have hTaylorV := uncenteredPathResidual_eq_laplacian_add_Taylor
-    ω₀ F t φ hsol v hv hpositiveV ε c hy
-  have hLap := laplacian_sub_of_contMDiff_two (ω₀.perturb φ hsol.1) u v hu hv y
-  rw [hTaylorU, hTaylorV, hLap]
-  ring
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartRep_isPositive_of_pointwise
     (α : FormField (EuclideanSpace ℂ (Fin n)) M 2)
     (hα : ∀ x, (α x).IsPositive) (x : M) {z : EuclideanSpace ℂ (Fin n)}
@@ -1069,79 +802,21 @@ private theorem chartRep_isPositive_of_pointwise
   rw [hchart]
   exact (hα y).compContinuousLinearMap AEquiv
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem c2Potential_metricInChart_posDef
-    (ω₁ : KahlerForm n M) (u : M → ℝ)
-    (hu : ω₁.IsC2Potential u) (x : M) {z : EuclideanSpace ℂ (Fin n)}
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
-    (ω₁.metricInChart x z + complexHessian
-      (u ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z).PosDef := by
-  let α := ω₁.toFormField + mddbar n u
-  have hchartpos := chartRep_isPositive_of_pointwise α hu.2 x hz
-  have hcoeff : (α.chartRep x z).coeffMatrix =
-      ω₁.metricInChart x z + complexHessian
-        (u ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z := by
-    change ((ω₁.toFormField.chartRep x z + (mddbar n u).chartRep x z).coeffMatrix) = _
-    rw [ContinuousAlternatingMap.coeffMatrix_add,
-      chartRep_mddbar_of_contMDiff_two hu.1 x hz]
-    rfl
-  rw [← hcoeff]
-  exact (ContinuousAlternatingMap.isPositive_iff.mp hchartpos).2
-
-omit [ConnectedSpace M] in
-private theorem centered_eval_eq_actual_average
-    (ω₁ : KahlerForm n M) (α : ℝ≥0) [P : ContinuityHolderPair ω₁ α]
-    (f : M → ℝ) (z : P.C0) (c : ℝ)
-    (hpoint : ∀ x, P.evalC0 z x = f x - c)
-    (hf : Continuous f) (hvol : 0 < ω₁.volume.real Set.univ) :
-    ∀ x, P.evalC0 z x = f x -
-      (∫ y, f y ∂ω₁.volume) / ω₁.volume.real Set.univ := by
-  let cz : C(M, ℝ) := littleHolderMeanZeroEvaluationCLM ω₁
-    P.finiteChartCover 0 α P.normedDataC0 z
-  have hcz : (fun x => P.evalC0 z x) = fun x => cz x := by
-    funext x
-    rfl
-  have hczcont : Continuous (fun x => P.evalC0 z x) :=
-    cz.continuous.congr (fun x => (congrFun hcz x).symm)
-  have hzint : Integrable (fun x => P.evalC0 z x) ω₁.volume :=
-    hczcont.integrable_of_hasCompactSupport
-      (HasCompactSupport.of_compactSpace (fun x => P.evalC0 z x))
-  have hfint : Integrable f ω₁.volume :=
-    hf.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace f)
-  have hmean : ∫ x, P.evalC0 z x ∂ω₁.volume = 0 := by
-    change littleHolderMeanFunctional ω₁ P.finiteChartCover
-      0 α P.normedDataC0 z = 0
-    exact z.property
-  have hI : (∫ x, f x ∂ω₁.volume) = c * ω₁.volume.real Set.univ := by
-    calc
-      (∫ x, f x ∂ω₁.volume) = ∫ x, (P.evalC0 z x + c) ∂ω₁.volume := by
-        apply integral_congr_ae
-        filter_upwards with x
-        rw [hpoint x]
-        ring
-      _ = (∫ x, P.evalC0 z x ∂ω₁.volume) + ∫ _ : M, c ∂ω₁.volume :=
-        integral_add hzint (integrable_const c)
-      _ = c * ω₁.volume.real Set.univ := by
-        rw [hmean]
-        simp [integral_const, smul_eq_mul]
-        ring
-  have hc : c =
-      (∫ y, f y ∂ω₁.volume) / ω₁.volume.real Set.univ := by
-    rw [hI, div_eq_mul_inv, mul_assoc,
-      mul_inv_cancel₀ (ne_of_gt hvol), mul_one]
-  intro x
-  rw [hpoint x, hc]
-
 set_option maxHeartbeats 800000 in
+end
+
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- Transfer the fixed-base and variable-base matrix Taylor estimates, completed order-two chart
 jets, and Hölder bilinear estimates to the pairwise chartwise remainder bound. -/
-@[deprecated "unused hypotheses `hα₀` and `hbilinear`; will be removed" (since := "2026-10-02")]
 theorem exists_centeredResidual_chartwiseRemainderBound_transfer
     (ω₀ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
     (t : ℝ) (φ : M → ℝ)
     (hsol : ω₀.SolvesMongeAmpere (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (α : ℝ≥0) (hα₁ : α < 1)
     [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
     (D : CenteredPathResidualData ω₀ F hF t φ hsol α)
     (L : P.C2 ≃L[ℝ] P.C0)
@@ -1171,18 +846,7 @@ theorem exists_centeredResidual_chartwiseRemainderBound_transfer
       HolderBoundOn 2 α ‖u‖₊ (P.finiteChartCover.piece i)
         ((P.evalC2 u) ∘
           (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
-            (P.finiteChartCover.base i)).symm))
-    (hbilinear : ∀ {X A B C : Type} [MetricSpace X]
-      [NormedAddCommGroup A] [NormedSpace ℝ A]
-      [NormedAddCommGroup B] [NormedSpace ℝ B]
-      [NormedAddCommGroup C] [NormedSpace ℝ C]
-      {alpha Kf Kg Mf Mg : ℝ≥0}
-      (L : A →L[ℝ] B →L[ℝ] C)
-      (hL : ∀ a b, ‖L a b‖ ≤ ‖a‖ * ‖b‖)
-      {f : X → A} {g : X → B}
-      (hf : HolderWith Kf alpha f) (hg : HolderWith Kg alpha g)
-      (hfnorm : ∀ x, ‖f x‖ ≤ Mf) (hgnorm : ∀ x, ‖g x‖ ≤ Mg),
-      HolderWith (Mf * Kg + Mg * Kf) alpha (fun x ↦ L (f x) (g x))) :
+            (P.finiteChartCover.base i)).symm)) :
     ∃ C : ℝ≥0, ∃ r : ℝ, 0 < r ∧
       ∀ p q : P.C2 × ℝ, ‖p‖ < r → ‖q‖ < r →
         ‖p.1‖ < D.radius → ‖q.1‖ < D.radius →

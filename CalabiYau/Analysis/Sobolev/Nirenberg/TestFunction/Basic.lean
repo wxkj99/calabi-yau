@@ -13,11 +13,10 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators
 
 namespace Sobolev.NirenbergTestFunction
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 theorem nirenbergTestFunction_apply
     (k : Fin d) (h : ℝ) (η u : E → ℝ) (x : E) (hh : h ≠ 0) :
     nirenbergTestFunction k h η u x =
@@ -27,7 +26,6 @@ theorem nirenbergTestFunction_apply
   change diffQuot k (-h) (fun y : E => η y ^ 2 * diffQuot k h u y) x = _
   rw [diffQuot_apply_of_ne (d := d) k (neg_ne_zero.mpr hh)]
 
-omit [NeZero d] in
 @[simp] lemma nirenbergTestFunction_zero_h
     (k : Fin d) (η u : E → ℝ) :
     nirenbergTestFunction k 0 η u = 0 := by
@@ -35,7 +33,6 @@ omit [NeZero d] in
   change diffQuot k (-(0 : ℝ)) (fun y : E => η y ^ 2 * diffQuot k 0 u y) x = 0
   simp
 
-omit [NeZero d] in
 theorem nirenbergTestFunction_support_subset
     (k : Fin d) (h : ℝ) {η : E → ℝ}
     (u : E → ℝ) :
@@ -72,7 +69,6 @@ theorem nirenbergTestFunction_support_subset
     · left
       exact subset_tsupport η hηx
 
-omit [NeZero d] in
 theorem nirenbergTestFunction_tsupport_subset
     (k : Fin d) (h : ℝ) {η : E → ℝ}
     (u : E → ℝ) :
@@ -92,7 +88,6 @@ theorem nirenbergTestFunction_tsupport_subset
   refine closure_minimal ?_ h_rhs_closed
   exact nirenbergTestFunction_support_subset (d := d) k h u
 
-omit [NeZero d] in
 theorem hasCompactSupport_nirenbergTestFunction
     {η u : E → ℝ} (hη_support : HasCompactSupport η)
     (k : Fin d) (h : ℝ) :
@@ -112,19 +107,6 @@ theorem hasCompactSupport_nirenbergTestFunction
   exact hasCompactSupport_diffQuot_of_hasCompactSupport
     (d := d) h_prod_support k (-h)
 
-omit [NeZero d] in
-private lemma support_eta_sq_subset
-    (η : E → ℝ) :
-    Function.support (fun y : E => η y ^ 2) ⊆ Function.support η := by
-  intro y hy
-  by_contra hyη
-  rw [Function.notMem_support] at hyη
-  apply hy
-  change η y ^ 2 = 0
-  rw [hyη]
-  simp
-
-omit [NeZero d] in
 private lemma support_eta_sq_diffQuot_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     Function.support
@@ -143,16 +125,6 @@ private lemma support_eta_sq_diffQuot_subset
   rw [hyη]
   simp
 
-omit [NeZero d] in
-private lemma tsupport_eta_sq_diffQuot_subset
-    (η u : E → ℝ) (k : Fin d) (h : ℝ) :
-    tsupport
-        (fun y : E => η y ^ 2 *
-          Sobolev.diffQuot k h u y) ⊆
-      tsupport η := by
-  exact closure_mono (support_eta_sq_diffQuot_subset (d := d) η u k h)
-
-omit [NeZero d] in
 theorem tsupport_nirenbergTestFunction_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     tsupport (nirenbergTestFunction k h η u) ⊆

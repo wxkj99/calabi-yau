@@ -3,7 +3,6 @@ module
 public import CalabiYau.Geometry.Kahler.Basic
 public import Mathlib.MeasureTheory.MeasurableSpace.Defs
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
-import CalabiYau.Geometry.Kahler.Laplacian.EuclideanDivergence
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.Calculus.Deriv.Polynomial
 
@@ -895,37 +894,6 @@ theorem chartRep_isOneOne (x : M) {z : EuclideanSpace ℂ (Fin n)}
   exact (ω₀.isOneOne y).compContinuousLinearMap AEquiv
 
 omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
-theorem kahler_chart_rep_partial_identity (x : M)
-    {z : EuclideanSpace ℂ (Fin n)}
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
-    (u v w : EuclideanSpace ℂ (Fin n)) :
-    let α := ω₀.toFormField.chartRep x
-    let D := fun (d a b : EuclideanSpace ℂ (Fin n)) ↦
-      fderiv ℝ (fun y ↦ α y ![a, b]) z d
-    ((D u v (Complex.I • w) - D v u (Complex.I • w) : ℝ) -
-      Complex.I * (D u v w - D v u w : ℝ) -
-      Complex.I * (D (Complex.I • u) v (Complex.I • w) -
-        D (Complex.I • v) u (Complex.I • w) : ℝ) -
-      (D (Complex.I • u) v w - D (Complex.I • v) u w : ℝ)) = 0 := by
-  let α := ω₀.toFormField.chartRep x
-  have hαtop : ContDiffAt ℝ ∞ α z := by
-    exact (ω₀.isSmooth x).contDiffAt
-      ((isOpen_extChartAt_target x).mem_nhds hz)
-  have hle : (1 : ℕ∞ω) ≤ ∞ := by
-    change ((1 : ℕ∞) : ℕ∞ω) ≤ ((⊤ : ℕ∞) : ℕ∞ω)
-    exact WithTop.coe_le_coe.mpr le_top
-  have hα := hαtop.of_le hle
-  have hclosed : extDeriv α z = 0 := by
-    have hclosed0 : ω₀.toFormField.extDeriv = 0 := ω₀.isClosed
-    have hzero := congrArg (fun β ↦ β.chartRep x z) hclosed0
-    rw [FormField.chartRep_extDeriv ω₀.isSmooth x hz, FormField.chartRep_zero] at hzero
-    exact hzero
-  have hone : ∀ᶠ y in nhds z, (α y).IsOneOne := by
-    filter_upwards [(isOpen_extChartAt_target x).mem_nhds hz] with y hy
-    exact chartRep_isOneOne x hy
-  simpa [α] using closed_oneOne_partial_identity hα hclosed hone u v w
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem kahler_chart_metric_symmetry (x : M) {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (i j k : Fin n) :
@@ -1007,6 +975,7 @@ theorem kahler_chart_cofactor_divergence (x : M) :
       rw [cofactor_divergence_algebra B T hsymm k]
       simp
 
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- Polarize the chart-diagonal trace identity to obtain the mixed Hermitian chart pairing. -/
 theorem chartGradientPair_polarization_relTrace (ω₀ : KahlerForm n M) (i : M)
     (u v : M → ℝ)
@@ -1097,6 +1066,7 @@ theorem chartGradientPair_polarization_relTrace (ω₀ : KahlerForm n M) (i : M)
   dsimp [U, V]
   ring
 
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- A finite smooth partition has zero total mixed chart-gradient pairing against a fixed
 function. The polarization is stated intrinsically using relTrace and mdWedgeDBar. -/
 theorem chartGradientPair_partition_sum_zero (ω₀ : KahlerForm n M)
@@ -1169,8 +1139,8 @@ theorem chartGradientPair_partition_sum_zero (ω₀ : KahlerForm n M)
     _ = chartGradientPair (ω₀.metricInChart y) sumU V z := hpairSum.symm
     _ = 0 := hpairZero
 
-@[deprecated "unused hypothesis `i`; will be removed" (since := "2026-10-02")]
-theorem chartPolarization_zero_of_not_source (ω₀ : KahlerForm n M) (i : M)
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
+theorem chartPolarization_zero_of_not_source (ω₀ : KahlerForm n M)
     (r g : M → ℝ)
     (hr : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ r)
     (hg : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ g)
@@ -1432,7 +1402,7 @@ theorem exists_chart_cutoff_extensions
           O, hOopen, hOK, hOtarget, hβoneO⟩
       · have hKempty : K = ∅ := Set.not_nonempty_iff_eq_empty.mp hKne
         refine ⟨0, contDiff_const, ?_, by simp, ∅, isOpen_empty, ?_, empty_subset _, ?_⟩
-        · exact HasCompactSupport.intro isCompact_empty (by intro z hz; simpa using hz)
+        · exact HasCompactSupport.intro isCompact_empty (by intro z _; simp)
         · simp [hKempty]
         · simp
     obtain ⟨β, hβcont, hβcompact, hβsupport, O, hOopen, hOK, hOtarget, hβoneO⟩ := hplateau

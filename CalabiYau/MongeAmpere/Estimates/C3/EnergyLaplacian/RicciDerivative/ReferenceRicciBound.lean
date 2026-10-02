@@ -17,9 +17,12 @@ open scoped Manifold ContDiff BigOperators
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 /-- In a reference-unitary frame, tracing has n summands. Nonnegative K,A
 therefore give the same finite coefficient n*(K+A) for Ricci and its first jet. -/
@@ -37,7 +40,7 @@ private theorem referenceRicci_frame_trace {n : ℕ} {M : Type*}
     [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
     (ω₀ : KahlerForm n M) (x : M)
     (P : Matrix (Fin n) (Fin n) ℂ)
-    (hP : referenceOrthonormalFrameMatrix ω₀ x P) (j l : Fin n) :
+    (hP : IsReferenceOrthonormalFrame ω₀ x P) (j l : Fin n) :
     c3TwoCovariantFrame P
       (c3RicciInChart (ω₀.metricInChart x)
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)) j l =
@@ -170,7 +173,8 @@ private theorem referenceRicci_chartPartialZ_inverse_entry {n : ℕ}
   rw [Finset.sum_comm]
   exact hentry
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem referenceRicci_coordinate_trace
     (ω₀ : KahlerForm n M) (x : M) (z : EuclideanSpace ℂ (Fin n))
     (hG : ∀ a b, ContDiffAt ℝ ∞ (fun w => ω₀.metricInChart x w a b) z)
@@ -194,11 +198,11 @@ private theorem referenceRicci_coordinate_trace
       (fun w => ∑ q, (g w)⁻¹ q p * chartCurvature g w p q j l) z :=
     DifferentiableAt.fun_sum (u := Finset.univ) (fun q _ => htermDiff p q)
   have hRicciDeriv :
-      c3PartialZ (fun w => ∑ p, ∑ q,
+      wirtingerDerivInChart (fun w => ∑ p, ∑ q,
         (g w)⁻¹ q p * chartCurvature g w p q j l) z k =
       ∑ p, ∑ q,
-        (c3PartialZ (fun w => (g w)⁻¹ q p) z k * chartCurvature g z p q j l +
-          (g z)⁻¹ q p * c3PartialZ (fun w => chartCurvature g w p q j l) z k) := by
+        (wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k * chartCurvature g z p q j l +
+          (g z)⁻¹ q p * wirtingerDerivInChart (fun w => chartCurvature g w p q j l) z k) := by
     change chartPartialZComplex (fun w => ∑ p, ∑ q,
       (g w)⁻¹ q p * chartCurvature g w p q j l) z k = _
     rw [referenceRicci_chartPartialZ_sum (fun p w =>
@@ -211,16 +215,16 @@ private theorem referenceRicci_coordinate_trace
     intro q hq
     exact referenceRicci_chartPartialZ_mul _ _ z k (hinvDiff q p) (hcurv p q j l)
   have hInvGamma (q p : Fin n) :
-      c3PartialZ (fun w => (g w)⁻¹ q p) z k =
-        -∑ a, (g z)⁻¹ q a * c3ChristoffelInChart g z p k a := by
+      wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k =
+        -∑ a, (g z)⁻¹ q a * christoffelInChart g z p k a := by
     have hInv (q p : Fin n) :
-        c3PartialZ (fun w => (g w)⁻¹ q p) z k =
-          -∑ a, ∑ b, (g z)⁻¹ q a * c3PartialZ (fun w => g w a b) z k *
+        wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k =
+          -∑ a, ∑ b, (g z)⁻¹ q a * wirtingerDerivInChart (fun w => g w a b) z k *
             (g z)⁻¹ b p := by
-      simpa [c3PartialZ, chartPartialZComplex] using
+      simpa [wirtingerDerivInChart, chartPartialZComplex] using
         referenceRicci_chartPartialZ_inverse_entry g z hG hdet q p k
     rw [hInv]
-    simp only [c3ChristoffelInChart, Finset.mul_sum]
+    simp only [christoffelInChart, Finset.mul_sum]
     congr 1
     apply Finset.sum_congr rfl
     intro a ha
@@ -251,20 +255,20 @@ private theorem referenceRicci_coordinate_trace
       rw [Finset.sum_comm]
     rw [Finset.sum_comm]
   have htraceInv :
-      (∑ p, ∑ q, c3PartialZ (fun w => (g w)⁻¹ q p) z k * chartCurvature g z p q j l) =
+      (∑ p, ∑ q, wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k * chartCurvature g z p q j l) =
         -(∑ p, ∑ q, ∑ r,
-          (g z)⁻¹ q p * c3ChristoffelInChart g z r k p * chartCurvature g z r q j l) := by
+          (g z)⁻¹ q p * christoffelInChart g z r k p * chartCurvature g z r q j l) := by
     simp_rw [hInvGamma]
     simp only [Finset.sum_mul, neg_mul, Finset.sum_neg_distrib]
-    rw [hsum3 (fun r q p => (g z)⁻¹ q p * c3ChristoffelInChart g z r k p *
+    rw [hsum3 (fun r q p => (g z)⁻¹ q p * christoffelInChart g z r k p *
       chartCurvature g z r q j l)]
   have htraceMetric :
-      (∑ r, c3ChristoffelInChart g z r k j *
+      (∑ r, christoffelInChart g z r k j *
         ∑ p, ∑ q, (g z)⁻¹ q p * chartCurvature g z p q r l) =
       ∑ p, ∑ q, (g z)⁻¹ q p *
-        ∑ r, c3ChristoffelInChart g z r k j * chartCurvature g z p q r l := by
+        ∑ r, christoffelInChart g z r k j * chartCurvature g z p q r l := by
     simp only [Finset.mul_sum]
-    rw [hsum3' (fun r p q => c3ChristoffelInChart g z r k j *
+    rw [hsum3' (fun r p q => christoffelInChart g z r k j *
       ((g z)⁻¹ q p * chartCurvature g z p q r l))]
     apply Finset.sum_congr rfl
     intro p hp
@@ -282,7 +286,6 @@ private theorem referenceRicci_coordinate_trace
   dsimp [g]
   ring_nf
 
-omit [T2Space M] [CompactSpace M] in
 private theorem referenceRicci_covariantDerivative_frame_trace
     (ω₀ : KahlerForm n M) (x : M) (P : Matrix (Fin n) (Fin n) ℂ)
     (hP : P.transpose * ω₀.metricInChart x
@@ -422,10 +425,9 @@ private theorem referenceRicci_covariantDerivative_frame_trace
   dsimp [z, g]
   ring
 
-omit [T2Space M] [CompactSpace M] in
-theorem c3ReferenceRicciFrameBound_of_curvature (ω₀ : KahlerForm n M)
+theorem referenceRicciFrameBound_of_curvature (ω₀ : KahlerForm n M)
     (K A : ℝ) (hK : 0 ≤ K) (hA : 0 ≤ A)
-    (hCurv : ∀ x P, referenceOrthonormalFrameMatrix ω₀ x P → ∀ p q j k,
+    (hCurv : ∀ x P, IsReferenceOrthonormalFrame ω₀ x P → ∀ p q j k,
       ‖referenceCurvatureComponent ω₀ x P p q j k‖ ≤ K)
     (hDeriv : ∀ (x : M) (P : Matrix (Fin n) (Fin n) ℂ),
       P.transpose * ω₀.metricInChart x
@@ -435,8 +437,8 @@ theorem c3ReferenceRicciFrameBound_of_curvature (ω₀ : KahlerForm n M)
             P a s * P b p * star (P c q) * P d j * star (P e k) *
               c3ReferenceCurvatureCovariantDerivativeInChart ω₀ x
                 (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) a b c d e‖ ≤ A) :
-    ∀ x P, referenceOrthonormalFrameMatrix ω₀ x P →
-      c3ReferenceRicciFrameBound ω₀ x
+    ∀ x P, IsReferenceOrthonormalFrame ω₀ x P →
+      ReferenceRicciFrameBound ω₀ x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) P ((n : ℝ) * (K + A)) := by
   intro x P hP
   constructor

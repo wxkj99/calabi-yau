@@ -15,8 +15,6 @@ public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -38,7 +36,7 @@ namespace DifferentialForm
 
 variable {IM M k}
 
-private lemma contMDiff_add_section {s t : (x : M) →
+lemma contMDiff_add_section {s t : (x : M) →
     Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x}
     (hs : ContMDiff IM (IM.prod 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (EM [⋀^Fin k]→L[ℝ] ℝ) x (s x)))
@@ -70,7 +68,7 @@ private lemma contMDiff_add_section {s t : (x : M) →
       (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀))
     (fun x hx => (e.linear ℝ hx).map_add (s x) (t x))
 
-private lemma contMDiff_smul_section (c : ℝ) {s : (x : M) →
+lemma contMDiff_smul_section (c : ℝ) {s : (x : M) →
     Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x}
     (hs : ContMDiff IM (IM.prod 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (EM [⋀^Fin k]→L[ℝ] ℝ) x (s x))) :
@@ -95,7 +93,7 @@ private lemma contMDiff_smul_section (c : ℝ) {s : (x : M) →
       (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀))
     (fun x hx => (e.linear ℝ hx).map_smul c (s x))
 
-private lemma contMDiff_zero_section :
+lemma contMDiff_zero_section :
     ContMDiff IM (IM.prod 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (EM [⋀^Fin k]→L[ℝ] ℝ) x (0 : Bundle.continuousAlternatingMap ℝ
         (Fin k) EM
@@ -409,37 +407,12 @@ theorem wedge_smul {k l : ℕ} (c : ℝ) (α : DifferentialForm IM M k)
     c • ContinuousAlternatingMap.wedgeProduct (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)
   exact ContinuousAlternatingMap.wedge_smul c (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)
 
-theorem wedge_comm {k l : ℕ} (α : DifferentialForm IM M k) (β : DifferentialForm IM M l) :
-    DifferentialForm.wedge α β = reindex (Fin.finAddCongr (m := l) (n := k))
-      ((-1 : ℝ)^(k*l) • DifferentialForm.wedge β α) := by
-  apply ContMDiffSection.ext
-  intro x
-  simp only [DifferentialForm.wedge, reindex_apply, smul_apply]
-  exact ContinuousAlternatingMap.wedge_antisymm (𝕜 := ℝ) (M := TangentSpace IM x)
-    (m := k) (n := l) (α x) (β x)
-
 theorem wedge_self_odd_zero {k : ℕ} (α : DifferentialForm IM M k) (hk : Odd k) :
     DifferentialForm.wedge α α = 0 := by
   apply ContMDiffSection.ext
   intro x
   exact ContinuousAlternatingMap.wedge_self_odd_zero (M := TangentSpace IM x) (m := k)
     (α x) hk (by norm_num)
-
-theorem wedge_assoc {k l r : ℕ} (α : DifferentialForm IM M k) (β : DifferentialForm IM M l)
-    (γ : DifferentialForm IM M r) :
-    reindex Fin.finAssoc.symm (DifferentialForm.wedge α (DifferentialForm.wedge β γ)) =
-      DifferentialForm.wedge (DifferentialForm.wedge α β) γ := by
-  apply ContMDiffSection.ext
-  intro x
-  change ContinuousAlternatingMap.domDomCongr Fin.finAssoc.symm
-      (ContinuousAlternatingMap.wedgeProduct (α x)
-        (ContinuousAlternatingMap.wedgeProduct (β x) (γ x) (ContinuousLinearMap.mul ℝ ℝ))
-        (ContinuousLinearMap.mul ℝ ℝ)) =
-    ContinuousAlternatingMap.wedgeProduct
-      (ContinuousAlternatingMap.wedgeProduct (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ))
-      (γ x) (ContinuousLinearMap.mul ℝ ℝ)
-  exact ContinuousAlternatingMap.wedge_mul_assoc (M := TangentSpace IM x) (m := k) (n := l)
-    (p := r) (α x) (β x) (γ x)
 
 end DifferentialForm
 

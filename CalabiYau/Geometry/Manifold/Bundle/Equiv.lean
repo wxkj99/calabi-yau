@@ -9,7 +9,6 @@ public import Mathlib.Topology.VectorBundle.Basic
 public import Mathlib.Geometry.Manifold.Diffeomorph
 public import Mathlib.Analysis.Normed.Module.FiniteDimension
 public import CalabiYau.Geometry.Manifold.Bundle.Zero
-public import CalabiYau.Geometry.Manifold.Bundle.ContinuousLinearMapSection.PointwiseSmoothness
 public import Mathlib.Geometry.Manifold.VectorBundle.Basic
 public import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
@@ -88,16 +87,6 @@ theorem ext (A B : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
 theorem baseMap_eq (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) (x : B₁) :
     f.baseMap x = (f.toFun ⟨x, 0⟩).proj := by
   simp [f.fiber_compat, map_zero]
-
-theorem baseMapContinuous
-    [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁] [VectorBundle 𝕜 F₁ E₁]
-    [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
-    (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) : Continuous f.baseMap := by
-  have h : f.baseMap = TotalSpace.proj ∘ f.toFun ∘ zeroSection F₁ E₁ := by
-    ext x; simp [baseMap_eq, zeroSection]
-  rw [h]
-  exact (FiberBundle.continuous_proj F₂ E₂).comp
-    (f.continuous_toFun.comp (continuous_zeroSection 𝕜))
 
 @[simp]
 theorem proj_eq (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) (p : TotalSpace F₁ E₁) :
@@ -576,21 +565,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
 
-private lemma continuous_symm_of_fiberBijective
-    {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂} (hΦ_cont : Continuous Φ)
-    {φ : ∀ x, E₁ x →ₗ[𝕜] E₂ x}
-    (hcompat : ∀ x v, Φ ⟨x, v⟩ = ⟨x, φ x v⟩)
-    (hbij : Function.Bijective Φ) (hφ_bij : ∀ x, Function.Bijective (φ x)) :
-    Continuous (Equiv.ofBijective Φ hbij).symm :=
-  continuous_symm_of_fiberBijective' hΦ_cont (Homeomorph.refl B) hcompat hbij hφ_bij
-
-noncomputable def VectorBundleHom.toVectorBundleEquivId
-    (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
-    (hid : f.baseMap = _root_.id)
-    (hbij : Function.Bijective f.toFun) :
-    VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂ :=
-  f.toVectorBundleEquiv (Homeomorph.refl B) hid hbij
-
 end ToVectorBundleEquiv
 
 open scoped Manifold
@@ -817,17 +791,6 @@ theorem baseMap_eq (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) 
     f.baseMap x = (f.toFun ⟨x, 0⟩).proj := by
   simp [f.fiber_compat, map_zero]
 
-theorem baseMapContMDiff (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) :
-    ContMDiff IB IB n f.baseMap := by
-  have h : f.baseMap = TotalSpace.proj ∘ f.toFun ∘ zeroSection F₁ E₁ := by
-    ext x; simp [baseMap_eq, zeroSection]
-  rw [h]
-  have h₁ : ContMDiff IB (IB.prod 𝓘(𝕜, F₁)) n (zeroSection F₁ E₁) :=
-    contMDiff_zeroSection 𝕜 E₁
-  have h₂ : ContMDiff (IB.prod 𝓘(𝕜, F₂)) IB n (TotalSpace.proj (F := F₂) (E := E₂)) :=
-    (contMDiff_proj E₂).of_le le_top
-  exact h₂.comp (f.contMDiff_toFun.comp h₁)
-
 def toVectorBundleHom (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) :
     VectorBundleHom 𝕜 F₁ E₁ F₂ E₂ where
   baseMap := f.baseMap
@@ -896,143 +859,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
   [ContMDiffVectorBundle n F₂ E₂ IB]
 
-omit [FiniteDimensional 𝕜 F₂] in
-private lemma contMDiff_symm_of_fiberBijective'
-    {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
-    (hΦ_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n Φ)
-    (baseMap : Diffeomorph IB IB B₁ B₂ n)
-    {φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ (baseMap x)}
-    (hcompat : ∀ x v, Φ ⟨x, v⟩ = ⟨baseMap x, φ x v⟩)
-    (hbij : Function.Bijective Φ) (hφ_bij : ∀ x, Function.Bijective (φ x)) :
-    ContMDiff (IB.prod 𝓘(𝕜, F₂)) (IB.prod 𝓘(𝕜, F₁)) n
-      (Equiv.ofBijective Φ hbij).symm := by
-  set Φ_equiv := Equiv.ofBijective Φ hbij
-  have hproj : ∀ p, (Φ_equiv.symm p).proj = baseMap.symm p.proj := fun p => by
-    have h1 : Φ (Φ_equiv.symm p) = p := Φ_equiv.apply_symm_apply p
-    rw [hcompat (Φ_equiv.symm p).proj (Φ_equiv.symm p).snd] at h1
-    have h := congrArg TotalSpace.proj h1
-    simp only at h
-    rw [← h, baseMap.symm_apply_apply]
-  intro ⟨y, w⟩
-  obtain ⟨x, rfl⟩ : ∃ x, baseMap x = y :=
-    ⟨baseMap.symm y, baseMap.apply_symm_apply y⟩
-  rw [Bundle.contMDiffAt_totalSpace]
-  refine ⟨?_, ?_⟩
-  · simp only [hproj]
-    have hbm_symm : ContMDiff (IB.prod 𝓘(𝕜, F₂)) IB n
-        (fun p : TotalSpace F₂ E₂ => baseMap.symm p.proj) :=
-      baseMap.symm.contMDiff.comp ((contMDiff_proj E₂).of_le le_top)
-    exact hbm_symm.contMDiffAt
-  · simp only [hproj, Diffeomorph.symm_apply_apply]
-    set e₁ := trivializationAt F₁ E₁ x
-    set e₂ := trivializationAt F₂ E₂ (baseMap x)
-    have hx₁ := mem_baseSet_trivializationAt F₁ E₁ x
-    have hx₂ := mem_baseSet_trivializationAt F₂ E₂ (baseMap x)
-    have he₂_source : (⟨baseMap x, w⟩ : TotalSpace F₂ E₂) ∈ e₂.source :=
-      e₂.mem_source.mpr hx₂
-    set A : B₁ → (F₁ →L[𝕜] F₂) := trivializationCoord baseMap φ x with hA_def
-    have hΦ_proj : ∀ p, (Φ p).proj = baseMap p.proj := fun p => by
-      obtain ⟨a, b⟩ := p; simp [hcompat]
-    have hA_contMDiff : ContMDiffAt IB 𝓘(𝕜, F₁ →L[𝕜] F₂) n A x := by
-      apply contMDiffAt_clm_of_pointwise
-      intro v
-      suffices h : ContMDiffAt IB 𝓘(𝕜, F₂) n
-          (fun q => (e₂ (Φ (e₁.toOpenPartialHomeomorph.symm (q, v)))).2) x by
-        refine h.congr_of_eventuallyEq (Filter.eventually_of_mem
-          (IsOpen.mem_nhds (e₁.open_baseSet.inter
-            (baseMap.continuous.isOpen_preimage _ e₂.open_baseSet)) ⟨hx₁, ?_⟩) ?_)
-        · exact hx₂
-        · intro q ⟨hq₁, hq₂⟩
-          exact trivializationCoord_apply hcompat x q hq₁ hq₂ v
-      have he₁_target : (x, v) ∈ e₁.target := by
-        rw [e₁.target_eq]; exact ⟨hx₁, Set.mem_univ _⟩
-      have he₁_symm : ContMDiffAt IB (IB.prod 𝓘(𝕜, F₁)) n
-          (fun q => e₁.toOpenPartialHomeomorph.symm (q, v)) x := by
-        have h1 := e₁.contMDiffOn_symm (n := n) (IB := IB) |>.contMDiffAt
-          (e₁.toOpenPartialHomeomorph.open_target.mem_nhds he₁_target)
-        have h2 : ContMDiffAt IB (IB.prod 𝓘(𝕜, F₁)) n (fun q => (q, v)) x :=
-          contMDiffAt_id.prodMk contMDiffAt_const
-        exact h1.comp x h2
-      have hpΦ : Φ (e₁.toOpenPartialHomeomorph.symm (x, v)) ∈ e₂.source := by
-        rw [e₂.mem_source, hΦ_proj, e₁.proj_symm_apply he₁_target]; exact hx₂
-      have hΦ_at : ContMDiffAt (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n Φ
-          (e₁.toOpenPartialHomeomorph.symm (x, v)) := hΦ_smooth.contMDiffAt
-      have he₂_at : ContMDiffAt (IB.prod 𝓘(𝕜, F₂)) (IB.prod 𝓘(𝕜, F₂)) n e₂
-          (Φ (e₁.toOpenPartialHomeomorph.symm (x, v))) :=
-        e₂.contMDiffOn (n := n) (IB := IB) |>.contMDiffAt
-          (e₂.open_source.mem_nhds hpΦ)
-      have hcomp1 : ContMDiffAt IB (IB.prod 𝓘(𝕜, F₂)) n
-          (fun q => Φ (e₁.toOpenPartialHomeomorph.symm (q, v))) x := by
-        refine hΦ_at.comp x he₁_symm
-      have hcomp2 : ContMDiffAt IB (IB.prod 𝓘(𝕜, F₂)) n
-          (fun q => e₂ (Φ (e₁.toOpenPartialHomeomorph.symm (q, v)))) x := by
-        refine he₂_at.comp x hcomp1
-      exact hcomp2.snd
-    have : CompleteSpace F₁ := FiniteDimensional.complete 𝕜 F₁
-    have hA_inv_at_x : (A x : F₁ →L[𝕜] F₂).IsInvertible :=
-      trivializationCoord_isInvertible (baseMap := baseMap) hφ_bij x x ⟨hx₁, hx₂⟩
-    have hA_inv_contMDiff : ContMDiffAt IB 𝓘(𝕜, F₂ →L[𝕜] F₁) n
-        (ContinuousLinearMap.inverse ∘ A) x :=
-      (hA_inv_at_x.contDiffAt_map_inverse (n := n)).contMDiffAt.comp x hA_contMDiff
-    have hNice_smooth : ContMDiffAt (IB.prod 𝓘(𝕜, F₂)) 𝓘(𝕜, F₁) n
-        (fun p : B₂ × F₂ =>
-          ContinuousLinearMap.inverse (A (baseMap.symm p.1)) p.2) (e₂ ⟨baseMap x, w⟩) := by
-      have h1 : ContMDiffAt (IB.prod 𝓘(𝕜, F₂)) 𝓘(𝕜, F₂ →L[𝕜] F₁) n
-          (fun p : B₂ × F₂ =>
-            ContinuousLinearMap.inverse (A (baseMap.symm p.1))) (e₂ ⟨baseMap x, w⟩) := by
-        have hfst_at : ContMDiffAt (IB.prod 𝓘(𝕜, F₂)) IB n
-            (fun p : B₂ × F₂ => p.1) (e₂ ⟨baseMap x, w⟩) := contMDiffAt_fst
-        have hbm_at : ContMDiffAt IB IB n baseMap.symm
-            ((fun p : B₂ × F₂ => p.1) (e₂ ⟨baseMap x, w⟩)) :=
-          baseMap.symm.contMDiff.contMDiffAt
-        have hcomp_bm : ContMDiffAt (IB.prod 𝓘(𝕜, F₂)) IB n
-            (baseMap.symm ∘ (fun p : B₂ × F₂ => p.1)) (e₂ ⟨baseMap x, w⟩) :=
-          hbm_at.comp _ hfst_at
-        have hbm_eq : (baseMap.symm ∘ (fun p : B₂ × F₂ => p.1)) (e₂ ⟨baseMap x, w⟩) = x := by
-          simp [e₂.coe_fst he₂_source, baseMap.symm_apply_apply]
-        have hAinv_at : ContMDiffAt IB 𝓘(𝕜, F₂ →L[𝕜] F₁) n
-            (ContinuousLinearMap.inverse ∘ A)
-            ((baseMap.symm ∘ (fun p : B₂ × F₂ => p.1)) (e₂ ⟨baseMap x, w⟩)) := by
-          rw [hbm_eq]; exact hA_inv_contMDiff
-        exact hAinv_at.comp _ hcomp_bm
-      exact h1.clm_apply contMDiffAt_snd
-    have hG_snd_smooth : ContMDiffAt (IB.prod 𝓘(𝕜, F₂)) 𝓘(𝕜, F₁) n
-        (fun p : B₂ × F₂ =>
-          (e₁ (Φ_equiv.symm (e₂.toOpenPartialHomeomorph.symm p))).2) (e₂ ⟨baseMap x, w⟩) :=
-      hNice_smooth.congr_of_eventuallyEq
-        (trivializationCoord_inverse_eventuallyEq baseMap.toHomeomorph
-          hcompat hbij hφ_bij x w).symm
-    have he₂_smooth := (e₂.contMDiffOn (n := n) (IB := IB)).contMDiffAt
-      (e₂.open_source.mem_nhds he₂_source)
-    exact (hG_snd_smooth.comp _ he₂_smooth).congr_of_eventuallyEq
-      (by filter_upwards [e₂.open_source.mem_nhds he₂_source] with p hp
-          exact congrArg (fun q => (e₁ (Φ_equiv.symm q)).2)
-            (e₂.toOpenPartialHomeomorph.left_inv hp).symm)
-
-noncomputable def ContMDiffVectorBundleHom.toContMDiffVectorBundleEquiv
-    (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
-    (baseMap : Diffeomorph IB IB B₁ B₂ n)
-    (hbase : f.baseMap = baseMap)
-    (hbij : Function.Bijective f.toFun) :
-    ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂ := by
-  obtain ⟨bm, Φ, hΦ_smooth, φ, hcompat⟩ := f
-  simp only at hbase
-  subst hbase
-  change Function.Bijective Φ at hbij
-  have hcompat' : ∀ x v, Φ ⟨x, v⟩ = (⟨baseMap x, φ x v⟩ : TotalSpace F₂ E₂) := hcompat
-  have hφ_bij : ∀ x, Function.Bijective (φ x) :=
-    fiberBijective_of_bijective' hcompat' hbij baseMap.injective
-  exact {
-    baseMap := baseMap
-    toDiffeomorph :=
-      { toEquiv := Equiv.ofBijective Φ hbij
-        contMDiff_toFun := hΦ_smooth
-        contMDiff_invFun :=
-          contMDiff_symm_of_fiberBijective' hΦ_smooth baseMap hcompat' hbij hφ_bij }
-    fiberLinearEquiv := fun x => LinearEquiv.ofBijective (φ x) (hφ_bij x)
-    fiber_compat := fun x v => hcompat' x v
-  }
-
 end ToContMDiffVectorBundleEquivGeneral
 
 section ToContMDiffVectorBundleEquiv
@@ -1054,24 +880,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
   [ContMDiffVectorBundle n F₂ E₂ IB]
 
-omit [FiniteDimensional 𝕜 F₂] in
-private lemma contMDiff_symm_of_fiberBijective
-    {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
-    (hΦ_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n Φ)
-    {φ : ∀ x, E₁ x →ₗ[𝕜] E₂ x}
-    (hcompat : ∀ x v, Φ ⟨x, v⟩ = ⟨x, φ x v⟩)
-    (hbij : Function.Bijective Φ) (hφ_bij : ∀ x, Function.Bijective (φ x)) :
-    ContMDiff (IB.prod 𝓘(𝕜, F₂)) (IB.prod 𝓘(𝕜, F₁)) n
-      (Equiv.ofBijective Φ hbij).symm :=
-  contMDiff_symm_of_fiberBijective' hΦ_smooth (Diffeomorph.refl IB B n) hcompat hbij hφ_bij
-
-noncomputable def ContMDiffVectorBundleHom.toContMDiffVectorBundleEquivId
-    (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
-    (hid : f.baseMap = _root_.id)
-    (hbij : Function.Bijective f.toFun) :
-    ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂ :=
-  f.toContMDiffVectorBundleEquiv (Diffeomorph.refl IB B n) hid hbij
-
 section FiberwiseEquiv
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -1088,72 +896,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E₂ : B → Type*} [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
   [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
-
-def ContMDiffVectorBundleHom.ofFiberwiseLinearMap
-    {B₂ : Type*} [TopologicalSpace B₂] [ChartedSpace HB B₂]
-    {E₂ : B₂ → Type*} [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
-    [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
-    [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
-    (f : B → B₂)
-    (φ : ∀ x : B, E₁ x →ₗ[𝕜] E₂ (f x))
-    (h_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n
-      (fun p : TotalSpace F₁ E₁ => (⟨f p.1, φ p.1 p.2⟩ : TotalSpace F₂ E₂))) :
-    ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂ where
-  baseMap := f
-  toFun p := ⟨f p.1, φ p.1 p.2⟩
-  contMDiff_toFun := h_smooth
-  fiberLinearMap := φ
-  fiber_compat _ _ := rfl
-
-noncomputable def ContMDiffVectorBundleEquiv.ofMutualInverseHoms
-    (Φ : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
-    (Ψ : ContMDiffVectorBundleHom 𝕜 IB n F₂ E₂ F₁ E₁)
-    (hΦ : Φ.baseMap = _root_.id)
-    (hΨΦ : ∀ p, Ψ.toFun (Φ.toFun p) = p)
-    (hΦΨ : ∀ p, Φ.toFun (Ψ.toFun p) = p) :
-    ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂ :=
-  have hΨ : Ψ.baseMap = _root_.id := by
-    funext y
-    have h := congrArg TotalSpace.proj (hΦΨ ⟨y, 0⟩)
-    rwa [Φ.proj_eq, Ψ.proj_eq, hΦ] at h
-  match Φ, Ψ, hΦ, hΨ, hΨΦ, hΦΨ with
-  | ⟨_, toFunΦ, hcΦ, φ, compatΦ⟩, ⟨_, toFunΨ, hcΨ, ψ, compatΨ⟩,
-    rfl, rfl, hΨΦ, hΦΨ =>
-    { baseMap := _root_.id
-      toDiffeomorph :=
-        { toEquiv := ⟨toFunΦ, toFunΨ, hΨΦ, hΦΨ⟩
-          contMDiff_toFun := hcΦ
-          contMDiff_invFun := hcΨ }
-      fiberLinearEquiv := fun x =>
-        LinearEquiv.ofLinearMap (φ x) (ψ x)
-          (LinearMap.ext fun v => by
-            have h := hΦΨ ⟨x, v⟩
-            simp only [compatΦ, compatΨ] at h
-            exact eq_of_heq (TotalSpace.mk.inj h).2)
-          (LinearMap.ext fun v => by
-            have h := hΨΦ ⟨x, v⟩
-            simp only [compatΦ, compatΨ] at h
-            exact eq_of_heq (TotalSpace.mk.inj h).2)
-      fiber_compat := compatΦ }
-
-noncomputable def ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
-    (φ : ∀ x : B, E₁ x ≃ₗ[𝕜] E₂ x)
-    (h_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n
-      (fun p : TotalSpace F₁ E₁ => (⟨p.1, φ p.1 p.2⟩ : TotalSpace F₂ E₂)))
-    (h_smooth_inv : ContMDiff (IB.prod 𝓘(𝕜, F₂)) (IB.prod 𝓘(𝕜, F₁)) n
-      (fun p : TotalSpace F₂ E₂ => (⟨p.1, (φ p.1).symm p.2⟩ : TotalSpace F₁ E₁))) :
-    ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂ where
-  baseMap := _root_.id
-  toDiffeomorph :=
-    { toEquiv :=
-        { toFun := fun p => ⟨p.1, φ p.1 p.2⟩
-          invFun := fun p => ⟨p.1, (φ p.1).symm p.2⟩
-          left_inv := fun ⟨_, v⟩ => by simp
-          right_inv := fun ⟨_, v⟩ => by simp }
-      contMDiff_toFun := h_smooth
-      contMDiff_invFun := h_smooth_inv }
-  fiberLinearEquiv := φ
-  fiber_compat _ _ := rfl
 
 end FiberwiseEquiv
 
@@ -1282,93 +1024,5 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   {EP : Type*} [NormedAddCommGroup EP] [NormedSpace 𝕜 EP]
   {HP : Type*} [TopologicalSpace HP] {IP : ModelWithCorners 𝕜 EP HP}
   {P : Type*} [TopologicalSpace P] [ChartedSpace HP P]
-
-theorem contMDiffOn_bundle_map_symm
-    {b₁ : P → M₁} {b₂ : P → M₂} {s : Set P}
-    (φ : ∀ p : P, V₁ (b₁ p) ≃L[𝕜] V₂ (b₂ p))
-    (hb₁ : ContMDiffOn IP I₁ n b₁ s)
-    (hφ : ∀ (e₁ : Trivialization F₁ (TotalSpace.proj : TotalSpace F₁ V₁ → M₁)),
-      ∀ [MemTrivializationAtlas e₁],
-      ContMDiffOn (IP.prod 𝓘(𝕜, F₁)) (I₂.prod 𝓘(𝕜, F₂)) n
-        (fun q : P × F₁ =>
-          (⟨b₂ q.1, φ q.1 (e₁.symmL 𝕜 (b₁ q.1) q.2)⟩ : TotalSpace F₂ V₂))
-        {q | q.1 ∈ s ∧ b₁ q.1 ∈ e₁.baseSet})
-    (e₂ : Trivialization F₂ (TotalSpace.proj : TotalSpace F₂ V₂ → M₂))
-    [MemTrivializationAtlas e₂] :
-    ContMDiffOn (IP.prod 𝓘(𝕜, F₂)) (I₁.prod 𝓘(𝕜, F₁)) n
-      (fun q : P × F₂ =>
-        (⟨b₁ q.1, (φ q.1).symm (e₂.symmL 𝕜 (b₂ q.1) q.2)⟩ : TotalSpace F₁ V₁))
-      {q | q.1 ∈ s ∧ b₂ q.1 ∈ e₂.baseSet} := by
-  rintro ⟨p₀, v₀⟩ ⟨hp₀, he₂p₀⟩
-  let e₁ := trivializationAt F₁ V₁ (b₁ p₀)
-  have he₁p₀ : b₁ p₀ ∈ e₁.baseSet := mem_baseSet_trivializationAt F₁ V₁ (b₁ p₀)
-  let L : F₁ ≃L[𝕜] F₂ := (e₁.continuousLinearEquivAt 𝕜 (b₁ p₀) he₁p₀).symm.trans
-    ((φ p₀).trans (e₂.continuousLinearEquivAt 𝕜 (b₂ p₀) he₂p₀))
-  let : FiniteDimensional 𝕜 F₂ :=
-    FiniteDimensional.of_injective L.symm.toLinearMap L.symm.injective
-  have : CompleteSpace F₁ := FiniteDimensional.complete 𝕜 F₁
-  let K : Set P := {p | p ∈ s ∧ b₁ p ∈ e₁.baseSet ∧ b₂ p ∈ e₂.baseSet}
-  have hK₀ : p₀ ∈ K := ⟨hp₀, he₁p₀, he₂p₀⟩
-  let C (p : P) : F₁ →L[𝕜] F₂ :=
-    (e₂.continuousLinearMapAt 𝕜 (b₂ p)).comp
-      ((φ p).toContinuousLinearMap.comp (e₁.symmL 𝕜 (b₁ p)))
-  have hC : ContMDiffOn IP 𝓘(𝕜, F₁ →L[𝕜] F₂) n C K := by
-    intro p hp
-    apply contMDiffWithinAt_clm_of_pointwise
-    intro w
-    have hsection := (hφ e₁).comp
-      ((contMDiff_id.prodMk (contMDiff_const (c := w))).contMDiffOn (s := K))
-      (fun q hq => ⟨hq.1, hq.2.1⟩)
-    have hcoord := e₂.contMDiffOn.comp hsection
-      (fun q hq => e₂.mem_source.mpr hq.2.2)
-    apply (hcoord p hp).snd.congr
-    · intro q hq
-      exact e₂.continuousLinearMapAt_apply_of_mem 𝕜 hq.2.2 _
-    · exact e₂.continuousLinearMapAt_apply_of_mem 𝕜 hp.2.2 _
-  have hCinv (p : P) (hp : p ∈ K) : (C p).IsInvertible := by
-    dsimp only [C]
-    rw [← e₂.coe_continuousLinearEquivAt_eq' (R := 𝕜) hp.2.2,
-      ← e₁.symm_continuousLinearEquivAt_eq' (R := 𝕜) hp.2.1]
-    simp
-  have hCinvApply (p : P) (hp : p ∈ K) (v : F₂) :
-      e₁.symmL 𝕜 (b₁ p) ((C p).inverse v) = (φ p).symm (e₂.symmL 𝕜 (b₂ p) v) := by
-    dsimp only [C]
-    rw [← e₂.coe_continuousLinearEquivAt_eq' (R := 𝕜) hp.2.2,
-      ← e₁.symm_continuousLinearEquivAt_eq' (R := 𝕜) hp.2.1]
-    simp only [ContinuousLinearMap.inverse_equiv_comp,
-      ContinuousLinearMap.inverse_comp_equiv, ContinuousLinearMap.inverse_equiv,
-      ContinuousLinearEquiv.symm_symm, ContinuousLinearMap.comp_apply]
-    simp only [ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply,
-      e₂.symm_continuousLinearEquivAt_eq (R := 𝕜) hp.2.2]
-  have hInv : ContMDiffOn IP 𝓘(𝕜, F₂ →L[𝕜] F₁) n (fun p => (C p).inverse) K :=
-    fun p hp => (hCinv p hp).contDiffAt_map_inverse.comp_contMDiffWithinAt (hC p hp)
-  have hbase : ContMDiffOn (IP.prod 𝓘(𝕜, F₂)) I₁ n
-      (fun q : P × F₂ => b₁ q.1) (Prod.fst ⁻¹' K) :=
-    hb₁.comp contMDiffOn_fst (fun q hq => hq.1)
-  have hvalue : ContMDiffOn (IP.prod 𝓘(𝕜, F₂)) 𝓘(𝕜, F₁) n
-      (fun q : P × F₂ => (C q.1).inverse q.2) (Prod.fst ⁻¹' K) :=
-    (hInv.comp contMDiffOn_fst (mapsTo_preimage _ _)).clm_apply contMDiffOn_snd
-  have htotal := e₁.contMDiffOn_symm.comp (hbase.prodMk hvalue)
-    (fun q hq => e₁.mem_target.mpr hq.2.1)
-  have hlocal : ContMDiffWithinAt (IP.prod 𝓘(𝕜, F₂)) (I₁.prod 𝓘(𝕜, F₁)) n
-      (fun q : P × F₂ =>
-        (⟨b₁ q.1, (φ q.1).symm (e₂.symmL 𝕜 (b₂ q.1) q.2)⟩ : TotalSpace F₁ V₁))
-      (Prod.fst ⁻¹' K) (p₀, v₀) := by
-    apply (htotal (p₀, v₀) hK₀).congr_of_eventuallyEq_of_mem _ hK₀
-    filter_upwards [self_mem_nhdsWithin] with q hq
-    dsimp only [Function.comp_def]
-    rw [← hCinvApply q.1 hq q.2, e₁.symmL_apply hq.2.1, e₁.mk_symm hq.2.1]
-  apply hlocal.mono_of_mem_nhdsWithin
-  have hbaseAt : ContinuousWithinAt (fun q : P × F₂ => b₁ q.1)
-      {q | q.1 ∈ s ∧ b₂ q.1 ∈ e₂.baseSet} (p₀, v₀) := by
-    have hbaseD : ContMDiffOn (IP.prod 𝓘(𝕜, F₂)) I₁ n (fun q : P × F₂ => b₁ q.1)
-        {q | q.1 ∈ s ∧ b₂ q.1 ∈ e₂.baseSet} :=
-      hb₁.comp contMDiffOn_fst (fun q hq => hq.1)
-    exact (hbaseD (p₀, v₀) ⟨hp₀, he₂p₀⟩).continuousWithinAt
-  have hinitial : ∀ᶠ q : P × F₂ in
-      𝓝[{q | q.1 ∈ s ∧ b₂ q.1 ∈ e₂.baseSet}] (p₀, v₀), b₁ q.1 ∈ e₁.baseSet :=
-    hbaseAt (e₁.open_baseSet.mem_nhds he₁p₀)
-  filter_upwards [self_mem_nhdsWithin, hinitial] with q hq hqi
-  exact ⟨hq.1, hqi, hq.2⟩
 
 end BundleMapInverse

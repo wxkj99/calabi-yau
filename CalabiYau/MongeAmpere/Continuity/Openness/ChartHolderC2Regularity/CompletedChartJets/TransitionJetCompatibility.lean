@@ -22,12 +22,11 @@ open Filter
 
 namespace KahlerForm
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E]
-  {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
-  [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
+section
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] in
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+  [IsManifold 𝓘(ℝ, E) ∞ M]
 private theorem smoothChartHolderTransition_contDiffAt
     (cover : CompactChartCover E M) (i j : cover.ι) (z w : E)
     (hz : z ∈ cover.piece i) (hw : w ∈ interior (cover.piece j))
@@ -52,171 +51,10 @@ private theorem smoothChartHolderTransition_contDiffAt
     contMDiffAt_extChartAt' (I := 𝓘(ℝ, E)) hxSource
   exact (hchart.comp z hsymm).contDiffAt
 
-omit [FiniteDimensional ℝ E] in
-private theorem smoothChartHolderTransitionJet_tendsto_zero
-    (G : ℕ → E → ℝ) (τ : E → E) (z : E) (r : ℕ) (hr : r ≤ 2)
-    (hG : ∀ n, ContDiffAt ℝ (∞ : ℕ∞ω) (G n) (τ z))
-    (hτ : ContDiffAt ℝ (∞ : ℕ∞ω) τ z)
-    (hjet : ∀ (k : ℕ), k ≤ 2 → Filter.Tendsto
-      (fun n => iteratedFDeriv ℝ k (G n) (τ z)) atTop (𝓝 0)) :
-    Filter.Tendsto (fun n => iteratedFDeriv ℝ r (G n ∘ τ) z) atTop (𝓝 0) := by
-  let p : ℕ → FormalMultilinearSeries ℝ E ℝ := fun n => ftaylorSeries ℝ (G n) (τ z)
-  let q : FormalMultilinearSeries ℝ E E := ftaylorSeries ℝ τ z
-  let control : ℕ → ℝ := fun n => ‖p n 0‖ + ‖p n 1‖ + ‖p n 2‖
-  have h0 : Filter.Tendsto (fun n => ‖p n 0‖) atTop (𝓝 0) := by
-    change Filter.Tendsto (fun n => ‖iteratedFDeriv ℝ 0 (G n) (τ z)‖) atTop (𝓝 0)
-    simpa using (hjet 0 (by omega)).norm
-  have h1 : Filter.Tendsto (fun n => ‖p n 1‖) atTop (𝓝 0) := by
-    change Filter.Tendsto (fun n => ‖iteratedFDeriv ℝ 1 (G n) (τ z)‖) atTop (𝓝 0)
-    simpa using (hjet 1 (by omega)).norm
-  have h2 : Filter.Tendsto (fun n => ‖p n 2‖) atTop (𝓝 0) := by
-    change Filter.Tendsto (fun n => ‖iteratedFDeriv ℝ 2 (G n) (τ z)‖) atTop (𝓝 0)
-    simpa using (hjet 2 (by omega)).norm
-  have hcontrol : Filter.Tendsto control atTop (𝓝 0) := by
-    simpa [control, add_assoc] using (h0.add h1).add h2
-  have hpBound : ∀ k ≤ 2, atTop.IsBoundedUnder (· ≤ ·) (fun n => ‖p n k‖) := by
-    intro k hk
-    have hk' := (hjet k hk).norm
-    change atTop.IsBoundedUnder (· ≤ ·)
-      (fun n => ‖iteratedFDeriv ℝ k (G n) (τ z)‖)
-    exact hk'.isBoundedUnder_le
-  have hpdiff : ∀ k ≤ 2,
-      (fun n => p n k - (0 : FormalMultilinearSeries ℝ E ℝ) k) =O[atTop] control := by
-    intro k hk
-    apply Asymptotics.IsBigO.of_norm_le
-    intro n
-    have hk_cases : k = 0 ∨ k = 1 ∨ k = 2 := by omega
-    rcases hk_cases with rfl | rfl | rfl
-    · have hbound : ‖p n 0‖ ≤ ‖p n 0‖ + ‖p n 1‖ + ‖p n 2‖ := by
-        calc
-          ‖p n 0‖ ≤ ‖p n 0‖ + (‖p n 1‖ + ‖p n 2‖) :=
-            le_add_of_nonneg_right (add_nonneg (norm_nonneg _) (norm_nonneg _))
-          _ = ‖p n 0‖ + ‖p n 1‖ + ‖p n 2‖ := by ring
-      simpa [control] using hbound
-    · have hbound : ‖p n 1‖ ≤ ‖p n 0‖ + ‖p n 1‖ + ‖p n 2‖ := by
-        calc
-          ‖p n 1‖ ≤ ‖p n 0‖ + ‖p n 1‖ := le_add_of_nonneg_left (norm_nonneg _)
-          _ ≤ (‖p n 0‖ + ‖p n 1‖) + ‖p n 2‖ :=
-            le_add_of_nonneg_right (norm_nonneg _)
-      simpa [control] using hbound
-    · have hbound : ‖p n 2‖ ≤ ‖p n 0‖ + ‖p n 1‖ + ‖p n 2‖ :=
-        le_add_of_nonneg_left (add_nonneg (norm_nonneg _) (norm_nonneg _))
-      simpa [control] using hbound
-  have hqBound : ∀ k ≤ 2, atTop.IsBoundedUnder (· ≤ ·)
-      (fun _n : ℕ => ‖q k‖) := by
-    intro k hk
-    exact isBoundedUnder_const
-  have hcontrol_nonneg (n : ℕ) : 0 ≤ control n := by
-    dsimp [control]
-    positivity
-  have hqDiff : ∀ k ≤ 2, (fun n => q k - q k) =O[atTop] control := by
-    intro k hk
-    apply Asymptotics.IsBigO.of_norm_le
-    intro n
-    simpa using hcontrol_nonneg n
-  have hbig : (fun n => (p n).taylorComp q r -
-      (0 : FormalMultilinearSeries ℝ E ℝ).taylorComp q r) =O[atTop] control := by
-    exact FormalMultilinearSeries.taylorComp_sub_taylorComp_isBigO
-      (fun k hk => hpBound k (hk.trans hr))
-      (fun k hk => hpdiff k (hk.trans hr))
-      (fun k hk => hqBound k (hk.trans hr))
-      (fun k hk => hqBound k (hk.trans hr))
-      (fun k hk => hqDiff k (hk.trans hr))
-  have hzero : (0 : FormalMultilinearSeries ℝ E ℝ).taylorComp q r = 0 := by
-    unfold FormalMultilinearSeries.taylorComp
-    apply Finset.sum_eq_zero
-    intro c hc
-    ext v
-    rfl
-  have hcomp : Filter.Tendsto (fun n => (p n).taylorComp q r) atTop (𝓝 0) := by
-    have h := hbig.trans_tendsto hcontrol
-    simpa [hzero] using h
-  have hEq (n : ℕ) :
-      iteratedFDeriv ℝ r (G n ∘ τ) z = (p n).taylorComp q r := by
-    simpa [p, q] using iteratedFDeriv_comp (hG n) hτ (i := r) (by
-      exact WithTop.coe_le_coe.mpr le_top)
-  exact hcomp.congr' (Filter.Eventually.of_forall fun n => (hEq n).symm)
+section
 
-omit [CompactSpace M] in
-omit [FiniteDimensional ℝ E] in
-private theorem smoothChartHolderCoreJets_tendsto_zero_across_chart_transition
-    (cover : CompactChartCover E M) (α : ℝ≥0)
-    (f : ℕ → SmoothChartHolderCore cover 2 α)
-    (i j : cover.ι) (z w : E)
-    (hz : z ∈ cover.piece i) (hw : w ∈ interior (cover.piece j))
-    (hcoord : (extChartAt 𝓘(ℝ, E) (cover.base i)).symm z =
-      (extChartAt 𝓘(ℝ, E) (cover.base j)).symm w)
-    (hjet : ∀ (r : ℕ), r ≤ 2 → Filter.Tendsto
-      (fun n => iteratedFDeriv ℝ r
-        ((f n).smoothMap ∘ (extChartAt 𝓘(ℝ, E) (cover.base j)).symm) w)
-      atTop (𝓝 0)) :
-    ∀ (r : ℕ), r ≤ 2 → Filter.Tendsto
-      (fun n => iteratedFDeriv ℝ r
-        ((f n).smoothMap ∘ (extChartAt 𝓘(ℝ, E) (cover.base i)).symm) z)
-      atTop (𝓝 0) := by
-  let ei := extChartAt 𝓘(ℝ, E) (cover.base i)
-  let ej := extChartAt 𝓘(ℝ, E) (cover.base j)
-  let τ : E → E := ej ∘ ei.symm
-  let G : ℕ → E → ℝ := fun n =>
-    (f n).smoothMap ∘ (extChartAt 𝓘(ℝ, E) (cover.base j)).symm
-  have hwTarget : w ∈ ej.target := cover.piece_in_target j (interior_subset hw)
-  have hxSource : ei.symm z ∈ (chartAt E (cover.base j)).source := by
-    rw [hcoord]
-    simpa [ej, extChartAt_source] using ej.map_target hwTarget
-  have hsymm : ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) (∞ : ℕ∞ω) ei.symm z := by
-    have hopen : IsOpen ei.target := isOpen_extChartAt_target (cover.base i)
-    have hzTarget : z ∈ ei.target := cover.piece_in_target i hz
-    have hOn : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ, E) (∞ : ℕ∞ω) ei.symm ei.target :=
-      contMDiffOn_extChartAt_symm (I := 𝓘(ℝ, E)) (cover.base i)
-    exact hOn.contMDiffAt (hopen.mem_nhds hzTarget)
-  have hτ : ContDiffAt ℝ (∞ : ℕ∞ω) τ z := by
-    have hchart : ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) (∞ : ℕ∞ω) ej (ei.symm z) :=
-      contMDiffAt_extChartAt' (I := 𝓘(ℝ, E)) hxSource
-    have hcomp := hchart.comp z hsymm
-    simpa [τ] using hcomp.contDiffAt
-  have hτz : τ z = w := by
-    calc
-      τ z = ej (ei.symm z) := rfl
-      _ = ej (ej.symm w) := by rw [hcoord]
-      _ = w := ej.right_inv hwTarget
-  have hG : ∀ n, ContDiffAt ℝ (∞ : ℕ∞ω) (G n) (τ z) := by
-    intro n
-    have hcont : ContDiffOn ℝ (∞ : ℕ∞ω)
-        ((f n).smoothMap ∘ (extChartAt 𝓘(ℝ, E) (cover.base j)).symm)
-        (extChartAt 𝓘(ℝ, E) (cover.base j)).target := by
-      have h := (contMDiff_iff.mp (f n).smoothMap.contMDiff).2 (cover.base j) 0
-      simpa [extChartAt, chartAt_self_eq] using h
-    have hopen : IsOpen ej.target := isOpen_extChartAt_target (cover.base j)
-    rw [hτz]
-    exact hcont.contDiffAt (hopen.mem_nhds
-      (cover.piece_in_target j (interior_subset hw)))
-  have hjet' : ∀ (r : ℕ), r ≤ 2 → Filter.Tendsto
-      (fun n => iteratedFDeriv ℝ r (G n) (τ z)) atTop (𝓝 0) := by
-    intro r hr
-    have heq : (fun n => iteratedFDeriv ℝ r (G n) (τ z)) =
-        (fun n => iteratedFDeriv ℝ r
-          ((f n).smoothMap ∘ (extChartAt 𝓘(ℝ, E) (cover.base j)).symm) w) := by
-      funext n
-      dsimp [G]
-      rw [hτz]
-    rw [heq]
-    exact hjet r hr
-  have hxSource' : ei.symm z ∈ ej.source := by
-    simpa [ej, extChartAt_source] using hxSource
-  have hnear : ∀ᶠ y in 𝓝 z, ei.symm y ∈ ej.source := by
-    have hopen : IsOpen ej.source := isOpen_extChartAt_source (cover.base j)
-    exact (hsymm.continuousAt.tendsto).eventually (hopen.mem_nhds hxSource')
-  have hlocalEq (n : ℕ) :
-      ((f n).smoothMap ∘ ei.symm) =ᶠ[𝓝 z] (G n ∘ τ) := by
-    filter_upwards [hnear] with y hy
-    change (f n).smoothMap (ei.symm y) = (f n).smoothMap (ej.symm (ej (ei.symm y)))
-    rw [ej.left_inv hy]
-  intro r hr
-  have hcomp := smoothChartHolderTransitionJet_tendsto_zero G τ z r hr hG hτ hjet'
-  exact hcomp.congr' (Filter.Eventually.of_forall fun n =>
-    ((hlocalEq n).iteratedFDeriv ℝ r).self_of_nhds.symm)
+variable [CompactSpace M]
 
-omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderTransitionChainRuleOrderOne
     (G : E → ℝ) (τ : E → E) (z : E)
     (hG : ContDiffAt ℝ (∞ : ℕ∞ω) G (τ z))
@@ -230,7 +68,6 @@ private theorem smoothChartHolderTransitionChainRuleOrderOne
   have hm := congrArg (fun A : E →L[ℝ] ℝ => A (m 0)) h
   simpa only [iteratedFDeriv_one_apply, ContinuousLinearMap.comp_apply] using hm
 
-omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderTransitionChainRuleOrderTwo
     (G : E → ℝ) (τ : E → E) (z : E)
     (hG : ContDiffAt ℝ (∞ : ℕ∞ω) G (τ z))
@@ -281,7 +118,8 @@ private theorem smoothChartHolderTransitionChainRuleOrderTwo
     ContinuousLinearMap.comp_apply]
   ring
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] in
+end
+
 private theorem smoothChartHolderCoreTransitionJetCompatibility_orderOne
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (f : SmoothChartHolderCore cover 2 α) (i j : cover.ι) (z w : E)
@@ -338,7 +176,6 @@ private theorem smoothChartHolderCoreTransitionJetCompatibility_orderOne
   rw [hτz] at hchain
   simpa [G, τ, ei, ej, extChartAt] using hchain
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] in
 private theorem smoothChartHolderCoreTransitionJetCompatibility_orderTwo
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (f : SmoothChartHolderCore cover 2 α) (i j : cover.ι) (z w : E)
@@ -399,7 +236,6 @@ private theorem smoothChartHolderCoreTransitionJetCompatibility_orderTwo
   rw [hτz] at hchain
   simpa [G, τ, ei, ej, extChartAt] using hchain
 
-omit [CompactSpace M] in
 private theorem smoothChartHolderCanonicalTransitionJetOrderOne
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α)
@@ -452,7 +288,6 @@ private theorem smoothChartHolderCanonicalTransitionJetOrderOne
       cover α f i j z w hz hw hcoord) m
   exact UniformSpace.Completion.induction_on u hclosed hcore
 
-omit [CompactSpace M] in
 private theorem smoothChartHolderCanonicalTransitionJetOrderTwo
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α)
@@ -518,7 +353,10 @@ private theorem smoothChartHolderCanonicalTransitionJetOrderTwo
       cover α f i j z w hz hw hcoord) m
   exact UniformSpace.Completion.induction_on u hclosed hcore
 
-omit [FiniteDimensional ℝ E] in
+section
+
+variable [CompactSpace M]
+
 private theorem smoothChartHolderTransitionFiniteChainRuleOrderOne
     (G : E → ℝ) (τ : E → E) (z : E)
     (hG : ContDiffAt ℝ (2 : ℕ∞ω) G (τ z))
@@ -532,7 +370,6 @@ private theorem smoothChartHolderTransitionFiniteChainRuleOrderOne
   have hm := congrArg (fun A : E →L[ℝ] ℝ => A (m 0)) h
   simpa only [iteratedFDeriv_one_apply, ContinuousLinearMap.comp_apply] using hm
 
-omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderTransitionFiniteChainRuleOrderTwo
     (G : E → ℝ) (τ : E → E) (z : E)
     (hG : ContDiffAt ℝ (2 : ℕ∞ω) G (τ z))
@@ -579,6 +416,21 @@ private theorem smoothChartHolderTransitionFiniteChainRuleOrderTwo
     ContinuousLinearMap.comp_apply]
   ring
 
+end
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+  {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
+  [IsManifold 𝓘(ℝ, E) ∞ M]
+section
+
+variable [CompactSpace M]
+
+omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderCompletedInteriorContDiffAt
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α)
@@ -589,6 +441,7 @@ private theorem smoothChartHolderCompletedInteriorContDiffAt
         (extChartAt 𝓘(ℝ, E) (cover.base j)).symm) q := by
   exact KahlerForm.smoothChartHolderCompletedContDiffAt cover α N u j q hq
 
+omit [FiniteDimensional ℝ E] in
 private theorem smoothChartHolderActualTransitionJetCompatibility
     (cover : CompactChartCover E M) (α : ℝ≥0)
     (N : SmoothChartHolderNormedData cover 2 α)
@@ -674,6 +527,7 @@ private theorem smoothChartHolderActualTransitionJetCompatibility
     rw [hτz, hG2, hG1] at hChain
     exact hEq.trans hChain
 
+omit [FiniteDimensional ℝ E] in
 /-- At an overlap where the point is interior to chart `j`'s compact piece, the actual first and
 second coordinate derivatives in chart `i` and the canonical completed jets in chart `i` both agree
 with the corresponding chain-rule transports of the canonical jets in chart `j`. The second-order
@@ -736,5 +590,9 @@ theorem smoothChartHolderCompletedTransitionJetCompatibility
     intro m
     exact smoothChartHolderCanonicalTransitionJetOrderTwo
       cover α N u i j z q hz hq hoverlap m
+
+end
+
+end
 
 end KahlerForm

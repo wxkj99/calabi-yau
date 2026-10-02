@@ -20,8 +20,6 @@ public import Mathlib.Topology.Compactness.LocallyCompact
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -166,14 +164,6 @@ lemma support_tangentSectionAction_subset
   have hX0 : X x = (0 : TangentSpace I x) :=
     Function.notMem_support.mp hne
   exact hx (tangentSectionAction_zero_of_X_zero (I := I) X f hX0)
-
-omit [Module.Finite ℝ E] in
-lemma tsupport_tangentSectionAction_subset
-    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) :
-    tsupport (tangentSectionAction (I := I) X f) ⊆ tsupport X :=
-  closure_minimal
-    ((support_tangentSectionAction_subset (I := I) X f).trans
-      (subset_tsupport (X : ∀ x, TangentSpace I x))) (isClosed_tsupport _)
 
 omit [Module.Finite ℝ E] in
 lemma hasCompactSupport_tangentSectionAction

@@ -21,12 +21,11 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
-@[deprecated "unused hypothesis `hQP`; will be removed" (since := "2026-10-02")]
 theorem referenceAction_action_covariance {n : ℕ}
     (P Q g g' : Matrix (Fin n) (Fin n) ℂ)
     (T : Fin n → Fin n → Fin n → ℂ)
     (U : Fin n → Fin n → Fin n → Fin n → ℂ)
-    (hPQ : P * Q = 1) (hQP : Q * P = 1)
+    (hPQ : P * Q = 1)
     (hmetric : ∀ s u, ∑ p, ∑ q, g' q p * P s p * star (P u q) = g u s) :
     ∀ i j k, referenceAction_tauT P Q (referenceAction_contract g T U) i j k =
       referenceAction_contract g' (referenceAction_tauT P Q T) (referenceAction_tauU P Q U) i j k := by

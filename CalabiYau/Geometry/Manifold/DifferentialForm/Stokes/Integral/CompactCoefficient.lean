@@ -1,6 +1,8 @@
 module
 public import CalabiYau.Geometry.Manifold.DifferentialForm.Stokes.Integral.ChartCoefficient
-public import CalabiYau.Geometry.Manifold.DifferentialForm.Stokes.Orientation.CompactCoefficient
+public import Mathlib.Analysis.Calculus.DifferentialForm.Basic
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 /-!
 # Integrability of chart coefficients supported away from the chart boundary
@@ -68,18 +70,15 @@ private theorem continuous_indicator_of_closed_of_frontier_zero
     rw [hxval]
     exact (continuousAt_const : ContinuousAt (fun _ : E => (0 : ℝ)) x).congr' hEq.symm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (Fin n → ℝ) M] [IsManifold (𝓘(ℝ, Fin n → ℝ)) ∞ M]
-  [T2Space M] [CompactSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (Fin n → ℝ) M]
+  [IsManifold (𝓘(ℝ, Fin n → ℝ)) ∞ M]
 
-omit [T2Space M] [CompactSpace M] in
 private theorem integrable_indicator_of_isCompact_continuousOn
     (K : Set (Fin n → ℝ)) (f : (Fin n → ℝ) → ℝ)
     (hK : IsCompact K) (hf : ContinuousOn f K) :
     Integrable (K.indicator f) (volume : Measure (Fin n → ℝ)) := by
   exact (integrable_indicator_iff hK.measurableSet).2 (hf.integrableOn_compact hK)
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chartTopCoefficient_eq_chartImageIndicator (x : M)
     (η : DifferentialForm (𝓘(ℝ, Fin n → ℝ)) M n)
     (hη : closure {z : M | η z ≠ 0} ⊆
@@ -144,8 +143,8 @@ private theorem chartTopCoefficient_eq_chartImageIndicator (x : M)
         rw [if_neg hy']
     simp [hzero, hy]
 
-omit [T2Space M] in
 
+variable [CompactSpace M] in
 /-- A top form whose *closed* nonzero support lies inside this chart has an
 integrable signed coordinate coefficient, extended by zero to all of ℝⁿ.
 Compactness of `M` and continuity of `η` preclude spurious nonintegrability;

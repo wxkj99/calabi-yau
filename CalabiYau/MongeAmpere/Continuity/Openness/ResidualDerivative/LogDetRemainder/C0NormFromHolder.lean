@@ -25,12 +25,10 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 omit [ConnectedSpace M] in
 /-- A faithfully evaluated mean-zero C⁰ completion element with a chartwise `HolderBoundOn` bound
 has completion norm bounded by twice the order-zero chart-gauge constant. -/
-@[deprecated "unused hypothesis `hEval`; will be removed" (since := "2026-10-02")]
 theorem meanZeroC0_norm_le_of_chartHolderBound
     (ω₁ : KahlerForm n M) (α : ℝ≥0)
     [P : ContinuityHolderPair ω₁ α]
-    (v : P.C0) (hEval : Function.Injective P.evalC0)
-    (K : ℝ≥0)
+    (v : P.C0) (K : ℝ≥0)
     (hK : ∀ i, HolderBoundOn 0 α K (P.finiteChartCover.piece i)
       (P.evalC0 v ∘
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))

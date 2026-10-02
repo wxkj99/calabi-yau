@@ -22,7 +22,7 @@ namespace Laplacian
 namespace LaplacianDomainVariationalLimitGeneral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -40,10 +40,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
+variable [I.Boundaryless]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
+omit [I.Boundaryless] in
 theorem gradFun_smul_smooth_eq_pointwise
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -108,7 +107,6 @@ theorem gradFun_smul_smooth_eq_pointwise
     rw [hd_φ_def]
     exact inner_gradFun (I := I) g φ x w]
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
 private lemma grad_g_smul_smooth_section_eq
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -148,7 +146,6 @@ private lemma grad_g_smul_smooth_section_eq
   simp only [grad_g_apply]
   exact gradFun_smul_smooth_eq_pointwise (I := I) (M := M) g hφ hv x
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
 private lemma tangentSectionAction_grad_g_eq_inner_grad
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -169,8 +166,6 @@ private lemma tangentSectionAction_grad_g_eq_inner_grad
       grad_g_apply (I := I) g vMap x]
   exact (inner_gradFun (I := I) g φ x _).symm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-omit [T2Space M] in
 theorem Δ_g_smul_eq
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -211,8 +206,11 @@ theorem Δ_g_smul_eq
     g.symm x _ _
   rw [h_symm]
   ring
+section
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [T2Space M] [CompactSpace M]
+
+
 theorem pouScalar_oneSubLapClassical_pointwise_leibniz
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (x : M) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun x =
@@ -259,7 +257,6 @@ theorem pouScalar_oneSubLapClassical_pointwise_leibniz
   rw [h_lap_v_eq]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma fHLeibniz_smoothCase_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ((leibnizCompensatedSource (I := I) (M := M) g α
@@ -362,7 +359,6 @@ private lemma fHLeibniz_smoothCase_coeFn_aeEq
   rw [smul_eq_mul]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem pouScalar_oneSubLap_aeEq_fHLeibniz_smooth
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =ᵐ[
@@ -386,6 +382,8 @@ theorem pouScalar_oneSubLap_aeEq_fHLeibniz_smooth
     pouScalar_oneSubLapClassical_pointwise_leibniz (I := I) (M := M) g α v
   refine Filter.EventuallyEq.trans (Filter.Eventually.of_forall h_pointwise) ?_
   exact h.symm
+
+end
 
 end LaplacianDomainVariationalLimitGeneral
 end Laplacian

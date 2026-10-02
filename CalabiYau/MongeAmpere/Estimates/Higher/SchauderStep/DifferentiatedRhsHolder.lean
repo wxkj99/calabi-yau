@@ -1,12 +1,11 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.BufferedInterpolation
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.CompactHolder
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.DirectionalJets
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.HolderAddition
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.MatrixTraceProduct
+import CalabiYau.Mathlib.Analysis.Matrix.HolderProduct
 
 /-!
 # Hölder bounds for the differentiated Monge–Ampère right-hand side
@@ -196,9 +195,9 @@ private theorem exists_uniform_holderBoundOn_directional_derivative_family
     {P E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     {S : Set P} {W U L : Set E} {k : ℕ} {α C : ℝ≥0}
-    (hW : IsOpen W) (hU : IsOpen U) (hL : IsCompact L)
+    (hW : IsOpen W) (hL : IsCompact L)
     (hbuffer : closure U ⊆ interior L) (hLW : L ⊆ W)
-    (hα₀ : 0 < α) (hα₁ : α < 1)
+    (hα₁ : α < 1)
     (f : P → E → F) (v : P → E)
     (hf : ∀ p ∈ S, ContDiffOn ℝ ∞ (f p) W)
     (hv : ∀ p ∈ S, ‖v p‖ ≤ 1)
@@ -247,7 +246,7 @@ private theorem exists_uniform_holderBoundOn_directional_derivative_family
       _ ≤ C := by
         simpa [norm_iteratedFDeriv_fderiv] using hbound p hp (j + 1) hj' z hz
   exact exists_uniform_holderBoundOn_family_of_buffered_derivative_bounds
-    S g hW hU hL hbuffer hLW hα₀ hα₁ hg hboundg
+    S g hW hL hbuffer hLW hα₁ hg hboundg
 
 private theorem holderBoundOn_neg_same_order
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -273,10 +272,10 @@ theorem exists_uniform_differentiated_rhs_holder
     (ω₀ : KahlerForm n M) (S : Set ((M → ℝ) × (M → ℝ)))
     (hS : ∀ p ∈ S, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ p.1 ∧
       ω₀.SolvesMongeAmpere p.1 p.2)
-    {x : M} {α : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1)
+    {x : M} {α : ℝ≥0} (hα₁ : α < 1)
     {r : ℕ} (hr : 2 ≤ r) {CG CA : ℝ≥0}
     {U L : Set (EuclideanSpace ℂ (Fin n))}
-    (hUopen : IsOpen U) (hUcompact : IsCompact (closure U))
+    (hUcompact : IsCompact (closure U))
     (hUtarget : closure U ⊆
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (hLcompact : IsCompact L) (hBuffer : closure U ⊆ interior L)
@@ -335,7 +334,7 @@ theorem exists_uniform_differentiated_rhs_holder
     have hle : j ≤ r + 2 := by omega
     simpa [g, e] using (hGouter q.1 hq).1 j hle z hz
   obtain ⟨CGD, hGdir⟩ := exists_uniform_holderBoundOn_directional_derivative_family
-    hW hUopen hLcompact hBuffer hLtarget hα₀ hα₁ g v hg hv hgBound
+    hW hLcompact hBuffer hLtarget hα₁ g v hg hv hgBound
   obtain ⟨CrefDir, hRefDir⟩ := exists_ref_directional_derivative_holder
     (k := r - 2) ω₀ hα₁.le hUcompact hUtarget
   let d : Fin n → Bool → Fin n → Fin n → EuclideanSpace ℂ (Fin n) → ℂ :=

@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.Geometry.Kahler.Connection.MetricJet
-public import CalabiYau.Geometry.Kahler.Connection.Contraction
+public import CalabiYau.Mathlib.LinearAlgebra.Matrix.PullbackContraction
 
 /-!
 # Nonlinear holomorphic coordinate change for the metric connection

@@ -17,7 +17,7 @@ namespace Laplacian
 namespace ChartBilinearH1Compl
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -34,7 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma weightedInvGramOnEuclid_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -61,7 +60,6 @@ private lemma weightedInvGramOnEuclid_bounded_on_compact
   intro y hy
   exact h_max_eq hy
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma densityOnEuclid_bounded_above_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -87,7 +85,7 @@ private lemma densityOnEuclid_bounded_above_on_compact
   intro y hy
   exact h_max_eq hy
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     {μ : Measure EuclN} {Y : EuclN → ℝ} {ψ_n : ℕ → EuclN → ℝ} {ψ : EuclN → ℝ}
     (hY : MemLp Y 2 μ)
@@ -214,7 +212,6 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     simpa [h_eq] using h_aux
   simpa [add_zero] using h_aux'
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma uChart_memLp_volume_restrict_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -226,7 +223,6 @@ private lemma uChart_memLp_volume_restrict_compact
   memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     (D.u_chart_memLp_weighted) hK_compact hK_meas hK_in
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChart_memLp_volume_restrict_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -238,7 +234,6 @@ private lemma fChart_memLp_volume_restrict_compact
   memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     (D.f_chart_memLp_weighted) hK_compact hK_meas hK_in
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_bilinear_identity_h1_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

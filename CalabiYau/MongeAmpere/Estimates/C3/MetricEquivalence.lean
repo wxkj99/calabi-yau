@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 import CalabiYau.Geometry.Complex.Forms.Positive
 
 /-!

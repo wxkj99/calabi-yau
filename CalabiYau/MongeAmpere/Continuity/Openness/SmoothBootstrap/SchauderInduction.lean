@@ -22,6 +22,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
   [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- Uniform difference-quotient Schauder estimates give the first `C²` to `C³` gain, and the
 higher-order induction then gives smoothness. -/
 theorem solvesMongeAmpereC2_smooth_of_differenceQuotientSchauderData
@@ -36,7 +37,7 @@ theorem solvesMongeAmpereC2_smooth_of_differenceQuotientSchauderData
     (hDifferenceQuotients : HasDifferenceQuotientSchauderData ω₀ G φ α) :
     ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ := by
   have hThree := solvesMongeAmpereC2_contMDiff_three_of_differenceQuotientSchauderData
-    hSch ω₀ α hα₀ hα₁ hG hφ cover hφGauge hEquation hDifferenceQuotients
+    hSch ω₀ α hα₀ hα₁ hφ cover hφGauge hDifferenceQuotients
   have hfinite : ∀ k : ℕ,
       ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) k φ := by
     intro k

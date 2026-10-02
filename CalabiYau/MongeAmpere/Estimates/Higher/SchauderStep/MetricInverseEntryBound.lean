@@ -1,8 +1,8 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.PositiveLowerBound
+public import CalabiYau.Analysis.Elliptic.Schauder
+import CalabiYau.Mathlib.Topology.Order.CompactPositiveLowerBound
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.UniformInverseEntryBound
 
 /-!

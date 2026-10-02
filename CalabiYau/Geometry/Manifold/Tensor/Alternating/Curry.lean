@@ -9,7 +9,7 @@ Coauthors: Jack McCarthy
 module
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Flip
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Composition
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.Domain
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Alternating.DomCongr
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Decomposition
 public import Mathlib.Analysis.Normed.Module.Alternating.Curry
 public import Mathlib.LinearAlgebra.Alternating.DomCoprod
@@ -41,10 +41,6 @@ def uncurryFin (f : E →L[𝕜] E [⋀^Fin n]→L[𝕜] F) : E [⋀^Fin (n + 1)
       _ = _ := by
         simp [mul_assoc, ← Fin.prod_univ_succAbove (‖v ·‖)]
 
-lemma toAlternatingMap_uncurryFin (f : E →L[𝕜] E [⋀^Fin n]→L[𝕜] F) :
-    (uncurryFin f).toAlternatingMap = .alternatizeUncurryFin (toAlternatingMapLinear ∘ₗ f) :=
-  rfl
-
 theorem norm_uncurryFin_le (f : E →L[𝕜] E [⋀^Fin n]→L[𝕜] F) :
     ‖uncurryFin f‖ ≤ (n + 1) * ‖f‖ :=
   AlternatingMap.mkContinuous_norm_le _ (by positivity) _
@@ -73,17 +69,6 @@ def uncurryFinCLM :
       map_smul' := by exact uncurryFin_smul }
     (n + 1) norm_uncurryFin_le
 
-theorem uncurryFin_uncurryFinCLM_comp_of_symmetric {f : E →L[𝕜] E →L[𝕜] E [⋀^Fin n]→L[𝕜] F}
-    (hf : ∀ x y, f x y = f y x) :
-    uncurryFin (uncurryFinCLM.comp f) = 0 := by
-  let g := LinearMap.compr₂ f.toLinearMap₁₂ toAlternatingMapLinear
-  have g_symm : ∀ x y, g x y = g y x := by
-    intro x y
-    have : g x y = (f x y).toAlternatingMap := rfl
-    aesop
-  let h₀ := AlternatingMap.alternatizeUncurryFin_alternatizeUncurryFinLM_comp_of_symmetric (g_symm)
-  exact toAlternatingMap_injective h₀
-
 def curryFin (f : E [⋀^Fin (n + 1)]→L[𝕜] F) : E →L[𝕜] E [⋀^Fin n]→L[𝕜] F :=
   f.curryLeft
 
@@ -109,16 +94,6 @@ theorem curryFin_smul {M : Type*} [Monoid M] [DistribMulAction M F] [ContinuousC
     curryFin (c • f) = c • curryFin f := by
   ext e v
   simp [curryFin_apply]
-
-theorem uncurryFin_curryFin (f : E [⋀^Fin (n + 1)]→L[𝕜] F) :
-    uncurryFin (curryFin f) = (n + 1 : ℕ) • f := by
-  apply toAlternatingMap_injective
-  rw [toAlternatingMap_uncurryFin]
-  have h : toAlternatingMapLinear ∘ₗ (curryFin f).toLinearMap =
-      AlternatingMap.curryLeft f.toAlternatingMap := by
-    ext x m; rfl
-  rw [h, AlternatingMap.alternatizeUncurryFin_curryLeft]
-  rfl
 
 def curryFinRight
     (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] G) (x : E) :
@@ -173,15 +148,6 @@ def uncurrySum.summand (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) (σ : 
       erw [← (f fun i ↦ v (σ₁ (Sum.inl i))).map_congr_perm fun i => v (σ₁ _)]
       simp [ContinuousMultilinearMap.flipAlternating]
       rfl
-
-theorem uncurrySum.summand_quot_mk
-    (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) (σ : Equiv.Perm (ι ⊕ ι')) :
-    uncurrySum.summand f (Quot.mk
-    (⇑(QuotientGroup.leftRel (Equiv.Perm.sumCongrHom ι ι').range)) σ) = Equiv.Perm.sign σ •
-    (ContinuousMultilinearMap.uncurrySum
-    (f.toContinuousMultilinearMap.flipAlternating.toContinuousMultilinearMap.flipMultilinear)
-      : ContinuousMultilinearMap 𝕜 (fun _ => E) F).domDomCongr σ :=
-  rfl
 
 theorem uncurrySum.summand_quotient_mk
     (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) (σ : Equiv.Perm (ι ⊕ ι')) :
@@ -273,11 +239,6 @@ def uncurrySum (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) : E [⋀^ι �
           (fun σ _ => Finset.mem_univ _) fun σ _ =>
           Equiv.swap_smul_involutive i j σ }
 
-theorem uncurrySum_coe (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) :
-    ((uncurrySum f).toContinuousMultilinearMap : ContinuousMultilinearMap 𝕜 (fun _ => E) F) =
-      ∑ σ : Equiv.Perm.ModSumCongr ι ι', uncurrySum.summand f σ :=
-  ContinuousMultilinearMap.ext fun _ => rfl
-
 theorem uncurrySum_apply (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) (m : ι ⊕ ι' → E) :
     uncurrySum f m = (∑ σ : Equiv.Perm.ModSumCongr ι ι', uncurrySum.summand f σ) m :=
   rfl
@@ -315,229 +276,6 @@ theorem lift_comp_domCoprod_eq_uncurrySum
   rw [LinearMap.map_smul_of_tower φ, hφ]; rfl
 
 variable {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
-
-theorem summand_left_match
-    (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] N'')
-    (x : E) (w : Fin (m + 1) ⊕ Fin (n + 1) → E) (hw : w (Sum.inl 0) = x)
-    (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
-    (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inl k)
-    (σ' : Equiv.Perm (Fin m ⊕ Fin (n + 1)))
-    (hσ' : Quotient.mk'' σ' = shuffleLeftRestrict
-      ⟨Quotient.mk'' σ, shuffleLeftRestrict_subtype_of_inv σ hσ⟩) :
-    uncurrySum.summand F (Quotient.mk'' σ) w =
-      uncurrySum.summand (curryFin F x) (Quotient.mk'' σ') (w ∘ Sum.map Fin.succ id) := by
-  have h_coset : (Quotient.mk'' σ' :
-      Equiv.Perm.ModSumCongr (Fin m) (Fin (n + 1))) =
-      Quotient.mk'' (shuffleLeftRestrictRepresentative σ hσ) := by
-    rw [hσ']
-    change Quotient.mk'' (shuffleLeftRestrictRepresentative (Quotient.out (Quotient.mk'' σ)) _) =
-      Quotient.mk'' (shuffleLeftRestrictRepresentative σ hσ)
-    apply Quotient.sound'
-    apply shuffleLeftRestrictRepresentative_respects_leftRel
-    rw [QuotientGroup.leftRel_apply]
-    have h_eq : (Quotient.mk'' (Quotient.out (Quotient.mk'' σ)) :
-      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin (n + 1))) = Quotient.mk'' σ :=
-      Quotient.out_eq _
-    exact QuotientGroup.leftRel_apply.mp (Quotient.exact' h_eq)
-  rw [h_coset]
-  set k := hσ.choose
-  set hk := hσ.choose_spec
-  set σ_can := shuffleLeftRestrictRepresentative σ hσ
-  have h_sign : Equiv.Perm.sign σ_can =
-      Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap 0 k) := by
-    change Equiv.Perm.sign (shuffleLeftRestrictRepresentative σ hσ) = _
-    unfold shuffleLeftRestrictRepresentative
-    rw [restrictComplement_sign _ (normalizeLeft_fixes σ k hk)]
-    unfold normalizeLeft
-    rw [Equiv.Perm.sign_mul]
-    congr 1
-    rw [Equiv.Perm.sign_sumCongr]; simp
-  rw [uncurrySum_summand_eval, uncurrySum_summand_eval]
-  set ν := normalizeLeft σ k
-  have hν_fix : ν (Sum.inl 0) = Sum.inl 0 := normalizeLeft_fixes σ k hk
-  have hσ_can_eq : σ_can = restrictComplement ν := rfl
-  have hν_inl : ∀ a : Fin (m + 1), ν (Sum.inl a) = σ (Sum.inl ((Equiv.swap 0 k) a)) := by
-    intro a; rfl
-  have hν_inr : ∀ b : Fin (n + 1), ν (Sum.inr b) = σ (Sum.inr b) := by
-    intro b; rfl
-  have hw'_inl : ∀ j : Fin m, (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j)) =
-      w (ν (Sum.inl j.succ)) := by
-    intro j
-    change w (Sum.map Fin.succ id (σ_can (Sum.inl j))) = w (ν (Sum.inl j.succ))
-    rw [hσ_can_eq, restrictComplement_lift ν hν_fix (Sum.inl j)]
-    rfl
-  have hw'_inr : ∀ b : Fin (n + 1), (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inr b)) =
-      w (ν (Sum.inr b)) := by
-    intro b
-    change w (Sum.map Fin.succ id (σ_can (Sum.inr b))) = w (ν (Sum.inr b))
-    rw [hσ_can_eq, restrictComplement_lift ν hν_fix (Sum.inr b)]
-    rfl
-  have h_inr_eq : (fun i => w (σ (Sum.inr i))) =
-      (fun i => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inr i))) := by
-    funext b; rw [hw'_inr, hν_inr]
-  have h_first_eq : ((fun i => w (σ (Sum.inl i))) ∘ (Equiv.swap (0 : Fin (m + 1)) k)) =
-      Fin.cons x (fun j => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j))) := by
-    funext i
-    refine Fin.cases ?_ ?_ i
-    · simp only [Function.comp_apply, Equiv.swap_apply_left, Fin.cons_zero]
-      rw [show σ (Sum.inl k) = Sum.inl (0 : Fin (m + 1)) from ?_, hw]
-      have := hk; rw [← Equiv.eq_symm_apply] at this; exact this.symm
-    · intro j
-      simp only [Function.comp_apply, Fin.cons_succ]
-      rw [hσ_can_eq, restrictComplement_lift ν hν_fix (Sum.inl j),
-          show Sum.map Fin.succ id (Sum.inl j : Fin m ⊕ Fin (n + 1)) =
-            Sum.inl j.succ from rfl, hν_inl]
-  have h_alt : (F ((fun i => w (σ (Sum.inl i))) ∘ (Equiv.swap (0 : Fin (m + 1)) k)) :
-      E [⋀^Fin (n + 1)]→L[𝕜] N'') =
-      Equiv.Perm.sign (Equiv.swap (0 : Fin (m + 1)) k) • F (fun i => w (σ (Sum.inl i))) := by
-    have := F.toAlternatingMap.map_perm (fun i => w (σ (Sum.inl i)))
-      (Equiv.swap (0 : Fin (m + 1)) k)
-    simp only [ContinuousAlternatingMap.coe_toAlternatingMap] at this
-    exact this
-  rw [h_inr_eq]
-  rw [show (curryFin F x) (fun j => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j))) =
-      F (Fin.cons x (fun j => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j)))) from rfl]
-  rw [← h_first_eq]
-  rw [h_alt]
-  rw [h_sign]
-  simp only [ContinuousAlternatingMap.smul_apply]
-  rw [smul_smul, mul_assoc, Int.units_mul_self, mul_one]
-
-theorem summand_right_match
-    (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] N'')
-    (x : E) (w : Fin (m + 1) ⊕ Fin (n + 1) → E) (hw : w (Sum.inl 0) = x)
-    (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
-    (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inr k)
-    (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
-    (hσ' : Quotient.mk'' σ' =
-      shuffleRightRestrict ⟨Quotient.mk'' σ,
-        shuffleRightRestrict_subtype_of_inv σ hσ⟩) :
-    uncurrySum.summand F (Quotient.mk'' σ) w =
-      -(uncurrySum.summand (curryFinRight F x) (Quotient.mk'' σ')
-        (fun y => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-          (Sum.map id Fin.succ y)))) := by
-  have h_coset : (Quotient.mk'' σ' :
-      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
-      Quotient.mk'' (shuffleRightRestrictRepresentative σ hσ) := by
-    rw [hσ']
-    change Quotient.mk'' (shuffleRightRestrictRepresentative (Quotient.out (Quotient.mk'' σ)) _) =
-      Quotient.mk'' (shuffleRightRestrictRepresentative σ hσ)
-    apply Quotient.sound'
-    apply shuffleRightRestrictRepresentative_respects_leftRel
-    rw [QuotientGroup.leftRel_apply]
-    have h_eq : (Quotient.mk'' (Quotient.out (Quotient.mk'' σ)) :
-      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin (n + 1))) = Quotient.mk'' σ :=
-      Quotient.out_eq _
-    exact QuotientGroup.leftRel_apply.mp (Quotient.exact' h_eq)
-  rw [h_coset]
-  set k := hσ.choose
-  set hk := hσ.choose_spec
-  set σ_can := shuffleRightRestrictRepresentative σ hσ
-  have h_sign : Equiv.Perm.sign σ_can =
-      -Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k) := by
-    change Equiv.Perm.sign (shuffleRightRestrictRepresentative σ hσ) = _
-    unfold shuffleRightRestrictRepresentative
-    rw [restrictComplementRight_sign _ (normalizeRight_fixes σ k hk)]
-    unfold normalizeRight
-    rw [Equiv.Perm.sign_mul, Equiv.Perm.sign_mul, Equiv.Perm.sign_sumCongr,
-      Equiv.Perm.sign_swap (show (Sum.inl (0 : Fin (m + 1)) : Fin (m + 1) ⊕ Fin (n + 1)) ≠
-        Sum.inr 0 from by simp)]
-    simp
-  set ν := normalizeRight σ k
-  have hν_fix : ν (Sum.inr 0) = Sum.inr 0 := normalizeRight_fixes σ k hk
-  have hσ_can_eq : σ_can = restrictComplementRight ν := rfl
-  have hν_inl : ∀ a : Fin (m + 1),
-      ν (Sum.inl a) =
-        Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0) (σ (Sum.inl a)) := by
-    intro a; rfl
-  have hν_inr : ∀ b : Fin (n + 1),
-      ν (Sum.inr b) =
-        Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-          (σ (Sum.inr ((Equiv.swap (0 : Fin (n + 1)) k) b))) := by
-    intro b; rfl
-  have hw_R_inl : ∀ j : Fin (m + 1),
-      w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inl j)))) =
-      w (σ (Sum.inl j)) := by
-    intro j
-    rw [hσ_can_eq, restrictComplementRight_lift ν hν_fix (Sum.inl j)]
-    change w (Equiv.swap _ _ (ν (Sum.inl j))) = _
-    rw [hν_inl, Equiv.swap_apply_self]
-  have hw_R_inr : ∀ j : Fin n,
-      w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inr j)))) =
-      w (σ (Sum.inr ((Equiv.swap (0 : Fin (n + 1)) k) j.succ))) := by
-    intro j
-    rw [hσ_can_eq, restrictComplementRight_lift ν hν_fix (Sum.inr j)]
-    change w (Equiv.swap _ _ (ν (Sum.inr j.succ))) = _
-    rw [hν_inr, Equiv.swap_apply_self]
-  rw [uncurrySum_summand_eval, uncurrySum_summand_eval]
-  have h_first_eq : (fun i => w (σ (Sum.inl i))) =
-      (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inl i))))) := by
-    funext i; rw [hw_R_inl]
-  have h_second_eq : ((fun i => w (σ (Sum.inr i))) ∘ (Equiv.swap (0 : Fin (n + 1)) k)) =
-      Fin.cons x (fun j => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inr j))))) := by
-    funext i
-    refine Fin.cases ?_ ?_ i
-    · simp only [Function.comp_apply, Equiv.swap_apply_left, Fin.cons_zero]
-      rw [show σ (Sum.inr k) = Sum.inl (0 : Fin (m + 1)) from ?_, hw]
-      have := hk; rw [← Equiv.eq_symm_apply] at this; exact this.symm
-    · intro j
-      simp only [Function.comp_apply, Fin.cons_succ]
-      rw [hw_R_inr]
-  have h_alt : (F (fun i => w (σ (Sum.inl i))) :
-      E [⋀^Fin (n + 1)]→L[𝕜] N'')
-      ((fun i => w (σ (Sum.inr i))) ∘ (Equiv.swap (0 : Fin (n + 1)) k)) =
-      Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k) •
-        (F (fun i => w (σ (Sum.inl i)))) (fun i => w (σ (Sum.inr i))) := by
-    have := (F (fun i => w (σ (Sum.inl i)))).toAlternatingMap.map_perm
-      (fun i => w (σ (Sum.inr i))) (Equiv.swap (0 : Fin (n + 1)) k)
-    simp only [ContinuousAlternatingMap.coe_toAlternatingMap] at this
-    exact this
-  change Equiv.Perm.sign σ • F _ _ = -(Equiv.Perm.sign σ_can • _)
-  rw [show ((curryFinRight F x)
-      (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inl i)))) :
-        Fin (m + 1) → E) :
-      E [⋀^Fin n]→L[𝕜] N'')
-      (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inr i))))) =
-    F (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inl i)))))
-      (Fin.cons x (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
-        (Sum.map id Fin.succ (σ_can (Sum.inr i)))))) from rfl]
-  rw [← h_first_eq, ← h_second_eq, h_alt, h_sign]
-  rw [smul_smul]
-  rw [show (-Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k)) *
-      Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k) = -Equiv.Perm.sign σ from by
-    rw [mul_assoc, Int.units_mul_self, mul_one]]
-  rw [show (-Equiv.Perm.sign σ : ℤˣ) • (F (fun i => w (σ (Sum.inl i)))
-      : E [⋀^Fin (n + 1)]→L[𝕜] N'') (fun i => w (σ (Sum.inr i))) =
-    -(Equiv.Perm.sign σ • (F (fun i => w (σ (Sum.inl i))))
-      (fun i => w (σ (Sum.inr i)))) from by
-    rw [Units.neg_smul]]
-  rw [neg_neg]
-
-theorem curryFin_sum_smul_clm {κ : Type*} {p : ℕ}
-    (s : Finset κ) (c : κ → 𝕜)
-    (f : κ → E [⋀^Fin (p + 1)]→L[𝕜] F) :
-    curryFin (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • curryFin (f i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty =>
-    simp only [Finset.sum_empty]
-    ext y v; simp [curryFin_apply]
-  | insert _ _ hni ih =>
-    rw [Finset.sum_insert hni, curryFin_add, curryFin_smul, ih, Finset.sum_insert hni]
-
-theorem curryFin_sum_smul {κ : Type*} {p : ℕ}
-    (s : Finset κ) (c : κ → 𝕜)
-    (f : κ → E [⋀^Fin (p + 1)]→L[𝕜] F) (x : E) :
-    curryFin (∑ i ∈ s, c i • f i) x = ∑ i ∈ s, c i • curryFin (f i) x := by
-  have := congr_fun (congr_arg DFunLike.coe (curryFin_sum_smul_clm s c f)) x
-  simpa only [_root_.sum_apply, _root_.smul_apply] using this
 
 end curry
 end ContinuousAlternatingMap

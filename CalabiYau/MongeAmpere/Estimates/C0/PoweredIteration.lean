@@ -24,10 +24,9 @@ The theorem records the genuinely finite product bound before using the recurren
 lemma. Its product and pointwise constant are uniform over every input function with the displayed
 recurrence and initial moment. Full support of Kähler volume converts the essential bound into a
 pointwise one. -/
-@[deprecated "unused hypothesis `hS`; will be removed" (since := "2026-10-02")]
 theorem c0_powered_iteration_bound
     (ω₀ : KahlerForm n M) {κ C_S A L : ℝ}
-    (hκ : 1 < κ) (hS : ω₀.SobolevInequality κ C_S) (hA : 0 ≤ A) :
+    (hκ : 1 < κ) (hA : 0 ≤ A) :
     ∃ B : ENNReal, B ≠ ⊤ ∧
       (∀ N, ∏ k ∈ Finset.range N,
         ENNReal.ofReal

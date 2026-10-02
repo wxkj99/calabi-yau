@@ -2,8 +2,8 @@ module
 
 public import CalabiYau.Geometry.Complex.Forms.OneOne
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import CalabiYau.LinearAlgebra.Hermitian.TraceInequality
-import CalabiYau.LinearAlgebra.Hermitian.EigenvalueBound
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.TraceInequalities
+import CalabiYau.Mathlib.Analysis.Matrix.PosDef.EigenvalueBounds
 
 /-!
 # Inequalities between positive `(1,1)`-forms

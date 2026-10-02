@@ -4,7 +4,7 @@ public import CalabiYau.Geometry.Kahler.Curvature.Chart
 import all CalabiYau.Geometry.Kahler.Curvature.Chart
 public import CalabiYau.Geometry.Kahler.Ricci
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates.HolomorphicPatch
-import all CalabiYau.Analysis.Complex.JacobianLogNorm
+import all CalabiYau.Mathlib.Analysis.Complex.JacobianLogNorm
 
 public section
 

@@ -16,7 +16,6 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -27,9 +26,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [T2Space M] [CompactSpace M]
+variable  [CompactSpace M]
 
-omit [Module.Finite ℝ E] [T2Space M] in
 lemma exists_phiSupBound
     (_g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : M, |((φ : M → ℝ) x)| ≤ C := by
@@ -46,19 +44,23 @@ noncomputable def phiSupBound
     (_g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) : ℝ :=
   Classical.choose (exists_phiSupBound (I := I) (M := M) _g φ)
 
-omit [Module.Finite ℝ E] [T2Space M] in
 lemma phiSupBound_nonneg
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     0 ≤ phiSupBound (I := I) (M := M) g φ :=
   (Classical.choose_spec
     (exists_phiSupBound (I := I) (M := M) g φ)).1
 
-omit [Module.Finite ℝ E] [T2Space M] in
 lemma abs_phi_le_phiSupBound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (x : M) :
     |((φ : M → ℝ) x)| ≤ phiSupBound (I := I) (M := M) g φ :=
   (Classical.choose_spec
     (exists_phiSupBound (I := I) (M := M) g φ)).2 x
+section
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M]
+
 
 lemma memLp_phi_mul_lp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -151,11 +153,22 @@ noncomputable def smoothMulLpLin
   map_add' f₁ f₂ := smoothMulLpFun_add (I := I) (M := M) g φ f₁ f₂
   map_smul' c f := smoothMulLpFun_smul (I := I) (M := M) g φ c f
 
+end
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M] in
 @[simp] lemma smoothMulLpLin_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     smoothMulLpLin (I := I) (M := M) g φ f =
       smoothMulLpFun (I := I) (M := M) g φ f := rfl
+section
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M]
+
 
 private lemma eLpNorm_smoothMulLp_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -222,12 +235,20 @@ noncomputable def smoothMulLp
     (phiSupBound (I := I) (M := M) g φ)
     (fun f => norm_smoothMulLpFun_le (I := I) (M := M) g φ f)
 
+end
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M] in
 @[simp] lemma smoothMulLp_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     smoothMulLp (I := I) (M := M) g φ f =
       smoothMulLpFun (I := I) (M := M) g φ f := rfl
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M] in
 theorem smoothMulLp_apply_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -238,34 +259,9 @@ theorem smoothMulLp_apply_coeFn
   rw [smoothMulLp_apply]
   exact smoothMulLpFun_coeFn (I := I) (M := M) g φ f
 
-private theorem dist_smoothMulLp_le_continuousMap_dist
-    (g : SmoothRiemannianMetric I M) (φ ψ : C^∞⟮I, M; ℝ⟯) :
-    dist (smoothMulLp (I := I) (M := M) g φ)
-        (smoothMulLp (I := I) (M := M) g ψ) ≤
-      dist (⟨φ, φ.contMDiff.continuous⟩ : C(M, ℝ))
-        (⟨ψ, ψ.contMDiff.continuous⟩ : C(M, ℝ)) := by
-  rw [dist_eq_norm, dist_eq_norm]
-  apply ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg _)
-  intro f
-  rw [sub_apply]
-  apply Lp.norm_le_mul_norm_of_ae_le_mul
-  have hsub := Lp.coeFn_sub
-    (smoothMulLp (I := I) (M := M) g φ f)
-    (smoothMulLp (I := I) (M := M) g ψ f)
-  have hφ := smoothMulLp_apply_coeFn (I := I) (M := M) g φ f
-  have hψ := smoothMulLp_apply_coeFn (I := I) (M := M) g ψ f
-  filter_upwards [hsub, hφ, hψ] with x hsubx hφx hψx
-  rw [hsubx, Pi.sub_apply, hφx, hψx]
-  calc
-    ‖φ x * f x - ψ x * f x‖ = ‖φ x - ψ x‖ * ‖f x‖ := by
-      rw [← sub_mul, norm_mul]
-    _ ≤ ‖(⟨φ, φ.contMDiff.continuous⟩ : C(M, ℝ)) -
-          (⟨ψ, ψ.contMDiff.continuous⟩ : C(M, ℝ))‖ * ‖f x‖ := by
-      gcongr
-      exact ContinuousMap.norm_coe_le_norm
-        ((⟨φ, φ.contMDiff.continuous⟩ : C(M, ℝ)) -
-          (⟨ψ, ψ.contMDiff.continuous⟩ : C(M, ℝ))) x
-
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [CompactSpace M] in
 @[simp] theorem smoothMulLp_one
     (g : SmoothRiemannianMetric I M) :
     smoothMulLp (I := I) (M := M) g 1 =

@@ -1,7 +1,25 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Regularity/LaplacianDomain/Chart/LocalRegularity.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Chart.H2
+public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
+public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFromDom
+public import CalabiYau.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
+public import CalabiYau.Analysis.Elliptic.Operator.ChartLocalLaplacian
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
+public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Distribution
+public import Mathlib.Analysis.Normed.Lp.SmoothApprox
+public import Mathlib.Analysis.Normed.Operator.Extend
+public import Mathlib.Analysis.InnerProductSpace.Dual
+public import Mathlib.MeasureTheory.Function.L2Space
+public import CalabiYau.Analysis.Elliptic.Operator.VariationalLaplacian
+public import CalabiYau.Analysis.Sobolev.Chart.Defs
+public import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
+public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Chart.VariationalData
+public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain.WeakPartialDerivativeBound
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.Smooth
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
 
@@ -77,11 +95,11 @@ theorem chartPushed_memWkp_two_of_laplacianDomain
     Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-        ((H1ComplToLp (I := I) (M := M) g u_h :
+        ((h1ComplToLp (I := I) (M := M) g u_h :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
+  set u : M → ℝ := ((h1ComplToLp (I := I) (M := M) g u_h :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) with hu_def
   set D := chartBilinearH1ComplDataOfLaplacianDomain
     (I := I) (M := M) g α hu_h with hD_def
@@ -274,7 +292,7 @@ theorem chartPushed_memWkp_two_of_laplacianDomain
       D.uChart =ᵐ[volume.restrict (chartTargetEuclid (I := I) (M := M) α)] f := by
     have h_coeFn :=
       chartPushedLpFromLp_coeFn
-      (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
+      (I := I) (M := M) g α (h1ComplToLp (I := I) (M := M) g u_h)
     have h_v_abs_w :
         (volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α) ≪
@@ -304,15 +322,15 @@ theorem chartPushed_memWkp_two_of_laplacianDomain
         densityOnEuclid_pos (I := I) g α hy_chart
       exact (ENNReal.ofReal_pos.mpr h_pos).ne'
     have h_coeFn_vol : ((chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h)) : EuclN → ℝ) =ᵐ[
+          (h1ComplToLp (I := I) (M := M) g u_h)) : EuclN → ℝ) =ᵐ[
           (volume : Measure EuclN).restrict
             (chartTargetEuclid (I := I) (M := M) α)]
         chartPushed (I := I) (M := M)
           (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α
-          ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) :=
+          ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) :=
       h_v_abs_w.ae_le h_coeFn
     change ((chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h)) : EuclN → ℝ) =ᵐ[_] f
+          (h1ComplToLp (I := I) (M := M) g u_h)) : EuclN → ℝ) =ᵐ[_] f
     exact h_coeFn_vol
   have h_uChart_ae_v_Ω'' : D.uChart =ᵐ[volume.restrict Ω''] v := by
     have h_sub : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α := hΩ''_in_chart
@@ -327,28 +345,28 @@ theorem chartPushed_memWkp_two_of_laplacianDomain
     exact heq
   have hv_memLp_Ω'' : MemLp v 2 (volume.restrict Ω'') :=
     (MeasureTheory.memLp_congr_ae h_uChart_ae_v_Ω'').mp h_uChart_memLp_vol_Ω''
-  have h_dwp_weak_v_Ω'' : ∀ i, DeGiorgi.HasWeakPartialDeriv
+  have h_dwp_weak_v_Ω'' : ∀ i, Sobolev.Euclidean.HasWeakPartialDeriv
       (d := Module.finrank ℝ E) i (D.weakPartial i) v Ω'' := by
     intro i
-    have h_dwp_uChart : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+    have h_dwp_uChart : Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (D.weakPartial i) D.uChart (chartTargetEuclid (I := I) (M := M) α) :=
       D.weak_partial_isWeakPartial i
-    have h_dwp_uChart_Ω'' : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+    have h_dwp_uChart_Ω'' : Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (D.weakPartial i) D.uChart Ω'' :=
-      DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart h_dwp_uChart
+      Sobolev.Euclidean.HasWeakPartialDeriv.restrict hΩ''_in_chart h_dwp_uChart
     exact Sobolev.Euclidean.hasWeakPartialDeriv_congr_ae
-      (d := Module.finrank ℝ E) hΩ''_open i h_uChart_ae_v_Ω'' h_dwp_uChart_Ω''
+      (d := Module.finrank ℝ E) i h_uChart_ae_v_Ω'' h_dwp_uChart_Ω''
   have h_dwp_memLp_Ω'' : ∀ i, MemLp (D.weakPartial i) 2 (volume.restrict Ω'') := by
     intro i
     have h := D.weak_partial_locally_memLp i (closure Ω'') hΩ''_compact_closure
       h_closureΩ''_in_chart
     exact h.mono_measure (Measure.restrict_mono subset_closure le_rfl)
-  have hv_memW1p_Ω'' : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 v Ω'' := by
+  have hv_memW1p_Ω'' : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) 2 v Ω'' := by
     refine ⟨hv_memLp_Ω'', ?_⟩
     intro i
     exact ⟨D.weakPartial i, h_dwp_memLp_Ω'' i, h_dwp_weak_v_Ω'' i⟩
   have hwp_i_memW1p_Ω'' : ∀ i,
-      DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 (D.weakPartial i) Ω'' := by
+      Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) 2 (D.weakPartial i) Ω'' := by
     intro i
     refine ⟨h_dwp_memLp_Ω'' i, ?_⟩
     intro k
@@ -359,7 +377,7 @@ theorem chartPushed_memWkp_two_of_laplacianDomain
         (d := Module.finrank ℝ E) 2 2 v Ω'' := by
     refine ⟨hv_memW1p_Ω'', ?_⟩
     intro i
-    have h_chosen_partial : DeGiorgi.HasWeakPartialDeriv
+    have h_chosen_partial : Sobolev.Euclidean.HasWeakPartialDeriv
         (d := Module.finrank ℝ E) i
         (Sobolev.Euclidean.chosenWeakPartialOrZero
           2 i v Ω'') v Ω'' :=
@@ -375,10 +393,10 @@ theorem chartPushed_memWkp_two_of_laplacianDomain
       (h_dwp_memLp_Ω'' i).locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     have h_ae : Sobolev.Euclidean.chosenWeakPartialOrZero
         2 i v Ω'' =ᵐ[volume.restrict Ω''] D.weakPartial i :=
-      DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial
+      Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial
         (h_dwp_weak_v_Ω'' i) h_chosen_local h_dwp_local
     rw [Sobolev.Euclidean.MemWkp.one_iff_memW1p]
-    exact (Sobolev.Euclidean.MemW1p_congr_ae hΩ''_open
+    exact (Sobolev.Euclidean.MemW1p_congr_ae
       h_ae.symm).mp (hwp_i_memW1p_Ω'' i)
   have hv_memWkp_two_chart :
       Sobolev.Euclidean.MemWkp
@@ -397,15 +415,15 @@ theorem laplacianDomain_memWkpChart_two
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     Sobolev.Chart.MemWkpChart
       (I := I) (M := M) 2 2
-      ((H1ComplToLp (I := I) (M := M) g u_h :
+      ((h1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) ∧
     Sobolev.Chart.wkpNormChart
       (I := I) (M := M) 2 2
-      ((H1ComplToLp (I := I) (M := M) g u_h :
+      ((h1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ := by
   have h_mem : Sobolev.Chart.MemWkpChart
       (I := I) (M := M) 2 2
-      ((H1ComplToLp (I := I) (M := M) g u_h :
+      ((h1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
     fun α => chartPushed_memWkp_two_of_laplacianDomain (I := I) (M := M) g hu_h α
   exact ⟨h_mem,

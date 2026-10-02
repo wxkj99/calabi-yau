@@ -5,13 +5,13 @@ public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.Smooth
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFromDom
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.GradientH1LipschitzBound
-public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.ToLpChartBridge
+public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.ChartLp
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
 public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Multiplication.LeibnizSource
 public import CalabiYau.Analysis.Elliptic.Regularity.GradInner.CLM.Defs
 public import CalabiYau.Analysis.Elliptic.Regularity.SmoothScalar.MulLp
-public import CalabiYau.Analysis.Elliptic.Operator.SmoothBridge
+public import CalabiYau.Analysis.Elliptic.Operator.SmoothResolvent
 public import CalabiYau.Analysis.Elliptic.Operator.VariationalLaplacian
 public import CalabiYau.Geometry.Riemannian.Operator.Gradient.Basic
 public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.Basic
@@ -33,11 +33,12 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainVariationalLimit
 
+section
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
 open CalabiYau.Laplacian.MetricExtension
@@ -61,8 +62,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
-
+variable [T2Space M] [CompactSpace M] in
 noncomputable def pouScalar
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     SmoothScalar g where
@@ -70,19 +70,20 @@ noncomputable def pouScalar
   smooth :=
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff).mul v.smooth
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+section
+
+variable [T2Space M] [CompactSpace M]
+
 private lemma pouScalar_toFun
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).toFun =
       fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pouScalar_hasCompactSupport
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     HasCompactSupport (pouScalar (I := I) (M := M) α v).toFun :=
   HasCompactSupport.of_compactSpace _
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pouScalar_tsupport_subset_chartSource
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     tsupport (pouScalar (I := I) (M := M) α v).toFun ⊆ (chartAt H α).source := by
@@ -105,7 +106,6 @@ private lemma pouScalar_tsupport_subset_chartSource
   exact h_tsupp_sub.trans
     ((CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M) α)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPullback_pouScalar_eq_chartPushed
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -114,6 +114,35 @@ private lemma chartPullback_pouScalar_eq_chartPushed
   rw [chartPullback_apply_of_mem (I := I) α _ hy]
   rfl
 
+end
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+  hiding chartTargetEuclid
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Analysis.Laplacian.ChartBilinearH1Compl
+open CalabiYau.Analysis.Laplacian.ChartBilinearH1ComplFromDom
+open CalabiYau.Analysis.Laplacian.ChartBilinearSmooth
+open CalabiYau.Analysis.Laplacian.H1ComplGradientChartBridge
+open CalabiYau.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
+open CalabiYau.Analysis.Laplacian.H1ComplToLpChartBridge
+open CalabiYau.Analysis.Laplacian.H1ComplWeakPartialLimit
+open CalabiYau.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
+open Sobolev.Chart
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
+variable [I.Boundaryless] [T2Space M] [CompactSpace M] in
 private theorem smooth_principal_identity
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -337,15 +366,33 @@ private theorem smooth_principal_identity
       exact h_negDens_eq y hy
   rw [← h_LHS_final, h_bilin, h_RHS_final]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-private lemma chartPushed_v_eq_chartPullback_pouScalar_on_chartTarget
-    {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun y =
-      chartPullback (I := I) α (pouScalar (I := I) (M := M) α v).toFun y :=
-  (chartPullback_pouScalar_eq_chartPushed (I := I) (M := M) α v hy).symm
+end
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+  hiding chartTargetEuclid
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Analysis.Laplacian.ChartBilinearH1Compl
+open CalabiYau.Analysis.Laplacian.ChartBilinearH1ComplFromDom
+open CalabiYau.Analysis.Laplacian.ChartBilinearSmooth
+open CalabiYau.Analysis.Laplacian.H1ComplGradientChartBridge
+open CalabiYau.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
+open CalabiYau.Analysis.Laplacian.H1ComplToLpChartBridge
+open CalabiYau.Analysis.Laplacian.H1ComplWeakPartialLimit
+open CalabiYau.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
+open Sobolev.Chart
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
+variable [I.Boundaryless] in
 private lemma integrable_density_pull_mul_test
     {g : SmoothRiemannianMetric I M} (α : M)
     {h : M → ℝ} (hh_cont : Continuous h)
@@ -453,6 +500,36 @@ private lemma integrable_density_pull_mul_test
   · exact h_int_global
   · rw [MeasureTheory.integrable_indicator_iff h_chartTarget_meas]
     rfl
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+  hiding chartTargetEuclid
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Analysis.Laplacian.ChartBilinearH1Compl
+open CalabiYau.Analysis.Laplacian.ChartBilinearH1ComplFromDom
+open CalabiYau.Analysis.Laplacian.ChartBilinearSmooth
+open CalabiYau.Analysis.Laplacian.H1ComplGradientChartBridge
+open CalabiYau.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
+open CalabiYau.Analysis.Laplacian.H1ComplToLpChartBridge
+open CalabiYau.Analysis.Laplacian.H1ComplWeakPartialLimit
+open CalabiYau.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
+open Sobolev.Chart
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
+section
+
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 private theorem smooth_variational_identity
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
@@ -566,94 +643,6 @@ private theorem smooth_variational_identity
   rw [h_RHS_split]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
-private lemma exists_bound_for_invGram_mul_fderiv_psi
-    {g : SmoothRiemannianMetric I M} (α : M) (i j : Fin (Module.finrank ℝ E))
-    {ψ : EuclN → ℝ} (hψ_cd : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    (hψ_cs : HasCompactSupport ψ)
-    (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ y : EuclN,
-      |invGramOnEuclid (I := I) g α i j y *
-        (fderiv ℝ ψ y) (EuclideanSpace.single j 1)| ≤ M := by
-  classical
-  have h_invGram_contOn : ContinuousOn
-      (fun y : EuclN => invGramOnEuclid (I := I) g α i j y)
-      (chartTargetEuclid (I := I) (M := M) α) :=
-    (invGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
-  have h_invGram_contOn_support : ContinuousOn
-      (fun y : EuclN => invGramOnEuclid (I := I) g α i j y)
-      (tsupport ψ) :=
-    h_invGram_contOn.mono hψ_support
-  have h_fderiv_cont : Continuous
-      (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) := by
-    have h1 : Continuous (fderiv ℝ ψ) :=
-      hψ_cd.continuous_fderiv (by simp)
-    exact h1.clm_apply continuous_const
-  have h_prod_contOn : ContinuousOn
-      (fun y : EuclN => invGramOnEuclid (I := I) g α i j y *
-        (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
-      (tsupport ψ) :=
-    h_invGram_contOn_support.mul h_fderiv_cont.continuousOn
-  obtain ⟨M, _hM⟩ := (hψ_cs : IsCompact (tsupport ψ)).bddAbove_image h_prod_contOn.abs
-  refine ⟨max M 0, le_max_right _ _, fun y => ?_⟩
-  by_cases hy : y ∈ tsupport ψ
-  · have : |invGramOnEuclid (I := I) g α i j y *
-        (fderiv ℝ ψ y) (EuclideanSpace.single j 1)| ≤ M := by
-      apply _hM
-      exact ⟨y, hy, rfl⟩
-    exact this.trans (le_max_left _ _)
-  · have hy_not : y ∉ Function.support (fderiv ℝ ψ) := by
-      intro h
-      apply hy
-      have h_support : Function.support (fderiv ℝ ψ) ⊆ tsupport ψ := support_fderiv_subset ℝ
-      exact h_support h
-    have h_fderiv_zero : fderiv ℝ ψ y = 0 := Function.notMem_support.mp hy_not
-    have h_zero : (fderiv ℝ ψ y) (EuclideanSpace.single j 1) = 0 := by
-      rw [h_fderiv_zero]
-      change (0 : EuclN →L[ℝ] ℝ) (EuclideanSpace.single j 1) = 0
-      rw [zero_apply]
-    rw [h_zero, mul_zero, abs_zero]
-    exact le_max_right _ _
-
-private lemma tendsto_inner_integral
-    {β : Type*} [MeasurableSpace β] {μ : Measure β}
-    (m : Lp ℝ 2 μ)
-    {g : ℕ → Lp ℝ 2 μ} {g_lim : Lp ℝ 2 μ}
-    (h_tendsto : Tendsto (fun n => ‖g n - g_lim‖) atTop (𝓝 0)) :
-    Tendsto (fun n => ∫ a, (m : β → ℝ) a * (g n : β → ℝ) a ∂μ)
-      atTop (𝓝 (∫ a, (m : β → ℝ) a * (g_lim : β → ℝ) a ∂μ)) := by
-  classical
-  have h_dist_tendsto : Tendsto (fun n => dist (g n) g_lim) atTop (𝓝 0) := by
-    have h_eq : (fun n => dist (g n) g_lim) = (fun n => ‖g n - g_lim‖) := by
-      funext n; rw [dist_eq_norm]
-    rw [h_eq]; exact h_tendsto
-  have h_g_tendsto : Tendsto g atTop (𝓝 g_lim) :=
-    tendsto_iff_dist_tendsto_zero.mpr h_dist_tendsto
-  have h_inner_eq : ∀ (f : Lp ℝ 2 μ),
-      ∫ a, (m : β → ℝ) a * (f : β → ℝ) a ∂μ = ⟪m, f⟫_ℝ := by
-    intro f
-    rw [L2.inner_def (𝕜 := ℝ) m f]
-    refine integral_congr_ae ?_
-    refine Filter.Eventually.of_forall (fun a => ?_)
-    change (m : β → ℝ) a * (f : β → ℝ) a = @inner ℝ _ _ ((m : β → ℝ) a) ((f : β → ℝ) a)
-    rw [show @inner ℝ _ _ ((m : β → ℝ) a) ((f : β → ℝ) a) =
-        (f : β → ℝ) a * (m : β → ℝ) a from RCLike.inner_apply _ _]
-    ring
-  rw [h_inner_eq g_lim]
-  have h_funeq : (fun n => ∫ a, (m : β → ℝ) a * (g n : β → ℝ) a ∂μ) =
-      (fun n => ⟪m, g n⟫_ℝ) := funext (fun n => h_inner_eq (g n))
-  rw [h_funeq]
-  have h_pair_tendsto :
-      Tendsto (fun p : Lp ℝ 2 μ × Lp ℝ 2 μ => ⟪p.1, p.2⟫_ℝ)
-        (𝓝 (m, g_lim)) (𝓝 ⟪m, g_lim⟫_ℝ) :=
-    continuous_inner.tendsto (m, g_lim)
-  have h_input_tendsto :
-      Tendsto (fun n => (m, g n)) atTop (𝓝 (m, g_lim)) :=
-    Filter.Tendsto.prodMk_nhds tendsto_const_nhds h_g_tendsto
-  have h_comp := h_pair_tendsto.comp h_input_tendsto
-  exact h_comp.congr' (Filter.Eventually.of_forall fun _ ↦ rfl)
-
 theorem laplacianDomain_variational_identity_smooth_case
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -676,6 +665,10 @@ theorem laplacianDomain_variational_identity_smooth_case
         ψ y
       ∂(volume : Measure EuclN) :=
   smooth_variational_identity (I := I) (M := M) α v hψ hψ_cs hψ_support
+
+end
+
+end
 
 end LaplacianDomainVariationalLimit
 end Laplacian

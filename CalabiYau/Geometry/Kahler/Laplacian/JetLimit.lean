@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.Geometry.Kahler.Laplacian
-public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderNorm
+public import CalabiYau.Geometry.Manifold.Holder.ChartNorm
 public import Mathlib.Topology.UniformSpace.UniformConvergence
 
 /-!

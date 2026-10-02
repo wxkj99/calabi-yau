@@ -124,36 +124,4 @@ theorem domDomCongr_smul {s s' : ℕ} (e : Fin s ≃ Fin s') (c : 𝕜)
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContMDiffSection.coe_smul]
 
-theorem product_domDomCongr_left {s s' q : ℕ} (e : Fin s ≃ Fin s')
-    (α : MultilinearSection 𝕜 F IB E n s) (β : MultilinearSection 𝕜 F IB E n q) :
-    product (IB := IB) n (domDomCongr (IB := IB) n e α) β
-      = domDomCongr (IB := IB) n
-          (finSumFinEquiv.symm.trans
-            ((Equiv.sumCongr e (Equiv.refl (Fin q))).trans finSumFinEquiv))
-          (product (IB := IB) n α β) := by
-  refine DFunLike.ext _ _ fun x => ?_
-  ext V
-  change Bundle.continuousMultilinearMap.productFun
-      ((domDomCongr (IB := IB) n e α) x) (β x) V = _
-  rw [domDomCongr_apply, Bundle.continuousMultilinearMap.product_fun_apply,
-    ContinuousMultilinearMap.domDomCongr_apply]
-  rw [show (domDomCongr (IB := IB) n
-      (finSumFinEquiv.symm.trans
-        ((Equiv.sumCongr e (Equiv.refl (Fin q))).trans finSumFinEquiv))
-      (product (IB := IB) n α β)) x V
-    = Bundle.continuousMultilinearMap.productFun (α x) (β x)
-        (fun i => V (finSumFinEquiv (Equiv.sumCongr e (Equiv.refl (Fin q))
-          (finSumFinEquiv.symm i)))) from rfl]
-  rw [Bundle.continuousMultilinearMap.product_fun_apply]
-  congr 1
-  · congr 1
-    funext i
-    simp only [Function.comp_apply, Equiv.sumCongr_apply,
-      finSumFinEquiv_symm_apply_castAdd, Sum.map_inl, finSumFinEquiv_apply_left]
-  · congr 1
-    funext j
-    simp only [Function.comp_apply, Equiv.sumCongr_apply,
-      finSumFinEquiv_symm_apply_natAdd, Sum.map_inr, finSumFinEquiv_apply_right,
-      Equiv.refl_apply]
-
 end CalabiYau.MultilinearSection

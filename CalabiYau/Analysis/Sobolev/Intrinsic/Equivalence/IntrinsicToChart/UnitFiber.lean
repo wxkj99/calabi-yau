@@ -6,8 +6,6 @@ public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -59,7 +57,7 @@ private lemma chartTargetUnit_smoothOn (α : M)
   exact congrArg Prod.snd
     ((trivializationAt E (TangentSpace I) α).apply_mk_symm hx v_E)
 
-private lemma g_inner_chartTargetUnit_continuousOn
+lemma g_inner_chartTargetUnit_continuousOn
     (g : CalabiYau.SmoothRiemannianMetric I M)
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContinuousOn

@@ -1,8 +1,11 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Nirenberg/CrossTermBoundsNonSmooth/CrossBoundsNonSmooth.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBounds
-public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.TranslatedCutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
+public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.CutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
 
 @[expose] public section
 
@@ -16,10 +19,11 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators InnerProductSpace
 
 namespace Sobolev.NirenbergCrossBoundsNonSmooth
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+variable [NeZero d] in
 private theorem cross_1_pointwise_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) (g : Fin d → E → ℝ)
@@ -175,14 +179,12 @@ private theorem cross_1_pointwise_bound_nonsmooth
       rw [h_indicator]; ring
     linarith
 
-omit [NeZero d] in
 lemma memLp_diffQuot_two
     (k : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v 2 (volume : Measure E)) :
     MemLp (diffQuot k h v) 2 (volume : Measure E) :=
   memLp_diffQuot k h hv
 
-omit [NeZero d] in
 lemma exists_bound_of_continuous_compactSupport
     {f : E → ℝ} (hf_cont : Continuous f) (hf_support : HasCompactSupport f) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x, |f x| ≤ M := by
@@ -197,7 +199,6 @@ lemma exists_bound_of_continuous_compactSupport
   have h : |f x| ≤ M := hM ⟨x, rfl⟩
   exact h.trans (le_max_left _ _)
 
-omit [NeZero d] in
 lemma memLp_bounded_mul
     {f g : E → ℝ}
     (hf_aesm : AEStronglyMeasurable f (volume : Measure E))
@@ -212,6 +213,7 @@ lemma memLp_bounded_mul
   rw [Real.norm_eq_abs, abs_mul, Real.norm_eq_abs]
   exact mul_le_mul_of_nonneg_right (hM x) (abs_nonneg _)
 
+variable [NeZero d] in
 private lemma integrable_cross_1_summand_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
@@ -270,7 +272,6 @@ private lemma integrable_cross_1_summand_nonsmooth
   rw [h_target_eq]
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₁_dqg_l2 h_dq_u_l2
 
-omit [NeZero d] in
 lemma integrable_const_eta_sq_diffQuot_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -349,7 +350,6 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
     mul_le_mul_of_nonneg_left h_eta_sq_le h_ic_nn
   exact mul_le_mul_of_nonneg_right h_ic_eta_sq h_dq_sq_nn
 
-omit [NeZero d] in
 lemma integrable_const_indicator_diffQuot_u_sq
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη_support : HasCompactSupport η)
@@ -415,7 +415,6 @@ lemma integrable_const_indicator_diffQuot_u_sq
     have h_dq_sq_nn : 0 ≤ (diffQuot k h u x)^2 := sq_nonneg _
     refine mul_nonneg (abs_nonneg _) h_dq_sq_nn
 
-omit [NeZero d] in
 lemma integral_const_indicator_eq
     {u : E → ℝ} (k : Fin d) (h : ℝ) (η : E → ℝ) (c : ℝ) :
     ∫ x, c * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -439,7 +438,6 @@ lemma integral_const_indicator_eq
     · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx]; ring]
   rw [MeasureTheory.integral_indicator (isClosed_tsupport η).measurableSet]
 
-omit [NeZero d] in
 private lemma integrable_eta_sq_diffQuot_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -455,36 +453,7 @@ private lemma integrable_eta_sq_diffQuot_g_sq
   rw [h_eq]
   exact hint
 
-omit [NeZero d] in
-private noncomputable def absorbingIntegral_nonsmooth
-    (k : Fin d) (h : ℝ) (η : E → ℝ) (g : Fin d → E → ℝ) : ℝ :=
-  ∫ x, (η x)^2 * ∑ i : Fin d, (diffQuot k h (g i) x)^2
-    ∂(volume : Measure E)
-
-omit [NeZero d] in
-private noncomputable def gradL2sqOn_nonsmooth
-    (Ω' : Set E) (g : Fin d → E → ℝ) : ℝ :=
-  ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E)
-
-omit [NeZero d] in
-private lemma absorbingIntegral_nonsmooth_nonneg
-    (k : Fin d) (h : ℝ) (η : E → ℝ) (g : Fin d → E → ℝ) :
-    0 ≤ absorbingIntegral_nonsmooth (d := d) k h η g := by
-  unfold absorbingIntegral_nonsmooth
-  refine integral_nonneg ?_
-  intro x
-  refine mul_nonneg (sq_nonneg _) ?_
-  exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-
-omit [NeZero d] in
-private lemma gradL2sqOn_nonsmooth_nonneg
-    (Ω' : Set E) (g : Fin d → E → ℝ) :
-    0 ≤ gradL2sqOn_nonsmooth (d := d) Ω' g := by
-  unfold gradL2sqOn_nonsmooth
-  refine integral_nonneg ?_
-  intro x
-  exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-
+variable [NeZero d] in
 theorem cross_1_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}

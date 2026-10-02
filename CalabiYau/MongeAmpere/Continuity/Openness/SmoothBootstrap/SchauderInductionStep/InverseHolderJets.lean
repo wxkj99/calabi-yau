@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 
@@ -178,33 +178,6 @@ private theorem compact_matrix_derivative_bound
     exact Finset.single_le_sum (fun ij hij => bot_le) (Finset.mem_univ (i, j))
   exact hentry.trans hle
 
-private theorem iteratedFDeriv_sub_translated
-    {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F]
-    (r : ℕ) (f g : E → F) (x y : E)
-    (hf : ContDiffAt ℝ r f x) (hg : ContDiffAt ℝ r g y) :
-    iteratedFDeriv ℝ r f x - iteratedFDeriv ℝ r g y =
-      iteratedFDeriv ℝ r (fun t : E ↦ f (x + t) - g (y + t)) 0 := by
-  have hfx' : ContDiffAt ℝ r f (x + 0) := by simpa using hf
-  have hgy' : ContDiffAt ℝ r g (y + 0) := by simpa using hg
-  have htx : ContDiffAt ℝ r (fun t : E ↦ x + t) 0 := by fun_prop
-  have hty : ContDiffAt ℝ r (fun t : E ↦ y + t) 0 := by fun_prop
-  have hfx : ContDiffAt ℝ r (fun t : E ↦ f (x + t)) 0 :=
-    ContDiffAt.comp 0 hfx' htx
-  have hgy : ContDiffAt ℝ r (fun t : E ↦ g (y + t)) 0 :=
-    ContDiffAt.comp 0 hgy' hty
-  calc
-    iteratedFDeriv ℝ r f x - iteratedFDeriv ℝ r g y =
-        iteratedFDeriv ℝ r (fun t : E ↦ f (x + t)) 0 -
-          iteratedFDeriv ℝ r (fun t : E ↦ g (y + t)) 0 := by
-            rw [iteratedFDeriv_comp_add_left r x 0,
-              iteratedFDeriv_comp_add_left r y 0]
-            simp
-    _ = iteratedFDeriv ℝ r
-        ((fun t : E ↦ f (x + t)) - (fun t ↦ g (y + t))) 0 := by
-          rw [iteratedFDeriv_sub_apply hfx hgy]
-    _ = iteratedFDeriv ℝ r (fun t : E ↦ f (x + t) - g (y + t)) 0 := rfl
-
 private theorem matrix_resolvent_holderOnWith
     {E : Type*} [PseudoMetricSpace E] {n : ℕ} {α C B : ℝ≥0} {U : Set E}
     (A : E → Matrix (Fin n) (Fin n) ℂ)
@@ -289,7 +262,7 @@ private theorem matrix_resolvent_holderOnWith
 /-- Local inversion preserves a genuine finite `C^{r,α}` matrix jet. -/
 theorem locally_holder_matrix_inverse
     {n r : ℕ} {α K : ℝ≥0} {W : Set (EuclideanSpace ℂ (Fin n))}
-    (hW : IsOpen W) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (hW : IsOpen W) (hα₁ : α < 1)
     (B : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (hB : ∀ i j, ContDiffOn ℝ r (fun w ↦ B w i j) W)
     (hunit : ∀ w ∈ W, IsUnit (B w))
@@ -317,7 +290,7 @@ theorem locally_holder_matrix_inverse
     inverse_entry_det_adjugate (B w) i j
   obtain ⟨R, hR, hRball⟩ := Metric.mem_nhds_iff.mp (hVo.mem_nhds hzV)
   obtain ⟨ρLower, hρLowerPos, _, _, hLowerJets⟩ :=
-    locally_holder_lower_matrix_jets hW hα₀ hα₁ B hB hBH z hz
+    locally_holder_lower_matrix_jets hW hα₁ B hB hBH z hz
   let ρ : ℝ := min (R / 2) (min (1 / 8) ρLower)
   let U : Set (EuclideanSpace ℂ (Fin n)) := Metric.ball z ρ
   let Q : Set (EuclideanSpace ℂ (Fin n)) := Metric.closedBall z ρ
@@ -395,7 +368,7 @@ theorem locally_holder_matrix_inverse
       exact hHolder' x hx y hy
     ·
       have hrpos : 0 < r := by omega
-      have hHolderTop := matrix_inverse_top_jet_holder_from_jets hrpos hUopen B
+      have hHolderTop := matrix_inverse_top_jet_holder_from_jets hUopen B
         (fun i j ↦ (hB i j).mono hUsubW)
         (fun w hw ↦ hunit w (hUsubW hw))
         (fun i j ↦ (hinvContDiff i j).mono hUsubV)

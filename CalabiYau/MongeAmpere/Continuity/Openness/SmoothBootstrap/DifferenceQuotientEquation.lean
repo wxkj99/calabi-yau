@@ -26,6 +26,7 @@ def HasDifferenceQuotientSchauderData (ω₀ : KahlerForm n M) (G φ : M → ℝ
   HasExactDifferenceQuotientData ω₀ G φ ∧
     HasUniformDifferenceQuotientBounds ω₀ G φ α
 
+omit [MeasurableSpace M] [BorelSpace M] [ConnectedSpace M] in
 /-- The chart equation, finite `C^{2,α}` gauge, and smooth data produce the complete Schauder
 input by gluing the exact quotient equation to its uniform bounds. -/
 theorem solvesMongeAmpereC2_hasDifferenceQuotientSchauderData

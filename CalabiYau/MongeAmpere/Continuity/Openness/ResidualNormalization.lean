@@ -76,6 +76,6 @@ theorem exists_centeredPathResidualData (ω₀ : KahlerForm n M) (F : M → ℝ)
     residual_zero_solution := ?_
   }⟩
   intro u δ hu hzero
-  exact centeredPathResidual_zero_to_solution ω₀ F hF t φ hsol α hα₀ hα₁ D u δ hu hzero
+  exact centeredPathResidual_zero_to_solution ω₀ F hF t φ hsol α hα₁ D u δ hu hzero
 
 end KahlerForm

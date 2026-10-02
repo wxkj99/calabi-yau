@@ -1,19 +1,26 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Chart/CrossChartBounds/CrossChartBoundStrict.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBound
+public import CalabiYau.Analysis.Sobolev.Chart.Defs
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Normed.Group.NullSubmodule
+public import Mathlib.Analysis.Normed.Group.Uniform
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.Defs
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
+public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
+public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
+public import CalabiYau.Analysis.Sobolev.Euclidean.Density
+public import CalabiYau.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
+public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.Multiply
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
+public import CalabiYau.Geometry.Riemannian.Volume.Basic
 public import CalabiYau.Analysis.Sobolev.Tools.StrictStrongSupport
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.Smooth
-public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
-public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.Transition
-public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -23,33 +30,6 @@ open scoped Manifold ContDiff ENNReal NNReal
 namespace Sobolev
 
 namespace Euclidean
-
-private lemma indicator_eq_indicator_of_tsupport_subset
-    {α : Type*} [Zero α]
-    {X : Type*} [TopologicalSpace X] {f : X → α}
-    {Ω Ω' : Set X} (hΩΩ' : Ω' ⊆ Ω)
-    (hf_support : tsupport f ⊆ Ω') :
-    Ω.indicator f = Ω'.indicator f := by
-  funext x
-  by_cases hxΩ' : x ∈ Ω'
-  · simp [Set.indicator_of_mem hxΩ', Set.indicator_of_mem (hΩΩ' hxΩ')]
-  · simp only [Set.indicator_of_notMem hxΩ']
-    by_cases hxΩ : x ∈ Ω
-    · rw [Set.indicator_of_mem hxΩ]
-      have hx_off : x ∉ tsupport f := fun h => hxΩ' (hf_support h)
-      exact image_eq_zero_of_notMem_tsupport hx_off
-    · simp [Set.indicator_of_notMem hxΩ]
-
-private lemma eLpNorm_restrict_eq_of_tsupport_subset
-    {X : Type*} [MeasurableSpace X] [TopologicalSpace X] {μ : Measure X}
-    {α : Type*} [NormedAddCommGroup α] {p : ℝ≥0∞}
-    {f : X → α}
-    {Ω Ω' : Set X} (hΩ_meas : MeasurableSet Ω) (hΩ'_meas : MeasurableSet Ω')
-    (hΩΩ' : Ω' ⊆ Ω) (hf_support : tsupport f ⊆ Ω') :
-    eLpNorm f p (μ.restrict Ω) = eLpNorm f p (μ.restrict Ω') := by
-  rw [← eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas,
-      ← eLpNorm_indicator_eq_eLpNorm_restrict hΩ'_meas]
-  rw [indicator_eq_indicator_of_tsupport_subset hΩΩ' hf_support]
 
 end Euclidean
 
@@ -66,33 +46,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-private lemma crossChartK_isCompact
-    [T2Space M] [SigmaCompactSpace M]
-    (γ : M) {K_α : Set M} (hK_compact : IsCompact K_α) :
-    IsCompact (K_α ∩ tsupport
-      ((CalabiYau.RiemannianVolume.chartAtlasPOU I M γ
-        : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-  hK_compact.inter_right (isClosed_tsupport _)
-
-private lemma crossChartK_subset_chartα_source
-    [T2Space M] [SigmaCompactSpace M]
-    (γ α : M) {K_α : Set M}
-    (hK_α_in_α : K_α ⊆ (chartAt H α).source) :
-    K_α ∩ tsupport
-      ((CalabiYau.RiemannianVolume.chartAtlasPOU I M γ
-        : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆ (chartAt H α).source := by
-  intro x hx
-  exact hK_α_in_α hx.1
-
-private lemma crossChartK_subset_chartγ_source
-    [T2Space M] [SigmaCompactSpace M]
-    (γ : M) {K_α : Set M} :
-    K_α ∩ tsupport
-      ((CalabiYau.RiemannianVolume.chartAtlasPOU I M γ
-        : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆ (chartAt H γ).source := by
-  intro x hx
-  exact CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M γ hx.2
 
 theorem chartTransition_smoothDiffeoBoundedAtOrder_strict
     [I.Boundaryless] (γ α : M)

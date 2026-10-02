@@ -209,7 +209,6 @@ theorem chartRep_extDeriv {α : FormField E M k} (hα : α.IsSmooth) (x : M) {z 
     _ = _root_.extDeriv (α.chartRep x) z :=
       (Filter.EventuallyEq.extDeriv_eq hlocal).symm
 
-@[deprecated "unused hypothesis `hα`; will be removed" (since := "2026-10-02")]
 theorem extDeriv_add {α β : FormField E M k} (hα : α.IsSmooth) (hβ : β.IsSmooth) :
     (α + β).extDeriv = α.extDeriv + β.extDeriv := by
   funext x
@@ -221,7 +220,7 @@ theorem extDeriv_add {α β : FormField E M k} (hα : α.IsSmooth) (hβ : β.IsS
   · exact ((hα x).contDiffAt (extChartAt_target_mem_nhds x)).differentiableAt (by simp)
   · exact ((hβ x).contDiffAt (extChartAt_target_mem_nhds x)).differentiableAt (by simp)
 
-theorem extDeriv_smul {α : FormField E M k} (hα : α.IsSmooth) (c : ℝ) :
+theorem extDeriv_smul {α : FormField E M k} (c : ℝ) :
     (c • α).extDeriv = c • α.extDeriv := by
   funext x
   change _root_.extDeriv ((c • α).chartRep x) (extChartAt 𝓘(ℝ, E) x x) =
@@ -265,10 +264,10 @@ theorem IsClosed.add {α β : FormField E M k} (hα : α.IsSmooth) (hβ : β.IsS
   rw [extDeriv_add hα hβ, hα', hβ']
   simp
 
-theorem IsClosed.smul {α : FormField E M k} (hα : α.IsSmooth) (hα' : α.IsClosed) (c : ℝ) :
+theorem IsClosed.smul {α : FormField E M k} (hα' : α.IsClosed) (c : ℝ) :
     (c • α).IsClosed := by
   change (c • α).extDeriv = 0
-  rw [extDeriv_smul hα c, hα']
+  rw [extDeriv_smul c, hα']
   simp
 
 theorem IsExact.isClosed {α : FormField E M (k + 1)} (h : α.IsExact) : α.IsClosed := by
@@ -287,7 +286,7 @@ theorem IsExact.smul {α : FormField E M (k + 1)} (hα : α.IsExact) (c : ℝ) :
     (c • α).IsExact := by
   obtain ⟨β, hβ, rfl⟩ := hα
   refine ⟨c • β, hβ.smul c, ?_⟩
-  exact extDeriv_smul hβ c
+  exact extDeriv_smul c
 
 theorem IsExact.neg {α : FormField E M (k + 1)} (hα : α.IsExact) : (-α).IsExact := by
   simpa only [neg_one_smul] using hα.smul (-1)

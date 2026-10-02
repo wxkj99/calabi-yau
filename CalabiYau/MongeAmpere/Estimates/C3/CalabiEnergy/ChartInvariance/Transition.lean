@@ -29,18 +29,18 @@ theorem calabiEnergy_chartChristoffel_transition {n : ℕ}
     (hBA : B * EuclideanSpace.clmMatrix (fderiv ℂ F z) = 1)
     (hdet : IsUnit (g (F z)).det) (i j k : Fin n) :
     let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ F w)
-    (∑ l, (g' z)⁻¹ l i * c3PartialZ (fun w => g' w k l) z j) =
+    (∑ l, (g' z)⁻¹ l i * wirtingerDerivInChart (fun w => g' w k l) z j) =
       (∑ p, ∑ q, ∑ r, B i p * A z q j * A z r k *
-        (∑ s, (g (F z))⁻¹ s p * c3PartialZ (fun w => g w r s) (F z) q)) +
-      ∑ p, B i p * c3PartialZ (fun w => A w p k) z j := by
+        (∑ s, (g (F z))⁻¹ s p * wirtingerDerivInChart (fun w => g w r s) (F z) q)) +
+      ∑ p, B i p * wirtingerDerivInChart (fun w => A w p k) z j := by
   dsimp only
   simp_rw [calabiEnergy_c3PartialZ_metric_pullback F g g' U V hU hV hF hg hFV
     hmetric z hz]
   rw [hmetric z hz]
   exact calabiEnergy_chartChristoffel_pullback_contraction
     (EuclideanSpace.clmMatrix (fderiv ℂ F z)) B (g (F z))
-    (fun q r s => c3PartialZ (fun w => g w r s) (F z) q)
-    (fun j p k => c3PartialZ
+    (fun q r s => wirtingerDerivInChart (fun w => g w r s) (F z) q)
+    (fun j p k => wirtingerDerivInChart
       (fun w => EuclideanSpace.clmMatrix (fderiv ℂ F w) p k) z j)
     hAB hBA hdet i j k
 
@@ -68,11 +68,11 @@ theorem calabiEnergy_connectionDifference_transition_generic {n : ℕ}
     (hgdet : IsUnit (g (F z)).det) (hhdet : IsUnit (h (F z)).det)
     (i j k : Fin n) :
     let A := EuclideanSpace.clmMatrix (fderiv ℂ F z)
-    (∑ l, (g' z)⁻¹ l i * c3PartialZ (fun w => g' w k l) z j) -
-        (∑ l, (h' z)⁻¹ l i * c3PartialZ (fun w => h' w k l) z j) =
+    (∑ l, (g' z)⁻¹ l i * wirtingerDerivInChart (fun w => g' w k l) z j) -
+        (∑ l, (h' z)⁻¹ l i * wirtingerDerivInChart (fun w => h' w k l) z j) =
       ∑ p, ∑ q, ∑ r, B i p * A q j * A r k *
-        ((∑ s, (g (F z))⁻¹ s p * c3PartialZ (fun w => g w r s) (F z) q) -
-          ∑ s, (h (F z))⁻¹ s p * c3PartialZ (fun w => h w r s) (F z) q) := by
+        ((∑ s, (g (F z))⁻¹ s p * wirtingerDerivInChart (fun w => g w r s) (F z) q) -
+          ∑ s, (h (F z))⁻¹ s p * wirtingerDerivInChart (fun w => h w r s) (F z) q) := by
   dsimp only
   rw [calabiEnergy_chartChristoffel_transition F g g' U V hU hV hF hg hFV hgmetric z hz
     B hAB hBA hgdet i j k,
@@ -91,11 +91,11 @@ theorem calabiEnergy_c3Christoffel_perturb
     (x : M) (z : EuclideanSpace ℂ (Fin n))
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (i j k : Fin n) :
-    c3ChristoffelInChart
+    christoffelInChart
       (fun w ↦ ω₀.metricInChart x w +
         complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w)
       z i j k =
-    c3ChristoffelInChart (fun w ↦ (ω₀.perturb φ hφ).metricInChart x w) z i j k := by
+    christoffelInChart (fun w ↦ (ω₀.perturb φ hφ).metricInChart x w) z i j k := by
   let g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun w ↦ ω₀.metricInChart x w +
       complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w
@@ -107,13 +107,13 @@ theorem calabiEnergy_c3Christoffel_perturb
   have hvalue : g z = gφ z :=
     (KahlerForm.metricInChart_perturb hφ x hz).symm
   have hjet (a b p : Fin n) :
-      c3PartialZ (fun w ↦ g w a b) z p = c3PartialZ (fun w ↦ gφ w a b) z p := by
+      wirtingerDerivInChart (fun w ↦ g w a b) z p = wirtingerDerivInChart (fun w ↦ gφ w a b) z p := by
     have hentry : (fun w ↦ g w a b) =ᶠ[nhds z] (fun w ↦ gφ w a b) :=
       hnear.mono fun w hw ↦ congrArg (fun G : Matrix (Fin n) (Fin n) ℂ ↦ G a b) hw
     have hderiv : fderiv ℝ (fun w ↦ g w a b) z =
         fderiv ℝ (fun w ↦ gφ w a b) z := hentry.fderiv_eq
-    simp only [c3PartialZ, hderiv]
-  unfold c3ChristoffelInChart
+    simp only [wirtingerDerivInChart, hderiv]
+  unfold christoffelInChart
   dsimp only [g, gφ] at hvalue hjet ⊢
   rw [hvalue]
   apply Finset.sum_congr rfl

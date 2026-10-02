@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # Hölder estimates for inverses of finite Hermitian matrices
@@ -60,7 +60,7 @@ private theorem uniformlyEllipticOn_matrix_inverse_bound {n : ℕ} (lam : ℝ≥
     rw [← hsol']
     exact hB.2 v
   have hdot : star v ⬝ᵥ e = star (v j) := by
-    simpa [e] using (dotProduct_single_one (star v) j)
+    simp [e]
   have hnormSq : ‖vE‖ ^ 2 = ∑ k, ‖v k‖ ^ 2 := by
     simpa [vE] using (EuclideanSpace.norm_sq_eq (x := vE))
   have hnormBound : (lam : ℝ) * ‖vE‖ ≤ 1 := by
@@ -209,10 +209,9 @@ private theorem holderBoundOn_zero_matrix_inv_entry_of_bound {n : ℕ} {α C B :
 
 /-- Uniform entrywise `C^{0,α}` control of the inverse of a family of uniformly elliptic
 Hermitian matrices. All constants are uniform in the auxiliary parameter. -/
-@[deprecated "unused hypotheses `hα₀` and `hα₁`; will be removed" (since := "2026-10-02")]
 theorem exists_uniform_holderBoundOn_matrix_inverse
     {n : ℕ}
-    (α lam K : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1) (hlam : 0 < lam)
+    (α lam K : ℝ≥0) (hlam : 0 < lam)
     (U : Set (EuclideanSpace ℂ (Fin n))) (P : Set ℝ)
     (A : ℝ → ℝ → EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (hEll : ∀ h ∈ P, ∀ s ∈ Set.Icc (0 : ℝ) 1,

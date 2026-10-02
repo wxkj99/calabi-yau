@@ -1,9 +1,6 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.Analysis.Calculus.FDeriv.CompCLM
-import Mathlib.LinearAlgebra.Matrix.Trace
 
 /-!
 # The relative scalar trace in a genuine normal-frame germ

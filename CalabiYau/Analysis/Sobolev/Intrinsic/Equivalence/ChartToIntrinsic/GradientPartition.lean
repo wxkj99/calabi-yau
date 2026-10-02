@@ -4,7 +4,7 @@ module
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.Basic
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Lp.Basic
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.FirstOrder
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Subcritical
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.Basic
@@ -16,8 +16,6 @@ public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 open CalabiYau.Riemannian
 
 noncomputable section

@@ -14,8 +14,6 @@ public import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 open CalabiYau.Tensor.Multilinear
 
 namespace CalabiYau
@@ -28,14 +26,15 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [FiniteDimensional 𝕜 E]
+
+section
+
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I 1 M]
 variable {x' : M}
 variable {r s : ℕ}
 
-omit [IsManifold I 1 M] in
 @[instance_reducible]
 noncomputable instance tangentSpaceNormedAddCommGroup (x : M) :
     NormedAddCommGroup (TangentSpace I x) where
@@ -53,7 +52,6 @@ noncomputable instance tangentSpaceNormedAddCommGroup (x : M) :
     unfold TangentSpace at v w ⊢
     exact NormedAddCommGroup.dist_eq v w
 
-omit [IsManifold I 1 M] in
 @[instance_reducible]
 noncomputable instance tangentSpaceNormedSpace (x : M) :
     NormedSpace 𝕜 (TangentSpace I x) where
@@ -63,25 +61,46 @@ noncomputable instance tangentSpaceNormedSpace (x : M) :
     unfold TangentSpace at v ⊢
     exact norm_smul_le c v
 
-omit [IsManifold I 1 M] in
 instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional 𝕜 (TangentSpace I x) := by
   change FiniteDimensional 𝕜 E
   infer_instance
 
-omit [IsManifold I 1 M] in
 instance tangentSpace_moduleFree (x : M) :
     Module.Free 𝕜 (TangentSpace I x) := by
   change Module.Free 𝕜 E
   infer_instance
 
+end
+
+variable [FiniteDimensional 𝕜 E] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H} in
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] in
+variable [IsManifold I 1 M] in
+variable {x' : M} in
+variable {r s : ℕ} in
 local instance tangentSpaceFiberBundleExplicit :
     FiberBundle E (TangentSpace I : M → Type _) :=
   TangentSpace.fiberBundle (I := I) (M := M)
 
+variable [FiniteDimensional 𝕜 E] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H} in
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] in
+variable [IsManifold I 1 M] in
+variable {x' : M} in
+variable {r s : ℕ} in
 local instance tangentSpace_vectorBundleExplicit :
     VectorBundle 𝕜 E (TangentSpace I : M → Type _) :=
   TangentSpace.vectorBundle (I := I) (M := M)
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 @[reducible]
 def Tensor0SModel (s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedField 𝕜]
@@ -101,8 +120,7 @@ def TensorRSModel (r s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedFiel
   (Tensor0SModel r 𝕜 E) →L[𝕜] (Tensor0SModel s 𝕜 E)
 
 def Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H)
-    [hMfd : IsManifold I 1 M] (x : M) : Type _ :=
-  let _ := hMfd
+    [IsManifold I 1 M] (x : M) : Type _ :=
   Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _) x
 
 @[reducible]
@@ -183,52 +201,54 @@ instance tensor0SSpace_isSMulApply (s : ℕ) (x : M) :
     IsSMulApply 𝕜 (Tensor0SSpace s I x) (Fin s → TangentSpace I x) 𝕜 where
   smul_apply _ _ _ := rfl
 
-omit [FiniteDimensional 𝕜 E] in
+end
+
+section
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+
 @[ext]
 theorem tensor0SSpace_ext (s : ℕ) (x : M)
     {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → TangentSpace I x, T v = T' v) : T = T' :=
   ContinuousMultilinearMap.ext (M₁ := fun _ : Fin s => TangentSpace I x) (M₂ := 𝕜) h
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem Tensor0SSpace.zero_apply (s : ℕ) (x : M)
     (v : Fin s → TangentSpace I x) :
     (0 : Tensor0SSpace s I x) v = 0 := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem Tensor0SSpace.add_apply (s : ℕ) (x : M)
     (A B : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     (A + B) v = A v + B v := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem Tensor0SSpace.smul_apply (s : ℕ) (x : M)
     (c : 𝕜) (A : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     (c • A) v = c • A v := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem Tensor0SSpace.nsmul_apply (s : ℕ) (x : M)
     (n : ℕ) (A : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     (n • A) v = n • A v := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.neg_apply (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     (-A) v = -A v := by
   rw [show -A = (-1 : 𝕜) • A by exact (neg_one_smul 𝕜 A).symm,
     Tensor0SSpace.smul_apply, neg_one_smul]
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.sub_apply (s : ℕ) (x : M)
     (A B : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     (A - B) v = A v - B v := by
   rw [sub_eq_add_neg, Tensor0SSpace.add_apply, Tensor0SSpace.neg_apply,
     sub_eq_add_neg]
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.sum_apply {α : Type*} (t : Finset α) (s : ℕ) (x : M)
     (A : α → Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     (∑ i ∈ t, A i) v = ∑ i ∈ t, A i v := by
@@ -238,14 +258,12 @@ theorem Tensor0SSpace.sum_apply {α : Type*} (t : Finset α) (s : ℕ) (x : M)
   | insert a t ha =>
       simp only [Finset.sum_insert ha, Tensor0SSpace.add_apply, *]
 
-omit [FiniteDimensional 𝕜 E] in
 noncomputable def Tensor0SSpace.domDomCongr {s s' : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (e : Fin s ≃ Fin s') :
     Tensor0SSpace s' I x := by
   unfold Tensor0SSpace at A ⊢
   exact ContinuousMultilinearMap.domDomCongr e A
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem Tensor0SSpace.domDomCongr_apply {s s' : ℕ} {x : M}
     (e : Fin s ≃ Fin s') (A : Tensor0SSpace s I x)
@@ -254,14 +272,12 @@ theorem Tensor0SSpace.domDomCongr_apply {s s' : ℕ} {x : M}
   unfold Tensor0SSpace.domDomCongr Tensor0SSpace
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.map_update_smul {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x)
     (i : Fin s) (c : 𝕜) (v : TangentSpace I x) :
     A (Function.update m i (c • v)) = c • A (Function.update m i v) :=
   ContinuousMultilinearMap.map_update_smul A m i c v
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.map_update_add {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x)
     (i : Fin s) (v w : TangentSpace I x) :
@@ -269,14 +285,12 @@ theorem Tensor0SSpace.map_update_add {s : ℕ} {x : M}
       A (Function.update m i v) + A (Function.update m i w) :=
   ContinuousMultilinearMap.map_update_add A m i v w
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.map_smul_univ {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (c : Fin s → 𝕜)
     (v : Fin s → TangentSpace I x) :
     A (fun i => c i • v i) = (∏ i, c i) • A v :=
   ContinuousMultilinearMap.map_smul_univ A c v
 
-omit [FiniteDimensional 𝕜 E] in
 theorem Tensor0SSpace.map_sum {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) {α : Fin s → Type*}
     [∀ i, Fintype (α i)]
@@ -284,8 +298,7 @@ theorem Tensor0SSpace.map_sum {s : ℕ} {x : M}
     A (fun i => ∑ j, g i j) = ∑ r : ∀ i, α i, A (fun i => g i (r i)) :=
   ContinuousMultilinearMap.map_sum A g
 
-omit [FiniteDimensional 𝕜 E] in
-private theorem tensor0SSpace_topology_eq (s : ℕ) (x : M) :
+theorem tensor0SSpace_topology_eq (s : ℕ) (x : M) :
     (inferInstance : TopologicalSpace (Tensor0SSpace s I x)) =
     (inferInstanceAs (TopologicalSpace (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) :=
   @Bundle.continuousMultilinearMap.topology_eq
@@ -293,6 +306,17 @@ private theorem tensor0SSpace_topology_eq (s : ℕ) (x : M) :
     (fun y => tangentSpaceNormedAddCommGroup y)
     (fun y => tangentSpaceNormedSpace y) _ tangentSpaceFiberBundleExplicit
     tangentSpace_vectorBundleExplicit s x
+
+end
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 @[reducible]
 instance tensor0SSpaceNormedAddCommGroup (s : ℕ) (x : M) :
@@ -379,13 +403,16 @@ instance tensorRSSpace_isSMulApply (r s : ℕ) (x : M) :
       (Tensor0SSpace s I x) where
   smul_apply _ _ _ := rfl
 
-def TensorRSSpace.toCLM {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
-    Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x := T
+end
 
-def TensorRSSpace.ofCLM {r s : ℕ} {x : M}
-    (T : Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) : TensorRSSpace r s I x := T
+section
 
-omit [FiniteDimensional 𝕜 E] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+
 @[ext]
 theorem tensorRSSpace_ext (r s : ℕ) (x : M)
     {T T' : TensorRSSpace r s I x}
@@ -395,6 +422,17 @@ theorem tensorRSSpace_ext (r s : ℕ) (x : M)
   ContinuousLinearMap.ext
     (f := (show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x from T))
     (g := (show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x from T')) h
+
+end
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 instance (s : ℕ) :
     NormedAddCommGroup (Tensor0SModel s 𝕜 E) := by
@@ -492,15 +530,17 @@ theorem finrank_tensorRSSpace [CompleteSpace 𝕜] (r s : ℕ) (x : M) :
   rw [e.finrank_eq, Module.finrank_linearMap 𝕜 𝕜,
     finrank_tensor0SSpace r x, finrank_tensor0SSpace s x, ← pow_add]
 
-omit [FiniteDimensional 𝕜 E] in
-private theorem tensor0SSpace_type_eq (s : ℕ) (x : M) :
-    Tensor0SSpace s I x =
-    ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 := by
-  unfold Tensor0SSpace Bundle.continuousMultilinearMap
-  rfl
+end
 
-omit [FiniteDimensional 𝕜 E] [IsManifold I 1 M] in
-private def tensor0SModelContinuousLinearEquiv (s : ℕ) (x : M) :
+section
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+
+def tensor0SModelContinuousLinearEquiv (s : ℕ) (x : M) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜 ≃L[𝕜]
       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 where
   toFun T := T.compContinuousLinearMap fun _ =>
@@ -528,7 +568,6 @@ private def tensor0SModelContinuousLinearEquiv (s : ℕ) (x : M) :
     (ContinuousMultilinearMap.compContinuousLinearMapL (F := 𝕜) fun _ =>
       (tangentSpaceModelContinuousLinearEquiv (I := I) x).toContinuousLinearMap).continuous
 
-omit [FiniteDimensional 𝕜 E] [IsManifold I 1 M] in
 def tensor0SSpaceFiberContinuousLinearEquiv (s : ℕ) (x : M) :
     Tensor0SSpace s I x ≃L[𝕜]
       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜 where
@@ -558,65 +597,77 @@ def tensor0SSpaceFiberContinuousLinearEquiv (s : ℕ) (x : M) :
         exact tensor0SSpace_topology_eq (I := I) s x]
     exact @continuous_id _ ContinuousMultilinearMap.instTopologicalSpace
 
+end
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+
 def tensor0SSpaceContinuousLinearEquiv (s : ℕ) (x : M) :
     Tensor0SSpace s I x ≃L[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 :=
   (tensor0SSpaceFiberContinuousLinearEquiv (I := I) s x).trans
     (tensor0SModelContinuousLinearEquiv (I := I) s x)
 
+end
+
 namespace Tensor0SSpace
 
-omit [FiniteDimensional 𝕜 E] [IsManifold I 1 M] in
+section
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+
 def eval {s : ℕ} {x : M} (T : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) : 𝕜 :=
   tensor0SSpaceFiberContinuousLinearEquiv (I := I) s x T v
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_zero {s : ℕ} {x : M} (v : Fin s → TangentSpace I x) :
     eval (0 : Tensor0SSpace s I x) v = 0 := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_add {s : ℕ} {x : M} (A B : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) :
     eval (A + B) v = eval A v + eval B v := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_smul {s : ℕ} {x : M} (c : 𝕜) (A : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) :
     eval (c • A) v = c • eval A v := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_sub {s : ℕ} {x : M} (A B : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) :
     eval (A - B) v = eval A v - eval B v := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_neg {s : ℕ} {x : M} (A : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) :
     eval (-A) v = -eval A v := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_domDomCongr {s s' : ℕ} {x : M} (A : Tensor0SSpace s I x)
     (e : Fin s ≃ Fin s') (v : Fin s' → TangentSpace I x) :
     eval (A.domDomCongr e) v = eval A (v ∘ e) := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 theorem eval_eq {s : ℕ} {x : M} (T : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) : eval T v = T v := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_fiber_equiv_symm {s : ℕ} {x : M}
     (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜)
@@ -624,13 +675,23 @@ theorem eval_fiber_equiv_symm {s : ℕ} {x : M}
     eval ((tensor0SSpaceFiberContinuousLinearEquiv (I := I) s x).symm T) v = T v := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem eval_sum {α : Type*} (t : Finset α) {s : ℕ} {x : M}
     (A : α → Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     eval (∑ i ∈ t, A i) v = ∑ i ∈ t, eval (A i) v := by
   rw [eval_eq, Tensor0SSpace.sum_apply]
   simp only [eval_eq]
+
+end
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 def toModel {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 :=
@@ -645,7 +706,16 @@ def ofModel {s : ℕ} {x : M}
     Tensor0SSpace s I x :=
   (tensor0SSpaceContinuousLinearEquiv s x).symm f
 
-omit [FiniteDimensional 𝕜 E] in
+end
+
+section
+
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+
 @[simp]
 theorem eval_ofModel {s : ℕ} {x : M}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜)
@@ -654,12 +724,10 @@ theorem eval_ofModel {s : ℕ} {x : M}
       f (fun i => tangentSpaceModelContinuousLinearEquiv (I := I) x (v i)) := by
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModelL_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     toModelL s x T = toModel T := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x)
     (v : Fin s → TangentSpace I x) :
@@ -667,84 +735,70 @@ theorem toModel_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x)
   unfold toModel tensor0SSpaceContinuousLinearEquiv
   rfl
 
-omit [FiniteDimensional 𝕜 E] in
-theorem toModel_apply_tangent {s : ℕ} {x : M} (T : Tensor0SSpace s I x)
-    (v : Fin s → TangentSpace I x) :
-    toModel T (fun i => tangentSpaceModelContinuousLinearEquiv (I := I) x (v i)) =
-      eval T v := by
-  rfl
-
-omit [FiniteDimensional 𝕜 E] in
-theorem toModel_apply_model_vector {s : ℕ} {x : M} (T : Tensor0SSpace s I x)
-    (v : Fin s → E) :
-    toModel T v =
-      T (fun i => (tangentSpaceModelContinuousLinearEquiv (I := I) x).symm (v i)) := by
-  rfl
-
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_add {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x) :
     toModel (T₁ + T₂) = toModel T₁ + toModel T₂ :=
   map_add (tensor0SSpaceContinuousLinearEquiv s x) T₁ T₂
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_smul {s : ℕ} {x : M} (c : 𝕜) (T : Tensor0SSpace s I x) :
     toModel (c • T) = c • toModel T :=
   map_smul (tensor0SSpaceContinuousLinearEquiv s x) c T
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_zero {s : ℕ} {x : M} :
     toModel (0 : Tensor0SSpace s I x) = 0 :=
   map_zero (tensor0SSpaceContinuousLinearEquiv s x)
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_neg {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     toModel (-T) = -toModel T :=
   map_neg (tensor0SSpaceContinuousLinearEquiv s x) T
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_sub {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x) :
     toModel (T₁ - T₂) = toModel T₁ - toModel T₂ :=
   map_sub (tensor0SSpaceContinuousLinearEquiv s x) T₁ T₂
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem ofModel_toModel {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     ofModel (toModel T) = T :=
   (tensor0SSpaceContinuousLinearEquiv s x).symm_apply_apply T
 
-omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_ofModel {s : ℕ} {x : M}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
     toModel (ofModel (I := I) (x := x) f) = f :=
   (tensor0SSpaceContinuousLinearEquiv s x).apply_symm_apply f
 
-omit [FiniteDimensional 𝕜 E] in
 theorem toModel_continuous {s : ℕ} {x : M} :
     Continuous (fun T : Tensor0SSpace s I x => toModel T) :=
   (tensor0SSpaceContinuousLinearEquiv s x).continuous_toFun
 
-omit [FiniteDimensional 𝕜 E] in
 theorem toModel_injective {s : ℕ} {x : M} :
     Function.Injective (fun T : Tensor0SSpace s I x => toModel T) :=
   (tensor0SSpaceContinuousLinearEquiv s x).injective
 
-omit [FiniteDimensional 𝕜 E] in
 theorem toModel_surjective {s : ℕ} {x : M} :
     Function.Surjective (fun T : Tensor0SSpace s I x => toModel T) :=
   (tensor0SSpaceContinuousLinearEquiv s x).surjective
 
-omit [FiniteDimensional 𝕜 E] in
 theorem toModel_bijective {s : ℕ} {x : M} :
     Function.Bijective (fun T : Tensor0SSpace s I x => toModel T) :=
   (tensor0SSpaceContinuousLinearEquiv s x).bijective
 
+end
+
 end Tensor0SSpace
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 def tensorRSSpaceContinuousLinearEquiv (r s : ℕ) (x : M) :
     TensorRSSpace r s I x ≃L[𝕜] TensorRSModel r s 𝕜 E := by
@@ -752,15 +806,7 @@ def tensorRSSpaceContinuousLinearEquiv (r s : ℕ) (x : M) :
   exact (tensor0SSpaceContinuousLinearEquiv (I := I) r x).arrowCongr
     (tensor0SSpaceContinuousLinearEquiv (I := I) s x)
 
-omit [FiniteDimensional 𝕜 E] in
-private theorem tensorRSSpace_type_eq (r s : ℕ) (x : M) :
-    TensorRSSpace r s I x =
-    (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E) 𝕜 →L[𝕜]
-     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) := by
-  unfold TensorRSSpace Tensor0SSpace Bundle.continuousMultilinearMap
-  congr 1 <;> exact tensor0SSpace_topology_eq (I := I) _ x
-
-private def tensorRSSpace_toModelAddHom (r s : ℕ) (x : M) :
+def tensorRSSpace_toModelAddHom (r s : ℕ) (x : M) :
     TensorRSSpace r s I x →+ TensorRSModel r s 𝕜 E :=
   { toFun := fun T => tensorRSSpaceContinuousLinearEquiv (I := I) r s x T
     map_zero' := map_zero (tensorRSSpaceContinuousLinearEquiv (I := I) r s x)
@@ -785,7 +831,18 @@ instance tensorRSSpace_continuousSMul (r s : ℕ) (x : M) :
     ContinuousSMul 𝕜 (TensorRSSpace r s I x) :=
   inferInstanceAs (ContinuousSMul 𝕜 (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
 
+end
+
 namespace TensorRSSpace
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 def toModel {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
     TensorRSModel r s 𝕜 E :=
@@ -860,16 +917,18 @@ theorem toModel_bijective {r s : ℕ} {x : M} :
     Function.Bijective (fun T : TensorRSSpace r s I x => toModel T) :=
   (tensorRSSpaceContinuousLinearEquiv (I := I) r s x).bijective
 
+end
+
 end TensorRSSpace
 
-noncomputable def tensor0SCurry (s : ℕ) (x : M) :
-    Tensor0SSpace (s+1) I x ≃L[𝕜]
-    (TangentSpace I x →L[𝕜] Tensor0SSpace s I x) :=
-  (tensor0SSpaceFiberContinuousLinearEquiv (I := I) (s + 1) x).trans
-    ((continuousMultilinearCurryLeftEquiv 𝕜
-      (fun _ : Fin (s + 1) => TangentSpace I x) 𝕜).toContinuousLinearEquiv.trans
-        ((ContinuousLinearEquiv.refl 𝕜 (TangentSpace I x)).arrowCongr
-          (tensor0SSpaceFiberContinuousLinearEquiv (I := I) s x).symm))
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 
 instance tensor0SBundleTopology (s : ℕ) :
     TopologicalSpace (TotalSpace
@@ -877,14 +936,12 @@ instance tensor0SBundleTopology (s : ℕ) :
       (fun x : M => Tensor0SSpace s I x)) :=
   Bundle.continuousMultilinearMap.topologicalSpaceTotalSpace 𝕜 s E (TangentSpace I : M → Type _)
 
-@[simp]
 noncomputable instance tensor0SBundleFiber (s : ℕ) :
     FiberBundle
       (Tensor0SModel s 𝕜 E)
       (fun x : M => Tensor0SSpace s I x) :=
   Bundle.continuousMultilinearMap.fiberBundle 𝕜 s E (TangentSpace I : M → Type _)
 
-@[simp]
 noncomputable instance tensor0SBundle_vector (s : ℕ) :
     VectorBundle 𝕜
       (Tensor0SModel s 𝕜 E)
@@ -896,9 +953,19 @@ instance isManifold_infty_succ [IsManifold I ∞ M] :
   have h : ((∞ : WithTop ℕ∞) + 1) = ∞ := by simp
   rw [h]; infer_instance
 
+
+end
+
+section
+
+variable [FiniteDimensional 𝕜 E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
 variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
-@[simp]
 noncomputable instance tensor0SBundle_smooth (s : ℕ) :
     ContMDiffVectorBundle n
       (Tensor0SModel s 𝕜 E)
@@ -951,99 +1018,38 @@ noncomputable instance tensorRSBundle_smooth (r s : ℕ) :
       (tensorRSBundle_vector r s) :=
   ContMDiffVectorBundle.continuousLinearMap
 
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpace_continuousLinearEquiv_apply (s : ℕ) (x : M)
-    (T : Tensor0SSpace s I x) :
-    tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x T = T := rfl
+end
 
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpace_continuousLinearEquiv_symm_apply (s : ℕ) (x : M)
-    (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
-    (tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x).symm T = T := rfl
+section
 
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpace_continuousLinearEquiv_apply_apply (s : ℕ) (x : M)
-    (T : Tensor0SSpace s I x) (v : Fin s → E) :
-    tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x T v =
-      T (fun i => (tangentSpaceModelContinuousLinearEquiv (I := I) x).symm (v i)) := by
-  rfl
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I 1 M]
+variable {x' : M}
+variable {r s : ℕ}
+variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpace_continuousLinearEquiv_symm_apply_apply (s : ℕ) (x : M)
-    (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜)
-    (v : Fin s → TangentSpace I x) :
-    (tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x).symm T v =
-      T (fun i => tangentSpaceModelContinuousLinearEquiv (I := I) x (v i)) := by
-  rfl
-
-theorem tensorRSSpace_continuousLinearEquiv_symm_apply_apply (r s : ℕ) (x : M)
-    (T : TensorRSModel r s 𝕜 E) (β : Tensor0SSpace r I x)
-    (v : Fin s → TangentSpace I x) :
-    (tensorRSSpaceContinuousLinearEquiv (I := I) (M := M) r s x).symm T β v =
-      T (Tensor0SSpace.toModel (I := I) (M := M) β)
-        (fun i => tangentSpaceModelContinuousLinearEquiv (I := I) x (v i)) := by
-  rfl
-
-theorem tensorRSSpace_continuousLinearEquiv_apply_apply (r s : ℕ) (x : M)
-    (T : TensorRSSpace r s I x) (β : Tensor0SModel r 𝕜 E) (v : Fin s → E) :
-    tensorRSSpaceContinuousLinearEquiv (I := I) (M := M) r s x T β v =
-      T ((tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) r x).symm β)
-        (fun i => (tangentSpaceModelContinuousLinearEquiv (I := I) x).symm (v i)) := by
-  rfl
-
-theorem tensorRSSpace_continuousLinearEquiv_symm_toContinuousLinearMap_apply_apply
-    (r s : ℕ) (x : M) (T : TensorRSModel r s 𝕜 E) (β : Tensor0SSpace r I x)
-    (v : Fin s → TangentSpace I x) :
-    (tensorRSSpaceContinuousLinearEquiv (I := I) (M := M) r s x).symm.toContinuousLinearMap
-        T β v =
-      T (Tensor0SSpace.toModel (I := I) (M := M) β)
-        (fun i => tangentSpaceModelContinuousLinearEquiv (I := I) x (v i)) := by
-  exact tensorRSSpace_continuousLinearEquiv_symm_apply_apply r s x T β v
-
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpace_continuousLinearEquiv_coe (s : ℕ) (x : M) :
-    (tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x : _ → _) = id := rfl
-
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
-    ((tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x).symm : _ → _) = id := rfl
-
-omit [FiniteDimensional 𝕜 E] in
 theorem tensor0SSpaceFiberContinuousLinearEquiv_apply (s : ℕ) (x : M)
     (T : Tensor0SSpace s I x) :
     tensor0SSpaceFiberContinuousLinearEquiv (I := I) (M := M) s x T = T := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 theorem tensor0SSpaceFiberContinuousLinearEquiv_apply_apply (s : ℕ) (x : M)
     (T : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
     tensor0SSpaceFiberContinuousLinearEquiv (I := I) (M := M) s x T v = T v := rfl
 
-theorem tensor0SSpaceFiberContinuousLinearEquiv_model_symm_apply (s : ℕ) (x : M)
-    (T : Tensor0SModel s 𝕜 E) (v : Fin s → TangentSpace I x) :
-    tensor0SSpaceFiberContinuousLinearEquiv (I := I) (M := M) s x
-        ((tensor0SSpaceContinuousLinearEquiv (I := I) (M := M) s x).symm T) v =
-      T (fun i => tangentSpaceModelContinuousLinearEquiv (I := I) x (v i)) := by
-  rfl
-
-omit [FiniteDimensional 𝕜 E] in
-theorem tensor0SSpaceFiberContinuousLinearEquiv_symm_apply (s : ℕ) (x : M)
-    (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜) :
-    (tensor0SSpaceFiberContinuousLinearEquiv (I := I) (M := M) s x).symm T = T := rfl
-
-omit [FiniteDimensional 𝕜 E] in
 theorem TensorRSSpace.zero_apply (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x) :
     (0 : TensorRSSpace r s I x) A = 0 := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 theorem TensorRSSpace.add_apply (r s : ℕ) (x : M)
     (T U : TensorRSSpace r s I x) (A : Tensor0SSpace r I x) :
     (T + U) A = T A + U A := rfl
 
-omit [FiniteDimensional 𝕜 E] in
 theorem TensorRSSpace.smul_apply (r s : ℕ) (x : M)
     (c : 𝕜) (T : TensorRSSpace r s I x) (A : Tensor0SSpace r I x) :
     (c • T) A = c • T A := rfl
+
+end
 
 end
 end Tensor0SBundle

@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
+public import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 public import Mathlib.Analysis.Matrix.Normed
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 

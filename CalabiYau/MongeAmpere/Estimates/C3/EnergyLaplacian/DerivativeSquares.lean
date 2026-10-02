@@ -1,7 +1,6 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.BochnerTensors
-import CalabiYau.Geometry.Complex.Forms.Positive
 
 /-!
 # Positivity of the two Calabi derivative-square contractions
@@ -240,12 +239,12 @@ theorem c3ConnectionDifference_derivativeSquares_nonneg
     let gφ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
       fun w ↦ ω₀.metricInChart x w + complexHessian (φ ∘ ψ) w
     let T : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ :=
-      fun w i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x w i j k
+      fun w i j k ↦ connectionDifferenceInChart ω₀ φ x w i j k
     let N : Fin n → Fin n → Fin n → Fin n → ℂ := fun p i j k ↦
-      c3PartialZ (fun w ↦ T w i j k) z p
-      + ∑ r, c3ChristoffelInChart gφ z i p r * T z r j k
-      - ∑ r, c3ChristoffelInChart gφ z r p j * T z i r k
-      - ∑ r, c3ChristoffelInChart gφ z r p k * T z i j r
+      wirtingerDerivInChart (fun w ↦ T w i j k) z p
+      + ∑ r, christoffelInChart gφ z i p r * T z r j k
+      - ∑ r, christoffelInChart gφ z r p j * T z i r k
+      - ∑ r, christoffelInChart gφ z r p k * T z i j r
     let Nbar : Fin n → Fin n → Fin n → Fin n → ℂ := fun q i j k ↦
       c3PartialBar (fun w ↦ T w i j k) z q
     0 ≤ c3DerivativeSquares gφ N Nbar z := by
@@ -254,12 +253,12 @@ theorem c3ConnectionDifference_derivativeSquares_nonneg
   let gφ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun w ↦ ω₀.metricInChart x w + complexHessian (φ ∘ ψ) w
   let T : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ :=
-    fun w i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x w i j k
+    fun w i j k ↦ connectionDifferenceInChart ω₀ φ x w i j k
   let N : Fin n → Fin n → Fin n → Fin n → ℂ := fun p i j k ↦
-    c3PartialZ (fun w ↦ T w i j k) z p
-    + ∑ r, c3ChristoffelInChart gφ z i p r * T z r j k
-    - ∑ r, c3ChristoffelInChart gφ z r p j * T z i r k
-    - ∑ r, c3ChristoffelInChart gφ z r p k * T z i j r
+    wirtingerDerivInChart (fun w ↦ T w i j k) z p
+    + ∑ r, christoffelInChart gφ z i p r * T z r j k
+    - ∑ r, christoffelInChart gφ z r p j * T z i r k
+    - ∑ r, christoffelInChart gφ z r p k * T z i j r
   let Nbar : Fin n → Fin n → Fin n → Fin n → ℂ := fun q i j k ↦
     c3PartialBar (fun w ↦ T w i j k) z q
   have hmetric := ω₀.metricInChart_perturb hφ x hz

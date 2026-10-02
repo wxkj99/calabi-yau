@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseCoefficientHolder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.DifferentiatedRhsHolder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.ApplyDirectionalSchauder
@@ -26,6 +26,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- The local Schauder continuation after ellipticity and the differentiated equation have been
 established. The uniform `C^{r,α}` potential bound and the `C^{r+2,0}` chart bound on the right-hand
 side data provide the coefficient and forcing estimates required by the order `r-2` interior
@@ -83,7 +84,7 @@ theorem exists_uniform_chart_holder_bound_succ_of_linearized
       HolderBoundOn (r + 1) α C K'
         (p.2 ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) := by
   obtain ⟨CA, hCoeffFull⟩ := exists_uniform_inverse_coefficient_holder
-    ω₀ S hS hα₀ hα₁ hr hUopen hUcompact hUtarget hLcompact hBuffer hLtarget
+    ω₀ S hS hα₁ hr hUcompact hUtarget hLcompact hBuffer hLtarget
     hCurrentOuter hGlocal
   have hCoeffLower : ∀ p ∈ S, ∀ j k, ∀ m < r - 2,
       HolderOnWith CA α (iteratedFDeriv ℝ m (fun z ↦
@@ -98,10 +99,10 @@ theorem exists_uniform_chart_holder_bound_succ_of_linearized
     intro p hp j k
     exact (hCoeffFull p hp j k).2
   obtain ⟨CR, hRhs⟩ := exists_uniform_differentiated_rhs_holder
-    ω₀ S hS hα₀ hα₁ hr hUopen hUcompact hUtarget hLcompact hBuffer hLtarget
+    ω₀ S hS hα₁ hr hUcompact hUtarget hLcompact hBuffer hLtarget
     hGouter hCoeffLower hCoeff
   exact exists_uniform_chart_holder_bound_succ_of_schauder_data
-    hSch ω₀ S hS hα₀ hα₁ hr hUopen hUcompact hUtarget hCurrent K' hK hKU lam
+    hSch ω₀ S hS hα₀ hα₁ hr hUopen hUtarget hCurrent K' hK hKU lam
     hlam hUniformElliptic hCoeff hRhs hLinearized
 
 end KahlerForm

@@ -2,6 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.TraceMatrixJets
 public import CalabiYau.Geometry.Kahler.Curvature.ReferenceBound
+public import CalabiYau.Mathlib.LinearAlgebra.Matrix.PullbackInverse
 
 /-!
 # Reference-curvature contraction in a normalized frame
@@ -29,7 +30,9 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [T2Space M] [CompactSpace M]
+section
+
+variable [T2Space M] [CompactSpace M]
 
 /-- The mixed Kähler curvature component, with the sign convention
 `R_{p q j k} = -g_{a k} ∂̄q Γᵃ_{p j}`. At a normal center where
@@ -38,7 +41,7 @@ noncomputable def c3RefinedTraceReferenceCurvatureInChart
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p q j k : Fin n) : ℂ :=
   -∑ a : Fin n, g z a k * c3RefinedTracePartialBar
-    (fun w ↦ c3ChristoffelInChart g w a p j) z q
+    (fun w ↦ christoffelInChart g w a p j) z q
 
 /-- Column-oriented matrix of a reference-metric orthonormal frame at the chart center. -/
 def c3RefinedTraceReferenceOrthonormalFrameMatrix (ω₀ : KahlerForm n M) (x : M)
@@ -150,7 +153,13 @@ private theorem c3RefinedTrace_normalized_curvature_sum_bound
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
+end
+
 open scoped ComplexOrder MatrixOrder in
+section
+
+variable [T2Space M] [CompactSpace M]
+
 private theorem c3RefinedTrace_exists_positive_simultaneous_diagonalization
     {n : ℕ} {A B : Matrix (Fin n) (Fin n) ℂ}
     (hA : A.PosDef) (hB : B.PosDef) :
@@ -291,39 +300,6 @@ private theorem c3RefinedTrace_diagonalized_matrix_trace_identities
   · rw [hTraceForward, ← RCLike.ofReal_sum, RCLike.ofReal_re]
   · rw [hTraceReverse, ← RCLike.ofReal_sum, RCLike.ofReal_re]
 
-omit [T2Space M] [CompactSpace M] in
-private theorem c3RefinedTrace_relTrace_eq_chart_matrix_trace
-    (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ) (x : M) :
-    relTrace (ω₀ x) (ω₀ x + mddbar n φ x) =
-      RCLike.re ((((ω₀.metricInChart x
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))⁻¹) *
-        (ω₀.metricInChart x (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) +
-          complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm)
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))).trace) := by
-  let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
-  have hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
-    change extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x ∈ _
-    exact mem_extChartAt_target x
-  have hcoeffω : (ω₀.toFormField.chartRep x z).coeffMatrix = ω₀.metricInChart x z := rfl
-  have hcoeffα : ((ω₀.toFormField + mddbar n φ).chartRep x z).coeffMatrix =
-      ω₀.metricInChart x z + complexHessian (φ ∘ (extChartAt
-        𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z := by
-    change ((ω₀.toFormField.chartRep x z + (mddbar n φ).chartRep x z).coeffMatrix) = _
-    rw [ContinuousAlternatingMap.coeffMatrix_add, hcoeffω, chartRep_mddbar hφ.1 x hz]
-    rfl
-  have hcoeffω' : (ω₀ x).coeffMatrix = ω₀.metricInChart x z := by
-    simpa [z] using (ω₀.metricInChart_self x).symm
-  have hcoeffα' : ((ω₀ x + mddbar n φ x).coeffMatrix) =
-      ω₀.metricInChart x z + complexHessian (φ ∘ (extChartAt
-        𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z := by
-    change ((ω₀.toFormField + mddbar n φ) x).coeffMatrix = _
-    rw [← FormField.chartRep_self (ω₀.toFormField + mddbar n φ) x]
-    exact hcoeffα
-  rw [ContinuousAlternatingMap.relTrace]
-  change RCLike.re (((ω₀ x).coeffMatrix)⁻¹ *
-    (ω₀ x + mddbar n φ x).coeffMatrix).trace = _
-  rw [hcoeffω', hcoeffα']
-
 private theorem c3RefinedTrace_curvatureInChart_eq_chartCurvature_at
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n))
@@ -346,10 +322,10 @@ private theorem c3RefinedTrace_curvatureInChart_eq_chartCurvature_at
       _ = ((g z)⁻¹ * g z) l k := by simp [Matrix.mul_apply]
       _ = if l = k then 1 else 0 := hInvEntry l k
   have hbarGamma (a : Fin n) :
-      c3RefinedTracePartialBar (fun w => c3ChristoffelInChart g w a p j) z q =
+      c3RefinedTracePartialBar (fun w => christoffelInChart g w a p j) z q =
         -(∑ l, (g z)⁻¹ l a * chartCurvature g z p q j l) := by
     have hcurv := chartChristoffel_bar_eq_curvature_at g z hg hdet a p j q
-    simpa [c3RefinedTracePartialBar, c3ChristoffelInChart, c3PartialZ,
+    simpa [c3RefinedTracePartialBar, christoffelInChart, wirtingerDerivInChart,
       chartPartialBarComplex, chartPartialZComplex] using hcurv
   unfold c3RefinedTraceReferenceCurvatureInChart
   rw [Finset.sum_congr rfl (fun a ha => by rw [hbarGamma a])]
@@ -391,7 +367,8 @@ private theorem c3RefinedTrace_curvatureInChart_eq_chartCurvature_at
       rw [hcontract l]
     _ = chartCurvature g z p q j k := by simp
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 open scoped ComplexOrder MatrixOrder in
 private theorem c3RefinedTrace_referenceFrame_curvature_eq
     (ω₀ : KahlerForm n M) (x : M) (P : Matrix (Fin n) (Fin n) ℂ)
@@ -430,7 +407,6 @@ private theorem c3RefinedTrace_referenceFrame_curvature_eq
   intro d hd
   rw [hcurv a b c d]
 
-omit [T2Space M] [CompactSpace M] in
 open scoped ComplexOrder MatrixOrder in
 private theorem c3RefinedTrace_exists_traceControlledReferenceFrame
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ) (x : M) (B : ℝ)
@@ -500,36 +476,9 @@ private theorem c3RefinedTrace_exists_traceControlledReferenceFrame
       ∑ i, (eigen i)⁻¹ = RCLike.re ((h⁻¹ * g).trace) := htr.2.symm
       _ ≤ B := hMatrixReverse
 
-private lemma transfer_pullback_metric_inverse {n : ℕ}
-    (A B G : Matrix (Fin n) (Fin n) ℂ)
-    (hAB : A * B = 1) (hBA : B * A = 1) :
-    (A.transpose * G * A.map star)⁻¹ = B.map star * G⁻¹ * B.transpose := by
-  have hinvA : A⁻¹ = B := by
-    calc
-      A⁻¹ = 1 * A⁻¹ := by simp
-      _ = (B * A) * A⁻¹ := by rw [hBA]
-      _ = B * (A * A⁻¹) := by rw [Matrix.mul_assoc]
-      _ = B := by
-        rw [Matrix.mul_nonsing_inv A (Matrix.isUnit_det_of_left_inverse hBA), mul_one]
-  rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev]
-  rw [← Matrix.transpose_nonsing_inv, hinvA]
-  have hABstar : A.map star * B.map star = 1 := by
-    ext a b
-    have hij := congrArg star (congrFun (congrFun hAB a) b)
-    simpa [Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul, mul_comm] using hij
-  have hBAstar : B.map star * A.map star = 1 := by
-    ext a b
-    have hij := congrArg star (congrFun (congrFun hBA a) b)
-    simpa [Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul, mul_comm] using hij
-  have hs : IsUnit (A.map star).det := Matrix.isUnit_det_of_right_inverse hABstar
-  have hinvstar : (A.map star)⁻¹ = B.map star := by
-    calc
-      (A.map star)⁻¹ = 1 * (A.map star)⁻¹ := by simp
-      _ = (B.map star * A.map star) * (A.map star)⁻¹ := by rw [hBAstar]
-      _ = B.map star * (A.map star * (A.map star)⁻¹) := by rw [Matrix.mul_assoc]
-      _ = B.map star := by rw [Matrix.mul_nonsing_inv _ hs, mul_one]
-  rw [hinvstar]
-  rw [← Matrix.mul_assoc]
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private lemma transfer_pullback_double_inverse {n : ℕ}
     (A B G H : Matrix (Fin n) (Fin n) ℂ)
@@ -537,7 +486,7 @@ private lemma transfer_pullback_double_inverse {n : ℕ}
     (A.transpose * G * A.map star)⁻¹ * (A.transpose * H * A.map star) *
         (A.transpose * G * A.map star)⁻¹ =
       B.map star * (G⁻¹ * H * G⁻¹) * B.transpose := by
-  rw [transfer_pullback_metric_inverse A B G hAB hBA]
+  rw [Matrix.inv_transpose_mul_mul_map_star A B G hBA]
   have htranspose : B.transpose * A.transpose = 1 := by
     rw [← Matrix.transpose_mul, hAB]
     simp
@@ -903,12 +852,12 @@ private theorem c3RefinedTraceTransfer_diagonalContraction
     exact congrArg RCLike.ofReal (inv_mul_cancel₀ (ne_of_gt (heigen i)))
   have hDinvEq : D⁻¹ = Dinv := Matrix.inv_eq_left_inv hDinvD
   have hFrameInvH : Dinv = Pinv.map star * h⁻¹ * Pinv.transpose := by
-    have hh := transfer_pullback_metric_inverse P Pinv h hPinvP hPInvP
+    have hh := Matrix.inv_transpose_mul_mul_map_star P Pinv h hPInvP
     rw [hdiag, hDinvEq] at hh
     exact hh
   have hFrameInvG : (1 : Matrix (Fin n) (Fin n) ℂ) =
       Pinv.map star * g⁻¹ * Pinv.transpose := by
-    have hh := transfer_pullback_metric_inverse P Pinv g hPinvP hPInvP
+    have hh := Matrix.inv_transpose_mul_mul_map_star P Pinv g hPInvP
     rw [hframe] at hh
     simpa using hh
   have hFrameCross : D = Pinv.map star * (g⁻¹ * h * g⁻¹) * Pinv.transpose := by
@@ -1014,7 +963,8 @@ private theorem c3RefinedTraceTransfer_diagonalContraction
       _ = _ := hRealDiag
   exact hRealDiagonal
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem c3RefinedTrace_signedError_eq_referenceFrame_sum
     (ω₀ : KahlerForm n M) (φ : M → ℝ) (x : M)
     (P : Matrix (Fin n) (Fin n) ℂ) (eigen : Fin n → ℝ)
@@ -1043,17 +993,16 @@ private theorem c3RefinedTrace_signedError_eq_referenceFrame_sum
           P a p * star (P b p) * P c j * star (P d j) * R a b c d)
   exact c3RefinedTraceTransfer_diagonalContraction g h P eigen R hP hDiag heigen
 
-omit [T2Space M] in
+variable [CompactSpace M] in
 /-- Under two-sided metric comparison, the signed bisectional-curvature error
 has a uniform absolute bound. In reference-orthonormal coordinates this follows
 from the existing K reference-frame curvature bound, the eigenvalue bounds,
 and finite summation of the normalized signed coefficients; the tensor law ensures the
 scalar above has the same value in the original point-selected chart. -/
-@[deprecated "unused hypothesis `hsol`; will be removed" (since := "2026-10-02")]
 theorem c3RefinedTrace_exists_uniform_referenceCurvature_error_bound
     (ω₀ : KahlerForm n M) (B : ℝ) (hB : 0 < B) :
     ∃ R : ℝ, 0 ≤ R ∧
-      ∀ (G φ : M → ℝ) (hsol : ω₀.SolvesMongeAmpere G φ) (x : M),
+      ∀ G φ : M → ℝ, ω₀.SolvesMongeAmpere G φ → ∀ x : M,
         relTrace (ω₀ x) (ω₀ x + mddbar n φ x) ≤ B →
         relTrace (ω₀ x + mddbar n φ x) (ω₀ x) ≤ B →
         |c3RefinedTraceReferenceCurvatureSignedError ω₀ φ x| ≤ R := by
@@ -1069,7 +1018,7 @@ theorem c3RefinedTrace_exists_uniform_referenceCurvature_error_bound
       rw [c3RefinedTrace_referenceFrame_curvature_eq ω₀ x P p p j j]
       exact hCbound x P
         (by simpa [c3RefinedTraceReferenceOrthonormalFrameMatrix,
-          referenceOrthonormalFrameMatrix] using hP) p p j j
+          IsReferenceOrthonormalFrame] using hP) p p j j
     have hsumBound := c3RefinedTrace_normalized_curvature_sum_bound B C hB hCnonneg
       eigen heigen hsum hinvsum
       (fun p j ↦ c3RefinedTraceReferenceCurvatureInFrame ω₀ x P p p j j)

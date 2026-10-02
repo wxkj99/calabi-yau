@@ -164,7 +164,7 @@ theorem exists_trace_controlled_reference_frame
     (hforward : relTrace (ω₀ x) (ω₀ x + mddbar n φ x) ≤ B)
     (hreverse : relTrace (ω₀ x + mddbar n φ x) (ω₀ x) ≤ B) :
     ∃ (P : Matrix (Fin n) (Fin n) ℂ) (eigen : Fin n → ℝ),
-      referenceOrthonormalFrameMatrix ω₀ x P ∧
+      IsReferenceOrthonormalFrame ω₀ x P ∧
       Matrix.transpose P *
         (ω₀.metricInChart x (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) +
           complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm)
@@ -192,7 +192,7 @@ theorem exists_trace_controlled_reference_frame
   have hPmap : P.map star = Q := by
     ext i j
     simp [P]
-  have hFrame : referenceOrthonormalFrameMatrix ω₀ x P := by
+  have hFrame : IsReferenceOrthonormalFrame ω₀ x P := by
     change P.transpose * g * P.map star = 1
     rw [hPtranspose, hPmap]
     exact hQG

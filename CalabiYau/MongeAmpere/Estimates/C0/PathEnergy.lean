@@ -12,10 +12,9 @@ open Set MeasureTheory
 namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem interval_product_integrable_of_continuous_bounded
     (ω₀ : KahlerForm n M) {f : ℝ → M → ℝ} (hf : Continuous (Function.uncurry f))
     (hbound : ∃ C : ℝ, ∀ s ∈ Set.uIoc (0 : ℝ) 1, ∀ x,
@@ -45,7 +44,7 @@ private theorem interval_product_integrable_of_continuous_bounded
     exact Filter.Eventually.of_forall fun x ↦ hC s hs x
   exact MeasureTheory.Integrable.of_mem_Icc (-C) C hfmeas hboundAE
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem interval_product_integrable_of_continuous
     (ω₀ : KahlerForm n M) {f : ℝ → M → ℝ} (hf : Continuous (Function.uncurry f)) :
     MeasureTheory.Integrable (Function.uncurry f)
@@ -68,7 +67,7 @@ private theorem interval_product_integrable_of_continuous
     exact abs_le.mp habs
   exact interval_product_integrable_of_continuous_bounded ω₀ hf ⟨C, hbound⟩
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem interval_integral_swap (ω₀ : KahlerForm n M) {f : ℝ → M → ℝ}
     (hf : Continuous (Function.uncurry f)) :
     (∫ s in (0 : ℝ)..1, ∫ x, f s x ∂ω₀.volume) =
@@ -76,7 +75,7 @@ private theorem interval_integral_swap (ω₀ : KahlerForm n M) {f : ℝ → M �
   exact MeasureTheory.intervalIntegral_integral_swap
     (interval_product_integrable_of_continuous ω₀ hf)
 
-omit [ConnectedSpace M] in
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem integral_weighted_mongeAmpere_segment
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (g : M → ℝ)
     (hF : Continuous (Function.uncurry fun (s : ℝ) (x : M) =>
@@ -116,6 +115,7 @@ private theorem integral_weighted_mongeAmpere_segment
     _ = ∫ s in (0 : ℝ)..1, ∫ x, F s x ∂ω₀.volume ∂MeasureTheory.volume :=
       (interval_integral_swap ω₀ (by simpa [F] using hF)).symm
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem continuous_coeffMatrix :
     Continuous (ContinuousAlternatingMap.coeffMatrix :
       (EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ) → Matrix (Fin n) (Fin n) ℂ) := by
@@ -139,6 +139,7 @@ private theorem continuous_coeffMatrix :
     Complex.continuous_ofReal.comp (hEval v₂)
   exact (h₁.sub (continuous_const.mul h₂)).div_const (2 : ℂ)
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem continuousAt_relTrace_of_isPositive
     {α β : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ}
     (hα : α.IsPositive) :
@@ -203,29 +204,6 @@ private theorem continuousAt_relTrace_of_isPositive
       ContinuousAlternatingMap.coeffMatrix p.2).trace) (α, β)
   exact ContinuousAt.comp' hreal htracePair
 
-omit [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem continuous_relTrace_comp
-    {G : ℝ × M → EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ}
-    {β : M → EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ}
-    (hG : Continuous G) (hβ : Continuous β) (hpos : ∀ p, (G p).IsPositive) :
-    Continuous (fun p => ContinuousAlternatingMap.relTrace (G p) (β p.2)) := by
-  have hp : Continuous (fun p : ℝ × M => (G p, β p.2)) :=
-    hG.prodMk (hβ.comp continuous_snd)
-  let R : ((EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ) ×
-      (EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)) → ℝ := fun q =>
-    ContinuousAlternatingMap.relTrace q.1 q.2
-  apply continuous_iff_continuousAt.2
-  intro p
-  have hrel : ContinuousAt R (G p, β p.2) := by
-    simpa [R] using
-      (continuousAt_relTrace_of_isPositive (α := G p) (β := β p.2) (hpos p))
-  change ContinuousAt (R ∘ (fun p => (G p, β p.2))) p
-  exact ContinuousAt.comp' (f := fun q => (G q, β q.2)) (g := R) (x := p)
-    hrel hp.continuousAt
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem continuousOn_path_metricInChart
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (x : M) :
     ContinuousOn
@@ -289,7 +267,6 @@ private theorem continuousOn_path_metricInChart
   rw [KahlerForm.metricInChart_perturb (hpot s) x hz]
   rw [hHsmul s hz]
 
-omit [ConnectedSpace M] in
 private theorem continuousOn_path_chart_integrand
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (x : M) :
     ContinuousOn
@@ -374,7 +351,6 @@ private theorem continuousOn_path_chart_integrand
   intro p hp
   simp only [div_eq_mul_inv, Pi.mul_apply]
 
-omit [ConnectedSpace M] in
 private theorem continuous_path_segment_integrand
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) :
     Continuous (Function.uncurry fun (s : ℝ) (y : M) =>
@@ -462,7 +438,6 @@ private theorem continuous_path_segment_integrand
     exact hFchart s x₀ y hy
   exact hcomp.congr_of_eventuallyEq heq
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem segment_weighted_trace_lower_bound
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ)
     (hn : 1 ≤ n) {s : ℝ} (hs₀ : 0 < s) (hs₁ : s < 1) (x : M)
@@ -506,7 +481,7 @@ private theorem segment_weighted_trace_lower_bound
     _ = ContinuousAlternatingMap.relDet (ω₀ x) (ω₀ x + s • mddbar n φ x) *
         ContinuousAlternatingMap.relTrace (ω₀ x + s • mddbar n φ x) β := rfl
 
-omit [BorelSpace M] [ConnectedSpace M] in
+variable [MeasurableSpace M] [T2Space M] [CompactSpace M] in
 private theorem integral_segment_trace_density_lower_bound
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (hn : 1 ≤ n)
     {s : ℝ} (hs₀ : 0 < s) (hs₁ : s < 1) (g : M → ℝ)
@@ -544,6 +519,7 @@ private theorem integral_segment_trace_density_lower_bound
   rw [integral_const_mul] at hmono
   exact hmono
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem segment_gradNormSq_integral_lower_bound
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (hn : 1 ≤ n)
     {s : ℝ} (hs₀ : 0 < s) (hs₁ : s < 1) (g : M → ℝ)
@@ -596,6 +572,7 @@ private theorem segment_gradNormSq_integral_lower_bound
   simpa [KahlerForm.gradNormSq, KahlerForm.mongeAmpere, KahlerForm.perturb_apply,
     mddbar_smul hφ.1 s, ωs] using htrace
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem interval_integral_one_sub_pow_lower (hn : 1 ≤ n) :
     (1 / 2 : ℝ) ^ n ≤ ∫ s in (0 : ℝ)..1, (1 - s) ^ (n - 1) := by
   have hcont : Continuous (fun s : ℝ => (1 - s) ^ (n - 1)) := by fun_prop
@@ -634,6 +611,7 @@ private theorem interval_integral_one_sub_pow_lower (hn : 1 ≤ n) :
         omega
   nlinarith
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem integral_mongeAmpere_weighted_laplacian_eq_energy
     (ω₀ : KahlerForm n M) {ψ φ : M → ℝ} (hψ : ω₀.IsPotential ψ)
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
@@ -657,6 +635,7 @@ private theorem integral_mongeAmpere_weighted_laplacian_eq_energy
     exact ENNReal.toReal_ofReal (le_of_lt (ω₀.mongeAmpere_pos hψ x))
   simpa only [htoReal, smul_eq_mul, mul_assoc] using henergy
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem integral_mongeAmpere_segment_weighted_energy
     (ω₀ : KahlerForm n M) {ψ φ : M → ℝ} (hψ : ω₀.IsPotential ψ)
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
@@ -700,6 +679,7 @@ private theorem integral_mongeAmpere_segment_weighted_energy
     linarith
   simpa [ωψ] using hresult
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 private theorem segment_weighted_energy_lower_bound
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (hn : 1 ≤ n)
     {s : ℝ} (hs₀ : 0 < s) (hs₁ : s < 1)
@@ -738,6 +718,7 @@ private theorem segment_weighted_energy_lower_bound
   have htrace' := htrace.trans_eq henergy'
   simpa [ωs] using htrace'
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 theorem normalized_mongeAmpere_energy_bound
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (hn : 1 ≤ n)
     {F : ℝ → ℝ} (hF : ContDiff ℝ ∞ F)

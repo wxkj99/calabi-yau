@@ -6,8 +6,6 @@ public import CalabiYau.Analysis.Parabolic.Euclidean.HeatKernel.PDE
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -19,9 +17,7 @@ namespace HeatEquation
 section ThirdDerivative
 
 variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
-  [Nontrivial V]
+  [NormedAddCommGroup V] [InnerProductSpace ℝ V]
 
 def baseD3 (u v w x : V) : ℝ :=
   (-(8 : ℝ)⁻¹ * ⟪x, u⟫ * ⟪x, v⟫ * ⟪x, w⟫ +
@@ -36,7 +32,6 @@ def baseD3Map (v w x : V) : V →L[ℝ] ℝ :=
       ((4 : ℝ)⁻¹ * ⟪x, v⟫ * baseHeat x) • innerSL ℝ w +
         ((4 : ℝ)⁻¹ * ⟪v, w⟫ * baseHeat x) • innerSL ℝ x
 
-omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 @[simp] theorem baseD3Map_apply (v w x u : V) :
     baseD3Map v w x u = baseD3 u v w x := by
   simp only [baseD3Map, add_apply,
@@ -45,7 +40,6 @@ omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   rw [real_inner_comm v u, real_inner_comm w u]
   ring
 
-omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem baseD2_hasFDeriv (v w x : V) :
     HasFDerivAt (baseD2 v w) (baseD3Map v w x) x := by
   have hv : HasFDerivAt (fun y : V => ⟪y, v⟫) (innerSL ℝ v) x := by
@@ -78,7 +72,6 @@ theorem baseD2_hasFDeriv (v w x : V) :
 def baseD3Maj (x : V) : ℝ :=
   ((8 : ℝ)⁻¹ * ‖x‖ ^ 3 + (3 / 4 : ℝ) * ‖x‖) * baseHeat x
 
-omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem baseD3Maj_nonneg (x : V) : 0 ≤ baseD3Maj x := by
   unfold baseD3Maj
   exact mul_nonneg
@@ -87,7 +80,6 @@ theorem baseD3Maj_nonneg (x : V) : 0 ≤ baseD3Maj x := by
       (mul_nonneg (by positivity) (norm_nonneg x)))
     (baseHeat_nonneg x)
 
-omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem baseD3_bound (u v w x : V) :
     ‖baseD3 u v w x‖ ≤ ‖u‖ * ‖v‖ * ‖w‖ * baseD3Maj x := by
   let A : ℝ := -(8 : ℝ)⁻¹ * ⟪x, u⟫ * ⟪x, v⟫ * ⟪x, w⟫
@@ -154,6 +146,7 @@ theorem baseD3_bound (u v w x : V) :
         (((8 : ℝ)⁻¹ * ‖x‖ ^ 3 + (3 / 4 : ℝ) * ‖x‖) *
           baseHeat x) := by ring
 
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem baseD3Maj_int : Integrable (baseD3Maj : V → ℝ) := by
   have h3 := (gaussMoment_int (V := V) 3
     (by positivity : (0 : ℝ) < (4 : ℝ)⁻¹)).const_mul
@@ -172,11 +165,12 @@ theorem baseD3Maj_int : Integrable (baseD3Maj : V → ℝ) := by
   rw [heq]
   exact h3.add h1
 
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] in
 def heatC3 (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] : ℝ :=
   ∫ x : V, baseD3Maj x
 
-omit [Nontrivial V] in
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] in
 theorem heatC3_nonneg : 0 ≤ heatC3 V :=
   integral_nonneg baseD3Maj_nonneg
 
@@ -195,12 +189,10 @@ def heatD3Map (t : ℝ) (v w x : V) : V →L[ℝ] ℝ :=
       (heatScale t)⁻¹ * (heatScale t)⁻¹) •
     baseD3Map v w ((heatScale t)⁻¹ • x)
 
-omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 @[simp] theorem heatD3Map_apply (t : ℝ) (v w x u : V) :
     heatD3Map t v w x u = heatD3 t u v w x := by
   simp [heatD3Map, heatD3]
 
-omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem heatD2_hasFDeriv {t : ℝ} (v w x : V) :
     HasFDerivAt (heatD2 t v w) (heatD3Map t v w x) x := by
   let S : V →L[ℝ] V := (heatScale t)⁻¹ • ContinuousLinearMap.id ℝ V
@@ -220,8 +212,6 @@ theorem heatD2_hasFDeriv {t : ℝ} (v w x : V) :
     ring
   exact h.congr_fderiv hderiv
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatD3Maj_nonneg {t : ℝ} (ht : 0 < t) (x : V) :
     0 ≤ heatD3Maj t x := by
   unfold heatD3Maj
@@ -235,8 +225,6 @@ theorem heatD3Maj_nonneg {t : ℝ} (ht : 0 < t) (x : V) :
       (inv_nonneg.mpr (heatScale_pos ht).le))
     (baseD3Maj_nonneg _)
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatD3_bound {t : ℝ} (ht : 0 < t) (u v w x : V) :
     ‖heatD3 t u v w x‖ ≤ ‖u‖ * ‖v‖ * ‖w‖ * heatD3Maj t x := by
   unfold heatD3 heatD3Maj
@@ -265,13 +253,14 @@ theorem heatD3_bound {t : ℝ} (ht : 0 < t) (u v w x : V) :
           (heatScale t)⁻¹ * (heatScale t)⁻¹ *
             baseD3Maj ((heatScale t)⁻¹ • x)) := by ring
 
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem heatD3Maj_int {t : ℝ} (ht : 0 < t) :
     Integrable (heatD3Maj t : V → ℝ) := by
   unfold heatD3Maj
   exact (baseD3Maj_int (V := V)).comp_smul
     (inv_ne_zero (heatScale_pos ht).ne') |>.const_mul _
 
-omit [Nontrivial V] in
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] in
 theorem integral_heatD3Maj {t : ℝ} (ht : 0 < t) :
     ∫ x : V, heatD3Maj t x =
       t⁻¹ * (heatScale t)⁻¹ * heatC3 V := by
@@ -294,6 +283,7 @@ theorem integral_heatD3Maj {t : ℝ} (ht : 0 < t) :
       field_simp [hr.ne']
     _ = t⁻¹ * (heatScale t)⁻¹ * ∫ x : V, baseD3Maj x := by rw [hscale]
 
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem integral_norm_D3 {t : ℝ} (ht : 0 < t) (u v w : V) :
     (∫ x : V, ‖heatD3 t u v w x‖) ≤
       ‖u‖ * ‖v‖ * ‖w‖ * t⁻¹ * (heatScale t)⁻¹ * heatC3 V := by
@@ -320,9 +310,7 @@ end ThirdDerivative
 section SecondTimeDerivative
 
 variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
-  [Nontrivial V]
+  [NormedAddCommGroup V] [InnerProductSpace ℝ V]
 
 def baseD2Dt (v w x : V) : ℝ :=
   -(((Module.finrank ℝ V : ℝ) + 2) / 2) * baseD2 v w x -
@@ -332,8 +320,6 @@ def baseD2DtMaj (x : V) : ℝ :=
   (((Module.finrank ℝ V : ℝ) + 2) / 2) * baseD2Maj x +
     (2 : ℝ)⁻¹ * ‖x‖ * baseD3Maj x
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem baseD2DtMaj_nonneg (x : V) : 0 ≤ baseD2DtMaj x := by
   unfold baseD2DtMaj
   exact add_nonneg
@@ -342,8 +328,6 @@ theorem baseD2DtMaj_nonneg (x : V) : 0 ≤ baseD2DtMaj x := by
       (mul_nonneg (by positivity) (norm_nonneg x))
       (baseD3Maj_nonneg x))
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem baseD2Dt_bound (v w x : V) :
     ‖baseD2Dt v w x‖ ≤ ‖v‖ * ‖w‖ * baseD2DtMaj x := by
   let c : ℝ := ((Module.finrank ℝ V : ℝ) + 2) / 2
@@ -365,6 +349,7 @@ theorem baseD2Dt_bound (v w x : V) :
     _ = ‖v‖ * ‖w‖ *
         (c * baseD2Maj x + (2 : ℝ)⁻¹ * ‖x‖ * baseD3Maj x) := by ring
 
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 private theorem baseD3First_int :
     Integrable (fun x : V => ‖x‖ * baseD3Maj x) := by
   have h4 := (gaussMoment_int (V := V) 4
@@ -384,6 +369,7 @@ private theorem baseD3First_int :
   rw [heq]
   exact h4.add h2
 
+variable [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 theorem baseD2DtMaj_int : Integrable (baseD2DtMaj : V → ℝ) := by
   have h0 := (baseD2Maj_int (V := V)).const_mul
     (((Module.finrank ℝ V : ℝ) + 2) / 2)
@@ -405,7 +391,7 @@ def heatD2DtMaj (t : ℝ) (x : V) : ℝ :=
   ((heatScale t) ^ Module.finrank ℝ V)⁻¹ * (t ^ 2)⁻¹ *
     baseD2DtMaj ((heatScale t)⁻¹ • x)
 
-omit [MeasurableSpace V] [BorelSpace V] in
+variable [FiniteDimensional ℝ V] [Nontrivial V] in
 theorem heatD2_time {t : ℝ} (ht : 0 < t) (v w x : V) :
     HasDerivAt (fun s : ℝ => heatD2 s v w x) (heatD2Dt t v w x) t := by
   let n := Module.finrank ℝ V
@@ -482,8 +468,6 @@ theorem heatD2_time {t : ℝ} (ht : 0 < t) (v w x : V) :
   exact (hprod.congr_deriv hderiv).congr_of_eventuallyEq <|
     Filter.Eventually.of_forall fun s => by rfl
 
-omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-omit [FiniteDimensional ℝ V] in
 theorem heatD2Dt_bound {t : ℝ} (ht : 0 < t) (v w x : V) :
     ‖heatD2Dt t v w x‖ ≤ ‖v‖ * ‖w‖ * heatD2DtMaj t x := by
   unfold heatD2Dt heatD2DtMaj

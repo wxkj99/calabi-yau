@@ -36,9 +36,9 @@ noncomputable def c3ReferenceCurvatureCovariantDerivativeInChart
     (s p q j k : Fin n) : ℂ :=
   let g₀ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun w ↦ ω₀.metricInChart x w
-  c3PartialZ (fun w ↦ chartCurvature g₀ w p q j k) z s -
-    ∑ a : Fin n, c3ChristoffelInChart g₀ z a s p * chartCurvature g₀ z a q j k -
-    ∑ a : Fin n, c3ChristoffelInChart g₀ z a s j * chartCurvature g₀ z p q a k
+  wirtingerDerivInChart (fun w ↦ chartCurvature g₀ w p q j k) z s -
+    ∑ a : Fin n, christoffelInChart g₀ z a s p * chartCurvature g₀ z a q j k -
+    ∑ a : Fin n, christoffelInChart g₀ z a s j * chartCurvature g₀ z p q a k
 
 omit [T2Space M] in
 /-- Uniform bound for the fifth-order components of `∇⁰R(g₀)` in all
@@ -71,7 +71,7 @@ theorem exists_uniform_c3ReferenceCurvatureCovariantDerivative_bound
   refine ⟨A, hA, ?_⟩
   intro x P hP s p q j k
   simpa only [c3FiveSlotFrameContraction, c3CovariantFourTensorZJet,
-    c3ReferenceCurvatureCovariantDerivativeInChart, c3PartialZ, chartPartialZComplex]
+    c3ReferenceCurvatureCovariantDerivativeInChart, wirtingerDerivInChart, chartPartialZComplex]
     using hglobal x P hP s p q j k
 
 end KahlerForm

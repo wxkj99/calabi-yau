@@ -126,10 +126,8 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 omit [T2Space M] [CompactSpace M] in
 /-- Differentiate an actual open-chart Ricci identity and replace the perturbed
 connection by the reference connection plus the connection difference. -/
-@[deprecated "unused hypothesis `hφ`; will be removed" (since := "2026-10-02")]
 theorem c3BochnerRicciDerivativeTerm_eq_error (ω₀ : KahlerForm n M)
-    {G φ : M → ℝ} (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
-    (hφ : ω₀.IsPotential φ) (x : M)
+    {G φ : M → ℝ} (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G) (x : M)
     (hcomponents : ∀ z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target,
       ∀ j l, c3RicciInChart (c3PerturbedMetricInChart ω₀ φ x) z j l =
         c3RicciInChart (ω₀.metricInChart x) z j l - c3ForcingHessianInChart G x z j l) :
@@ -138,7 +136,7 @@ theorem c3BochnerRicciDerivativeTerm_eq_error (ω₀ : KahlerForm n M)
   let z := e x
   let g₀ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ := fun w ↦ ω₀.metricInChart x w
   let gφ := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   let R : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → ℂ := c3RicciInChart g₀
   let H : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → ℂ :=
     fun w j l ↦ c3ForcingHessianInChart G x w j l
@@ -155,9 +153,9 @@ theorem c3BochnerRicciDerivativeTerm_eq_error (ω₀ : KahlerForm n M)
     filter_upwards [hnear] with w hw
     exact hcomponents w hw j l
   have hpartial (j l k : Fin n) :
-      c3PartialZ (fun w ↦ c3RicciInChart gφ w j l) z k =
-        c3PartialZ (fun w ↦ R w j l - H w j l) z k := by
-    unfold c3PartialZ
+      wirtingerDerivInChart (fun w ↦ c3RicciInChart gφ w j l) z k =
+        wirtingerDerivInChart (fun w ↦ R w j l - H w j l) z k := by
+    unfold wirtingerDerivInChart
     rw [hRicci j l |>.fderiv_eq (𝕜 := ℝ)]
   have hcenter : ∀ j l, c3RicciInChart gφ z j l = R z j l - H z j l :=
     fun j l ↦ hcomponents z hz j l
@@ -195,24 +193,24 @@ theorem c3BochnerRicciDerivativeTerm_eq_error (ω₀ : KahlerForm n M)
     exact (hH.contDiffAt ((isOpen_extChartAt_target x).mem_nhds hz)).differentiableAt
       (by norm_num)
   have hpartialSub (j l k : Fin n) :
-      c3PartialZ (fun w ↦ R w j l - H w j l) z k =
-        c3PartialZ (fun w ↦ R w j l) z k - c3PartialZ (fun w ↦ H w j l) z k := by
-    unfold c3PartialZ
+      wirtingerDerivInChart (fun w ↦ R w j l - H w j l) z k =
+        wirtingerDerivInChart (fun w ↦ R w j l) z k - wirtingerDerivInChart (fun w ↦ H w j l) z k := by
+    unfold wirtingerDerivInChart
     rw [fderiv_fun_sub (hRdiff j l) (hHdiff j l)]
     simp only [sub_apply]
     ring_nf
   have hGamma (r k j : Fin n) :
-      c3ChristoffelInChart gφ z r k j =
-        c3ChristoffelInChart g₀ z r k j + T z r k j := by
-    change c3ChristoffelInChart
+      christoffelInChart gφ z r k j =
+        christoffelInChart g₀ z r k j + T z r k j := by
+    change christoffelInChart
         (fun w ↦ ω₀.metricInChart x w +
           complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) w)
-        z r k j = c3ChristoffelInChart g₀ z r k j + T z r k j
-    dsimp [T, c3ConnectionDifferenceInChart, g₀]
+        z r k j = christoffelInChart g₀ z r k j + T z r k j
+    dsimp [T, connectionDifferenceInChart, g₀]
     ring
   have hCov (k j l : Fin n) :
-      c3PartialZ (fun w ↦ c3RicciInChart gφ w j l) z k -
-        ∑ r, c3ChristoffelInChart gφ z r k j * c3RicciInChart gφ z r l =
+      wirtingerDerivInChart (fun w ↦ c3RicciInChart gφ w j l) z k -
+        ∑ r, christoffelInChart gφ z r k j * c3RicciInChart gφ z r l =
       c3ReferenceCovariantTwoTensorZ ω₀ x R z k j l -
         c3ReferenceCovariantTwoTensorZ ω₀ x H z k j l -
           ∑ r, T z r k j * (R z r l - H z r l) := by

@@ -51,41 +51,6 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
-private theorem normalFrame_relativeTrace_jacobian_equiv
-    (ω₀ ω₁ : KahlerForm n M) (x : M) (F : YauNormalFrame ω₀ ω₁ x) :
-    ∃ A : EuclideanSpace ℂ (Fin n) ≃L[ℂ] EuclideanSpace ℂ (Fin n),
-      (A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)) =
-        fderiv ℂ F.map F.center := by
-  let A := fderiv ℂ F.map F.center
-  have hmatrix : (EuclideanSpace.clmMatrix A).det ≠ 0 := by
-    simpa [A, holomorphicJacobianMatrix] using F.jacobian_det_ne_zero
-  have hclmMatrix : EuclideanSpace.clmMatrix A =
-      LinearMap.toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
-        (EuclideanSpace.basisFun (Fin n) ℂ).toBasis A.toLinearMap := by
-    ext i j
-    simp [EuclideanSpace.clmMatrix, LinearMap.toMatrix_apply,
-      EuclideanSpace.basisFun_apply]
-  have hdetEq : LinearMap.det A.toLinearMap = (EuclideanSpace.clmMatrix A).det := by
-    calc
-      LinearMap.det A.toLinearMap =
-          Matrix.det (LinearMap.toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
-            (EuclideanSpace.basisFun (Fin n) ℂ).toBasis A.toLinearMap) :=
-        (LinearMap.det_toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
-          A.toLinearMap).symm
-      _ = (EuclideanSpace.clmMatrix A).det := by rw [← hclmMatrix]
-  have hdet : LinearMap.det A.toLinearMap ≠ 0 := fun h ↦ hmatrix (hdetEq ▸ h)
-  have hker : LinearMap.ker A.toLinearMap = ⊥ := by
-    by_contra hk
-    have hzero : LinearMap.det A.toLinearMap = 0 :=
-      (LinearMap.det_eq_zero_iff_ker_ne_bot).2 hk
-    exact hdet hzero
-  have hinj : Function.Injective A.toLinearMap := LinearMap.ker_eq_bot.mp hker
-  have hsurj : Function.Surjective A.toLinearMap :=
-    LinearMap.surjective_of_injective hinj
-  let eLin := LinearEquiv.ofBijective A.toLinearMap ⟨hinj, hsurj⟩
-  exact ⟨eLin.toContinuousLinearEquivOfContinuous
-    eLin.toLinearMap.continuous_of_finiteDimensional, rfl⟩
-
 private theorem relative_trace_eq_sum_of_unit_pullback
     (form₀ form₁ : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
     (A : EuclideanSpace ℂ (Fin n) ≃L[ℂ] EuclideanSpace ℂ (Fin n))
@@ -105,7 +70,7 @@ theorem normalFrame_relative_trace_eq_sums
     (ω₀ ω₁ : KahlerForm n M) (x : M) (F : YauNormalFrame ω₀ ω₁ x) :
     relTrace (ω₀ x) (ω₁ x) = ∑ j, F.eigenvalue j ∧
       relTrace (ω₁ x) (ω₀ x) = ∑ j, (F.eigenvalue j)⁻¹ := by
-  obtain ⟨A, hA⟩ := normalFrame_relativeTrace_jacobian_equiv ω₀ ω₁ x F
+  obtain ⟨A, hA⟩ := F.exists_jacobian_equiv
   let Aℝ := (A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)).restrictScalars ℝ
   have hcenter : F.map F.center = extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x :=
     F.center_eq_chart_center

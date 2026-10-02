@@ -10,9 +10,9 @@ Modified by: Ziyang Qin
 module
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.Permutation
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Coordinates.MultiKroneckerDelta
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.PredualBasis
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Split
-public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Reindexing.Domain
+public import CalabiYau.Mathlib.LinearAlgebra.Dual.PredualBasis
+public import CalabiYau.Mathlib.LinearAlgebra.Alternating.ShuffleSplit
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Alternating.DomCongr
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Composition
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Curry
 public import CalabiYau.Geometry.Manifold.Tensor.Product.Defs
@@ -22,8 +22,6 @@ public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Placement
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -105,87 +103,9 @@ theorem wedge_product_eq_alternatization [CharZero 𝕜]
   have h_eq := factorial_nsmul_wedge_product_eq_alternatization g h f v
   rw [← h_eq, ← Nat.cast_smul_eq_nsmul 𝕜, inv_smul_smul₀ h_ne]
 
-theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
-    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
-    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
-    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
-      (elementaryCovector b (Fin.addCases I J) :
-        M [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
-  obtain ⟨B, dual⟩ := exists_predual_basis b
-  apply ContinuousAlternatingMap.toAlternatingMap_injective
-  apply B.ext_alternating
-  intro v hv
-  change ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ v) =
-    elementaryCovector b (Fin.addCases I J) (B ∘ v)
-  rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v]
-  have lhs_eq := wedge_product_eq_alternatization (elementaryCovector b I)
-    (elementaryCovector b J) (ContinuousLinearMap.mul 𝕜 𝕜) (⇑B ∘ v)
-  rw [lhs_eq, MultilinearMap.alternatization_apply]
-  simp_rw [MultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.coe_coe,
-    tensorProductMap_apply, ContinuousLinearMap.mul_apply']
-  simp_rw [show ∀ (σ : Equiv.Perm (Fin (m' + p))),
-    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.castAdd p = ⇑B ∘ (v ∘ σ ∘ Fin.castAdd p) from fun _ => rfl,
-    show ∀ (σ : Equiv.Perm (Fin (m' + p))),
-    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.natAdd m' = ⇑B ∘ (v ∘ σ ∘ Fin.natAdd m') from fun _ => rfl,
-    elementaryCovector_basis_eval B b dual]
-  exact Fin.multiKroneckerDelta_cauchyBinet I J v
-
-theorem uncurryFin_smulRight_elementaryCovector
-    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
-    (a : Fin d) (I : Fin m → Fin d) :
-    uncurryFin ((b a).smulRight (elementaryCovector b I)) =
-      (elementaryCovector b (Fin.cons a I) :
-        M [⋀^Fin (m + 1)]→L[𝕜] 𝕜) := by
-  ext v
-  rw [uncurryFin_apply, elementaryCovector_apply, Matrix.det_succ_row_zero]
-  simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply,
-    smul_eq_mul, Fin.cons_zero]
-  apply Finset.sum_congr rfl
-  intro j _
-  let J : Fin (m + 1) → Fin d := Fin.cons a I
-  have hdet : (elementaryCovector b I) (j.removeNth v) =
-      (Matrix.submatrix (fun r c : Fin (m + 1) => (b (J r)) (v c))
-        Fin.succ j.succAbove).det := by
-    rw [elementaryCovector_apply]
-    rfl
-  rw [hdet]
-  simp [J, zsmul_eq_mul, mul_assoc]
-
-theorem formValuedLinearMap_eq_sum_smulRight_elementaryCovector
-    [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜]
-    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] 𝕜)) :
-    let d := Module.finrank 𝕜 M
-    let B : Module.Basis (Fin d) 𝕜 M := Module.finBasis 𝕜 M
-    let b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
-    let bm := elementaryCovectorBasis (k := m) B
-    g' = ∑ I : Fin m ↪o Fin d,
-      (((bm.coord I).comp g'.toLinearMap).toContinuousLinearMap).smulRight
-        (elementaryCovector b (I : Fin m → Fin d)) := by
-  dsimp
-  ext x v
-  rw [_root_.sum_apply]
-  simp only [ContinuousLinearMap.smulRight_apply]
-  rw [ContinuousAlternatingMap.sum_apply]
-  have hsum : g' x = ∑ I : Fin m ↪o Fin (Module.finrank 𝕜 M),
-      (elementaryCovectorBasis (k := m) (Module.finBasis 𝕜 M)).repr (g' x) I •
-        (elementaryCovectorBasis (k := m) (Module.finBasis 𝕜 M)) I :=
-    ((elementaryCovectorBasis (k := m) (Module.finBasis 𝕜 M)).sum_repr (g' x)).symm
-  rw [hsum]
-  simp only [ContinuousAlternatingMap.sum_apply, ContinuousAlternatingMap.smul_apply]
-  apply Finset.sum_congr rfl
-  intro I _
-  rw [elementaryCovectorBasis_apply]
-  rfl
-
 theorem wedge_product_mul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] 𝕜} {x : Fin (m + n) → M} :
     (g ∧[ContinuousLinearMap.mul 𝕜 𝕜] h) x =
     uncurryFinAdd ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
-  rfl
-
-theorem wedge_product_lsmul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] N}
-    {x : Fin (m + n) → M} :
-      (g ∧[ContinuousLinearMap.lsmul 𝕜 𝕜] h) x =
-      uncurryFinAdd ((ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
   rfl
 
 theorem add_wedge (g₁ g₂ : M [⋀^Fin m]→L[𝕜] N)
@@ -2311,24 +2231,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {M : Type*} [NormedAddCommGroup M] [NormedSpace 𝕜 M]
 
 open Fin
-
-lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[𝕜] 𝕜) :
-    domDomCongr finAddFlip (g∧[𝕜]g) = (g∧[𝕜]g) := by
-  ext x
-  rw[wedge_product_mul, uncurryFinAdd, domDomCongr_apply, domDomCongr_apply, uncurrySum_apply,
-    _root_.sum_apply, wedge_product_mul, uncurryFinAdd, domDomCongr_apply,
-    uncurrySum_apply, _root_.sum_apply]
-  conv_rhs => rw[← Equiv.sum_comp Equiv.Perm.finAddFlipEquivEqFin]
-  apply Finset.sum_congr rfl
-  rintro σ -
-  refine Quotient.inductionOn' σ fun σ₁ => ?_
-  rw [show Equiv.Perm.finAddFlipEquivEqFin (Quotient.mk'' σ₁) =
-      Quotient.mk'' (Equiv.Perm.sumCommPermEqFin σ₁) from rfl]
-  rw[uncurrySum_summand_eval]
-  rw[uncurrySum_summand_eval]
-  simp only [Equiv.Perm.sign_sumCommPerm_eqFin, Units.smul_def,
-    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply']
-  simp [Function.comp_def, finAddFlip, mul_comm]
 
 theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[𝕜] 𝕜) (m_odd : Odd m) (h2 : (2 : 𝕜) ≠ 0) :
     (g ∧[𝕜] g) = 0 := by

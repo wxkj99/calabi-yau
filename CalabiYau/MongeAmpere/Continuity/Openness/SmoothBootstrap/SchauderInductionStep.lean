@@ -23,10 +23,9 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+
 private theorem chartFirstDerivative_contDiffOn_pred
     {φ : M → ℝ} {k : ℕ} (hk : 3 ≤ k)
     (hregular : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) k φ)
@@ -50,7 +49,6 @@ private theorem chartFirstDerivative_contDiffOn_pred
     contDiffOn_const
   exact hfd.clm_apply hv
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartFirstDerivative_locally_bounded
     {φ : M → ℝ} {k : ℕ} (hk : 3 ≤ k)
     (hregular : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) k φ)
@@ -80,7 +78,6 @@ private theorem chartFirstDerivative_locally_bounded
   have habs : |u w| ≤ C := by simpa only [Real.norm_eq_abs] using hnorm
   exact habs.trans (Real.le_coe_toNNReal C)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem contMDiff_succ_of_local_chart_directional_derivatives
     {φ : M → ℝ} {k : ℕ} (hk : 1 ≤ k)
     (hregular : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) k φ)
@@ -177,6 +174,7 @@ private theorem contMDiff_succ_of_local_chart_directional_derivatives
     exact hreg
   exact contMDiff_of_locally_contMDiffOn hlocal
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem local_contDiffOn_of_higher_schauder_inputs
     {k : ℕ} (hk : 3 ≤ k) (hSch : InteriorSchauderEstimate n)
     {α lam K K₀ K₁ : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1) (hlam : 0 < lam)
@@ -205,6 +203,7 @@ section
 open scoped ComplexOrder Matrix.Norms.Elementwise
 open Matrix
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem det_contDiffOn_of_finite_entry_jets
     {n r : ℕ} {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {U : Set E} {B : E → Matrix (Fin n) (Fin n) ℂ}
@@ -213,7 +212,6 @@ private theorem det_contDiffOn_of_finite_entry_jets
   simp only [Matrix.det_apply]
   fun_prop
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartMetric_inverse_contDiffOn_pred_two
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hEquation : HasChartLogDetEquation ω₀ G φ)
@@ -300,7 +298,6 @@ private theorem chartMetric_inverse_contDiffOn_pred_two
   rw [hEq]
   exact hinvdet.mul (hadj i j)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartDirectionalForcing_contDiffOn_of_inverse_entries
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
@@ -355,7 +352,6 @@ private theorem chartDirectionalForcing_contDiffOn_of_inverse_entries
     simp [Matrix.mul_apply, Matrix.trace, Complex.reCLM_apply]
   exact (hHd.of_le (WithTop.coe_le_coe.mpr le_top)).sub htrace
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartLogDetEquation_linearized_finite
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hEquation : HasChartLogDetEquation ω₀ G φ)
@@ -431,6 +427,9 @@ section
 
 open Matrix Filter
 
+section
+
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 private theorem induction_complexHessian_entry_contDiffAt_one {n : ℕ}
     {u : EuclideanSpace ℂ (Fin n) → ℝ} {z : EuclideanSpace ℂ (Fin n)}
     (hu : ContDiffAt ℝ 3 u z) (j k : Fin n) :
@@ -797,6 +796,9 @@ private theorem induction_complexHessian_fderiv_directional {n : ℕ}
 
 end
 
+end
+
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem holderBoundOn_congr_of_isOpen
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -817,6 +819,7 @@ private theorem holderBoundOn_congr_of_isOpen
     rw [hjet m x hx, hjet m y hy]
     exact hg.2 x hx y hy
 
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The lower pass upgrades directional jets before reconstructing the second-pass inputs. -/
 private theorem higher_holder_inputs_of_finite_jets
     {n k : ℕ} (hk : 3 ≤ k) (hSch : InteriorSchauderEstimate n)
@@ -887,9 +890,9 @@ private theorem higher_holder_inputs_of_finite_jets
     refine ⟨V, C * (K₁ + K₀), hV, hzV, subset_closure.trans (hVU.trans hUt), ?_⟩
     simpa only [show k - 3 + 2 = k - 1 by omega] using hGain.2
   obtain ⟨WB, KB, hWB, hzWB, hWBt, hBH⟩ :=
-    locally_holder_metric_of_directional_derivatives hk hW hα₀ hα₁ f g hf hg hfirst z₀ hz
+    locally_holder_metric_of_directional_derivatives hk hW hα₁ f g hf hg hfirst z₀ hz
   obtain ⟨WI, KI, hWI, hzWI, hWIB, hIH⟩ :=
-    locally_holder_matrix_inverse hWB hα₀ hα₁ B
+    locally_holder_matrix_inverse hWB hα₁ B
       (fun i j ↦ (hB i j).mono hWBt)
       (fun w hw ↦ (hpos w (hWBt hw)).isUnit) hBH z₀ hzWB
   obtain ⟨UB, VB, lam, KL, K₀, KQ, hUB, hVB, hUBc, hVBc, hVBU, hUBt,
@@ -918,7 +921,6 @@ private theorem higher_holder_inputs_of_finite_jets
     (fun w hw ↦ hEll w (hUI hw).2.1),
     (fun i j ↦ (hI' i j).mono_set hUI), hQH⟩
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The finite-order Schauder passes supply common-domain Hölder control. The commutation identity uses genuine third-derivative symmetry; the remaining
 witness supplies the two finite-order Hölder passes. -/
 private theorem chartFirstDerivative_higher_holder_forcing_inputs
@@ -1018,7 +1020,6 @@ private theorem chartFirstDerivative_higher_holder_forcing_inputs
     (fun d ↦ chartDirectionalForcing_contDiffOn_of_inverse_entries ω₀ hG x hBA.2 d)
     hEq z₀ v hz₀ hU₀ hzU₀
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The first finite-order Schauder pass supplies the Hölder inputs for the second pass. -/
 private theorem chartFirstDerivative_higher_schauder_inputs
     (hSch : InteriorSchauderEstimate n)
@@ -1060,7 +1061,6 @@ private theorem chartFirstDerivative_higher_schauder_inputs
   exact ⟨U, V, lam, K, K₀, K₁, hU, hUt, hVc, hVU, hzV,
     hlam, hAU, hEll, hAH, hLu, hLuH, fun w hw ↦ huB w (hUU₀ hw)⟩
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The nonzero-direction gain uses a genuine `C²` Schauder input. -/
 private theorem chartFirstDerivative_local_contDiffOn_of_schauder_nonzero
     (hSch : InteriorSchauderEstimate n)
@@ -1095,7 +1095,6 @@ private theorem chartFirstDerivative_local_contDiffOn_of_schauder_nonzero
   exact local_contDiffOn_of_higher_schauder_inputs hk hSch hα₀ hα₁ hlam hU hVc hVU
     hzV A u hA (hC2.mono hUt) hEll hAH hLu hLuH huB
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The two finite-order Schauder passes give each directional derivative the required local
 regularity; their neighborhoods may depend on the direction. -/
 private theorem chartFirstDerivative_local_contDiffOn_of_schauder
@@ -1134,7 +1133,6 @@ private theorem chartFirstDerivative_local_contDiffOn_of_schauder
     exact chartFirstDerivative_local_contDiffOn_of_schauder_nonzero hSch ω₀ hG hφ
       hEquation hk hregular x z₀ v hz₀ hn hv hC2
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- Higher-order interior regularity: for `k ≥ 3`, a `C^k` positive solution with smooth
 right-hand side is `C^{k+1}`.  This hypothesis ensures the differentiated unknowns are already `C²`
 Schauder inputs. -/

@@ -47,30 +47,6 @@ lemma modelInnerAt_symm
       modelInnerAt (I := I) (M := M) g x w v :=
   g.symm x _ _
 
-omit [Module.Finite ℝ E] in
-lemma modelInnerAt_pos_of_ne_zero
-    (g : SmoothRiemannianMetric I M) (x : M)
-    {v : E} (hv : v ≠ 0) :
-    0 < modelInnerAt (I := I) (M := M) g x v v :=
-  g.pos x _ ((tangentSpaceModelContinuousLinearEquiv (I := I) x).symm.injective.ne hv)
-
-omit [Module.Finite ℝ E] in
-lemma modelInnerAt_nonneg
-    (g : SmoothRiemannianMetric I M) (x : M) (v : E) :
-    0 ≤ modelInnerAt (I := I) (M := M) g x v v := by
-  rcases eq_or_ne v 0 with rfl | hv
-  · simp [modelInnerAt, map_zero]
-  · exact le_of_lt (modelInnerAt_pos_of_ne_zero (I := I) (M := M) g x hv)
-
-omit [Module.Finite ℝ E] in
-lemma modelInnerAt_eq_zero_iff
-    (g : SmoothRiemannianMetric I M) (x : M) (v : E) :
-    modelInnerAt (I := I) (M := M) g x v v = 0 ↔ v = 0 := by
-  refine ⟨fun h => ?_, fun h => by simp [modelInnerAt, h]⟩
-  by_contra hv
-  have hpos := modelInnerAt_pos_of_ne_zero (I := I) (M := M) g x hv
-  exact absurd h (ne_of_gt hpos)
-
 def gramMatrixAt (g : SmoothRiemannianMetric I M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i j =>
@@ -202,19 +178,6 @@ lemma gramMatrixAt_inv_eigenvalues_pos
   have hpd : ((gramMatrixAt (I := I) (M := M) g x)⁻¹).PosDef :=
     (gramMatrixAt_posDef (I := I) (M := M) g x).inv
   exact hpd.eigenvalues_pos k
-
-lemma gramMatrixAt_isUnit
-    (g : SmoothRiemannianMetric I M) (x : M) :
-    IsUnit (gramMatrixAt (I := I) (M := M) g x) :=
-  (gramMatrixAt_posDef (I := I) (M := M) g x).isUnit
-
-lemma gramMatrixAt_inv_mul_self
-    (g : SmoothRiemannianMetric I M) (x : M) :
-    (gramMatrixAt (I := I) (M := M) g x)⁻¹ *
-        gramMatrixAt (I := I) (M := M) g x = 1 := by
-  refine Matrix.nonsing_inv_mul _ ?_
-  exact Matrix.isUnit_iff_isUnit_det _ |>.mp
-    (gramMatrixAt_isUnit (I := I) (M := M) g x)
 
 noncomputable def separableFormAt
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ) (v : Fin r → E) :
@@ -476,7 +439,7 @@ private lemma lowerAllUpperIndicesML_norm_bound
     _ = (‖T‖ * ∏ i : Fin r, ‖modelInnerAt (I := I) (M := M) g x‖) *
           ∏ j : Fin (r + s), ‖v j‖ := by rw [← hsplit]
 
-private noncomputable def lowerAllUpperIndicesCMLM
+noncomputable def lowerAllUpperIndicesCMLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
     ContinuousMultilinearMap ℝ (fun _ : Fin (r + s) => E) ℝ :=
@@ -504,7 +467,7 @@ private lemma lowerAllUpperIndicesCMLM_zero
   rw [lowerAllUpperIndicesCMLM_apply, zero_apply]
   rfl
 
-private lemma lowerAllUpperIndicesCMLM_add
+lemma lowerAllUpperIndicesCMLM_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T₁ T₂ : TensorRSModel r s ℝ E) :
     lowerAllUpperIndicesCMLM (I := I) (M := M) g r s x (T₁ + T₂) =
@@ -514,7 +477,7 @@ private lemma lowerAllUpperIndicesCMLM_add
   intro v
   simp [add_apply]
 
-private lemma lowerAllUpperIndicesCMLM_smul
+lemma lowerAllUpperIndicesCMLM_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (T : TensorRSModel r s ℝ E) :
     lowerAllUpperIndicesCMLM (I := I) (M := M) g r s x (c • T) =
@@ -523,7 +486,7 @@ private lemma lowerAllUpperIndicesCMLM_smul
   intro v
   simp [smul_apply, smul_apply]
 
-private noncomputable def lowerAllUpperIndicesAddHom
+noncomputable def lowerAllUpperIndicesAddHom
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →+
       ContinuousMultilinearMap ℝ (fun _ : Fin (r + s) => E) ℝ where
@@ -533,7 +496,7 @@ private noncomputable def lowerAllUpperIndicesAddHom
   map_add' := fun T₁ T₂ =>
     lowerAllUpperIndicesCMLM_add (I := I) (M := M) g r s x T₁ T₂
 
-private lemma lowerAllUpperIndicesCMLM_norm_bound
+lemma lowerAllUpperIndicesCMLM_norm_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
     ‖lowerAllUpperIndicesCMLM (I := I) (M := M) g r s x T‖
@@ -577,249 +540,6 @@ lemma lowerAllUpperIndices_apply
           (fun i : Fin r => v (Fin.castAdd s i)))
         (fun j : Fin s => v (Fin.natAdd r j)) :=
   lowerAllUpperIndicesCMLM_apply (I := I) (M := M) g r s x T v
-
-private lemma separableFormAt_basis_apply
-    (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ)
-    (idx jdx : Fin r → Fin (Module.finrank ℝ E)) :
-    separableFormAt (I := I) (M := M) g x r
-        (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k))
-        (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) =
-      ∏ k : Fin r,
-        gramMatrixAt (I := I) (M := M) g x (idx k) (jdx k) := by
-  rw [separableFormAt_apply]
-  refine Finset.prod_congr rfl ?_
-  intro k _
-  rw [gramMatrixAt_apply]
-
-private lemma lower_at_basis_pair_zero_of_lower_zero
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
-    (T : TensorRSModel r s ℝ E)
-    (hT : lowerAllUpperIndices (I := I) (M := M) g r s x T = 0)
-    (idx : Fin r → Fin (Module.finrank ℝ E))
-    (jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    (T (separableFormAt (I := I) (M := M) g x r
-          (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k))))
-        (fun j : Fin s => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx j)) = 0 := by
-  have hzero :
-      lowerAllUpperIndices (I := I) (M := M) g r s x T
-          (Fin.append
-            (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k))
-            (fun j : Fin s => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx j))) = 0 := by
-    rw [hT]
-    rfl
-  rw [lowerAllUpperIndices_apply] at hzero
-  have hcast :
-      (fun k : Fin r =>
-          Fin.append
-            (fun k' : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k'))
-            (fun j' : Fin s => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx j'))
-            (Fin.castAdd s k)) =
-        (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k)) := by
-    funext k
-    exact Fin.append_left _ _ k
-  have hnat :
-      (fun j : Fin s =>
-          Fin.append
-            (fun k' : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k'))
-            (fun j' : Fin s => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx j'))
-            (Fin.natAdd r j)) =
-        (fun j : Fin s => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx j)) := by
-    funext j
-    exact Fin.append_right _ _ j
-  rw [hcast, hnat] at hzero
-  exact hzero
-
-private lemma cmlm_eq_zero_of_basis_zero
-    {p : ℕ} (S : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
-    (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
-      S (fun k : Fin p => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ k)) = 0) :
-    S = 0 := by
-  apply ContinuousMultilinearMap.toMultilinearMap_injective
-  refine Module.Basis.ext_multilinear
-    (e := fun _ : Fin p => CalabiYau.Tensor.Coordinates.chartModelBasis E) ?_
-  intro v
-  rw [ContinuousMultilinearMap.toMultilinearMap_zero,
-    zero_apply]
-  exact h v
-
-private lemma tensor0SModel_ext_basis
-    {p : ℕ} (S₁ S₂ : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
-    (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
-      S₁ (fun k : Fin p => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ k)) =
-        S₂ (fun k : Fin p => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (φ k))) :
-    S₁ = S₂ := by
-  apply ContinuousMultilinearMap.toMultilinearMap_injective
-  refine Module.Basis.ext_multilinear
-    (e := fun _ : Fin p => CalabiYau.Tensor.Coordinates.chartModelBasis E) ?_
-  intro v
-  exact h v
-
-theorem lowerAllUpperIndices_injective
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
-    Function.Injective
-      (lowerAllUpperIndices (I := I) (M := M) g r s x) := by
-  classical
-  rw [injective_iff_map_eq_zero]
-  intro T hT
-  let n : ℕ := Module.finrank ℝ E
-  refine ContinuousLinearMap.ext ?_
-  intro α
-  refine cmlm_eq_zero_of_basis_zero (E := E) (p := s) (T α) ?_
-  intro kdx
-  have hTβ : ∀ idx : Fin r → Fin n,
-      (T (separableFormAt (I := I) (M := M) g x r
-            (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k))))
-          (fun j : Fin s => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (kdx j)) = 0 :=
-    fun idx => lower_at_basis_pair_zero_of_lower_zero
-      (I := I) (M := M) g r s x T hT idx kdx
-  let Ginv : Matrix (Fin n) (Fin n) ℝ :=
-    (gramMatrixAt (I := I) (M := M) g x)⁻¹
-  let G : Matrix (Fin n) (Fin n) ℝ :=
-    gramMatrixAt (I := I) (M := M) g x
-  have hGinvG : Ginv * G = 1 := by
-    change (gramMatrixAt (I := I) (M := M) g x)⁻¹ *
-        gramMatrixAt (I := I) (M := M) g x = 1
-    exact gramMatrixAt_inv_mul_self (I := I) (M := M) g x
-  let c : (Fin r → Fin n) → ℝ := fun idx =>
-    ∑ jdx : Fin r → Fin n,
-      α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-        ∏ k : Fin r, Ginv (jdx k) (idx k)
-  have hspan :
-      α = ∑ idx : Fin r → Fin n, c idx •
-        separableFormAt (I := I) (M := M) g x r
-          (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k)) := by
-    refine tensor0SModel_ext_basis _ _ ?_
-    intro kdx'
-    rw [sum_apply]
-    have hRHS_step :
-        (∑ idx : Fin r → Fin n,
-          (c idx • separableFormAt (I := I) (M := M) g x r
-            (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (idx k)))
-            (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (kdx' k)))
-          = ∑ idx : Fin r → Fin n,
-            c idx * ∏ k : Fin r, G (idx k) (kdx' k) := by
-      refine Finset.sum_congr rfl ?_
-      intro idx _
-      rw [smul_apply, smul_eq_mul,
-        separableFormAt_basis_apply]
-    rw [hRHS_step]
-    have hRHS_expand :
-        ∑ idx : Fin r → Fin n,
-            c idx * ∏ k : Fin r, G (idx k) (kdx' k)
-          = ∑ jdx : Fin r → Fin n,
-            α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-              ∑ idx : Fin r → Fin n,
-                (∏ k : Fin r, Ginv (jdx k) (idx k)) *
-                  ∏ k : Fin r, G (idx k) (kdx' k) := by
-      have h1 : ∀ idx : Fin r → Fin n,
-          c idx * ∏ k : Fin r, G (idx k) (kdx' k)
-            = ∑ jdx : Fin r → Fin n,
-              α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-                ((∏ k : Fin r, Ginv (jdx k) (idx k)) *
-                  ∏ k : Fin r, G (idx k) (kdx' k)) := by
-        intro idx
-        change (∑ jdx : Fin r → Fin n,
-              α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-                ∏ k : Fin r, Ginv (jdx k) (idx k)) *
-              ∏ k : Fin r, G (idx k) (kdx' k) = _
-        rw [Finset.sum_mul]
-        refine Finset.sum_congr rfl ?_
-        intro jdx _
-        ring
-      rw [Finset.sum_congr rfl (fun idx _ => h1 idx)]
-      rw [Finset.sum_comm]
-      refine Finset.sum_congr rfl ?_
-      intro jdx _
-      rw [Finset.mul_sum]
-    rw [hRHS_expand]
-    have hcombine : ∀ jdx : Fin r → Fin n,
-        ∑ idx : Fin r → Fin n,
-            (∏ k : Fin r, Ginv (jdx k) (idx k)) *
-              ∏ k : Fin r, G (idx k) (kdx' k)
-          = ∑ idx : Fin r → Fin n,
-            ∏ k : Fin r, Ginv (jdx k) (idx k) * G (idx k) (kdx' k) := by
-      intro jdx
-      refine Finset.sum_congr rfl ?_
-      intro idx _
-      rw [← Finset.prod_mul_distrib]
-    have hfubini : ∀ jdx : Fin r → Fin n,
-        ∑ idx : Fin r → Fin n,
-            ∏ k : Fin r, Ginv (jdx k) (idx k) * G (idx k) (kdx' k)
-          = ∏ k : Fin r,
-            ∑ ik : Fin n, Ginv (jdx k) ik * G ik (kdx' k) := by
-      intro jdx
-      rw [Fintype.prod_sum (κ := fun _ : Fin r => Fin n)
-          (f := fun k ik => Ginv (jdx k) ik * G ik (kdx' k))]
-    have hkron : ∀ jdx : Fin r → Fin n, ∀ k : Fin r,
-        ∑ ik : Fin n, Ginv (jdx k) ik * G ik (kdx' k)
-          = (1 : Matrix (Fin n) (Fin n) ℝ) (jdx k) (kdx' k) := by
-      intro jdx k
-      have h := hGinvG
-      have hentry : (Ginv * G) (jdx k) (kdx' k) =
-          (1 : Matrix (Fin n) (Fin n) ℝ) (jdx k) (kdx' k) := by
-        rw [h]
-      rw [← hentry]
-      rw [Matrix.mul_apply]
-    have hone_pi : ∀ jdx : Fin r → Fin n,
-        ∏ k : Fin r,
-            (1 : Matrix (Fin n) (Fin n) ℝ) (jdx k) (kdx' k)
-          = if jdx = kdx' then 1 else 0 := by
-      intro jdx
-      simp only [Matrix.one_apply]
-      by_cases hjk : jdx = kdx'
-      · subst hjk
-        simp
-      · rw [if_neg hjk]
-        have hjk' : ∃ k : Fin r, jdx k ≠ kdx' k := Function.ne_iff.mp hjk
-        obtain ⟨k₀, hk₀⟩ := hjk'
-        refine Finset.prod_eq_zero (Finset.mem_univ k₀) ?_
-        rw [if_neg hk₀]
-    have hsimplify :
-        ∑ jdx : Fin r → Fin n,
-            α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-              ∑ idx : Fin r → Fin n,
-                (∏ k : Fin r, Ginv (jdx k) (idx k)) *
-                  ∏ k : Fin r, G (idx k) (kdx' k)
-          = α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (kdx' k)) := by
-      have hrewrite : ∀ jdx : Fin r → Fin n,
-          α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-              ∑ idx : Fin r → Fin n,
-                (∏ k : Fin r, Ginv (jdx k) (idx k)) *
-                  ∏ k : Fin r, G (idx k) (kdx' k)
-            = α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-              if jdx = kdx' then (1 : ℝ) else 0 := by
-        intro jdx
-        rw [hcombine jdx, hfubini jdx]
-        congr 1
-        rw [Finset.prod_congr rfl (fun k _ => hkron jdx k)]
-        exact hone_pi jdx
-      rw [Finset.sum_congr rfl (fun jdx _ => hrewrite jdx)]
-      have hsum :
-          ∑ jdx : Fin r → Fin n,
-              α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)) *
-                (if jdx = kdx' then (1 : ℝ) else 0)
-            = ∑ jdx : Fin r → Fin n,
-              if jdx = kdx' then
-                α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k))
-              else 0 := by
-        refine Finset.sum_congr rfl ?_
-        intro jdx _
-        by_cases hjk : jdx = kdx'
-        · subst hjk; simp
-        · simp [hjk]
-      rw [hsum]
-      have h := Finset.sum_ite_eq' Finset.univ kdx'
-        (fun jdx => α (fun k : Fin r => (CalabiYau.Tensor.Coordinates.chartModelBasis E) (jdx k)))
-      rw [h, if_pos (Finset.mem_univ _)]
-    rw [hsimplify]
-  rw [hspan]
-  rw [map_sum]
-  rw [sum_apply]
-  refine Finset.sum_eq_zero ?_
-  intro idx _
-  rw [ContinuousLinearMap.map_smul, smul_apply,
-    smul_eq_mul]
-  rw [hTβ idx, mul_zero]
 
 end CalabiYau.L2
 

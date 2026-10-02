@@ -58,7 +58,7 @@ theorem holderBoundedInCharts_of_fixedCoverBound (cover : CompactChartCover E M)
   have hlocal (a : ι) : ∃ C : ℝ≥0, HolderBoundOn 2 α C (patch a) (f ∘ e.symm) :=
     (hW a.1).2.2.2
   obtain ⟨C, hC⟩ :=
-    exists_holderBoundOn_of_finite_compact_patch hα hK patch hpatch hcover hlocal
+    exists_holderBoundOn_of_finite_compact_patch hK patch hcover hlocal
   refine ⟨C, ?_⟩
   intro g hg
   have hgf : g = f := Set.mem_singleton_iff.mp hg

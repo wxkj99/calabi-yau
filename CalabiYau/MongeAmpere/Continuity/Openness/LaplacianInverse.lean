@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
 public import CalabiYau.Geometry.Kahler.Poisson
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.GlobalSchauder
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.ForwardBound
 public import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.PoissonInverse
@@ -33,57 +33,6 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 /- The smooth Poisson solver becomes an inverse on the mean-zero subspace after fixing its
 constant ambiguity.  This is the algebraic part of the linearized-operator argument; Hölder
 boundedness and completeness are still needed before applying the Banach-space IFT. -/
-private theorem existsUnique_meanZero_laplacian_solution [Nonempty M]
-    (ω₁ : KahlerForm n M) (hPoisson : ω₁.PoissonSolvable) {f : M → ℝ}
-    (hf : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ f)
-    (hfm : ∫ x, f x ∂ω₁.volume = 0) :
-    ∃! u : M → ℝ,
-      ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u ∧
-        (∫ x, u x ∂ω₁.volume = 0) ∧ ω₁.laplacian u = f := by
-  obtain ⟨u₀, hu₀, hlap₀⟩ := hPoisson f hf hfm
-  have hvol : 0 < ω₁.volume.real univ := by
-    have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₁.volume := by
-      simp
-    simp
-  have hu₀int : Integrable u₀ ω₁.volume :=
-    hu₀.continuous.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace u₀)
-  let c : ℝ := (∫ x, u₀ x ∂ω₁.volume) / ω₁.volume.real univ
-  let u : M → ℝ := fun x ↦ u₀ x - c
-  have hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u := by
-    dsimp [u]
-    exact hu₀.sub contMDiff_const
-  have hum : ∫ x, u x ∂ω₁.volume = 0 := by
-    rw [show u = fun x ↦ u₀ x - c from rfl, integral_sub hu₀int (integrable_const c)]
-    rw [integral_const]
-    dsimp [c]
-    field_simp [ne_of_gt hvol]
-    ring
-  have hulap : ω₁.laplacian u = f := by
-    rw [show u = fun x ↦ u₀ x - c from rfl,
-      show (fun x ↦ u₀ x - c) = fun x ↦ u₀ x + (-c) from by funext x; ring,
-      ω₁.laplacian_add_const (-c)]
-    exact hlap₀
-  refine ⟨u, ⟨hu, hum, hulap⟩, ?_⟩
-  intro v hv
-  have hlapEq : ω₁.laplacian v = ω₁.laplacian u := by rw [hv.2.2, hulap]
-  obtain ⟨d, hd⟩ := ω₁.eq_add_const_of_laplacian_eq hu hv.1 hlapEq.symm
-  have uint : Integrable u ω₁.volume := by
-    rw [show u = fun x ↦ u₀ x - c from rfl]
-    exact hu₀int.sub (integrable_const c)
-  have hintEq : ∫ x, v x ∂ω₁.volume = ∫ x, u x ∂ω₁.volume +
-      ∫ _ : M, d ∂ω₁.volume := by
-    calc
-      ∫ x, v x ∂ω₁.volume = ∫ x, u x + d ∂ω₁.volume := by
-        apply integral_congr_ae
-        filter_upwards [] with x
-        exact hd x
-      _ = _ := integral_add uint (integrable_const d)
-  have hdzero : d = 0 := by
-    have hmul : d * ω₁.volume.real univ = 0 := by
-      simpa [hv.2.1, hum, integral_const, smul_eq_mul, mul_comm] using hintEq
-    exact (mul_eq_zero.mp hmul).resolve_right (ne_of_gt hvol)
-  funext x
-  rw [hd x, hdzero, add_zero]
 
 /-- The Laplacian extends to a continuous linear equivalence between the mean-zero little Hölder
 spaces. -/
@@ -213,9 +162,9 @@ theorem exists_laplacian_equiv (ω₁ : KahlerForm n M) (α : ℝ≥0)
     have hGlobal := exists_global_meanZero_laplacian_holder_bound
       ω₁ P.finiteChartCover α hα₀ hα₁ hSch
     have hForward := exists_forward_laplacian_holder_bound
-      ω₁ P.finiteChartCover α hα₀ hα₁
+      ω₁ P.finiteChartCover α hα₁
     have hPoissonInverse := exists_bounded_smooth_meanZero_poisson_inverse
-      ω₁ P.finiteChartCover α hα₀ hα₁ hSch hPoisson hGlobal
+      ω₁ P.finiteChartCover α hPoisson hGlobal
     have hEvalC2CLM := littleHolderMeanZeroEvaluationC2CLM_injective
       ω₁ P.finiteChartCover α P.normedDataC2
     have hEvalC0CLM := littleHolderMeanZeroEvaluationC0CLM_injective
@@ -231,7 +180,7 @@ theorem exists_laplacian_equiv (ω₁ : KahlerForm n M) (α : ℝ≥0)
       ext x
       exact congrFun huv x
     obtain ⟨A, hAeval⟩ := exists_completed_forward_laplacian
-      ω₁ α hα₀ hα₁ hForward hSmoothDense hvol
+      ω₁ α hForward hvol
     obtain ⟨B, hBA, hAB⟩ := exists_completed_poisson_inverse_laws
       ω₁ α hEvalC2 hEvalC0 hPoissonInverse A hAeval hSmoothDense hvol
     let e : P.C2 ≃ₗ[ℝ] P.C0 := {

@@ -29,6 +29,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] in
 /-- Uniform control of the differentiated-Ricci contraction alone. This
 retains the connection correction and requires third, not just second, derivatives of `G`. -/
 theorem exists_uniform_c3BochnerRicciDerivative_bound (ω₀ : KahlerForm n M)
@@ -49,13 +50,13 @@ theorem exists_uniform_c3BochnerRicciDerivative_bound (ω₀ : KahlerForm n M)
   obtain ⟨H, hH, hforcing⟩ := exists_uniform_c3ForcingFrameBound ω₀ (Prod.fst '' S) hSmooth hG
   obtain ⟨K, hK, hcurv⟩ := ω₀.exists_uniform_reference_curvature_component_bound
   obtain ⟨A, hA, hderiv⟩ := ω₀.exists_uniform_c3ReferenceCurvatureCovariantDerivative_bound
-  have hricci := c3ReferenceRicciFrameBound_of_curvature ω₀ K A hK hA hcurv hderiv
+  have hricci := referenceRicciFrameBound_of_curvature ω₀ K A hK hA hcurv hderiv
   obtain ⟨C, hC, hbound⟩ := exists_uniform_c3RicciDerivativeError_bound ω₀ S
     (fun p hp ↦ (hS p hp).2.1) hMetric ((n : ℝ) * (K + A)) H (by positivity) hH hricci
     (fun p hp ↦ hforcing p.1 ⟨p, hp, rfl⟩)
   refine ⟨C, hC, ?_⟩
   intro p hp x
-  rw [c3BochnerRicciDerivativeTerm_eq_error ω₀ (hS p hp).1 (hS p hp).2.1 x
+  rw [c3BochnerRicciDerivativeTerm_eq_error ω₀ (hS p hp).1 x
     (fun z hz j l ↦ c3RicciInChart_perturb_eq_of_solvesMongeAmpere ω₀
       (hS p hp).1 (hS p hp).2 x hz j l)]
   exact hbound p hp x

@@ -6,7 +6,7 @@ public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Variational
 public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Variational.ArbitraryTest
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFromDom
 public import CalabiYau.Analysis.Elliptic.Operator.ChartMeasureEquiv
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 
 @[expose] public section
 
@@ -160,16 +160,6 @@ private lemma chartPulledIntegralWeight_tsupport_subset
   refine closure_minimal
     (chartPulledIntegralWeight_support_subset (I := I) (M := M) g α θ) ?_
   exact (chartSourcePreimage_isCompact (I := I) (M := M) α hθ_cs hθ_support).isClosed
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
-private lemma chartPulledIntegralWeight_hasCompactSupport
-    (g : SmoothRiemannianMetric I M) (α : M) {θ : EuclN → ℝ}
-    (hθ_cs : HasCompactSupport θ)
-    (hθ_support : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    HasCompactSupport (chartPulledIntegralWeight (I := I) (M := M) g α θ) :=
-  HasCompactSupport.of_support_subset_isCompact
-    (chartSourcePreimage_isCompact (I := I) (M := M) α hθ_cs hθ_support)
-    (chartPulledIntegralWeight_support_subset (I := I) (M := M) g α θ)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_tsupport_subset_chartSource

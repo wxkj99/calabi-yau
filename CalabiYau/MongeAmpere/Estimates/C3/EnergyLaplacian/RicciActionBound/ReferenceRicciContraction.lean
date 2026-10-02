@@ -32,7 +32,7 @@ private theorem referenceRicciZero_frame_trace {n : ℕ} {M : Type*}
     [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
     (ω₀ : KahlerForm n M) (x : M)
     (P : Matrix (Fin n) (Fin n) ℂ)
-    (hP : referenceOrthonormalFrameMatrix ω₀ x P) (j l : Fin n) :
+    (hP : IsReferenceOrthonormalFrame ω₀ x P) (j l : Fin n) :
     c3TwoCovariantFrame P
       (c3RicciInChart (ω₀.metricInChart x)
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)) j l =
@@ -88,7 +88,7 @@ omit [T2Space M] in
 frame, uniformly in the point. -/
 theorem exists_uniform_referenceRicciZero_frame_component_bound (ω₀ : KahlerForm n M) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ x U,
-      referenceOrthonormalFrameMatrix ω₀ x U →
+      IsReferenceOrthonormalFrame ω₀ x U →
         ∀ j l,
           ‖c3TwoCovariantFrame U
             (c3RicciInChart (ω₀.metricInChart x)

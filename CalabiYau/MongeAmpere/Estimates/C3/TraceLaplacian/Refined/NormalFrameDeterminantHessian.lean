@@ -30,11 +30,11 @@ private theorem c3RefinedTrace_logDet_diagonal_jet {n : ℕ}
     (hHerm : ∀ᶠ w in 𝓝 z, (F w).IsHermitian)
     (hdiag : F z = Matrix.diagonal (fun j ↦ (lam j : ℂ)))
     (hlam : ∀ j, 0 < lam j) (p : Fin n) :
-    (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
       (fun v ↦ (Real.log ((F v).det.re) : ℂ)) w p) z p).re =
-      (∑ j, (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+      (∑ j, (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
         (fun v ↦ F v j j) w p) z p).re / lam j) -
-      ∑ j, ∑ k, ‖c3PartialZ (fun w ↦ F w j k) z p‖ ^ (2 : ℕ) /
+      ∑ j, ∑ k, ‖wirtingerDerivInChart (fun w ↦ F w j k) z p‖ ^ (2 : ℕ) /
         (lam j * lam k) := by
   have hreg : ∀ j k, ContDiffAt ℝ 2 (fun w ↦ F w j k) z :=
     fun j k ↦ (hF j k).of_le
@@ -47,11 +47,11 @@ private theorem c3RefinedTrace_reference_logDet_jet {n : ℕ}
     (z : EuclideanSpace ℂ (Fin n))
     (hg : ∀ i j, ContDiffAt ℝ ∞ (fun w ↦ g w i j) z)
     (hNormal : g z = 1)
-    (hFirst : ∀ i j p, c3PartialZ (fun w ↦ g w i j) z p = 0)
+    (hFirst : ∀ i j p, wirtingerDerivInChart (fun w ↦ g w i j) z p = 0)
     (hLocal : ∃ U : Set (EuclideanSpace ℂ (Fin n)),
       IsOpen U ∧ z ∈ U ∧ ∀ w ∈ U, g w = (g w).conjTranspose)
     (p : Fin n) :
-    (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
       (fun v ↦ (Real.log ((g v).det.re) : ℂ)) w p) z p).re =
       ∑ j, RCLike.re (c3RefinedTraceMatrixMixedPartial g z p p j j) := by
   obtain ⟨U, hU, hz, hHerm⟩ := hLocal
@@ -234,7 +234,7 @@ private theorem c3RefinedTrace_complexHessian_sub {n : ℕ}
 private theorem c3RefinedTrace_mixed_wirtinger_realpart_eq_hessian {n : ℕ}
     (a : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (ha : ContDiffAt ℝ 2 a z) (p : Fin n) :
-    (c3PartialZ (fun w ↦ c3RefinedTracePartialBar a w p) z p).re =
+    (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar a w p) z p).re =
       (complexHessian (fun w ↦ (a w).re) z p p).re := by
   let ep : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single p 1
   have ha1 : ContDiffAt ℝ 1 (fderiv ℝ a) z := ha.fderiv_right (m := 1) (by norm_num)
@@ -274,7 +274,7 @@ private theorem c3RefinedTrace_mixed_wirtinger_realpart_eq_hessian {n : ℕ}
   have hq : ContDiffAt ℝ 2 (fun w ↦ (a w).re) z := by
     change ContDiffAt ℝ 2 (RCLike.re ∘ a) z
     exact (RCLike.reCLM.contDiff.contDiffAt.comp z ha)
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [hpartial ep, hpartial (Complex.I • ep), complexHessian_apply hq p p]
   simp only [div_eq_mul_inv]
   have hsymm := ha.isSymmSndFDerivAt (by norm_num [minSmoothness])
@@ -319,10 +319,10 @@ private theorem c3RefinedTrace_local_Gjet_from_log_equation {n : ℕ}
       ∀ w ∈ U, g w = (g w).conjTranspose ∧ h w = (h w).conjTranspose ∧
         (h w).det = Complex.exp (G w) * (g w).det)
     (p : Fin n) :
-    (c3PartialZ (fun w ↦ c3RefinedTracePartialBar G w p) z p).re =
-      (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar G w p) z p).re =
+      (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
         (fun v ↦ (Real.log ((h v).det.re) : ℂ)) w p) z p).re -
-      (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+      (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
         (fun v ↦ (Real.log ((g v).det.re) : ℂ)) w p) z p).re := by
   have hEq := c3RefinedTrace_local_logdet_equation g h G z lam hg hh
     hNormal hDiagonal hPositive hLocal
@@ -351,42 +351,13 @@ private theorem c3RefinedTrace_local_Gjet_from_log_equation {n : ℕ}
   rw [hReG, hHessEq, hSub, hfJet, hgJet]
   simp [Complex.sub_re]
 
-private theorem c3RefinedTrace_local_mixed_Gjet_eq_logdet_difference {n : ℕ}
-    (G : EuclideanSpace ℂ (Fin n) → ℂ)
-    (f g : EuclideanSpace ℂ (Fin n) → ℝ)
-    (z : EuclideanSpace ℂ (Fin n))
-    (hG : ContDiffAt ℝ 2 G z) (hf : ContDiffAt ℝ 2 f z) (hg : ContDiffAt ℝ 2 g z)
-    (hEq : (fun w ↦ (G w).re) =ᶠ[𝓝 z] (fun w ↦ f w - g w))
-    (p : Fin n) :
-    (c3PartialZ (fun w ↦ c3RefinedTracePartialBar G w p) z p).re =
-      (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
-        (fun v ↦ (f v : ℂ)) w p) z p).re -
-      (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
-        (fun v ↦ (g v : ℂ)) w p) z p).re := by
-  have hReG := c3RefinedTrace_mixed_wirtinger_realpart_eq_hessian G z hG p
-  have hReReg : ContDiffAt ℝ 2 (fun w ↦ (G w).re) z := by
-    change ContDiffAt ℝ 2 (RCLike.re ∘ G) z
-    exact (RCLike.reCLM.contDiff.contDiffAt.comp z hG)
-  have hHessEq := c3RefinedTrace_complexHessian_eventuallyEq
-    (fun w ↦ (G w).re) (fun w ↦ f w - g w) z hReReg (hf.sub hg) hEq p
-  have hSub := c3RefinedTrace_complexHessian_sub f g z hf hg p
-  have hfJet := c3RefinedTrace_mixed_wirtinger_realpart_eq_hessian
-    (fun w ↦ (f w : ℂ)) z
-    (by exact (Complex.ofRealCLM.contDiff.contDiffAt.comp z hf)) p
-  have hgJet := c3RefinedTrace_mixed_wirtinger_realpart_eq_hessian
-    (fun w ↦ (g w : ℂ)) z
-    (by exact (Complex.ofRealCLM.contDiff.contDiffAt.comp z hg)) p
-  simp only [Complex.ofReal_re] at hfJet hgJet
-  rw [hReG, hHessEq, hSub, hfJet, hgJet]
-  simp [Complex.sub_re]
-
 private theorem c3RefinedTrace_partialBar_star_partialZ_star {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
     (hf : DifferentiableAt ℝ f z) :
     c3RefinedTracePartialBar f z p =
-      star (c3PartialZ (fun w ↦ star (f w)) z p) := by
-  unfold c3RefinedTracePartialBar c3PartialZ
+      star (wirtingerDerivInChart (fun w ↦ star (f w)) z p) := by
+  unfold c3RefinedTracePartialBar wirtingerDerivInChart
   let e := EuclideanSpace.single p (1 : ℂ)
   have hreal := hf.hasFDerivAt
   have hc := (Complex.conjCLE.hasFDerivAt (x := f z)).comp z hreal
@@ -401,7 +372,7 @@ private theorem c3RefinedTrace_referenceBar_zero {n : ℕ}
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n))
     (hg : ∀ i j, ContDiffAt ℝ ∞ (fun w ↦ g w i j) z)
-    (hFirst : ∀ i j p, c3PartialZ (fun w ↦ g w i j) z p = 0)
+    (hFirst : ∀ i j p, wirtingerDerivInChart (fun w ↦ g w i j) z p = 0)
     (hHermitian : ∃ U : Set (EuclideanSpace ℂ (Fin n)),
       IsOpen U ∧ z ∈ U ∧ ∀ w ∈ U, g w = (g w).conjTranspose) :
     ∀ i j p, c3RefinedTracePartialBar (fun w ↦ g w i j) z p = 0 := by
@@ -414,9 +385,9 @@ private theorem c3RefinedTrace_referenceBar_zero {n : ℕ}
       simpa using h
     simpa using congrArg star hij
   have hderiv := hlocal.fderiv_eq (𝕜 := ℝ) (x := z)
-  have hpartial : c3PartialZ (fun w ↦ star (g w i j)) z p =
-      c3PartialZ (fun w ↦ g w j i) z p := by
-    unfold c3PartialZ
+  have hpartial : wirtingerDerivInChart (fun w ↦ star (g w i j)) z p =
+      wirtingerDerivInChart (fun w ↦ g w j i) z p := by
+    unfold wirtingerDerivInChart
     rw [hderiv]
   have hbar := c3RefinedTrace_partialBar_star_partialZ_star
     (fun w ↦ g w i j) z p ((hg i j).differentiableAt (by norm_num))
@@ -428,7 +399,7 @@ private theorem c3RefinedTrace_reference_curvature_eq_neg_mixed {n : ℕ}
     (z : EuclideanSpace ℂ (Fin n))
     (hg : ∀ i j, ContDiffAt ℝ ∞ (fun w ↦ g w i j) z)
     (hNormal : g z = 1)
-    (hFirst : ∀ i j p, c3PartialZ (fun w ↦ g w i j) z p = 0)
+    (hFirst : ∀ i j p, wirtingerDerivInChart (fun w ↦ g w i j) z p = 0)
     (hHermitian : ∃ U : Set (EuclideanSpace ℂ (Fin n)),
       IsOpen U ∧ z ∈ U ∧ ∀ w ∈ U, g w = (g w).conjTranspose)
     (p j : Fin n) :
@@ -437,10 +408,10 @@ private theorem c3RefinedTrace_reference_curvature_eq_neg_mixed {n : ℕ}
   have hbar := c3RefinedTrace_referenceBar_zero g z hg hFirst hHermitian
   have hdet : IsUnit (g z).det := by rw [hNormal]; simp
   have hbarGamma (a : Fin n) : c3RefinedTracePartialBar
-      (fun w ↦ c3ChristoffelInChart g w a p j) z p =
+      (fun w ↦ christoffelInChart g w a p j) z p =
       -(∑ l, (g z)⁻¹ l a * chartCurvature g z p p j l) := by
     have hcurv := chartChristoffel_bar_eq_curvature_at g z hg hdet a p j p
-    simpa [c3RefinedTracePartialBar, c3ChristoffelInChart, c3PartialZ,
+    simpa [c3RefinedTracePartialBar, christoffelInChart, wirtingerDerivInChart,
       chartPartialBarComplex, chartPartialZComplex] using hcurv
   unfold c3RefinedTraceReferenceCurvatureInChart
   rw [Finset.sum_congr rfl (fun a ha => by rw [hbarGamma a])]
@@ -449,7 +420,7 @@ private theorem c3RefinedTrace_reference_curvature_eq_neg_mixed {n : ℕ}
   simp [Matrix.one_apply]
   unfold chartCurvature c3RefinedTraceMatrixMixedPartial
     c3RefinedTraceMatrixPartialZ c3RefinedTraceMatrixPartialBar
-  rw [show chartPartialZComplex = c3PartialZ from rfl,
+  rw [show chartPartialZComplex = wirtingerDerivInChart from rfl,
     show chartPartialBarComplex = c3RefinedTracePartialBar from rfl]
   simp [hFirst, hbar]
 
@@ -496,7 +467,7 @@ theorem c3RefinedTrace_normalFrame_determinantHessian
     (hh : ∀ i j, ContDiffAt ℝ ∞ (fun w ↦ h w i j) z)
     (hG : ContDiffAt ℝ ∞ G z)
     (hNormal : g z = 1)
-    (hFirst : ∀ i j p, c3PartialZ (fun w ↦ g w i j) z p = 0)
+    (hFirst : ∀ i j p, wirtingerDerivInChart (fun w ↦ g w i j) z p = 0)
     (hDiagonal : h z = Matrix.diagonal (fun i ↦ (lam i : ℂ)))
     (hPositive : ∀ i, 0 < lam i)
     (hLocal : ∃ U : Set (EuclideanSpace ℂ (Fin n)),
@@ -506,9 +477,9 @@ theorem c3RefinedTrace_normalFrame_determinantHessian
     (∑ p : Fin n, ∑ j : Fin n,
       RCLike.re (c3RefinedTraceMatrixMixedPartial h z j j p p) / lam p) =
       (∑ p : Fin n, RCLike.re
-        (c3PartialZ (fun w ↦ c3RefinedTracePartialBar G w p) z p)) +
+        (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar G w p) z p)) +
       (∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-        ‖c3PartialZ (fun w ↦ h w j k) z p‖ ^ (2 : ℕ) /
+        ‖wirtingerDerivInChart (fun w ↦ h w j k) z p‖ ^ (2 : ℕ) /
           (lam j * lam k)) -
       (∑ p : Fin n, ∑ j : Fin n,
         RCLike.re (c3RefinedTraceReferenceCurvatureInChart g z p p j j)) := by
@@ -529,16 +500,16 @@ theorem c3RefinedTrace_normalFrame_determinantHessian
   let Curv : Fin n → Fin n → ℝ := fun p j =>
     RCLike.re (c3RefinedTraceReferenceCurvatureInChart g z p p j j)
   let Q : Fin n → ℝ := fun p =>
-    ∑ j, ∑ k, ‖c3PartialZ (fun w ↦ h w j k) z p‖ ^ (2 : ℕ) /
+    ∑ j, ∑ k, ‖wirtingerDerivInChart (fun w ↦ h w j k) z p‖ ^ (2 : ℕ) /
       (lam j * lam k)
   let Hlog : Fin n → ℝ := fun p =>
-    RCLike.re (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    RCLike.re (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
       (fun v ↦ (Real.log ((h v).det.re) : ℂ)) w p) z p)
   let Glog : Fin n → ℝ := fun p =>
-    RCLike.re (c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+    RCLike.re (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
       (fun v ↦ (Real.log ((g v).det.re) : ℂ)) w p) z p)
   let Gjet : Fin n → ℝ := fun p =>
-    RCLike.re (c3PartialZ (fun w ↦ c3RefinedTracePartialBar G w p) z p)
+    RCLike.re (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar G w p) z p)
   have hGjet (p : Fin n) : Gjet p = Hlog p - Glog p := by
     exact c3RefinedTrace_local_Gjet_from_log_equation g h G z lam hg hh hG
       hNormal hDiagonal hPositive hLocal' p

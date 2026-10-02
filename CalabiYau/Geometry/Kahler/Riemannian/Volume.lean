@@ -31,15 +31,12 @@ open scoped Manifold ContDiff ComplexOrder
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [T2Space M] [SigmaCompactSpace M]
 
 local instance : MeasurableSpace M := borel M
 local instance : BorelSpace M := ⟨rfl⟩
 
-omit [T2Space M] [SigmaCompactSpace M] in
 private lemma linearMapAt_symmL_eq_tangentCoordChange
     {x₀ x z : M}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).source)
@@ -66,7 +63,6 @@ private lemma linearMapAt_symmL_eq_tangentCoordChange
   exact tangentCoordChange_comp (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n)))
     (w := x) (x := z) (y := x₀) (z := z) hw
 
-omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartBasisVecFiber_model_eq_tangentCoordChange
     (x y : M) {i : Fin (Module.finrank ℝ (EuclideanSpace ℂ (Fin n)))}
     (hyx : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x).source) :
@@ -121,7 +117,6 @@ private noncomputable def chartModelBasisJacobian (n : ℕ) : ℝ :=
     (EuclideanSpace ℂ (Fin n))
   Real.sqrt (Matrix.det (Matrix.of fun i j => Inner.inner ℝ (b i) (b j)))
 
-omit [T2Space M] [SigmaCompactSpace M] in
 /-- The chart Gram determinant has the squared Jacobian of `chartModelBasis` relative to the
 canonical real orthonormal frame. -/
 private theorem chartGramMatrix_det_eq_jacobian_sq_mul_two_pow_mul_normSq_det
@@ -183,7 +178,6 @@ private theorem chartGramMatrix_det_eq_jacobian_sq_mul_two_pow_mul_normSq_det
   rw [hJreal]
   rfl
 
-omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartDensity_eq_jacobian_mul_volumeDensityInChart (ω₀ : KahlerForm n M)
     (x : M) {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
@@ -295,7 +289,6 @@ private theorem map_restricted_density_eq_of_ratio
     · simp [hy, smul_eq_mul]
   rw [hdensity, withDensity_smul q (hpK.comp hg)]
 
-omit [T2Space M] [SigmaCompactSpace M] in
 /-- Compare the two restricted weighted measures after both are transported to canonical real
 Euclidean coordinates. The chart-model Jacobian occurs in complex volume and in metric density,
 so it cancels before transporting the measures back to the manifold. -/
@@ -358,7 +351,6 @@ private theorem chartSources_map_toEuclidean_eq (ω₀ : KahlerForm n M) (x : M)
       (E := EuclideanSpace ℂ (Fin n)))
     p r hpK hrK hpoint
 
-omit [T2Space M] [SigmaCompactSpace M] in
 private theorem chartVolume_eq_chartLocalMeasure (ω₀ : KahlerForm n M) (x : M) :
     ω₀.chartVolume x = CalabiYau.RiemannianVolume.chartLocalMeasure
       (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) ω₀.toRiemannianMetric x := by
@@ -484,6 +476,10 @@ private theorem chartVolume_eq_chartLocalMeasure (ω₀ : KahlerForm n M) (x : M
           (PiLp.borelSpace (p := 2) (X := fun _ : Fin n => ℂ))
           ⟨rfl⟩ hcanonical.symm
 
+section
+
+variable [T2Space M] [SigmaCompactSpace M]
+
 /-- The Kähler measure `ω₀ⁿ / n!` agrees with the measure of the associated Riemannian metric,
 when both are assembled using the same smooth partition of unity subordinate to chart domains.
 
@@ -519,5 +515,7 @@ theorem volume_eq_riemannianVolumeMeasure (ω₀ : KahlerForm n M) :
       (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (M := M) ω₀.toRiemannianMetric := by
   rw [CalabiYau.RiemannianVolume.riemannianVolumeMeasure_def]
   exact volume_eq_riemannianMeasure_chartAtlasPOU ω₀
+
+end
 
 end KahlerForm

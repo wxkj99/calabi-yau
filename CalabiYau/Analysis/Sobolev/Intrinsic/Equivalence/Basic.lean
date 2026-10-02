@@ -3,7 +3,7 @@
 module
 public import CalabiYau.Analysis.Sobolev.Chart.Defs
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Defs
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Geometry.Riemannian.Operator.DirectionalDerivative
 public import CalabiYau.Geometry.Riemannian.Volume.Properties
 public import CalabiYau.Geometry.Riemannian.Volume.Basic
@@ -15,8 +15,6 @@ public import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -29,7 +27,7 @@ namespace Equivalence
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -39,6 +37,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
 open Sobolev.Chart
+
+section
+
+variable [IsManifold I ∞ M]
 
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
@@ -50,7 +52,8 @@ private def chartPushedExt (α : M) (f : M → ℝ) : EuclN E → ℝ := by
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
-omit [IsManifold I ∞ M] in
+end
+
 private lemma chartPushedExt_apply_of_mem_target
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target) :
@@ -62,7 +65,6 @@ private lemma chartPushedExt_apply_of_mem_target
     else 0) = f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
   rw [if_pos hy]
 
-omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : (toEuclidean (E := E)).symm y ∉ (extChartAt I α).target) :
@@ -73,7 +75,6 @@ private lemma chartPushedExt_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
-omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_mem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -84,7 +85,6 @@ private lemma chartPushedExt_apply_of_mem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_notMem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -94,7 +94,6 @@ private lemma chartPushedExt_apply_of_notMem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_eq_chartPushed_on_target
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (α : M) (u : M → ℝ) {y : EuclN E}
@@ -107,7 +106,6 @@ private lemma chartPushedExt_eq_chartPushed_on_target
   unfold chartPushed
   rfl
 
-omit [IsManifold I ∞ M] in
 private lemma image_toEuclidean_chart_tsupport_isCompact
     [CompactSpace M] {f : M → ℝ} {α : M}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -117,7 +115,6 @@ private lemma image_toEuclidean_chart_tsupport_isCompact
     (I := I) (M := M) (u := f) (α := α) hf_support
   exact hKE.1.image (toEuclidean (E := E)).continuous
 
-omit [IsManifold I ∞ M] in
 private lemma image_toEuclidean_chart_tsupport_subset_chartTargetEuclid
     {f : M → ℝ} {α : M}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -127,7 +124,6 @@ private lemma image_toEuclidean_chart_tsupport_subset_chartTargetEuclid
   image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     (I := I) (M := M) (u := f) (α := α) hf_support
 
-omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_support : tsupport f ⊆ (chartAt H α).source) {y : EuclN E}
@@ -153,7 +149,6 @@ private lemma chartPushedExt_eq_zero_off_image_tsupport
     refine ⟨z, ⟨(extChartAt I α).symm z, hsymm_in_support, hz_eq⟩, hzy⟩
   · exact chartPushedExt_apply_of_notMem_chartTargetEuclid (I := I) (M := M) α f hy_target
 
-omit [IsManifold I ∞ M] in
 private lemma hasCompactSupport_chartPushedExt
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -170,6 +165,10 @@ private lemma hasCompactSupport_chartPushedExt
   apply hy_support
   exact chartPushedExt_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_support hyK
+
+section
+
+variable [IsManifold I ∞ M]
 
 private lemma contDiffOn_chartPushedExt_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -212,7 +211,8 @@ private lemma contDiffAt_chartPushedExt_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartPushedExt_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
-omit [IsManifold I ∞ M] in
+end
+
 private lemma contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
     (α : M) {f : M → ℝ}
     (hf_support : tsupport f ⊆ (chartAt H α).source)
@@ -241,6 +241,7 @@ private lemma contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
   exact chartPushedExt_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_support hz
 
+variable [IsManifold I ∞ M] in
 private lemma contDiff_chartPushedExt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     [I.Boundaryless]
@@ -261,10 +262,13 @@ private lemma contDiff_chartPushedExt
     exact contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
       (I := I) (M := M) α (f := f) hf_support hf_compact hy_off
 
-omit [IsManifold I ∞ M] in
 private lemma chartTargetEuclid_isOpen' [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
+
+section
+
+variable [IsManifold I ∞ M]
 
 private lemma memLp_chartPushedExt
     [CompactSpace M] [I.Boundaryless]
@@ -332,7 +336,7 @@ private lemma memW1p_chartPushedExt
     (α : M) (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun β : M => (chartAt H β).source))
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) {p : ℝ≥0∞} (_hp : 1 ≤ p) :
-    DeGiorgi.MemW1p p (chartPushedExt (I := I) (M := M) α
+    Sobolev.Euclidean.MemW1p p (chartPushedExt (I := I) (M := M) α
         (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -353,21 +357,20 @@ private lemma memW1p_chartPushedExt
       (fderiv ℝ (chartPushedExt (I := I) (M := M) α f) x)
         (EuclideanSpace.single i 1), ?_, ?_⟩
     · exact fderiv_chartPushedExt_memLp (I := I) (M := M) α ρ hρ hu p i
-    · exact DeGiorgi.HasWeakPartialDeriv.of_contDiff
-        (chartTargetEuclid_isOpen' (I := I) (M := M) α)
+    · exact Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff
         (hsmooth.of_le (by norm_cast))
 
 private theorem memW1p_chartPushed_of_contMDiff
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) {p : ℝ≥0∞} (hp : 1 ≤ p) :
-    DeGiorgi.MemW1p p
+    Sobolev.Euclidean.MemW1p p
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set ρ := chartAtlasPOU I M with hρ_def
   have hρ_sub : ρ.IsSubordinate (fun β : M => (chartAt H β).source) :=
     chartAtlasPOU_isSubordinate I M
-  have hExt_memW1p : DeGiorgi.MemW1p p
+  have hExt_memW1p : Sobolev.Euclidean.MemW1p p
       (chartPushedExt (I := I) (M := M) α
         (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -383,8 +386,7 @@ private theorem memW1p_chartPushed_of_contMDiff
     intro y hy
     exact chartPushedExt_eq_chartPushed_on_target
       (I := I) (M := M) ρ α u hy
-  exact (Sobolev.Euclidean.MemW1p_congr_ae
-    (chartTargetEuclid_isOpen' (I := I) (M := M) α) hae_eq).mp hExt_memW1p
+  exact (Sobolev.Euclidean.MemW1p_congr_ae hae_eq).mp hExt_memW1p
 
 theorem MemWkpChart_of_contMDiff
     [CompactSpace M] [I.Boundaryless]
@@ -398,13 +400,15 @@ theorem MemWkpChart_of_contMDiff
   refine ⟨?_, ?_⟩
   · exact memW1p_chartPushed_of_contMDiff (I := I) (M := M) α hu hp
   · intro i
-    have hMW1p : DeGiorgi.MemW1p p
+    have hMW1p : Sobolev.Euclidean.MemW1p p
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) :=
       memW1p_chartPushed_of_contMDiff (I := I) (M := M) α hu hp
     rw [Sobolev.Euclidean.MemWkp_zero]
     exact Sobolev.Euclidean.chosenWeakPartialOrZero_memLp_of_mem
       (d := Module.finrank ℝ E) hMW1p i
+
+end
 
 end Equivalence
 end Sobolev

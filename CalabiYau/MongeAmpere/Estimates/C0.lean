@@ -39,67 +39,7 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
-
-private theorem integral_sq_mul_laplacian_eq_neg_two_energy (ω₀ : KahlerForm n M)
-    {u : M → ℝ} (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u) :
-    ∫ x, u x ^ 2 * ω₀.laplacian u x ∂ω₀.volume =
-      -2 * ∫ x, u x * ω₀.gradNormSq u x ∂ω₀.volume := by
-  have h2le : (2 : ℕ∞ω) ≤ ∞ :=
-    WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top)
-  have hu2 : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (fun x => u x ^ 2) :=
-    (contDiff_id.pow 2).contMDiff.comp hu
-  have hsquare : ContDiff ℝ 2 (fun t : ℝ => t ^ 2) :=
-    (contDiff_id.pow 2).of_le h2le
-  have hsquare' : deriv (fun t : ℝ => t ^ 2) = fun t => 2 * t := by
-    funext t
-    change deriv ((fun t : ℝ => t) ^ 2) t = 2 * t
-    rw [deriv_pow differentiableAt_id 2]
-    norm_num
-  have hsquare'' : deriv (deriv (fun t : ℝ => t ^ 2)) = fun _ => 2 := by
-    rw [hsquare']
-    funext t
-    simp
-  have hLapPow : ∀ x, ω₀.laplacian (fun y => u y ^ 2) x =
-      2 * u x * ω₀.laplacian u x + 2 * ω₀.gradNormSq u x := by
-    intro x
-    calc
-      ω₀.laplacian (fun y => u y ^ 2) x =
-          ω₀.laplacian ((fun t : ℝ => t ^ 2) ∘ u) x := by rfl
-      _ = 2 * u x * ω₀.laplacian u x + 2 * ω₀.gradNormSq u x := by
-        rw [ω₀.laplacian_comp hu hsquare x, hsquare'', hsquare']
-  have hContLap := ω₀.contMDiff_laplacian hu
-  have hContGrad := ω₀.contMDiff_gradNormSq hu
-  have hInt₁ : Integrable (fun x => u x ^ 2 * ω₀.laplacian u x) ω₀.volume :=
-    integrable_of_continuous_volume ω₀
-      ((hu2.continuous).mul hContLap.continuous)
-  have hInt₂ : Integrable (fun x => u x * ω₀.gradNormSq u x) ω₀.volume :=
-    integrable_of_continuous_volume ω₀ (hu.continuous.mul hContGrad.continuous)
-  have hB : ∫ x, u x * ω₀.laplacian (fun y => u y ^ 2) x ∂ω₀.volume =
-      2 * ∫ x, u x ^ 2 * ω₀.laplacian u x ∂ω₀.volume +
-        2 * ∫ x, u x * ω₀.gradNormSq u x ∂ω₀.volume := by
-    have hpt : ∀ x, u x * ω₀.laplacian (fun y => u y ^ 2) x =
-        2 * (u x ^ 2 * ω₀.laplacian u x) + 2 * (u x * ω₀.gradNormSq u x) := by
-      intro x
-      rw [hLapPow x]
-      ring
-    calc
-      ∫ x, u x * ω₀.laplacian (fun y => u y ^ 2) x ∂ω₀.volume =
-          ∫ x, (2 * (u x ^ 2 * ω₀.laplacian u x) +
-            2 * (u x * ω₀.gradNormSq u x)) ∂ω₀.volume := by
-        apply integral_congr_ae
-        exact Filter.Eventually.of_forall hpt
-      _ = 2 * ∫ x, u x ^ 2 * ω₀.laplacian u x ∂ω₀.volume +
-          2 * ∫ x, u x * ω₀.gradNormSq u x ∂ω₀.volume := by
-        rw [integral_add (hInt₁.const_mul 2) (hInt₂.const_mul 2), integral_const_mul,
-          integral_const_mul]
-  have hgreen := ω₀.integral_mul_laplacian_comm hu2 hu
-  have hzero :
-      (∫ x, u x ^ 2 * ω₀.laplacian u x ∂ω₀.volume) +
-        2 * ∫ x, u x * ω₀.gradNormSq u x ∂ω₀.volume = 0 := by
-    rw [hgreen] at hB
-    linarith
-  linarith
+  [T2Space M] [CompactSpace M]
 
 private theorem laplacian_energy_le_mean_of_solvesMongeAmpere
     (ω₀ : KahlerForm n M) {G φ : M → ℝ} (hsol : ω₀.SolvesMongeAmpere G φ)
@@ -171,7 +111,9 @@ private theorem laplacian_energy_le_mean_of_solvesMongeAmpere
       (2 : ℝ) ^ n * ((Real.exp K - 1) * ∫ x, -φ x ∂ω₀.volume) := by
     simpa [hF'] using hmono''
   simpa [hF'', mul_one, mul_assoc] using hscaled.trans hmono'''
+variable [ConnectedSpace M] in
 
+omit [ConnectedSpace M] in
 private theorem poincare_variance_le_mean_of_solvesMongeAmpere
     (ω₀ : KahlerForm n M) {G φ : M → ℝ} (hsol : ω₀.SolvesMongeAmpere G φ)
     {C_P K : ℝ} (hP : ω₀.PoincareInequality C_P) (hG : ∀ x, |G x| ≤ K)
@@ -192,7 +134,7 @@ private theorem poincare_variance_le_mean_of_solvesMongeAmpere
     _ = C_P' * ((2 : ℝ) ^ n * (Real.exp K - 1)) *
         ∫ x, -φ x ∂ω₀.volume := by ring
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] in
 /-- A smooth MA solution is a subsolution by positivity of the perturbed form. -/
 private theorem laplacian_lower_bound_of_solvesMongeAmpere
     (ω₀ : KahlerForm n M) {G φ : M → ℝ} (hsol : ω₀.SolvesMongeAmpere G φ) :
@@ -219,6 +161,10 @@ private theorem c0_centered_softplus_moment_recurrence
       c0MomentFactor n κ C_S k *
         eLpNorm (c0CenteredSoftplus u) (c0MomentExponent κ k) ω₀.volume := by
   exact c0_softplus_powered_recurrence ω₀ hu hsub hκ hS
+section
+
+variable [ConnectedSpace M]
+
 
 private theorem c0_centered_softplus_product_bound
     {κ C_S : ℝ} (hκ : 1 < κ) :
@@ -259,6 +205,7 @@ private theorem c0_centered_softplus_product_bound
   rw [← ENNReal.ofReal_prod_of_nonneg hfnonneg]
   exact (ENNReal.ofReal_le_ofReal_iff (Real.exp_nonneg S)).2 hprodReal
 
+omit [ConnectedSpace M] in
 /-- Bound the softplus starting moment by Poincaré and the p=1 energy estimate. -/
 private theorem c0_centered_softplus_second_moment_le
     (ω₀ : KahlerForm n M) {G φ : M → ℝ} (hsol : ω₀.SolvesMongeAmpere G φ)
@@ -411,5 +358,7 @@ theorem exists_osc_le_of_solvesMongeAmpere (ω₀ : KahlerForm n M) {κ C_S C_P 
           refine ⟨C, ?_⟩
           intro G φ hG hbound hsol x y
           exact hosc G φ hG hbound hsol x y
+
+end
 
 end KahlerForm

@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.Geometry.Complex.Forms.OneOne
 public import CalabiYau.Geometry.Riemannian.Volume.Chart.Density
-public import CalabiYau.LinearAlgebra.Matrix.Realification
+public import CalabiYau.Mathlib.LinearAlgebra.Matrix.Realification
 public import Mathlib.MeasureTheory.Measure.Haar.Unique
 
 /-!

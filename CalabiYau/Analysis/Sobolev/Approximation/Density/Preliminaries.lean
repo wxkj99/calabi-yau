@@ -3,17 +3,14 @@
 module
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
-public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.Transition
-public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.Defs
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.Defs
 public import CalabiYau.Analysis.Sobolev.Chart.Defs
 public import CalabiYau.Geometry.Riemannian.Volume.Family.Basic
 
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

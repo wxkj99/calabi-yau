@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.MongeAmpere.Continuity.Openness.CompactChartCover
+public import CalabiYau.Mathlib.Geometry.Manifold.CompactChartCover
 public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 
@@ -18,11 +18,9 @@ open scoped Manifold ContDiff NNReal Topology
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [T2Space M] [CompactSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
 
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 /-- Finite partition-of-unity localization data for a real C² function on a compact manifold.
 Each localized term is extended by zero in one real chart and has compact support strictly inside
 the chart target. -/
@@ -46,7 +44,6 @@ structure CompactChartC2Localization (φ : M → ℝ) where
     φ x = Finset.sum (@Finset.univ cover.ι cover.fintype_ι)
       (fun i => localizedFunction i x)
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem chart_zero_extension_c2_of_contDiffOn
     (i : M) (g : M → ℝ)
     (hcoord : ContDiffOn ℝ 2
@@ -120,7 +117,10 @@ private theorem chart_zero_extension_c2_of_contDiffOn
     have hcx : c x ∈ c.target := c.map_source hx
     simp [u, hcx, c.left_inv hx]
 
-omit [T2Space M] [CompactSpace M] in
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+
 private theorem real_manifold_infty :
     IsManifold 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞ M := by
   exact isManifold_of_contDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) ∞ M fun e e' he he' ↦ by
@@ -129,7 +129,6 @@ private theorem real_manifold_infty :
     rw [contDiffGroupoid, mem_groupoid_of_pregroupoid] at h
     exact (h.1.of_le le_top).restrict_scalars ℝ
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chart_coordinate_c2 (i : M) (g : M → ℝ)
     (hg : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 g) :
     ContDiffOn ℝ 2 (g ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) i).symm)
@@ -139,7 +138,8 @@ private theorem chart_coordinate_c2 (i : M) (g : M → ℝ)
       (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top))
   simpa only [mfld_simps, chartAt_self_eq] using (contMDiff_iff.mp hg).2 i (0 : ℝ)
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
+end
+
 private theorem product_tsupport_subset (a b : M → ℝ) :
     tsupport (fun x => a x * b x) ⊆ tsupport a := by
   apply closure_mono
@@ -147,6 +147,7 @@ private theorem product_tsupport_subset (a b : M → ℝ) :
   change a x * b x ≠ 0 at hx
   exact Function.mem_support.mpr (fun hzero => hx (by simp only [hzero, zero_mul]))
 
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem finite_subordinate_smooth_cutoffs
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M) :
     ∃ σ : cover.ι → M → ℝ,
@@ -182,7 +183,7 @@ private theorem finite_subordinate_smooth_cutoffs
   · intro x
     simpa only [finsum_eq_sum_of_fintype] using ρ.sum_eq_one (Set.mem_univ x)
 
-omit [T2Space M] in
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [CompactSpace M] in
 private theorem localization_of_finite_smooth_cutoffs
     {φ : M → ℝ}
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 φ)
@@ -238,6 +239,7 @@ private theorem localization_of_finite_smooth_cutoffs
     change φ x = ∑ i, σ i x * φ x
     rw [← Finset.sum_mul, hsum x, one_mul]
 
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 /-- A smooth finite partition of unity gives compactly supported chart-local C² summands. -/
 theorem exists_compactChartC2Localization {φ : M → ℝ}
     (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 2 φ) :

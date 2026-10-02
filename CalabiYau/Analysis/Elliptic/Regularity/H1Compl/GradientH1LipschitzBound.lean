@@ -4,7 +4,7 @@ module
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.GradientLipschitzBound
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.IntrinsicToChart.ComponentNormBound
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
 public import CalabiYau.Geometry.Riemannian.Operator.Gradient.NormSquared
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
@@ -100,20 +100,6 @@ private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
     chartPushedPartial (I := I) (M := M) g α j v =ᵐ[
         (chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
-      (fun y : EuclN => (fderiv ℝ (chartSmoothExt (I := I) (M := M) α
-        (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x)) y)
-        (EuclideanSpace.single j 1)) := by
-  refine (MeasureTheory.ae_restrict_iff'
-    (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
-  refine Filter.Eventually.of_forall (fun y hy => ?_)
-  exact chartPushedPartial_eq_fderiv_chartSmoothExt (I := I) (M := M) g α j v hy
-
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt_volume
-    (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
-    (v : SmoothScalar g) :
-    chartPushedPartial (I := I) (M := M) g α j v =ᵐ[
-        (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)]
       (fun y : EuclN => (fderiv ℝ (chartSmoothExt (I := I) (M := M) α
         (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x)) y)
         (EuclideanSpace.single j 1)) := by

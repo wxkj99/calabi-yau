@@ -3,7 +3,6 @@ module
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ReferenceCurvatureDerivative.Basic
 public import CalabiYau.MongeAmpere.Estimates.C3.CalabiEnergy.Basic
 public import CalabiYau.Geometry.Kahler.Curvature.Chart
-import Mathlib.Topology.Compactness.LocallyCompact
 
 /-!
 # Fixed-chart compact bound for the reference curvature derivative
@@ -204,41 +203,14 @@ private theorem auxiliary_fixed_chart_compact_frame_entry_bound
   exact (le_abs_self _).trans
     ((Complex.abs_re_le_norm _).trans (hInvDiag z hz a))
 
-private theorem auxiliary_frame_column_l2_sq_le_of_entry_bound {n : ℕ}
-    (P : Matrix (Fin n) (Fin n) ℂ) (Q : ℝ) (hQ : 0 ≤ Q) (j : Fin n)
-    (hP : ∀ i, ‖P i j‖ ≤ Real.sqrt Q) :
-    ∑ i : Fin n, ‖P i j‖ ^ 2 ≤ (n : ℝ) * Q := by
-  calc
-    ∑ i : Fin n, ‖P i j‖ ^ 2 ≤ ∑ _i : Fin n, Q := by
-      apply Finset.sum_le_sum
-      intro i hi
-      have hnonneg : 0 ≤ Real.sqrt Q - ‖P i j‖ := sub_nonneg.mpr (hP i)
-      have hsum : 0 ≤ Real.sqrt Q + ‖P i j‖ := add_nonneg (Real.sqrt_nonneg _) (norm_nonneg _)
-      have hprod := mul_nonneg hnonneg hsum
-      nlinarith [Real.sq_sqrt hQ]
-    _ = (n : ℝ) * Q := by simp
-
-private theorem auxiliary_frame_column_l2_bound_of_entry_bound {n : ℕ}
-    (P : Matrix (Fin n) (Fin n) ℂ) (Q : ℝ) (hQ : 0 ≤ Q)
-    (hP : ∀ i j, ‖P i j‖ ≤ Real.sqrt Q) :
-    ∃ L : ℝ, 0 ≤ L ∧ ∀ j : Fin n, ∑ i : Fin n, ‖P i j‖ ^ 2 ≤ L ^ 2 := by
-  let L : ℝ := Real.sqrt ((n : ℝ) * Q)
-  refine ⟨L, Real.sqrt_nonneg _, ?_⟩
-  intro j
-  have hsum := auxiliary_frame_column_l2_sq_le_of_entry_bound P Q hQ j (fun i => hP i j)
-  calc
-    ∑ i : Fin n, ‖P i j‖ ^ 2 ≤ (n : ℝ) * Q := hsum
-    _ = L ^ 2 := by
-      simpa [L] using (Real.sq_sqrt (show 0 ≤ (n : ℝ) * Q by positivity)).symm
-
 private noncomputable def auxiliaryReferenceCurvatureCovariantDerivativeInChart
     (ω₀ : KahlerForm n M) (x : M) (z : EuclideanSpace ℂ (Fin n))
     (s p q j k : Fin n) : ℂ :=
   let g₀ : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun w ↦ ω₀.metricInChart x w
-  c3PartialZ (fun w ↦ chartCurvature g₀ w p q j k) z s -
-    ∑ a : Fin n, c3ChristoffelInChart g₀ z a s p * chartCurvature g₀ z a q j k -
-    ∑ a : Fin n, c3ChristoffelInChart g₀ z a s j * chartCurvature g₀ z p q a k
+  wirtingerDerivInChart (fun w ↦ chartCurvature g₀ w p q j k) z s -
+    ∑ a : Fin n, christoffelInChart g₀ z a s p * chartCurvature g₀ z a q j k -
+    ∑ a : Fin n, christoffelInChart g₀ z a s j * chartCurvature g₀ z p q a k
 
 private theorem auxiliary_reference_curvature_covariant_derivative_contDiffAt
     (ω₀ : KahlerForm n M) (x : M) (z : EuclideanSpace ℂ (Fin n))
@@ -307,24 +279,24 @@ private theorem auxiliary_reference_curvature_covariant_derivative_contDiffAt
             chartPartialBarComplex (fun v => g v i d) w b) z
     exact (hZBar c d a b).neg.add hdouble
   have hChrist (a b c : Fin n) : ContDiffAt ℝ ∞
-      (fun w => c3ChristoffelInChart g w a b c) z := by
-    unfold c3ChristoffelInChart
+      (fun w => christoffelInChart g w a b c) z := by
+    unfold christoffelInChart
     apply ContDiffAt.sum
     intro l hl
     have hpartial : ContDiffAt ℝ ∞
-        (fun w => c3PartialZ (fun v => g v c l) w b) z := by
+        (fun w => wirtingerDerivInChart (fun v => g v c l) w b) z := by
       change ContDiffAt ℝ ∞ (fun w => chartPartialZComplex (fun v => g v c l) w b) z
       exact hZ c l b
     exact (hinvEntry l a).mul hpartial
   have hcurvPartial : ContDiffAt ℝ ∞
-      (fun w => c3PartialZ (fun v => chartCurvature g v p q j k) w s) z := by
+      (fun w => wirtingerDerivInChart (fun v => chartCurvature g v p q j k) w s) z := by
     change ContDiffAt ℝ ∞ (fun w => chartPartialZComplex
       (fun v => chartCurvature g v p q j k) w s) z
     exact auxiliary_chartPartialZComplex_contDiffAt _ z (hCurv p q j k) s
   change ContDiffAt ℝ ∞ (fun w =>
-    c3PartialZ (fun v => chartCurvature g v p q j k) w s -
-      ∑ a : Fin n, c3ChristoffelInChart g w a s p * chartCurvature g w a q j k -
-      ∑ a : Fin n, c3ChristoffelInChart g w a s j * chartCurvature g w p q a k) z
+    wirtingerDerivInChart (fun v => chartCurvature g v p q j k) w s -
+      ∑ a : Fin n, christoffelInChart g w a s p * chartCurvature g w a q j k -
+      ∑ a : Fin n, christoffelInChart g w a s j * chartCurvature g w p q a k) z
   fun_prop (disch := assumption)
 
 private theorem auxiliary_fixed_chart_compact_covariant_derivative_component_bound
@@ -413,7 +385,7 @@ theorem exists_compact_fixed_chart_c3_curvature_derivative_bound
       P.transpose * ω₀.metricInChart x z * P.map star = 1 →
         ∀ s p q j k : Fin n,
           ‖c3FiveSlotFrameContraction P
-            (c3CovariantFourTensorZJet (c3ChristoffelInChart (ω₀.metricInChart x) z)
+            (c3CovariantFourTensorZJet (christoffelInChart (ω₀.metricInChart x) z)
               (chartCurvature (ω₀.metricInChart x) z)
               (fun a b c d e => chartPartialZComplex
                 (fun w => chartCurvature (ω₀.metricInChart x) w b c d e) z a))
@@ -443,7 +415,7 @@ theorem exists_compact_fixed_chart_c3_curvature_derivative_bound
     fun w => ω₀.metricInChart x w
   have hTensor (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ K)
       (s p q j k : Fin n) :
-      ‖c3CovariantFourTensorZJet (c3ChristoffelInChart g z)
+      ‖c3CovariantFourTensorZJet (christoffelInChart g z)
         (chartCurvature g z)
         (fun a b c d e => chartPartialZComplex
           (fun w => chartCurvature g w b c d e) z a) s p q j k‖ ≤ C := by
@@ -455,7 +427,7 @@ theorem exists_compact_fixed_chart_c3_curvature_derivative_bound
       (hP : P.transpose * g z * P.map star = 1)
       (s p q j k a b c d e : Fin n) :
       ‖P a s * P b p * star (P c q) * P d j * star (P e k) *
-        c3CovariantFourTensorZJet (c3ChristoffelInChart g z)
+        c3CovariantFourTensorZJet (christoffelInChart g z)
           (chartCurvature g z)
           (fun u v w r t => chartPartialZComplex
             (fun y => chartCurvature g y v w r t) z u) a b c d e‖ ≤ D := by
@@ -472,7 +444,7 @@ theorem exists_compact_fixed_chart_c3_curvature_derivative_bound
   intro z hz P hP s p q j k
   let F : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ := fun a b c d e =>
     P a s * P b p * star (P c q) * P d j * star (P e k) *
-      c3CovariantFourTensorZJet (c3ChristoffelInChart g z)
+      c3CovariantFourTensorZJet (christoffelInChart g z)
         (chartCurvature g z)
         (fun u v w r t => chartPartialZComplex
           (fun y => chartCurvature g y v w r t) z u) a b c d e
@@ -499,13 +471,13 @@ theorem exists_compact_fixed_chart_c3_curvature_derivative_bound
       _ = B := rfl
   have hNormSum :
       ‖c3FiveSlotFrameContraction P
-        (c3CovariantFourTensorZJet (c3ChristoffelInChart g z)
+        (c3CovariantFourTensorZJet (christoffelInChart g z)
           (chartCurvature g z)
           (fun a b c d e => chartPartialZComplex
             (fun w => chartCurvature g w b c d e) z a)) s p q j k‖ ≤ B := by
     change ‖∑ a, ∑ b, ∑ c, ∑ d, ∑ e,
       P a s * P b p * star (P c q) * P d j * star (P e k) *
-        c3CovariantFourTensorZJet (c3ChristoffelInChart g z)
+        c3CovariantFourTensorZJet (christoffelInChart g z)
           (chartCurvature g z)
           (fun u v w r t => chartPartialZComplex
             (fun y => chartCurvature g y v w r t) z u) a b c d e‖ ≤ B
@@ -524,7 +496,7 @@ theorem exists_local_fixed_chart_c3_curvature_derivative_bound
           ∀ s p q j k : Fin n,
             ‖c3FiveSlotFrameContraction P
               (c3CovariantFourTensorZJet
-                (c3ChristoffelInChart (ω₀.metricInChart x)
+                (christoffelInChart (ω₀.metricInChart x)
                   (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y))
                 (chartCurvature (ω₀.metricInChart x)
                   (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y))

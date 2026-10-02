@@ -20,7 +20,7 @@ namespace Sobolev
 namespace SubstitutionNonSmoothChartBilinear
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -39,7 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma nirenbergTestFunction_tsupport_in_thickening
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) {η : EuclN → ℝ}
     {K_0 : Set EuclN} (hη_support_in_K_0 : tsupport η ⊆ K_0)
@@ -69,7 +68,11 @@ lemma nirenbergTestFunction_tsupport_in_thickening
     refine Metric.mem_cthickening_of_dist_le _ _ |h| K_0 hy_K_0 ?_
     exact h_dist
 
-omit [NeZero (Module.finrank ℝ E)] in
+section
+
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 lemma weightedInvGramOnEuclid_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -198,7 +201,8 @@ def fTermChartBilinear
         (d := Module.finrank ℝ E) k h η D.uChart x
   ∂(volume : Measure EuclN)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+end
+
 lemma cthickening_K_0_isCompact
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0) {h : ℝ} :
     IsCompact (Metric.cthickening |h| K_0) := by
@@ -209,6 +213,9 @@ lemma cthickening_K_0_isCompact
     Metric.isClosed_cthickening
   exact (Metric.isCompact_iff_isClosed_bounded).mpr ⟨h_closed, h_bdd⟩
 
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 def chartBilinearLHS
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -221,6 +228,9 @@ def chartBilinearLHS
     + cross3TermChartBilinear (I := I) (M := M) D K_0 η k h
     + fTermChartBilinear (I := I) (M := M) D K_0 η k h
 
+variable [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 def chartBilinearRHS
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

@@ -4,9 +4,9 @@ public import CalabiYau.Geometry.Kahler.Riemannian.Metric
 public import CalabiYau.Geometry.Kahler.Laplacian.Cofactor
 public import CalabiYau.Geometry.Riemannian.Operator.Gradient.Basic
 public import CalabiYau.Geometry.Riemannian.Volume.Chart.Density
-import CalabiYau.Geometry.Kahler.Laplacian
 import CalabiYau.Geometry.Kahler.Riemannian.Volume.GramHaarNormalization
 import CalabiYau.Geometry.Kahler.Riemannian.Laplacian.ComplexTrace.RealCofactorTransport
+import Mathlib.Analysis.Complex.RealDeriv
 
 /-!
 # From weighted real divergence to the Kähler complex trace

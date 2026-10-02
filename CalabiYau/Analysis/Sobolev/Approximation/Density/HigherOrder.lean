@@ -692,7 +692,7 @@ theorem contMDiff_dense_in_WkpChart_k
       fun j hj y _ => hC_bound y j hj
     obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
       Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
-        k hp_one hp_top hΩα_open hηE_smooth hC_nn hηE_iter_bound
+        k hp_one hΩα_open hηE_smooth hC_nn hηE_iter_bound
     set ε_inner : ℝ := ε_per / (K_leib + 1) with hε_inner_def
     have hε_inner_pos : 0 < ε_inner := by
       apply div_pos hε_per_pos; linarith

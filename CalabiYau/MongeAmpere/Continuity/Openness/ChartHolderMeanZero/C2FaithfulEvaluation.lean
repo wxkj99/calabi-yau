@@ -27,6 +27,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] in
 /-- Evaluation faithfully represents the order-two little-Hölder completion on a compact,
 finite-dimensional manifold. The proof identifies the limiting chart derivatives on chart interiors
 with derivatives of the evaluated limit, as in Gilbarg–Trudinger, §4.1, pp. 51–53, and Lunardi,

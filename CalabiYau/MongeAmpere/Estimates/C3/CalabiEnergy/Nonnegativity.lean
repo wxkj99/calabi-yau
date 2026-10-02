@@ -33,7 +33,7 @@ theorem calabiEnergy_nonneg (ω₀ : KahlerForm n M) {φ : M → ℝ}
     ω₀.metricInChart x z +
       complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z
   let T : Fin n → Fin n → Fin n → ℂ :=
-    fun i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x z i j k
+    fun i j k ↦ connectionDifferenceInChart ω₀ φ x z i j k
   have hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
     dsimp [z]
     exact (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).map_source

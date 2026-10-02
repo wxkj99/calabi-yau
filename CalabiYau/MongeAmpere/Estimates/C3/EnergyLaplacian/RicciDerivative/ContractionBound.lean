@@ -24,6 +24,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- Finite-dimensional contraction only: fixed and forcing tensor jets have
 explicit finite bounds; the actual potential provides positivity and E=|T|². -/
 theorem exists_uniform_c3RicciDerivativeError_bound (ω₀ : KahlerForm n M)
@@ -32,11 +33,11 @@ theorem exists_uniform_c3RicciDerivativeError_bound (ω₀ : KahlerForm n M)
       relTrace (ω₀ x) (ω₀ x + mddbar n p.2 x) ≤ B ∧
       relTrace (ω₀ x + mddbar n p.2 x) (ω₀ x) ≤ B)
     (R H : ℝ) (hR : 0 ≤ R) (hH : 0 ≤ H)
-    (hRicci : ∀ x P, referenceOrthonormalFrameMatrix ω₀ x P →
-      c3ReferenceRicciFrameBound ω₀ x
+    (hRicci : ∀ x P, IsReferenceOrthonormalFrame ω₀ x P →
+      ReferenceRicciFrameBound ω₀ x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) P R)
-    (hForcing : ∀ p ∈ S, ∀ x P, referenceOrthonormalFrameMatrix ω₀ x P →
-      c3ForcingFrameBound ω₀ p.1 x
+    (hForcing : ∀ p ∈ S, ∀ x P, IsReferenceOrthonormalFrame ω₀ x P →
+      ForcingFrameBound ω₀ p.1 x
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) P H) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ p ∈ S, ∀ x,
       |c3RicciDerivativeError ω₀ p.1 p.2 x| ≤

@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Analysis.DeGiorgi.SobolevPoincare
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.SobolevPoincare
 
 /-!
 # Distributionally constant real functions on a Euclidean ball
@@ -29,7 +29,7 @@ private theorem exists_zero_gradient_witness_on_unit_ball
       tsupport φ ⊆ Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1 →
       ∫ x in Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1,
         u x * (fderiv ℝ φ x) (EuclideanSpace.single i 1) = 0) :
-    ∃ hw : DeGiorgi.MemW1pWitness (ENNReal.ofReal 2) u
+    ∃ hw : Sobolev.Euclidean.MemW1pWitness (ENNReal.ofReal 2) u
       (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1), hw.weakGrad = 0 := by
   let B : Set (EuclideanSpace ℝ (Fin d)) := Metric.ball 0 1
   let : IsFiniteMeasure (MeasureTheory.volume.restrict B) :=
@@ -62,7 +62,7 @@ private theorem ae_eq_average_on_unit_ball_of_zero_distributional_derivative
       (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)),
       u x = ⨍ y in Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1, u y ∂MeasureTheory.volume := by
   obtain ⟨hw, hgrad⟩ := exists_zero_gradient_witness_on_unit_ball u hu hzero
-  have hpoincare := DeGiorgi.poincare_unitBall_W1p_public
+  have hpoincare := Sobolev.Euclidean.poincare_unitBall_W1p_public
     (d := d) (p := 2) (by norm_num) hw
   have hgrad_norm : eLpNorm (fun x => ‖hw.weakGrad x‖) (ENNReal.ofReal 2)
       (MeasureTheory.volume.restrict (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) = 0 := by
@@ -75,7 +75,7 @@ private theorem ae_eq_average_on_unit_ball_of_zero_distributional_derivative
       (MeasureTheory.volume.restrict (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) = 0 := by
     apply le_antisymm
     · calc
-        _ ≤ ENNReal.ofReal (DeGiorgi.CPoincVal d) *
+        _ ≤ ENNReal.ofReal (Sobolev.Euclidean.poincareConstant d) *
             eLpNorm (fun x => ‖hw.weakGrad x‖) (ENNReal.ofReal 2)
               (MeasureTheory.volume.restrict (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) := hpoincare
         _ = 0 := by rw [hgrad_norm]; simp

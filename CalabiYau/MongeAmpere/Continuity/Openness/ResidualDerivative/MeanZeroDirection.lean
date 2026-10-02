@@ -25,11 +25,9 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 omit [ConnectedSpace M] in
 /-- The centered derivative in the scalar path parameter is represented by an element of the
 mean-zero little-Hölder target. -/
-@[deprecated "unused hypotheses `hα₀` and `hα₁`; will be removed" (since := "2026-10-02")]
 theorem exists_centeredResidual_meanZeroDirection (ω₁ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
-    [P : ContinuityHolderPair ω₁ α]
+    (α : ℝ≥0) [P : ContinuityHolderPair ω₁ α]
     (hvol : 0 < ω₁.volume.real Set.univ) :
     ∃ b : P.C0, ∀ x,
       P.evalC0 b x =

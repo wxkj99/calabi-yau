@@ -24,6 +24,7 @@ variable {d : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℝ, Fin d → ℝ) ∞ M]
   [T2Space M] [CompactSpace M]
 
+omit [T2Space M] in
 /-- Atlas and partition choices do not change the constructed linear map when
 both sets of restricted charts are positive for the same reference form. -/
 theorem FinitePositiveChartPartition.integral_eq
@@ -37,6 +38,7 @@ theorem FinitePositiveChartPartition.integral_eq
     (fun i hi j hj => OrientedLocalChart.compatible_of_isPositiveFor
       (A.charts i) (B.charts j) ν (A.positive i hi) (B.positive j hj)) η
 
+omit [T2Space M] in
 /-- The local formula is for CLOSED support inside a restricted positive
 chart domain, not for a whole canonical source with an assumed uniform sign. -/
 theorem FinitePositiveChartPartition.integral_eq_of_supported

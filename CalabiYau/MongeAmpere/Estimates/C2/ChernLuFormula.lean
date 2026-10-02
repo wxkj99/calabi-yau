@@ -11,9 +11,6 @@ public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.RelativeTrace
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.LaplacianExpansion
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.RicciExpansion
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.SecondDerivativeSymmetry
-import CalabiYau.Geometry.Kahler.Laplacian.Cofactor
-import CalabiYau.LinearAlgebra.Hermitian.NormalJet
-import CalabiYau.LinearAlgebra.Hermitian.SimultaneousDiagonalization
 
 /-!
 # The Chern–Lu trace formula
@@ -36,96 +33,6 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
   [T2Space M] [CompactSpace M]
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_kahler_chart_normal_jet
-    (ω₀ : KahlerForm n M) (x : M) {z : EuclideanSpace ℂ (Fin n)}
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
-    (hG : ω₀.metricInChart x z = 1) :
-    ∃ C : Fin n → Fin n → Fin n → ℂ,
-      (∀ a i k, C a i k = C a k i) ∧
-      (∀ i k j, chartPartialZComplex
-        (fun w ↦ ω₀.metricInChart x w k j) z i +
-          ∑ a, (ω₀.metricInChart x z) a j * C a i k = 0) := by
-  let G := ω₀.metricInChart x z
-  let D : Fin n → Fin n → Fin n → ℂ := fun i k j ↦
-    chartPartialZComplex (fun w ↦ ω₀.metricInChart x w k j) z i
-  have hD : ∀ i k j, D i k j = D k i j := by
-    intro i k j
-    exact kahler_chart_metric_symmetry (ω₀ := ω₀) x hz i k j
-  have hInv : G.transpose * (1 : Matrix (Fin n) (Fin n) ℂ) = 1 := by
-    rw [show G = 1 by exact hG]
-    simp
-  obtain ⟨C, hC, hcancel⟩ := Matrix.exists_symmetric_normal_jet G 1 hInv D hD
-  refine ⟨C, hC, ?_⟩
-  intro i k j
-  simpa [D, G] using hcancel i k j
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_kahler_simultaneous_normalization
-    (ω₀ ω₁ : KahlerForm n M) (x : M) :
-    ∃ (P : Matrix (Fin n) (Fin n) ℂ) (eigenvalue : Fin n → ℝ),
-      Matrix.conjTranspose P * (ω₀ x).coeffMatrix * P = 1 ∧
-      Matrix.conjTranspose P * (ω₁ x).coeffMatrix * P =
-        Matrix.diagonal (RCLike.ofReal ∘ eigenvalue) ∧
-      (∀ j, 0 < eigenvalue j) ∧
-      relTrace (ω₀ x) (ω₁ x) = ∑ j, eigenvalue j ∧
-      relTrace (ω₁ x) (ω₀ x) = ∑ j, (eigenvalue j)⁻¹ := by
-  let A := (ω₀ x).coeffMatrix
-  let B := (ω₁ x).coeffMatrix
-  have hA : A.PosDef := (ContinuousAlternatingMap.isPositive_iff.mp
-    (ω₀.isPositive x)).2
-  have hB : B.PosDef := (ContinuousAlternatingMap.isPositive_iff.mp
-    (ω₁.isPositive x)).2
-  obtain ⟨P, eigenvalue, hPA, hPB⟩ :=
-    Matrix.PosDef.exists_simultaneous_diagonalization hA hB.isHermitian
-  have heigenvalue : ∀ j, 0 < eigenvalue j :=
-    (Matrix.posDef_iff_forall_pos_of_conjTranspose_mul_mul_eq hPA hPB).1 hB
-  have hTrace : RCLike.re (A⁻¹ * B).trace = ∑ j, eigenvalue j :=
-    Matrix.re_trace_inv_mul_eq_sum_of_conjTranspose_mul_mul_eq hPA hPB
-  have hReverseTrace : RCLike.re (B⁻¹ * A).trace = ∑ j, (eigenvalue j)⁻¹ :=
-    Matrix.re_trace_inv_mul_eq_sum_inv_of_conjTranspose_mul_mul_eq hPA hPB
-      (fun j ↦ (heigenvalue j).ne')
-  refine ⟨P, eigenvalue, hPA, hPB, heigenvalue, ?_, ?_⟩
-  · change RCLike.re (A⁻¹ * B).trace = _
-    exact hTrace
-  · change RCLike.re (B⁻¹ * A).trace = _
-    exact hReverseTrace
-
-omit [T2Space M] [CompactSpace M] in
-private theorem exists_normalized_first_jet_array
-    (G H : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (hG0 : G z = 1)
-    (hGsym : ∀ i k j, chartPartialZComplex (fun w ↦ G w k j) z i =
-      chartPartialZComplex (fun w ↦ G w i j) z k)
-    (hHsym : ∀ i k j, chartPartialZComplex (fun w ↦ H w k j) z i =
-      chartPartialZComplex (fun w ↦ H w i j) z k) :
-    ∃ (C : Fin n → Fin n → Fin n → ℂ)
-      (T : Fin n → Fin n → Fin n → ℂ),
-      (∀ a i k, C a i k = C a k i) ∧
-      (∀ i k j, chartPartialZComplex (fun w ↦ G w k j) z i +
-        ∑ a, (G z) a j * C a i k = 0) ∧
-      (∀ i j k, T i j k = chartPartialZComplex (fun w ↦ H w j k) z i +
-        ∑ a, (H z) a k * C a i j) ∧
-      (∀ i j k, T i j k = T j i k) := by
-  let D : Fin n → Fin n → Fin n → ℂ := fun i k j ↦
-    chartPartialZComplex (fun w ↦ G w k j) z i
-  have hD : ∀ i k j, D i k j = D k i j := hGsym
-  have hInv : (G z).transpose * (1 : Matrix (Fin n) (Fin n) ℂ) = 1 := by
-    rw [hG0]
-    simp
-  obtain ⟨C, hC, hcancel⟩ :=
-    Matrix.exists_symmetric_normal_jet (G z) 1 hInv D hD
-  let T : Fin n → Fin n → Fin n → ℂ := fun i j k ↦
-    chartPartialZComplex (fun w ↦ H w j k) z i +
-      ∑ a, (H z) a k * C a i j
-  refine ⟨C, T, hC, ?_, ?_, ?_⟩
-  · intro i k j
-    simpa [D] using hcancel i k j
-  · intro i j k
-    rfl
-  · intro i j k
-    simp [T, hHsym i j k, hC]
 
 omit [T2Space M] [CompactSpace M] in
 /-- The normal-coordinate curvature expression reduces to the negative mixed second derivative
@@ -164,31 +71,6 @@ The first-derivative cancellation in the normal-coordinate proof is a weighted
 Cauchy--Schwarz inequality: the inverse metric weights the squared norm of the
 contraction, while the metric weights the squared norm of the derivative terms.
 -/
-
-private theorem weighted_sum_sq_le {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (u weights : ι → ℝ) (hweights : ∀ i, 0 < weights i) :
-    (∑ i, u i) ^ 2 ≤ (∑ i, (weights i)⁻¹) * ∑ i, weights i * (u i) ^ 2 := by
-  classical
-  have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ
-    (fun i ↦ (Real.sqrt (weights i))⁻¹) (fun i ↦ Real.sqrt (weights i) * u i)
-  have hsqrt : ∀ i, Real.sqrt (weights i) ≠ 0 :=
-    fun i ↦ (Real.sqrt_pos.2 (hweights i)).ne'
-  have hsum :
-      (∑ i, (Real.sqrt (weights i))⁻¹ * (Real.sqrt (weights i) * u i)) = ∑ i, u i := by
-    refine Finset.sum_congr rfl ?_
-    intro i hi
-    rw [← mul_assoc, inv_mul_cancel₀ (hsqrt i), one_mul]
-  have hleft : (∑ i, ((Real.sqrt (weights i))⁻¹) ^ 2) = ∑ i, (weights i)⁻¹ := by
-    refine Finset.sum_congr rfl ?_
-    intro i hi
-    rw [inv_pow, Real.sq_sqrt (hweights i).le]
-  have hright :
-      (∑ i, (Real.sqrt (weights i) * u i) ^ 2) = ∑ i, weights i * (u i) ^ 2 := by
-    refine Finset.sum_congr rfl ?_
-    intro i hi
-    rw [mul_pow, Real.sq_sqrt (hweights i).le]
-  rw [hsum, hleft, hright] at hcs
-  exact hcs
 
 /-- Weighted Cauchy--Schwarz for a finite complex sum, in the form used for the diagonal
 first-derivative terms of the Chern--Lu calculation. -/
@@ -393,6 +275,7 @@ private theorem relTrace_ricciForm_eq_reference_sub_laplacian
           (mddbar n (fun y ↦ Real.log (relDet (ω₀ y) (ω₁ y))) x) := rfl
   linarith
 
+omit [T2Space M] in
 /-- Compactness gives a uniform signed curvature bound and normal-coordinate data realizing the
 Laplacian and Ricci expansions at every point. The finite-dimensional estimate below closes the
 remaining analytic cancellation. The signed curvature array is chosen so that its contraction
@@ -465,6 +348,7 @@ private theorem exists_yau_normal_data (ω₀ : KahlerForm n M) :
   exact ⟨lambda, curvature, first, second, hlambda, hcurvature, hfirst, hsecond,
     htrace', hreverse', hlaplacian, hricci⟩
 
+omit [T2Space M] in
 /-- Yau's relative-volume form of the Chern--Lu estimate. The Laplacian bridge above converts
 this form to the varying-metric Ricci formulation in the public theorem. -/
 private theorem laplacian_log_relTrace_ge_chernLu_yau
@@ -488,6 +372,7 @@ private theorem laplacian_log_relTrace_ge_chernLu_yau
     exact yau_diagonal_trace_estimate lambda curvature first second B
       hlambda hcurvature hfirst hsecond
 
+omit [T2Space M] in
 /-- Chern–Lu's pointwise estimate for the trace of one Kähler metric against another. The
 curvature constant is uniform on the compact manifold; the Ricci term is the Ricci form of the
 varying metric, traced against the reference metric. -/

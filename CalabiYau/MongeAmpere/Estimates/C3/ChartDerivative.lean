@@ -22,9 +22,8 @@ open ContinuousAlternatingMap
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
 /-- A global Calabi-energy bound transfers to any chart representation of the energy. -/
 private theorem calabiEnergyInChart_le_of_global_bound (ω₀ : KahlerForm n M)
@@ -45,6 +44,7 @@ private theorem calabiEnergyInChart_le_of_global_bound (ω₀ : KahlerForm n M)
 open scoped MatrixOrder ComplexOrder
 open ContinuousAlternatingMap
 
+variable [T2Space M] [CompactSpace M] in
 /-- Relative trace bounds the diagonal entries of a positive `(1,1)`-form. -/
 private theorem form_diag_le_relTrace {n : ℕ} [NeZero n]
     (eta theta : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
@@ -61,7 +61,6 @@ private theorem form_diag_le_relTrace {n : ℕ} [NeZero n]
       Complex.real_smul, RCLike.re_ofReal_mul] using hdr
   exact (sub_nonneg.mp hs)
 
-omit [T2Space M] [CompactSpace M] in
 private theorem relTrace_chartRep_eq (α β : FormField (EuclideanSpace ℂ (Fin n)) M 2)
     (x y : M) (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x).source)
     (hα : (α y).IsOneOne) (hβ : (β y).IsOneOne) :
@@ -129,6 +128,7 @@ private theorem relTrace_chartRep_eq (α β : FormField (EuclideanSpace ℂ (Fin
   rw [hrepα, hrepβ]
   simpa only [hAEquiv] using htrace.symm
 
+variable [T2Space M] [CompactSpace M] in
 private theorem isNonneg_smul_sub_of_trace_le {n : ℕ}
     (eta theta : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
     (heta : eta.IsPositive) (htheta : theta.IsPositive) (D : ℝ)
@@ -156,7 +156,6 @@ private theorem isNonneg_smul_sub_of_trace_le {n : ℕ}
         ContinuousAlternatingMap.smul_apply]
       ring
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chartRep_isPositive (α : FormField (EuclideanSpace ℂ (Fin n)) M 2)
     (x y : M) (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x).source)
     (hα : (α y).IsPositive) :
@@ -219,6 +218,7 @@ private theorem chartRep_isPositive (α : FormField (EuclideanSpace ℂ (Fin n))
   rw [hrep]
   simpa only [hAEquiv] using hα.compContinuousLinearMap AEquiv
 
+variable [T2Space M] [CompactSpace M] in
 private theorem isNonneg_compContinuousLinearMap_of_commutesWithI
     {n : ℕ} (alpha : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
     (halpha : alpha.IsNonneg)
@@ -238,7 +238,6 @@ private theorem isNonneg_compContinuousLinearMap_of_commutesWithI
     rw [hmap, hA v]
     exact halpha.2 (A v)
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chartRep_isNonneg_at
     (alpha : FormField (EuclideanSpace ℂ (Fin n)) M 2) (x : M)
     {z : EuclideanSpace ℂ (Fin n)} (hz : z ∈
@@ -254,13 +253,11 @@ private theorem chartRep_isNonneg_at
   change ((alpha y).compContinuousLinearMap A).IsNonneg
   exact isNonneg_compContinuousLinearMap_of_commutesWithI (alpha y) halpha A hA
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chartRep_neg (eta : FormField (EuclideanSpace ℂ (Fin n)) M 2) (x : M) :
     (-eta).chartRep x = -eta.chartRep x := by
   ext z v
   simp [FormField.chartRep, ContinuousAlternatingMap.compContinuousLinearMap_apply]
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chartRep_order_of_reverse_relTrace
     (eta theta : FormField (EuclideanSpace ℂ (Fin n)) M 2) (x : M)
     {z : EuclideanSpace ℂ (Fin n)} (hz : z ∈
@@ -293,6 +290,10 @@ private theorem chartRep_order_of_reverse_relTrace
         simp only [sub_eq_add_neg]
   rw [hcoeff] at hmatrix
   exact Matrix.le_iff.mpr (by simpa using hmatrix)
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem posDef_diag_norm_eq_re {ι : Type*} [Fintype ι] [DecidableEq ι]
     (A : Matrix ι ι ℂ) (hA : A.PosDef) (i : ι) :
@@ -460,29 +461,6 @@ private theorem c3_weight_matrix_inv_diag {n : ℕ} (g : Matrix (Fin n) (Fin n) 
 
 open Matrix in
 open scoped BigOperators Kronecker in
-private theorem c3_tensor_weight_inv_diag_le {n : ℕ}
-    (g : Matrix (Fin n) (Fin n) ℂ) (hg : g.PosDef) (Cinv C : ℝ)
-    (hCinv : 0 ≤ Cinv) (hC : 0 ≤ C)
-    (hgi : ∀ i, ‖g⁻¹ i i‖ ≤ Cinv) (hgdiag : ∀ i, ‖g i i‖ ≤ C) :
-    ∀ i j k, RCLike.re
-      ((Matrix.kronecker gᵀ (Matrix.kronecker g⁻¹ g⁻¹))⁻¹ (i, (j, k)) (i, (j, k))) ≤
-        Cinv * C * C := by
-  intro i j k
-  rw [c3_weight_matrix_inv_diag g hg i j k]
-  calc
-    RCLike.re (g⁻¹ i i * g j j * g k k) ≤
-        ‖g⁻¹ i i * g j j * g k k‖ := RCLike.re_le_norm _
-    _ = ‖g⁻¹ i i‖ * ‖g j j‖ * ‖g k k‖ := by rw [norm_mul, norm_mul]
-    _ = ‖g⁻¹ i i‖ * (‖g j j‖ * ‖g k k‖) := by ring
-    _ ≤ Cinv * (C * C) := by
-      have hjk : ‖g j j‖ * ‖g k k‖ ≤ C * C :=
-        mul_le_mul (hgdiag j) (hgdiag k) (norm_nonneg _) hC
-      exact mul_le_mul (hgi i) hjk
-        (mul_nonneg (norm_nonneg _) (norm_nonneg _)) hCinv
-    _ = Cinv * C * C := by ring
-
-open Matrix in
-open scoped BigOperators Kronecker in
 private theorem c3_tensor_connection_bound_of_energy {n : ℕ}
     (g : Matrix (Fin n) (Fin n) ℂ) (T : Fin n → Fin n → Fin n → ℂ)
     (hg : g.PosDef) (B C : ℝ) (hC : 0 ≤ C)
@@ -525,7 +503,8 @@ private theorem c3_tensor_connection_bound_of_energy {n : ℕ}
     ‖T i j k‖ ^ 2 ≤ max B 0 * C := hsq
     _ = Real.sqrt (max B 0 * C) ^ 2 := (Real.sq_sqrt harg).symm
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem chartRep_diag_le_of_relTrace [NeZero n]
     (eta theta : FormField (EuclideanSpace ℂ (Fin n)) M 2) (x y : M)
     (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x).source)
@@ -549,7 +528,6 @@ private theorem chartRep_diag_le_of_relTrace [NeZero n]
     _ ≤ D * RCLike.re (ηc.coeffMatrix i i) :=
       mul_le_mul_of_nonneg_right (by rw [← htraceChart]; exact htrace) hηdiag
 
-omit [T2Space M] [CompactSpace M] in
 private theorem exists_metricChart_entry_bound_on_compact
     (ω₀ : KahlerForm n M) (x₀ : M)
     (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
@@ -570,7 +548,6 @@ private theorem exists_metricChart_entry_bound_on_compact
   intro z hz j k
   exact (hCjk (j, k) z hz).trans (hC (Set.mem_range_self (j, k)))
 
-omit [T2Space M] [CompactSpace M] in
 private theorem exists_metricInvChart_entry_bound_on_compact
     (ω₀ : KahlerForm n M) (x₀ : M)
     (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
@@ -627,7 +604,6 @@ private theorem exists_metricInvChart_entry_bound_on_compact
   intro z hz j k
   exact (hCjk (j, k) z hz).trans (hC (Set.mem_range_self (j, k)))
 
-omit [T2Space M] [CompactSpace M] in
 private theorem c3_chart_perturbed_metric_diagonal_bounds [NeZero n]
     (ω₀ : KahlerForm n M) (φ : M → ℝ)
     (hφ : ω₀.IsPotential φ) (x₀ : M) {z : EuclideanSpace ℂ (Fin n)}
@@ -732,7 +708,7 @@ private theorem exists_uniform_c3ConnectionDifference_bound_of_calabiEnergy
     (x₀ : M) (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
     (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target) :
     ∃ T : ℝ, ∀ p ∈ S, ∀ z ∈ K, ∀ i j k : Fin n,
-      ‖c3ConnectionDifferenceInChart ω₀ p.2 x₀ z i j k‖ ≤ T := by
+      ‖connectionDifferenceInChart ω₀ p.2 x₀ z i j k‖ ≤ T := by
   classical
   by_cases hKne : K.Nonempty
   · by_cases hSne : S.Nonempty
@@ -763,7 +739,7 @@ private theorem exists_uniform_c3ConnectionDifference_bound_of_calabiEnergy
         let g : Matrix (Fin n) (Fin n) ℂ := ω₀.metricInChart x₀ z +
           complexHessian (p.2 ∘ e.symm) z
         let T : Fin n → Fin n → Fin n → ℂ := fun a b c ↦
-          c3ConnectionDifferenceInChart ω₀ p.2 x₀ z a b c
+          connectionDifferenceInChart ω₀ p.2 x₀ z a b c
         have hg : g.PosDef := by
           change (ω₀.metricInChart x₀ z + complexHessian (p.2 ∘ e.symm) z).PosDef
           have hpos := (ω₀.perturb p.2 hsol.1).posDef_metricInChart x₀ hzTarget
@@ -813,6 +789,10 @@ private theorem exists_uniform_c3ConnectionDifference_bound_of_calabiEnergy
   · refine ⟨0, ?_⟩
     intro p hp z hz i j k
     exact (hKne ⟨z, hz⟩).elim
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 /-- Recover a metric derivative from the difference of the two connection coefficients. -/
 private theorem c3_recover_complex_derivative_from_connection_difference {n : ℕ}
@@ -1188,13 +1168,14 @@ private theorem norm_fderiv_ddbar_le_partialZ_local {n : ℕ}
       mul_le_mul_of_nonneg_left hmatrix (by positivity)
     _ = 8 * (n : ℝ) ^ 3 * A := by ring
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem exists_uniform_metric_c3PartialZ_bound
     (ω₀ : KahlerForm n M) (x₀ : M) (K : Set (EuclideanSpace ℂ (Fin n)))
     (hK : IsCompact K)
     (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ z ∈ K, ∀ i j k : Fin n,
-      ‖c3PartialZ (fun w ↦ ω₀.metricInChart x₀ w j k) z i‖ ≤ C := by
+      ‖wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x₀ w j k) z i‖ ≤ C := by
   classical
   let T := (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target
   have hTopen : IsOpen T := isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀
@@ -1207,7 +1188,7 @@ private theorem exists_uniform_metric_c3PartialZ_bound
     intro j k
     exact (hentry j k).continuousOn_fderiv_of_isOpen hTopen (by simp)
   have hpartial : ∀ i j k : Fin n,
-      ContinuousOn (fun z ↦ c3PartialZ (fun w ↦ ω₀.metricInChart x₀ w j k) z i) T := by
+      ContinuousOn (fun z ↦ wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x₀ w j k) z i) T := by
     intro i j k
     have hx : ContinuousOn (fun z ↦ fderiv ℝ
         (fun w ↦ ω₀.metricInChart x₀ w j k) z (EuclideanSpace.single i 1)) T :=
@@ -1215,20 +1196,24 @@ private theorem exists_uniform_metric_c3PartialZ_bound
     have hy : ContinuousOn (fun z ↦ fderiv ℝ
         (fun w ↦ ω₀.metricInChart x₀ w j k) z (Complex.I • EuclideanSpace.single i 1)) T :=
       (hderiv j k).clm_apply continuousOn_const
-    dsimp [c3PartialZ]
+    dsimp [wirtingerDerivInChart]
     exact (hx.sub (continuousOn_const.mul hy)).div_const _
   have hb : ∀ i j k : Fin n, ∃ C : ℝ, ∀ z ∈ K,
-      ‖c3PartialZ (fun w ↦ ω₀.metricInChart x₀ w j k) z i‖ ≤ C := by
+      ‖wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x₀ w j k) z i‖ ≤ C := by
     intro i j k
     exact hK.exists_bound_of_continuousOn ((hpartial i j k).mono hKt)
   let Cijk : Fin n × (Fin n × Fin n) → ℝ := fun p ↦ Classical.choose (hb p.1 p.2.1 p.2.2)
   have hCijk (p : Fin n × (Fin n × Fin n)) : ∀ z ∈ K,
-      ‖c3PartialZ (fun w ↦ ω₀.metricInChart x₀ w p.2.1 p.2.2) z p.1‖ ≤ Cijk p :=
+      ‖wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x₀ w p.2.1 p.2.2) z p.1‖ ≤ Cijk p :=
     Classical.choose_spec (hb p.1 p.2.1 p.2.2)
   obtain ⟨C, hC⟩ := (Set.finite_range Cijk).bddAbove
   refine ⟨max C 0, le_max_right _ _, ?_⟩
   intro z hz i j k
   exact (hCijk (i, (j, k)) z hz).trans (le_trans (hC (Set.mem_range_self (i, (j, k)))) (le_max_left _ _))
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem psd_entry_normSq_le_local {n : ℕ} (A : Matrix (Fin n) (Fin n) ℂ)
     (hA : A.PosSemidef) (i j : Fin n) :
@@ -1290,15 +1275,15 @@ private theorem posDef_entry_norm_le_of_diag_norm_le_local {n : ℕ}
 
 /-- The coordinate formula for a Kähler connection difference turns its uniform component bound
 into an ordinary derivative bound for the complex Hessian on a compact chart piece. -/
-private theorem c3PartialZ_hessian_difference {n : ℕ}
+private theorem wirtingerDerivInChart_hessian_difference {n : ℕ}
     (g0 : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (ψ : EuclideanSpace ℂ (Fin n) → ℝ)
     (z : EuclideanSpace ℂ (Fin n)) (j k l : Fin n)
     (hdd : DifferentiableAt ℝ (ddbar ψ) z)
     (hg0 : DifferentiableAt ℝ (fun w ↦ g0 w k l) z) :
-    c3PartialZ (fun w ↦ (g0 w + complexHessian ψ w) k l) z j -
-        c3PartialZ (fun w ↦ g0 w k l) z j =
-      c3PartialZ (fun w ↦ complexHessian ψ w k l) z j := by
+    wirtingerDerivInChart (fun w ↦ (g0 w + complexHessian ψ w) k l) z j -
+        wirtingerDerivInChart (fun w ↦ g0 w k l) z j =
+      wirtingerDerivInChart (fun w ↦ complexHessian ψ w k l) z j := by
   have hcoeff := differentiableAt_coeffMatrix_local hdd
   change DifferentiableAt ℝ (fun w j k ↦ complexHessian ψ w j k) z at hcoeff
   have hH : DifferentiableAt ℝ (fun w ↦ complexHessian ψ w k l) z :=
@@ -1308,7 +1293,7 @@ private theorem c3PartialZ_hessian_difference {n : ℕ}
   have hEq : (fun w ↦ (g0 w + complexHessian ψ w) k l) =
       (fun w ↦ g0 w k l + complexHessian ψ w k l) := by funext w; simp
   rw [hEq]
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   have hadd (e : EuclideanSpace ℂ (Fin n)) :
       fderiv ℝ (fun w ↦ g0 w k l + complexHessian ψ w k l) z e =
         fderiv ℝ (fun w ↦ g0 w k l) z e +
@@ -1320,7 +1305,8 @@ private theorem c3PartialZ_hessian_difference {n : ℕ}
   rw [hadd (EuclideanSpace.single j 1), hadd (Complex.I • EuclideanSpace.single j 1)]
   ring
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 /-- The coordinate formula for a Kähler connection difference turns its uniform component bound
 into an ordinary derivative bound for the complex Hessian on a compact chart piece. -/
 private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
@@ -1334,7 +1320,7 @@ private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
     (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target)
     (hn : n ≠ 0)
     (T : ℝ) (hT : ∀ p ∈ S, ∀ z ∈ K, ∀ i j k : Fin n,
-      ‖c3ConnectionDifferenceInChart ω₀ p.2 x₀ z i j k‖ ≤ T) :
+      ‖connectionDifferenceInChart ω₀ p.2 x₀ z i j k‖ ≤ T) :
     ∃ C : ℝ, ∀ p ∈ S, ∀ z ∈ K,
       ‖fderiv ℝ (ddbar (p.2 ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm)) z‖ ≤ C := by
   classical
@@ -1401,7 +1387,7 @@ private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
     exact posDef_entry_norm_le_of_diag_norm_le_local g hGpos (D * C₀')
       (mul_nonneg hD.le hC₀') (fun a ↦ (hdiag a).1) i m
   have hq0_entry (b c l : Fin n) :
-      ‖c3PartialZ (fun w ↦ g₀f w c l) z b‖ ≤ Cq0 :=
+      ‖wirtingerDerivInChart (fun w ↦ g₀f w c l) z b‖ ≤ Cq0 :=
     hq0 z hz b c l
   have hg₀smooth (c l : Fin n) :
       ContDiffAt ℝ 1 (fun w ↦ g₀f w c l) z := by
@@ -1409,11 +1395,11 @@ private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
       ω₀.contDiffOn_metricInChart x₀ c l
     exact (hentry.contDiffAt hztop).of_le horder1
   have hpartial (b c l : Fin n) :
-      ‖c3PartialZ (fun w ↦ complexHessian ψ w c l) z b‖ ≤ A := by
-    let q₀ : Fin n → ℂ := fun a ↦ c3PartialZ (fun w ↦ g₀f w c a) z b
-    let q : Fin n → ℂ := fun a ↦ c3PartialZ (fun w ↦ gφf w c a) z b
+      ‖wirtingerDerivInChart (fun w ↦ complexHessian ψ w c l) z b‖ ≤ A := by
+    let q₀ : Fin n → ℂ := fun a ↦ wirtingerDerivInChart (fun w ↦ g₀f w c a) z b
+    let q : Fin n → ℂ := fun a ↦ wirtingerDerivInChart (fun w ↦ gφf w c a) z b
     let Tvec : Fin n → ℂ := fun i ↦
-      c3ConnectionDifferenceInChart ω₀ p.2 x₀ z i b c
+      connectionDifferenceInChart ω₀ p.2 x₀ z i b c
     let r : Fin n → ℂ := fun i ↦ ∑ a : Fin n, g₀⁻¹ a i * q₀ a
     have hq₀ (a : Fin n) : ‖q₀ a‖ ≤ Cq0 := by
       dsimp [q₀]
@@ -1443,7 +1429,7 @@ private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
         dsimp [ψ, e]
       dsimp [Tvec, q, q₀, g, g₀, gφf, g₀f]
       rw [hψchart]
-      simp [c3ConnectionDifferenceInChart, c3ChristoffelInChart]
+      simp [connectionDifferenceInChart, christoffelInChart]
     have hrec (m : Fin n) : q m =
         ∑ i : Fin n, g i m * (Tvec i + r i) := by
       exact c3_recover_complex_derivative_from_connection_difference
@@ -1451,13 +1437,13 @@ private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
     have hq_bound : ‖q l‖ ≤ (n : ℝ) * G * (T' + R) := by
       simpa only [Fintype.card_fin] using
         c3_norm_recovered_derivative_le g q r Tvec G T' R hG hrec hGentry hTvec hr l
-    have hsplit := c3PartialZ_hessian_difference g₀f ψ z b c l hddbar
+    have hsplit := wirtingerDerivInChart_hessian_difference g₀f ψ z b c l hddbar
       ((hg₀smooth c l).differentiableAt (by norm_num))
-    have hsplit' : q l - q₀ l = c3PartialZ
+    have hsplit' : q l - q₀ l = wirtingerDerivInChart
         (fun w ↦ complexHessian ψ w c l) z b := by
       simpa [q, q₀, gφf] using hsplit
     calc
-      ‖c3PartialZ (fun w ↦ complexHessian ψ w c l) z b‖ = ‖q l - q₀ l‖ := by
+      ‖wirtingerDerivInChart (fun w ↦ complexHessian ψ w c l) z b‖ = ‖q l - q₀ l‖ := by
         rw [← hsplit']
       _ ≤ ‖q l‖ + ‖q₀ l‖ := norm_sub_le _ _
       _ ≤ (n : ℝ) * G * (T' + R) + Cq0 :=
@@ -1465,7 +1451,7 @@ private theorem exists_uniform_fderiv_ddbar_bound_of_c3ConnectionDifference
       _ = A := by simp [A]
   have hbound := norm_fderiv_ddbar_le_partialZ_local hψ3 hddbar A hA (by
     intro b c l
-    simpa only [c3PartialZ] using hpartial b c l)
+    simpa only [wirtingerDerivInChart] using hpartial b c l)
   exact hbound
 
 /-- Translate a uniform bound on the Calabi energy and metric equivalence into a uniform

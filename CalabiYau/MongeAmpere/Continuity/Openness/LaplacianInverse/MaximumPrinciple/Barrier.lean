@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
 /-!

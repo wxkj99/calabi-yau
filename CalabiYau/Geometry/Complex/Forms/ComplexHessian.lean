@@ -4,7 +4,7 @@ public import CalabiYau.Geometry.Complex.Basic
 public import CalabiYau.Geometry.Complex.Forms.OneOne
 
 import Mathlib.Analysis.Calculus.TaylorIntegral
-import CalabiYau.Analysis.Complex.HolomorphicRegularity
+import CalabiYau.Mathlib.Analysis.Complex.Holomorphic.ContDiff
 import CalabiYau.Geometry.Complex.Forms.ComplexHessian.ComplexLineHarmonic
 import CalabiYau.Geometry.Complex.Forms.ComplexHessian.StrongMaximum
 
@@ -596,20 +596,28 @@ end VectorSpace
 section Manifold
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+section
 
-variable (n) in
+variable (n)
+
+
 /-- `i∂∂̄φ` on a complex manifold, computed at each point in the chart centred there. -/
 noncomputable def mddbar (φ : M → ℝ) : FormField (EuclideanSpace ℂ (Fin n)) M 2 := fun x ↦
   ddbar (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm)
     (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)
 
-variable (n) in
 /-- `i∂φ ∧ ∂̄φ` on a complex manifold, computed at each point in the chart centred there. -/
 noncomputable def mdWedgeDBar (φ : M → ℝ) : FormField (EuclideanSpace ℂ (Fin n)) M 2 := fun x ↦
   dWedgeDBar (fderiv ℝ (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm)
     (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
 
+end
+
+variable  {φ ψ : M → ℝ}
+section
+
 variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] {φ ψ : M → ℝ}
+
 
 /-- `mddbar φ` is computed by `ddbar` in every chart. -/
 theorem chartRep_mddbar (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ) (x : M)
@@ -1038,54 +1046,14 @@ theorem isClosed_mddbar (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) �
     (mddbar n φ).IsClosed :=
   (isExact_mddbar hφ).isClosed
 
-theorem isSmooth_mdWedgeDBar (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ) :
-    (mdWedgeDBar n φ).IsSmooth := by
-  intro x
-  let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
-  have hφon : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ univ :=
-    contMDiffOn_univ.mpr hφ
-  have hφsymm : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
-      (φ ∘ e.symm) e.target := by
-    exact hφon.comp (contMDiffOn_extChartAt_symm x) (by intro z hz; simp)
-  have hφchart : ContDiffOn ℝ ∞ (φ ∘ e.symm) e.target := hφsymm.contDiffOn
-  have h_inf : (∞ : ℕ∞ω) + 1 ≤ ∞ :=
-    le_of_eq (show (∞ : ℕ∞ω) = ∞ + 1 from rfl).symm
-  have hfd : ContDiffOn ℝ ∞ (fderiv ℝ (φ ∘ e.symm)) e.target :=
-    hφchart.fderiv_of_isOpen (isOpen_extChartAt_target x) h_inf
-  let L : (EuclideanSpace ℂ (Fin n) →L[ℝ] ℝ) ≃ₗᵢ[ℝ]
-      (EuclideanSpace ℂ (Fin n) [⋀^Fin 1]→L[ℝ] ℝ) :=
-    ContinuousAlternatingMap.ofSubsingletonLIE (0 : Fin 1)
-  have hL : ContDiffOn ℝ ∞ (fun z ↦ L (fderiv ℝ (φ ∘ e.symm) z)) e.target := by
-    change ContDiffOn ℝ ∞
-      (fun z ↦ L.toContinuousLinearMap (fderiv ℝ (φ ∘ e.symm) z)) e.target
-    exact hfd.continuousLinearMap_comp L.toContinuousLinearMap
-  have hbilin : ContDiffOn ℝ ∞ (fun z ↦
-      ((fderiv ℝ (φ ∘ e.symm) z).comp (EuclideanSpace.complexStructure n)).smulRight
-        (L (fderiv ℝ (φ ∘ e.symm) z))) e.target := by
-    fun_prop
-  have hmap : ContDiffOn ℝ ∞
-      (fun z ↦ dWedgeDBar (fderiv ℝ (φ ∘ e.symm) z)) e.target := by
-    have halt := hbilin.continuousLinearMap_comp
-      (ContinuousAlternatingMap.alternatizeUncurryFinCLM ℝ
-        (EuclideanSpace ℂ (Fin n)) ℝ)
-    have hhalf := halt.const_smul (1 / 2 : ℝ)
-    exact hhalf.congr (fun z hz ↦ by
-      change (1 / 2 : ℝ) • ContinuousAlternatingMap.alternatizeUncurryFin
-          (((fderiv ℝ (φ ∘ e.symm) z).comp (EuclideanSpace.complexStructure n)).smulRight
-            (ofSubsingleton ℝ (EuclideanSpace ℂ (Fin n)) ℝ (0 : Fin 1)
-              (fderiv ℝ (φ ∘ e.symm) z))) =
-        (1 / 2 : ℝ) • ContinuousAlternatingMap.alternatizeUncurryFinCLM ℝ
-          (EuclideanSpace ℂ (Fin n)) ℝ
-          (((fderiv ℝ (φ ∘ e.symm) z).comp (EuclideanSpace.complexStructure n)).smulRight
-            (L (fderiv ℝ (φ ∘ e.symm) z)))
-      rw [ContinuousAlternatingMap.alternatizeUncurryFinCLM_apply]
-      rfl)
-  change ContDiffOn ℝ ∞ ((mdWedgeDBar n φ).chartRep x) e.target
-  exact hmap.congr (fun z hz ↦ chartRep_mdWedgeDBar hφ x hz)
+end
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 theorem isNonneg_mdWedgeDBar (φ : M → ℝ) : (mdWedgeDBar n φ).IsNonneg := fun _ ↦
   isNonneg_dWedgeDBar _
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] {φ ψ : M → ℝ}
+
 
 theorem mddbar_add (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
     (hψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ ψ) :
@@ -1185,7 +1153,8 @@ theorem mddbar_sub (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(�
     ddbar (φ ∘ e.symm) (e x) - ddbar (ψ ∘ e.symm) (e x)
   exact ddbar_sub hφC hψC
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
+end
+
 @[simp]
 theorem mddbar_const (c : ℝ) :
     mddbar n (fun _ : M ↦ c) = 0 := by
@@ -1193,12 +1162,15 @@ theorem mddbar_const (c : ℝ) :
   change ddbar (fun _ : EuclideanSpace ℂ (Fin n) ↦ c) _ = 0
   exact ddbar_const c
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 @[simp]
 theorem mddbar_add_const (c : ℝ) :
     mddbar n (fun x ↦ φ x + c) = mddbar n φ := by
   funext x
   exact ddbar_add_const c
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] {φ ψ : M → ℝ}
+
 
 /-- Chain rule: `i∂∂̄(h ∘ φ) = h'(φ) i∂∂̄φ + h''(φ) i∂φ ∧ ∂̄φ`. -/
 theorem mddbar_comp_real (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ) {h : ℝ → ℝ}
@@ -1334,7 +1306,7 @@ theorem eq_const_of_mddbar_eq_zero [CompactSpace M] [ConnectedSpace M]
           _ = r := by ring
       · exact hf
       · exact fun w hw ↦ htrace w hw v
-    have hconst := eqOn_ball_of_harmonicOnNhd_complexLine hr hlocalMax hlines
+    have hconst := eqOn_ball_of_harmonicOnNhd_complexLine hlocalMax hlines
     let W : Set M := e.source ∩ e ⁻¹' Metric.ball z (r / 2)
     have hWopen : IsOpen W := by
       change IsOpen ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).source ∩
@@ -1371,5 +1343,7 @@ theorem eq_const_of_mddbar_eq_zero [CompactSpace M] [ConnectedSpace M]
     have hx : x ∈ S := by simp [hUniv]
     change φ x = c at hx
     exact hx
+
+end
 
 end Manifold

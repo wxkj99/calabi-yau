@@ -3,7 +3,14 @@
 module
 public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Defs
 public import CalabiYau.Geometry.Riemannian.Metric.Coordinates.ChartGram
-public import CalabiYau.Geometry.Riemannian.TensorInner.Fiber.MetricData
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
+public import Mathlib.Analysis.InnerProductSpace.Defs
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Mathlib.Analysis.InnerProductSpace.Positive
+public import Mathlib.Analysis.InnerProductSpace.Projection.FiniteDimensional
+public import CalabiYau.Geometry.Riemannian.Metric.Basic
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 public import Mathlib.Geometry.Manifold.VectorBundle.ContMDiffSection
@@ -11,8 +18,6 @@ public import Mathlib.Topology.VectorBundle.Riemannian
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

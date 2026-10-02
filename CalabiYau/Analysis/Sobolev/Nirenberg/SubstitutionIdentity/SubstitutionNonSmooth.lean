@@ -3,7 +3,17 @@
 module
 public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.MasterInequalityNonSmooth
 public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.WeakRegularity
-public import CalabiYau.Analysis.Sobolev.Solutions.WeakSolution
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
+public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Distribution
+public import Mathlib.Analysis.Normed.Lp.SmoothApprox
+public import Mathlib.Analysis.Normed.Operator.Extend
+public import Mathlib.Analysis.InnerProductSpace.Dual
+public import Mathlib.MeasureTheory.Function.L2Space
+public import CalabiYau.Analysis.Sobolev.Tools.Mollification.Basic
 
 @[expose] public section
 
@@ -44,14 +54,14 @@ private lemma shiftedEllipticity_pointwise
     change ‖(WithLp.toLp 2 V : EuclN) i‖ ^ 2 = _
     have : (WithLp.toLp 2 V : EuclN) i = V i := by rfl
     rw [this, Real.norm_eq_abs, sq_abs]
-  have hcoer : B.lam * ‖ξ‖ ^ 2 ≤ ⟪ξ, DeGiorgi.matMulE (B.a y) ξ⟫_ℝ :=
+  have hcoer : B.lam * ‖ξ‖ ^ 2 ≤ ⟪ξ, Sobolev.Euclidean.matMulE (B.a y) ξ⟫_ℝ :=
     B.coercive y hx_translate ξ
   have h_inner :
-      ⟪ξ, DeGiorgi.matMulE (B.a y) ξ⟫_ℝ =
+      ⟪ξ, Sobolev.Euclidean.matMulE (B.a y) ξ⟫_ℝ =
         ∑ i : Fin d, ∑ j : Fin d, B.a y i j * V i * V j := by
-    have hmat_ofLp : (DeGiorgi.matMulE (B.a y) ξ).ofLp = (B.a y).mulVec V := by
-      rw [DeGiorgi.matMulE_ofLp, hξ_ofLp]
-    change (DeGiorgi.matMulE (B.a y) ξ).ofLp ⬝ᵥ star ξ.ofLp = _
+    have hmat_ofLp : (Sobolev.Euclidean.matMulE (B.a y) ξ).ofLp = (B.a y).mulVec V := by
+      rw [Sobolev.Euclidean.matMulE_ofLp, hξ_ofLp]
+    change (Sobolev.Euclidean.matMulE (B.a y) ξ).ofLp ⬝ᵥ star ξ.ofLp = _
     rw [hmat_ofLp, hξ_ofLp]
     have hstarV : (star V : Fin d → ℝ) = V := by funext i; simp
     rw [hstarV]

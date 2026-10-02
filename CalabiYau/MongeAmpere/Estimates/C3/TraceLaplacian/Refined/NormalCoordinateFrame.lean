@@ -70,7 +70,7 @@ structure C3RefinedTraceNormalCoordinateFrame (ω₀ : KahlerForm n M) (φ : M �
   eigenvalue_pos : ∀ i, 0 < eigenvalue i
   reference_normal : c3RefinedTracePulledReferenceMetric ω₀ x coord center = 1
   reference_first : ∀ i j p,
-    c3PartialZ (fun w ↦ c3RefinedTracePulledReferenceMetric ω₀ x coord w i j) center p = 0
+    wirtingerDerivInChart (fun w ↦ c3RefinedTracePulledReferenceMetric ω₀ x coord w i j) center p = 0
   perturbed_diagonal : c3RefinedTracePulledPerturbedMetric ω₀ φ x coord center =
     Matrix.diagonal (fun i ↦ (eigenvalue i : ℂ))
 
@@ -439,13 +439,13 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       {z : EuclideanSpace ℂ (Fin n)} (hα : ContDiffAt ℝ 1 α z)
       (hclosed : extDeriv α z = 0) (hone : ∀ᶠ y in nhds z, (α y).IsOneOne)
       (i j k : Fin n) :
-      c3PartialZ (fun y ↦ (α y).coeffMatrix j k) z i =
-        c3PartialZ (fun y ↦ (α y).coeffMatrix i k) z j := by
+      wirtingerDerivInChart (fun y ↦ (α y).coeffMatrix j k) z i =
+        wirtingerDerivInChart (fun y ↦ (α y).coeffMatrix i k) z j := by
     let D := fun (d a b : EuclideanSpace ℂ (Fin n)) ↦
       fderiv ℝ (fun y ↦ α y ![a, b]) z d
     have h := c3Refined_closed_oneOne_partial_identity hα hclosed hone
       (EuclideanSpace.single i 1) (EuclideanSpace.single j 1) (EuclideanSpace.single k 1)
-    unfold c3PartialZ
+    unfold wirtingerDerivInChart
     rw [c3Refined_fderiv_coeffMatrix_entry hα j k,
       c3Refined_fderiv_coeffMatrix_entry hα i k]
     simp only [_root_.sub_apply, _root_.smul_apply,
@@ -527,8 +527,8 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       {z : EuclideanSpace ℂ (Fin n)}
       (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
       (i j k : Fin n) :
-      c3PartialZ (fun w ↦ ω₀.metricInChart x w j k) z i =
-        c3PartialZ (fun w ↦ ω₀.metricInChart x w i k) z j := by
+      wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x w j k) z i =
+        wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x w i k) z j := by
     let α := ω₀.toFormField.chartRep x
     have hαtop : ContDiffAt ℝ ∞ α z :=
       (ω₀.isSmooth x).contDiffAt ((isOpen_extChartAt_target x).mem_nhds hz)
@@ -900,21 +900,21 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
     · intro v hv
       exact isUnit_iff_ne_zero.mpr hv.2
 
-  have c3PartialZ_mul {n : ℕ}
+  have wirtingerDerivInChart_mul {n : ℕ}
       {u v : EuclideanSpace ℂ (Fin n) → ℂ} {z : EuclideanSpace ℂ (Fin n)}
       (hu : DifferentiableAt ℝ u z) (hv : DifferentiableAt ℝ v z) (j : Fin n) :
-      c3PartialZ (fun w ↦ u w * v w) z j =
-        c3PartialZ u z j * v z + u z * c3PartialZ v z j := by
-    unfold c3PartialZ
+      wirtingerDerivInChart (fun w ↦ u w * v w) z j =
+        wirtingerDerivInChart u z j * v z + u z * wirtingerDerivInChart v z j := by
+    unfold wirtingerDerivInChart
     rw [fderiv_fun_mul hu hv]
     simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
     ring
 
-  have c3PartialZ_star_zero {n : ℕ}
+  have wirtingerDerivInChart_star_zero {n : ℕ}
       (f : EuclideanSpace ℂ (Fin n) → ℂ)
       (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
       (hf : DifferentiableAt ℂ f z) :
-      c3PartialZ (fun w ↦ star (f w)) z p = 0 := by
+      wirtingerDerivInChart (fun w ↦ star (f w)) z p = 0 := by
     have hreal : HasFDerivAt f ((fderiv ℂ f z).restrictScalars ℝ) z :=
       hf.hasFDerivAt.restrictScalars ℝ
     have hconj : HasFDerivAt (Complex.conjCLE : ℂ → ℂ)
@@ -930,7 +930,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
           (EuclideanSpace.single p (1 : ℂ)) := by
       change fderiv ℂ f z (Complex.I • EuclideanSpace.single p (1 : ℂ)) = _
       exact (fderiv ℂ f z).map_smul Complex.I _
-    unfold c3PartialZ
+    unfold wirtingerDerivInChart
     rw [hstar]
     simp only [ContinuousLinearMap.comp_apply]
     rw [hI]
@@ -938,7 +938,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
     rw [← mul_assoc, Complex.I_mul_I]
     ring
 
-  have c3PartialZ_directional_smul {n : ℕ}
+  have wirtingerDerivInChart_directional_smul {n : ℕ}
       (D : EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ) (c : ℂ)
       (v : EuclideanSpace ℂ (Fin n)) :
       D (c • v) - Complex.I * D (Complex.I • (c • v)) =
@@ -972,13 +972,13 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
     push_cast
     linear_combination
 
-  have c3PartialZ_comp {n : ℕ}
+  have wirtingerDerivInChart_comp {n : ℕ}
       (F : EuclideanSpace ℂ (Fin n) → ℂ)
       (ψ : EuclideanSpace ℂ (Fin n) → EuclideanSpace ℂ (Fin n))
       (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
       (hF : DifferentiableAt ℝ F (ψ z)) (hψ : DifferentiableAt ℂ ψ z) :
-      c3PartialZ (fun w ↦ F (ψ w)) z p =
-        ∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p * c3PartialZ F (ψ z) a := by
+      wirtingerDerivInChart (fun w ↦ F (ψ w)) z p =
+        ∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p * wirtingerDerivInChart F (ψ z) a := by
     have hψR : HasFDerivAt ψ ((fderiv ℂ ψ z).restrictScalars ℝ) z :=
       hψ.hasFDerivAt.restrictScalars ℝ
     have hψreal : fderiv ℝ ψ z = (fderiv ℂ ψ z).restrictScalars ℝ := by
@@ -994,7 +994,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
     have hvec : L e = ∑ a, (A a p) • EuclideanSpace.single a (1 : ℂ) := by
       ext a
       simp [A, e, EuclideanSpace.clmMatrix, Pi.single_apply]
-    unfold c3PartialZ
+    unfold wirtingerDerivInChart
     rw [hcomp', hψreal]
     simp only [ContinuousLinearMap.comp_apply]
     change (D (L e) - Complex.I * D (L (Complex.I • e))) / 2 = _
@@ -1007,18 +1007,18 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
           Complex.I * D (Complex.I • ((A a p) • EuclideanSpace.single a (1 : ℂ)))) := by
       rw [Finset.mul_sum, Finset.sum_sub_distrib]
     rw [hsum]
-    simp_rw [c3PartialZ_directional_smul]
+    simp_rw [wirtingerDerivInChart_directional_smul]
     simp only [div_eq_mul_inv, Finset.sum_mul]
     apply Finset.sum_congr rfl
     intro a ha
     ring
 
-  have c3PartialZ_sum {n : ℕ}
+  have wirtingerDerivInChart_sum {n : ℕ}
       (F : (Fin n × Fin n) → EuclideanSpace ℂ (Fin n) → ℂ)
       (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
       (hF : ∀ i, DifferentiableAt ℝ (F i) z) :
-      c3PartialZ (fun w ↦ ∑ i, F i w) z p = ∑ i, c3PartialZ (F i) z p := by
-    unfold c3PartialZ
+      wirtingerDerivInChart (fun w ↦ ∑ i, F i w) z p = ∑ i, wirtingerDerivInChart (F i) z p := by
+    unfold wirtingerDerivInChart
     have hfd : fderiv ℝ (fun w ↦ ∑ i, F i w) z = ∑ i, fderiv ℝ (F i) z := by
       simpa using fderiv_fun_sum (u := Finset.univ) (fun i hi ↦ hF i)
     rw [hfd]
@@ -1039,10 +1039,10 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       (z : EuclideanSpace ℂ (Fin n)) (p : Fin n)
       (hu : DifferentiableAt ℂ u z) (hv : DifferentiableAt ℂ v z)
       (hF : DifferentiableAt ℝ F (ψ z)) (hψ : DifferentiableAt ℂ ψ z) :
-      c3PartialZ (fun w ↦ u w * F (ψ w) * star (v w)) z p =
-        c3PartialZ u z p * F (ψ z) * star (v z) +
+      wirtingerDerivInChart (fun w ↦ u w * F (ψ w) * star (v w)) z p =
+        wirtingerDerivInChart u z p * F (ψ z) * star (v z) +
           u z * (∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p *
-            c3PartialZ F (ψ z) a) * star (v z) := by
+            wirtingerDerivInChart F (ψ z) a) * star (v z) := by
     have hψR : HasFDerivAt ψ ((fderiv ℂ ψ z).restrictScalars ℝ) z :=
       hψ.hasFDerivAt.restrictScalars ℝ
     have hcompDiff : DifferentiableAt ℝ (fun w ↦ F (ψ w)) z :=
@@ -1053,10 +1053,10 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
         hv.hasFDerivAt.restrictScalars ℝ
       exact (Complex.conjCLE.hasFDerivAt (x := v z)).comp z hvr |>.differentiableAt
     have hleft : DifferentiableAt ℝ (fun w ↦ u w * F (ψ w)) z := huR.mul hcompDiff
-    rw [c3PartialZ_mul hleft hvStar p,
-      c3PartialZ_mul huR hcompDiff p,
-      c3PartialZ_star_zero v z p hv,
-      c3PartialZ_comp F ψ z p hF hψ]
+    rw [wirtingerDerivInChart_mul hleft hvStar p,
+      wirtingerDerivInChart_mul huR hcompDiff p,
+      wirtingerDerivInChart_star_zero v z p hv,
+      wirtingerDerivInChart_comp F ψ z p hF hψ]
     ring
 
   have c3Pullback_entry_derivative {n : ℕ}
@@ -1067,12 +1067,12 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       (hJ : ∀ r s, DifferentiableAt ℂ (fun w ↦ J w r s) z)
       (hG : ∀ r s, DifferentiableAt ℝ (fun w ↦ G w r s) (ψ z))
       (hψ : DifferentiableAt ℂ ψ z) :
-      c3PartialZ
+      wirtingerDerivInChart
           (fun w ↦ ((J w).transpose * G (ψ w) * (J w).map star) j k) z p =
         ∑ r, ∑ s,
-          (c3PartialZ (fun w ↦ J w r j) z p * G (ψ z) r s * star (J z s k) +
+          (wirtingerDerivInChart (fun w ↦ J w r j) z p * G (ψ z) r s * star (J z s k) +
             J z r j * (∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p *
-              c3PartialZ (fun w ↦ G w r s) (ψ z) a) * star (J z s k)) := by
+              wirtingerDerivInChart (fun w ↦ G w r s) (ψ z) a) * star (J z s k)) := by
     let T (rs : Fin n × Fin n) (w : EuclideanSpace ℂ (Fin n)) : ℂ :=
       (J w rs.1 j * star (J w rs.2 k)) * G (ψ w) rs.1 rs.2
     have hentry (w : EuclideanSpace ℂ (Fin n)) :
@@ -1105,7 +1105,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       rw [hentry w]
       simp only [T, Fintype.sum_prod_type]
     rw [hfun]
-    rw [c3PartialZ_sum T z p hTdiff]
+    rw [wirtingerDerivInChart_sum T z p hTdiff]
     simp only [Fintype.sum_prod_type]
     apply Finset.sum_congr rfl
     intro r hr
@@ -1144,7 +1144,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
         EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n))
       (hQ : ∀ u v, Q u v = Q v u)
       (a j p : Fin n) :
-      c3PartialZ
+      wirtingerDerivInChart
         (fun w ↦ EuclideanSpace.clmMatrix
           (fderiv ℂ (c3RefinedQuadraticChartMap z₀ A Q) w) a j) 0 p =
         Q (EuclideanSpace.single p 1) (EuclideanSpace.single j 1) a := by
@@ -1171,7 +1171,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
         Complex.I * (L.restrictScalars ℝ) (EuclideanSpace.single p (1 : ℂ)) := by
       change L (Complex.I • EuclideanSpace.single p (1 : ℂ)) = _
       exact L.map_smul Complex.I _
-    unfold c3PartialZ
+    unfold wirtingerDerivInChart
     rw [hfun, hfd]
     simp only
     rw [hI]
@@ -1189,7 +1189,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       (Q : EuclideanSpace ℂ (Fin n) →L[ℂ]
         EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n))
       (hQ : ∀ u v, Q u v = Q v u) (p j k : Fin n) :
-      c3PartialZ
+      wirtingerDerivInChart
           (fun v ↦ c3RefinedTracePulledReferenceMetric ω₀ x
             (c3RefinedQuadraticChartMap z₀ A Q) v j k) 0 p =
         (∑ a, ∑ b,
@@ -1198,7 +1198,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
           ∑ a, ∑ b, ∑ c,
             (EuclideanSpace.clmMatrix A a j) * star (EuclideanSpace.clmMatrix A b k) *
               (EuclideanSpace.clmMatrix A c p) *
-                c3PartialZ (fun w ↦ ω₀.metricInChart x w a b) z₀ c := by
+                wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x w a b) z₀ c := by
     let ψ := c3RefinedQuadraticChartMap z₀ A Q
     let G : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
       fun z ↦ ω₀.metricInChart x z
@@ -1234,7 +1234,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
       change EuclideanSpace.clmMatrix (fderiv ℂ ψ 0) = _
       rw [hderiv0]
     have hJpartial (a b : Fin n) :
-        c3PartialZ (fun z ↦ J z a b) 0 p =
+        wirtingerDerivInChart (fun z ↦ J z a b) 0 p =
           Q (EuclideanSpace.single p 1) (EuclideanSpace.single b 1) a :=
       c3Quadratic_jacobian_entry_partial z₀ A Q hQ a b p
     have hψ0 : ψ 0 = z₀ := by simp [ψ, c3RefinedQuadraticChartMap]
@@ -1242,12 +1242,12 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
         fun v ↦ ((J v).transpose * G (ψ v) * (J v).map star) j k by
           funext v
           rfl]
-    have hPull' : c3PartialZ
+    have hPull' : wirtingerDerivInChart
         (fun w ↦ ((J w).transpose * G (ψ w) * (J w).map star) j k) 0 p =
         ∑ r, ∑ s,
-          (c3PartialZ (fun w ↦ J w r j) 0 p * G (ψ 0) r s * star (J 0 s k) +
+          (wirtingerDerivInChart (fun w ↦ J w r j) 0 p * G (ψ 0) r s * star (J 0 s k) +
             J 0 r j * (∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ 0)) a p *
-              c3PartialZ (fun w ↦ G w r s) (ψ 0) a) * star (J 0 s k)) := by
+              wirtingerDerivInChart (fun w ↦ G w r s) (ψ 0) a) * star (J 0 s k)) := by
       simpa using hPull
     rw [hPull']
     simp_rw [hJpartial]
@@ -1259,12 +1259,12 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
     let aterm : Fin n → Fin n → ℂ := fun a b ↦
       (EuclideanSpace.clmMatrix A a j *
         (∑ c, EuclideanSpace.clmMatrix A c p *
-          c3PartialZ (fun w ↦ ω₀.metricInChart x w a b) z₀ c)) *
+          wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x w a b) z₀ c)) *
         star (EuclideanSpace.clmMatrix A b k)
     let cterm : Fin n → Fin n → Fin n → ℂ := fun a b c ↦
       EuclideanSpace.clmMatrix A a j * star (EuclideanSpace.clmMatrix A b k) *
         EuclideanSpace.clmMatrix A c p *
-          c3PartialZ (fun w ↦ ω₀.metricInChart x w a b) z₀ c
+          wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x w a b) z₀ c
     have hsplit : ∑ a, ∑ b, (qterm a b + aterm a b) =
         (∑ a, ∑ b, qterm a b) + (∑ a, ∑ b, aterm a b) := by
       calc
@@ -1304,7 +1304,7 @@ theorem exists_c3RefinedTrace_normalCoordinateFrame (ω₀ : KahlerForm n M)
   obtain ⟨J, eigenvalue, hnormal, hdiagonal, heigenvalue, hJunit⟩ :=
     c3RefinedTrace_exists_simultaneous_normalization G₀ H₀ hG₀ hH₀
   let D : Fin n → Fin n → Fin n → ℂ := fun p a b ↦
-    c3PartialZ (fun w ↦ ω₀.metricInChart x w a b) z₀ p
+    wirtingerDerivInChart (fun w ↦ ω₀.metricInChart x w a b) z₀ p
   have hD : ∀ p a b, D p a b = D a p b := by
     intro p a b
     exact c3Refined_kahler_chart_metric_symmetry ω₀ x hz₀ p a b

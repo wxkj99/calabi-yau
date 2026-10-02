@@ -1,14 +1,13 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Regularity/ChartBilinear/UniformDiffQuotBoundFromDomain/WeakPartialDerivativeBound.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Calculus.Cutoff.Compact
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
 public import CalabiYau.Analysis.Elliptic.MetricExtension.DensityBounds
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain.DataBounds
 public import CalabiYau.Analysis.Sobolev.Nirenberg.H2Regularity.UniformDifferenceQuotient
 public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearVariationalIdentity
 public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain.Coercivity
-public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain.Cutoff
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain.SolutionDifferenceQuotient
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain.TestFunction
 
@@ -135,7 +134,7 @@ private theorem exists_smooth_metric_extension_with_density
   have hlamK_le_lamK0 : lamK ≤ lamK0 := min_le_right _ _
   have hlamK0_bound_for_lamK : ∀ y ∈ tsupport χ, ∀ ξ : EuclN,
       lamK * ‖ξ‖ ^ 2 ≤
-        ⟪ξ, DeGiorgi.matMulE
+        ⟪ξ, Sobolev.Euclidean.matMulE
           (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
             weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ := by
     intro y hy ξ
@@ -160,10 +159,10 @@ private theorem exists_smooth_metric_extension_with_density
     exact extendedMatrix_symm (I := I) g α
       (χ := χ) hχ_tsupp_chart i j y
   have h_a_coercive : ∀ y ∈ (Set.univ : Set EuclN), ∀ ξ : EuclN,
-      lamK * ‖ξ‖ ^ 2 ≤ ⟪ξ, DeGiorgi.matMulE (aFun y) ξ⟫_ℝ := by
+      lamK * ‖ξ‖ ^ 2 ≤ ⟪ξ, Sobolev.Euclidean.matMulE (aFun y) ξ⟫_ℝ := by
     intro y _ ξ
     change lamK * ‖ξ‖ ^ 2 ≤
-      ⟪ξ, DeGiorgi.matMulE
+      ⟪ξ, Sobolev.Euclidean.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ
     exact extendedMatrix_coercive (I := I) g α
@@ -380,7 +379,7 @@ theorem uniform_diffQuot_weakPartial_bound_quantitative
   have hg_g_l2 : ∀ i, MemLp (g_g i) 2 (volume : Measure EuclN) := fun i =>
     cutoff_uChart_partial_memLp_two_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_tsupp_in_chart i
-  have hg_g_isWP : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+  have hg_g_isWP : ∀ i, Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
       (g_g i) u_g Set.univ := fun i =>
     cutoff_uChart_hasWeakPartialDeriv_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_tsupp_in_chart i

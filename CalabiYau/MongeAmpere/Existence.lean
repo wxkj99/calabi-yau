@@ -3,7 +3,7 @@ module
 public import CalabiYau.MongeAmpere.Continuity.Basic
 public import CalabiYau.Geometry.Kahler.Sobolev
 public import CalabiYau.Geometry.Kahler.Poisson
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Continuity.Openness
 import CalabiYau.MongeAmpere.Continuity.Closedness
 

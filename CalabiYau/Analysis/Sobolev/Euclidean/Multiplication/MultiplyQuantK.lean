@@ -148,7 +148,7 @@ section LeibnizQuant
 variable [NeZero d]
 
 theorem wkpNorm_smul_smooth_bounded_le
-    (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
+    (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {η : E → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -161,7 +161,7 @@ theorem wkpNorm_smul_smooth_bounded_le
   induction k generalizing η with
   | zero =>
       exact wkpNorm_smul_smooth_bounded_le_one (k := 0) (Nat.zero_le _)
-        hp_one hp_top hΩ_open hη_smooth hC_nonneg hη_bound
+        hp_one hΩ_open hη_smooth hC_nonneg hη_bound
   | succ k ih =>
       have hη_bound_k : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C :=
         fun j hj x hx => hη_bound j (hj.trans (Nat.le_succ _)) x hx
@@ -252,7 +252,7 @@ theorem wkpNorm_smul_smooth_bounded_le
           intro x hx
           have h := hη_bound 1 (Nat.succ_le_succ (Nat.zero_le _)) x hx
           rwa [norm_iteratedFDeriv_one] at h
-        have hu_W1p : DeGiorgi.MemW1p (d := d) p u Ω := hu.memW1p
+        have hu_W1p : Sobolev.Euclidean.MemW1p (d := d) p u Ω := hu.memW1p
         have hae := chosenWeakPartialOrZero_smul_smooth_bounded_ae (d := d) hp_one hΩ_open
           hη_smooth h0' h1' hu_W1p i
         rw [wkpNorm_congr_ae (d := d) hp_one hΩ_open hae]

@@ -24,9 +24,9 @@ variable {n : ℕ}
 noncomputable def c3CurvatureCovariantZ
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p j q k l : Fin n) : ℂ :=
-  c3PartialZ (fun w => chartCurvature g w j q k l) z p -
-    ∑ r, c3ChristoffelInChart g z r p j * chartCurvature g z r q k l -
-    ∑ r, c3ChristoffelInChart g z r p k * chartCurvature g z j q r l
+  wirtingerDerivInChart (fun w => chartCurvature g w j q k l) z p -
+    ∑ r, christoffelInChart g z r p j * chartCurvature g z r q k l -
+    ∑ r, christoffelInChart g z r p k * chartCurvature g z j q r l
 
 @[expose]
 noncomputable def c3RaisedCurvatureInChart

@@ -13,11 +13,10 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators
 
 namespace Sobolev.NirenbergTestFunction
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 theorem contDiff_nirenbergTestFunction
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -36,7 +35,6 @@ theorem contDiff_nirenbergTestFunction
     h_eta_sq.mul h_diffQuot_u
   exact contDiff_diffQuot_of_contDiff (d := d) h_prod k hnh
 
-omit [NeZero d] in
 theorem fderiv_eta_sq_times_diffQuot_apply
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :
@@ -107,7 +105,6 @@ theorem fderiv_eta_sq_times_diffQuot_apply
           (fun y : E => (fderiv ℝ u y) ej) x
   ring
 
-omit [NeZero d] in
 theorem fderiv_nirenbergTestFunction_apply
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :

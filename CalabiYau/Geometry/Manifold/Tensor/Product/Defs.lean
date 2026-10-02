@@ -4,7 +4,7 @@
 Authors: Yuan Liao, Jack McCarthy
 -/
 module
-public import CalabiYau.Geometry.Manifold.Tensor.Product.HomEquiv
+public import CalabiYau.Mathlib.LinearAlgebra.TensorProduct.HomEquiv
 public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Defs
 
 public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Curry
@@ -23,42 +23,37 @@ variable {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [Finit
 
 section MapL
 
-variable {G₁ G₂ : Type*}
-  [NormedAddCommGroup G₁] [NormedSpace 𝕜 G₁] [FiniteDimensional 𝕜 G₁]
-  [NormedAddCommGroup G₂] [NormedSpace 𝕜 G₂] [FiniteDimensional 𝕜 G₂]
+variable {G₁ G₂ : Type*} [NormedAddCommGroup G₁] [NormedSpace 𝕜 G₁] [FiniteDimensional 𝕜 G₁]
+  [NormedAddCommGroup G₂] [NormedSpace 𝕜 G₂]
 
 noncomputable def TensorProduct.mapLFiniteDimensional (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     (F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂) :=
   (TensorProduct.map L₁.toLinearMap L₂.toLinearMap).toContinuousLinearMap
 
-omit [FiniteDimensional 𝕜 G₂] in
 @[simp]
 theorem TensorProduct.mapLFiniteDimensional_tmul (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) (v : F₁) (w : F₂) :
     TensorProduct.mapLFiniteDimensional L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w := by
   simp [TensorProduct.mapLFiniteDimensional, TensorProduct.map_tmul]
 
-omit [FiniteDimensional 𝕜 G₂] in
 theorem TensorProduct.mapLFiniteDimensional_add_left (L₁ L₁' : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapLFiniteDimensional (L₁ + L₁') L₂ =
       TensorProduct.mapLFiniteDimensional L₁ L₂ + TensorProduct.mapLFiniteDimensional L₁' L₂ := by
   ext x; simp [TensorProduct.mapLFiniteDimensional, TensorProduct.map_add_left]
 
-omit [FiniteDimensional 𝕜 G₂] in
 theorem TensorProduct.mapLFiniteDimensional_add_right (L₁ : F₁ →L[𝕜] G₁) (L₂ L₂' : F₂ →L[𝕜] G₂) :
     TensorProduct.mapLFiniteDimensional L₁ (L₂ + L₂') =
       TensorProduct.mapLFiniteDimensional L₁ L₂ + TensorProduct.mapLFiniteDimensional L₁ L₂' := by
   ext x; simp [TensorProduct.mapLFiniteDimensional, TensorProduct.map_add_right]
 
-omit [FiniteDimensional 𝕜 G₂] in
 theorem TensorProduct.mapLFiniteDimensional_smul_left (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapLFiniteDimensional (c • L₁) L₂ = c • TensorProduct.mapLFiniteDimensional L₁ L₂ := by
   ext x; simp [TensorProduct.mapLFiniteDimensional, TensorProduct.map_smul_left]
 
-omit [FiniteDimensional 𝕜 G₂] in
 theorem TensorProduct.mapLFiniteDimensional_smul_right (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapLFiniteDimensional L₁ (c • L₂) = c • TensorProduct.mapLFiniteDimensional L₁ L₂ := by
   ext x; simp [TensorProduct.mapLFiniteDimensional, TensorProduct.map_smul_right]
 
+variable [FiniteDimensional 𝕜 G₂] in
 noncomputable def TensorProduct.mapLBilinear :
     (F₁ →L[𝕜] G₁) →L[𝕜] (F₂ →L[𝕜] G₂) →L[𝕜]
       ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) := by
@@ -97,13 +92,6 @@ noncomputable def TensorProduct.mapLBilinear :
         ((F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂))) :=
     ContinuousLinearMap.mk outerLM h
   exact f
-
-theorem TensorProduct.mapLBilinear_contDiff :
-    ContDiff 𝕜 ⊤ (fun p : (F₁ →L[𝕜] G₁) × (F₂ →L[𝕜] G₂) =>
-      TensorProduct.mapLBilinear (𝕜 := 𝕜) p.1 p.2) :=
-  ((TensorProduct.mapLBilinear (𝕜 := 𝕜) (F₁ := F₁) (G₁ := G₁)
-    (F₂ := F₂) (G₂ := G₂)).contDiff.comp contDiff_fst).clm_apply
-    (contDiff_snd)
 
 end MapL
 

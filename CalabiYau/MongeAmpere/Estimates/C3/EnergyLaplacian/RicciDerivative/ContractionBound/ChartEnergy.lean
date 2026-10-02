@@ -35,8 +35,8 @@ theorem c3_calabi_energy_eq_connection_pair {n : ℕ} {M : Type*}
     (z : EuclideanSpace ℂ (Fin n)) :
     calabiEnergyInChart ω₀ φ x z =
       (c3Pair (c3PerturbedMetricInChart ω₀ φ x) z
-        (fun i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x z i j k)
-        (fun i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x z i j k)).re := by
+        (fun i j k ↦ connectionDifferenceInChart ω₀ φ x z i j k)
+        (fun i j k ↦ connectionDifferenceInChart ω₀ φ x z i j k)).re := by
   classical
   unfold calabiEnergyInChart c3Pair
   rfl
@@ -56,13 +56,13 @@ theorem c3_calabiEnergyInChart_eq_frame_weighted_sum
       ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
         (d i / (d j * d k)) *
           ‖c3MixedFrameChange P Q
-            (fun i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x
+            (fun i j k ↦ connectionDifferenceInChart ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) i j k)
             i j k‖ ^ 2 := by
   classical
   let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
   let T : Fin n → Fin n → Fin n → ℂ :=
-    fun i j k ↦ c3ConnectionDifferenceInChart ω₀ φ x z i j k
+    fun i j k ↦ connectionDifferenceInChart ω₀ φ x z i j k
   let g := c3PerturbedMetricInChart ω₀ φ x
   let gd : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ :=
     fun _ ↦ Matrix.diagonal (fun i ↦ (d i : ℂ))

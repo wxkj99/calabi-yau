@@ -5,7 +5,6 @@ public import CalabiYau.Analysis.Parabolic.Euclidean.HeatKernel.Convolution.Lp
 
 @[expose] public section
 
-
 noncomputable section
 
 open Real
@@ -115,14 +114,6 @@ theorem heatKernel_time {t : ℝ} (ht : 0 < t) (x : V) :
       fun s => baseHeat ((heatScale s)⁻¹ • x)) (heatDt t x) t
   rw [← hder]
   exact hprod
-
-theorem heatKernel_heatEq {t : ℝ} (ht : 0 < t) (x : V) :
-    HasDerivAt (fun s : ℝ => heatKernel s x)
-      (∑ i : Fin (Module.finrank ℝ V),
-        heatD2 t ((stdOrthonormalBasis ℝ V) i)
-          ((stdOrthonormalBasis ℝ V) i) x) t := by
-  rw [← heatDt_eq_trace ht x]
-  exact heatKernel_time ht x
 
 end PointwiseEquation
 

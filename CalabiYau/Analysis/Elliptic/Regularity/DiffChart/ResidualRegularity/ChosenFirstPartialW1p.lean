@@ -52,7 +52,7 @@ noncomputable def chartPushedChosenFirstPartial
   Sobolev.Euclidean.chosenWeakPartialOrZero
     (d := Module.finrank ℝ E) 2 i
     (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
-      ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
+      ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
     (chartTargetEuclid (I := I) (M := M) α)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in

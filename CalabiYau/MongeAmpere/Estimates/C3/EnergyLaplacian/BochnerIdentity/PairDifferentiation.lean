@@ -25,6 +25,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 theorem calabiEnergy_laplacian_eq_ordered_pair (ω₀ : KahlerForm n M)
     {φ : M → ℝ} (hφ : ω₀.IsPotential φ) (x : M) :
     (ω₀.perturb φ hφ).laplacian (calabiEnergy ω₀ φ) x =
@@ -33,11 +34,11 @@ theorem calabiEnergy_laplacian_eq_ordered_pair (ω₀ : KahlerForm n M)
           (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)
           (c3OppositeConnectionTensorLaplacian ω₀ φ x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
-          (c3ConnectionDifferenceInChart ω₀ φ x
+          (connectionDifferenceInChart ω₀ φ x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))).re +
         c3BochnerConnectionTerm ω₀ φ x := by
   rw [calabiEnergy_laplacian_eq_chart_pair_hessian ω₀ hφ x]
   exact c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz ω₀ hφ x
-    (c3MetricPairLeibnizOn_perturbed ω₀ hφ x)
+    (metricPairLeibnizOn_perturbed ω₀ hφ x)
 
 end KahlerForm

@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian.Basic
-import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionCurvatureIdentity
-import CalabiYau.Geometry.Kahler.MatrixInverse
+import CalabiYau.Mathlib.Analysis.Matrix.EntrywiseSmoothness
 import CalabiYau.Geometry.Kahler.Curvature.Chart.MixedDerivatives
 
 /-!
@@ -22,13 +21,13 @@ namespace KahlerForm
 
 variable {n : ℕ}
 
-theorem c3PartialZ_inverse_eq_christoffel
+theorem wirtingerDerivInChart_inverse_eq_christoffel
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n))
     (hd : ∀ a b, DifferentiableAt ℝ (fun w => g w a b) z)
     (hunit : IsUnit (g z)) (l i p : Fin n) :
-    c3PartialZ (fun w => (g w)⁻¹ l i) z p =
-      -∑ r, c3ChristoffelInChart g z i p r * (g z)⁻¹ l r := by
+    wirtingerDerivInChart (fun w => (g w)⁻¹ l i) z p =
+      -∑ r, christoffelInChart g z i p r * (g z)⁻¹ l r := by
   classical
   let U := (g z)⁻¹
   let V : Matrix (Fin n) (Fin n) ℂ := fun a b =>
@@ -55,11 +54,11 @@ theorem c3PartialZ_inverse_eq_christoffel
       (EuclideanSpace.single p 1)
   have himag := Matrix.fderiv_inverse_entry_apply hd hunit l i
       (Complex.I • EuclideanSpace.single p 1)
-  unfold c3PartialZ c3ChristoffelInChart
+  unfold wirtingerDerivInChart christoffelInChart
   rw [hreal, himag]
   convert halgebra U V W l i using 1
   all_goals
-    simp only [U, V, W, c3PartialZ]
+    simp only [U, V, W, wirtingerDerivInChart]
     try ring_nf
 
 theorem c3ChartPartialBar_contDiffAt

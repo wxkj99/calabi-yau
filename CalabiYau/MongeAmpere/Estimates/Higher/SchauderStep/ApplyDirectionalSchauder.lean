@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.DirectionalJets
+public import CalabiYau.Analysis.Elliptic.Schauder
 
 /-!
 # Apply interior Schauder estimates to the coordinate derivatives
@@ -381,7 +380,6 @@ omit [T2Space M] [CompactSpace M] in
 /-- The order `r-2` interior estimate for the linearized equation, applied in every coordinate
 direction of the real basis of `ℂⁿ` (both `e_i` and `I • e_i`), gives a uniform order `r+1`
 bound for the potential on `K'`. -/
-@[deprecated "unused hypothesis `hUcompact`; will be removed" (since := "2026-10-02")]
 theorem exists_uniform_chart_holder_bound_succ_of_schauder_data
     (hSch : InteriorSchauderEstimate n)
     (ω₀ : KahlerForm n M) (S : Set ((M → ℝ) × (M → ℝ)))
@@ -389,7 +387,7 @@ theorem exists_uniform_chart_holder_bound_succ_of_schauder_data
       ω₀.SolvesMongeAmpere p.1 p.2)
     {x : M} {α : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1)
     {r : ℕ} (hr : 2 ≤ r) {Cφ CA CR : ℝ≥0} {U : Set (EuclideanSpace ℂ (Fin n))}
-    (hUopen : IsOpen U) (hUcompact : IsCompact (closure U))
+    (hUopen : IsOpen U)
     (hUtarget : closure U ⊆
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
     (hCurrent : ∀ p ∈ S,

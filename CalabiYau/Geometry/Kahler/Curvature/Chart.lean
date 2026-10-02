@@ -26,35 +26,6 @@ theorem chartPartialBarComplex_sub (F G : EuclideanSpace ℂ (Fin n) → ℂ)
   simp only [sub_apply]
   ring
 
-private theorem matrix_inverse_pullback_congruence
-    (A G : Matrix (Fin n) (Fin n) ℂ) :
-    (A.transpose * G * A.map star)⁻¹ =
-      (A.map star)⁻¹ * G⁻¹ * (A.transpose)⁻¹ := by
-  rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev]
-  simp only [Matrix.mul_assoc]
-
-private theorem matrix_inverse_pullback_entry
-    (A G : Matrix (Fin n) (Fin n) ℂ) (a b : Fin n) :
-    (A.transpose * G * A.map star)⁻¹ b a =
-      ∑ r, ∑ s, (A.map star)⁻¹ b r * G⁻¹ r s * (A.transpose)⁻¹ s a := by
-  rw [matrix_inverse_pullback_congruence]
-  simp only [Matrix.mul_apply]
-  simp_rw [Finset.sum_mul]
-  rw [Finset.sum_comm]
-
-private theorem matrix_pullback_entry
-    (A G : Matrix (Fin n) (Fin n) ℂ) (j k : Fin n) :
-    (A.transpose * G * A.map star) j k =
-      ∑ r, ∑ s, (A r j * star (A s k)) * G r s := by
-  simp only [Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply]
-  simp_rw [Finset.sum_mul]
-  rw [Finset.sum_comm]
-  apply Finset.sum_congr rfl
-  intro r hr
-  apply Finset.sum_congr rfl
-  intro s hs
-  ring
-
 private theorem clmMatrix_single_eq_sum
     (L : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)) (j : Fin n) :
     L (EuclideanSpace.single j 1) =
@@ -187,183 +158,6 @@ private theorem chartPartialBar_comp_holomorphic
   apply Finset.sum_congr rfl
   intro a ha
   ring
-
-private theorem chartPartialZComplex_comp_linear
-    (F : EuclideanSpace ℂ (Fin n) → ℂ)
-    (L : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n))
-    (z : EuclideanSpace ℂ (Fin n)) (j : Fin n)
-    (hF : DifferentiableAt ℝ F (L z)) :
-    chartPartialZComplex (fun w ↦ F (L w)) z j =
-      ∑ a, (EuclideanSpace.clmMatrix L) a j *
-        chartPartialZComplex F (L z) a := by
-  have hL : DifferentiableAt ℂ (fun w ↦ L w) z := L.differentiableAt
-  have hLℝ : DifferentiableAt ℝ (fun w ↦ L w) z :=
-    (L.restrictScalars ℝ).differentiableAt
-  have hLreal : fderiv ℝ (fun w ↦ L w) z = L.restrictScalars ℝ := by
-    simpa using hL.fderiv_restrictScalars ℝ
-  have hcomp := fderiv_comp (f := fun w ↦ L w) (g := F) (x := z)
-    hF hLℝ
-  have hcomp' : fderiv ℝ (fun w ↦ F (L w)) z =
-      (fderiv ℝ F (L z)).comp (fderiv ℝ (fun w ↦ L w) z) := by
-    simpa [Function.comp_def] using hcomp
-  let D := fderiv ℝ F (L z)
-  let A := EuclideanSpace.clmMatrix L
-  let e := EuclideanSpace.single j (1 : ℂ)
-  have hvec : L e = ∑ a, (A a j) • EuclideanSpace.single a (1 : ℂ) := by
-    simpa [A, e] using clmMatrix_single_eq_sum L j
-  unfold chartPartialZComplex
-  rw [hcomp', hLreal]
-  simp only [ContinuousLinearMap.comp_apply]
-  change (D (L e) - Complex.I * D (L (Complex.I • e))) / 2 = _
-  rw [map_smul, hvec]
-  simp only [map_sum, Finset.smul_sum]
-  have hsum :
-      (∑ a, D ((A a j) • EuclideanSpace.single a (1 : ℂ))) -
-        Complex.I * ∑ a, D (Complex.I • ((A a j) • EuclideanSpace.single a (1 : ℂ))) =
-      ∑ a, (D ((A a j) • EuclideanSpace.single a (1 : ℂ)) -
-        Complex.I * D (Complex.I • ((A a j) • EuclideanSpace.single a (1 : ℂ)))) := by
-    rw [Finset.mul_sum, Finset.sum_sub_distrib]
-  rw [hsum]
-  simp_rw [wirtinger_directional_smul]
-  simp only [div_eq_mul_inv, Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro a ha
-  ring
-
-private theorem chartPartialBarComplex_comp_linear
-    (F : EuclideanSpace ℂ (Fin n) → ℂ)
-    (L : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n))
-    (z : EuclideanSpace ℂ (Fin n)) (j : Fin n)
-    (hF : DifferentiableAt ℝ F (L z)) :
-    chartPartialBarComplex (fun w ↦ F (L w)) z j =
-      ∑ a, star (EuclideanSpace.clmMatrix L a j) *
-        chartPartialBarComplex F (L z) a := by
-  have hL : DifferentiableAt ℂ (fun w ↦ L w) z := L.differentiableAt
-  have hLℝ : DifferentiableAt ℝ (fun w ↦ L w) z :=
-    (L.restrictScalars ℝ).differentiableAt
-  have hLreal : fderiv ℝ (fun w ↦ L w) z = L.restrictScalars ℝ := by
-    simpa using hL.fderiv_restrictScalars ℝ
-  have hcomp := fderiv_comp (f := fun w ↦ L w) (g := F) (x := z)
-    hF hLℝ
-  have hcomp' : fderiv ℝ (fun w ↦ F (L w)) z =
-      (fderiv ℝ F (L z)).comp (fderiv ℝ (fun w ↦ L w) z) := by
-    simpa [Function.comp_def] using hcomp
-  let D := fderiv ℝ F (L z)
-  let A := EuclideanSpace.clmMatrix L
-  let e := EuclideanSpace.single j (1 : ℂ)
-  have hvec : L e = ∑ a, (A a j) • EuclideanSpace.single a (1 : ℂ) := by
-    simpa [A, e] using clmMatrix_single_eq_sum L j
-  unfold chartPartialBarComplex
-  rw [hcomp', hLreal]
-  simp only [ContinuousLinearMap.comp_apply]
-  change (D (L e) + Complex.I * D (L (Complex.I • e))) / 2 = _
-  rw [map_smul, hvec]
-  simp only [map_sum, Finset.smul_sum]
-  have hsum :
-      (∑ a, D ((A a j) • EuclideanSpace.single a (1 : ℂ))) +
-        Complex.I * ∑ a, D (Complex.I • ((A a j) • EuclideanSpace.single a (1 : ℂ))) =
-      ∑ a, (D ((A a j) • EuclideanSpace.single a (1 : ℂ)) +
-        Complex.I * D (Complex.I • ((A a j) • EuclideanSpace.single a (1 : ℂ)))) := by
-    rw [Finset.mul_sum, Finset.sum_add_distrib]
-  rw [hsum]
-  simp_rw [antiwirtinger_directional_smul]
-  simp only [div_eq_mul_inv, Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro a ha
-  ring
-
-private theorem chartPartialZ_bar_comp_linear
-    (F : EuclideanSpace ℂ (Fin n) → ℂ)
-    (L : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n))
-    (z : EuclideanSpace ℂ (Fin n)) (p q : Fin n)
-    (hF : Differentiable ℝ F)
-    (hbarF : ∀ b, Differentiable ℝ (fun w ↦ chartPartialBarComplex F w b)) :
-    chartPartialZComplex
-        (fun w ↦ chartPartialBarComplex (fun u ↦ F (L u)) w q) z p =
-      ∑ b, ∑ a, (EuclideanSpace.clmMatrix L) a p *
-        star (EuclideanSpace.clmMatrix L b q) *
-        chartPartialZComplex
-          (fun w ↦ chartPartialBarComplex F w b) (L z) a := by
-  let A := EuclideanSpace.clmMatrix L
-  have hLℝ : DifferentiableAt ℝ (fun w ↦ L w) z :=
-    (L.restrictScalars ℝ).differentiableAt
-  have hpoint (w : EuclideanSpace ℂ (Fin n)) :
-      chartPartialBarComplex (fun u ↦ F (L u)) w q =
-        ∑ b, star (A b q) * chartPartialBarComplex F (L w) b := by
-    exact chartPartialBarComplex_comp_linear F L w q (hF (L w))
-  have hfun :
-      (fun w ↦ chartPartialBarComplex (fun u ↦ F (L u)) w q) =
-        fun w ↦ ∑ b, star (A b q) * chartPartialBarComplex F (L w) b := by
-    funext w
-    exact hpoint w
-  have hsumdiff (b : Fin n) :
-      DifferentiableAt ℝ (fun w ↦ star (A b q) * chartPartialBarComplex F (L w) b) z := by
-    exact ((hbarF b (L z)).comp z hLℝ).const_mul _
-  have hbarCompDiff (b : Fin n) :
-      DifferentiableAt ℝ (fun w ↦ chartPartialBarComplex F (L w) b) z :=
-    (hbarF b (L z)).comp z hLℝ
-  rw [hfun]
-  rw [chartPartialZComplex_sum
-    (F := fun b w ↦ star (A b q) * chartPartialBarComplex F (L w) b)
-    z p hsumdiff]
-  simp_rw [chartPartialZComplex_const_mul
-    (c := star (A _ q)) (F := fun w ↦ chartPartialBarComplex F (L w) _)
-    (z := z) (j := p) (hbarCompDiff _)]
-  simp_rw [chartPartialZComplex_comp_linear
-    (F := fun w ↦ chartPartialBarComplex F w _) (L := L) (z := z)
-    (j := _) (hbarF _ (L z))]
-  simp_rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro b hb
-  apply Finset.sum_congr rfl
-  intro a ha
-  ring
-
-private theorem chartPartialZ_pullback_entry
-    (L : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n))
-    (G : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (p j k : Fin n)
-    (hG : ∀ r s, Differentiable ℝ (fun w ↦ G w r s)) :
-    chartPartialZComplex
-        (fun w ↦ ((EuclideanSpace.clmMatrix L).transpose * G (L w) *
-          (EuclideanSpace.clmMatrix L).map star) j k) z p =
-      ∑ r, ∑ s, ((EuclideanSpace.clmMatrix L) r j *
-        star (EuclideanSpace.clmMatrix L s k)) *
-        (∑ a, (EuclideanSpace.clmMatrix L) a p *
-          chartPartialZComplex (fun w ↦ G w r s) (L z) a) := by
-  let A := EuclideanSpace.clmMatrix L
-  have hLℝ : DifferentiableAt ℝ (fun w ↦ L w) z :=
-    (L.restrictScalars ℝ).differentiableAt
-  have hcompdiff (r s : Fin n) :
-      DifferentiableAt ℝ (fun w ↦ G (L w) r s) z :=
-    (hG r s (L z)).comp z hLℝ
-  have htermDiff (r s : Fin n) :
-      DifferentiableAt ℝ (fun w ↦ (A r j * star (A s k)) * G (L w) r s) z :=
-    (hcompdiff r s).const_mul _
-  have hinnerDiff (r : Fin n) :
-      DifferentiableAt ℝ (fun w ↦ ∑ s, (A r j * star (A s k)) * G (L w) r s) z :=
-    DifferentiableAt.fun_sum (fun s hs ↦ htermDiff r s)
-  have hfun :
-      (fun w ↦ (A.transpose * G (L w) * A.map star) j k) =
-        fun w ↦ ∑ r, ∑ s, (A r j * star (A s k)) * G (L w) r s := by
-    funext w
-    exact matrix_pullback_entry A (G (L w)) j k
-  rw [hfun]
-  rw [chartPartialZComplex_sum
-    (F := fun r w ↦ ∑ s, (A r j * star (A s k)) * G (L w) r s)
-    (z := z) (j := p) hinnerDiff]
-  apply Finset.sum_congr rfl
-  intro r hr
-  rw [chartPartialZComplex_sum
-    (F := fun s w ↦ (A r j * star (A s k)) * G (L w) r s)
-    (z := z) (j := p) (htermDiff r)]
-  apply Finset.sum_congr rfl
-  intro s hs
-  rw [chartPartialZComplex_const_mul
-    (c := A r j * star (A s k)) (F := fun w ↦ G (L w) r s)
-    (z := z) (j := p) (hcompdiff r s)]
-  rw [chartPartialZComplex_comp_linear
-    (F := fun w ↦ G w r s) (L := L) (z := z) (j := p) (hG r s (L z))]
 
 private theorem sum_swap_outer_inner
     {ι : Type*} [Fintype ι] (f : ι → ι → ι → ℂ) :
@@ -812,21 +606,6 @@ private theorem chartChristoffel_differentiableAt_at
     chartPartialZComplex_differentiableAt_at _ y (hH k l) j
   exact DifferentiableAt.fun_sum (fun l hl => (hi l).mul (hz l))
 
-private theorem chartChristoffel_bar_comp_chain_at
-    (H : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (f : EuclideanSpace ℂ (Fin n) → EuclideanSpace ℂ (Fin n))
-    (z : EuclideanSpace ℂ (Fin n))
-    (hH : ∀ a b, ContDiffAt ℝ ∞ (fun y => H y a b) (f z))
-    (hdet : IsUnit (H (f z)).det) (hf : DifferentiableAt ℂ f z)
-    (s c a q : Fin n) :
-    chartPartialBarComplex (fun w => ∑ l, (H (f w))⁻¹ l s *
-      chartPartialZComplex (fun v => H v a l) (f w) c) z q =
-      ∑ b, star ((EuclideanSpace.clmMatrix (fderiv ℂ f z)) b q) *
-        chartPartialBarComplex (fun y => ∑ l, (H y)⁻¹ l s *
-          chartPartialZComplex (fun v => H v a l) y c) (f z) b :=
-  chartPartialBar_comp_holomorphic _ _ z q
-    (chartChristoffel_differentiableAt_at H (f z) hH hdet s c a) hf
-
 private theorem chart_curvature_lowering
     (A H G : Matrix (Fin n) (Fin n) ℂ)
     (hA : IsUnit A.det) (hH : IsUnit H.det) (hG : IsUnit G.det)
@@ -900,7 +679,6 @@ private theorem chart_curvature_lowering
 transforms as a covariant tensor of complex type `(1,1,1,1)`. Here `A` is the complex Jacobian of
 `f`, and the metric relation is `g = Aᵀ (g' ∘ f) Ā`. The nonzero Jacobian determinant makes the
 coordinate change locally biholomorphic at `z`. -/
-@[deprecated "unused hypothesis `hkahler`; will be removed" (since := "2026-10-02")]
 theorem chartCurvature_pullback
     (U : Set (EuclideanSpace ℂ (Fin n))) (hU : IsOpen U)
     (f : EuclideanSpace ℂ (Fin n) → EuclideanSpace ℂ (Fin n))
@@ -910,9 +688,6 @@ theorem chartCurvature_pullback
     (hmetric : ∀ w ∈ U,
       g w = Matrix.transpose (EuclideanSpace.clmMatrix (fderiv ℂ f w)) *
         g' (f w) * (EuclideanSpace.clmMatrix (fderiv ℂ f w)).map star)
-    (hkahler : ∀ w ∈ f '' U, ∀ i j k,
-      chartPartialZComplex (fun v => g' v j k) w i =
-        chartPartialZComplex (fun v => g' v i k) w j)
     (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ U)
     (hjac : IsUnit (EuclideanSpace.clmMatrix (fderiv ℂ f z)).det)
     (hgdet : IsUnit (g' (f z)).det)
@@ -925,7 +700,6 @@ theorem chartCurvature_pullback
           star ((EuclideanSpace.clmMatrix (fderiv ℂ f z)) d k) *
           chartCurvature g' (f z) a b c d := by
   classical
-  have := hkahler
   let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ f w)
   have hAt : IsUnit (A z).transpose.det := by
     rw [Matrix.det_transpose]

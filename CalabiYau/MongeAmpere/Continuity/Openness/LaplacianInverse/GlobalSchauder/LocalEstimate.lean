@@ -1,8 +1,8 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
-public import CalabiYau.MongeAmpere.Continuity.Openness.CompactChartCover
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Mathlib.Geometry.Manifold.CompactChartCover
+public import CalabiYau.Analysis.Elliptic.Schauder
 public import CalabiYau.Geometry.Kahler.Laplacian
 import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.Chartwise.RhsTransfer
 import CalabiYau.MongeAmpere.Continuity.Openness.LaplacianInverse.Chartwise.CompactPatch
@@ -27,11 +27,9 @@ open MeasureTheory
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ⊤ M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
 
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ⊤ M] in
 /-- The local Schauder estimate on a fixed finite chart cover, before removing its `C⁰` term.
 The pointwise bound `K` is the global supremum contribution appearing in the classical local
 interior estimate. All gauge values used through `toReal` are explicitly finite. -/
@@ -44,6 +42,11 @@ def HasFiniteChartLocalLaplacianHolderEstimate (ω₁ : KahlerForm n M)
       finiteChartHolderGauge cover 0 α (ω₁.laplacian f) < ⊤ ∧
       (finiteChartHolderGauge cover 2 α f).toReal ≤
         (C : ℝ) * ((finiteChartHolderGauge cover 0 α (ω₁.laplacian f)).toReal + K)
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ⊤ M] [MeasurableSpace M] [BorelSpace M]
+  [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
 private theorem holderBoundOn_of_contDiffOn_compact
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -449,88 +452,8 @@ private theorem chartLaplacian_eq_complexEllipticOp
       complexHessian (f ∘ e.symm) z).trace at hLap
   exact hLap
 
-private theorem finiteChartHolderGauge_le_of_chartwiseHolderBound
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
-    (cover : CompactChartCover E M) (k : ℕ) (α C : ℝ≥0) (f : M → ℝ)
-    (hC : ∀ i, HolderBoundOn k α C (cover.piece i)
-      (f ∘ (extChartAt 𝓘(ℝ, E) (cover.base i)).symm)) :
-    finiteChartHolderGauge cover k α f ≤
-      (∑ _j ∈ Finset.range (k + 1), (C : ℝ≥0∞)) + C := by
-  classical
-  unfold finiteChartHolderGauge
-  apply iSup_le
-  intro i
-  exact CalabiYau.Schauder.eContDiffHolderGaugeOn_le (fun _ => C) C
-    (hC i).1 (HolderWith.restrict_iff.mpr (hC i).2)
+end
 
-private theorem holderBoundOn_zero_comp_contDiffOn
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    {α C : ℝ≥0} {K U : Set E} {τ : E → E} {g : E → ℝ}
-    (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
-    (hτ : ContDiffOn ℝ 1 τ U)
-    (hbound : HolderBoundOn 0 α C (τ '' K) g) :
-    ∃ C' : ℝ≥0, HolderBoundOn 0 α C' K (g ∘ τ) := by
-  classical
-  have hLoc : LocallyLipschitzOn K τ := by
-    intro x hx
-    have hxU : x ∈ U := hKU hx
-    have hfx : ContDiffAt ℝ 1 τ x := hτ.contDiffAt (hU.mem_nhds hxU)
-    obtain ⟨L, t, ht, hLip⟩ := hfx.exists_lipschitzOnWith
-    obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp ht
-    refine ⟨L, Metric.ball x δ ∩ K,
-      Metric.mem_nhdsWithin_iff.mpr ⟨δ, hδ, ?_⟩, ?_⟩
-    · exact fun y hy => ⟨hy.1, hy.2⟩
-    · apply hLip.mono
-      intro y hy
-      exact hball hy.1
-  obtain ⟨L, hLip⟩ := LocallyLipschitzOn.exists_lipschitzOnWith_of_compact hK hLoc
-  have hτHolder : HolderOnWith L 1 τ K := hLip.holderOnWith
-  have hG : HolderOnWith C α g (τ '' K) := by
-    have hJet : HolderOnWith C α (iteratedFDeriv ℝ 0 g) (τ '' K) := hbound.2
-    let JI : ℝ ≃ₗᵢ[ℝ] (E [×0]→L[ℝ] ℝ) :=
-      (continuousMultilinearCurryFin0 ℝ E ℝ).symm
-    have hInv : HolderWith 1 1 (JI.symm : (E [×0]→L[ℝ] ℝ) → ℝ) :=
-      JI.symm.lipschitz.holderWith
-    have hComp : HolderOnWith C α
-        ((JI.symm : (E [×0]→L[ℝ] ℝ) → ℝ) ∘ iteratedFDeriv ℝ 0 g) (τ '' K) := by
-      simpa [NNReal.rpow_one, one_mul] using
-        (hInv.holderOnWith Set.univ).comp hJet (by intro x hx; trivial)
-    have hEq : ((JI.symm : (E [×0]→L[ℝ] ℝ) → ℝ) ∘ iteratedFDeriv ℝ 0 g) = g := by
-      funext x
-      simp [Function.comp_def, iteratedFDeriv_zero_eq_comp, JI]
-    simpa [hEq] using hComp
-  have hGτ : HolderOnWith (C * L ^ (α : ℝ)) α (g ∘ τ) K := by
-    have h := hG.comp hτHolder (by
-      intro x hx
-      exact Set.mem_image_of_mem _ hx)
-    simpa using h
-  have hJ : HolderWith 1 1
-      ((continuousMultilinearCurryFin0 ℝ E ℝ).symm.toContinuousLinearMap) := by
-    exact (((continuousMultilinearCurryFin0 ℝ E ℝ).symm).lipschitz.holderWith)
-  have hJet : HolderOnWith (C * L ^ (α : ℝ)) α
-      (iteratedFDeriv ℝ 0 (g ∘ τ)) K := by
-    have hcomp := (hJ.holderOnWith Set.univ).comp hGτ (by intro x hx; trivial)
-    have hEq : iteratedFDeriv ℝ 0 (g ∘ τ) =
-        ((continuousMultilinearCurryFin0 ℝ E ℝ).symm.toContinuousLinearMap) ∘ (g ∘ τ) := by
-      funext x
-      simp [Function.comp_def, iteratedFDeriv_zero_eq_comp]
-    simpa [hEq, NNReal.rpow_one, one_mul] using hcomp
-  refine ⟨max C (C * L ^ (α : ℝ)), ?_⟩
-  refine ⟨?_, ?_⟩
-  · intro j hj x hx
-    have hj0 : j = 0 := Nat.eq_zero_of_le_zero hj
-    subst j
-    rw [norm_iteratedFDeriv_zero]
-    have hb := hbound.1 0 le_rfl (τ x) ⟨x, hx, rfl⟩
-    have hb' : |g (τ x)| ≤ (C : ℝ) := by
-      simpa [norm_iteratedFDeriv_zero] using hb
-    change |g (τ x)| ≤ _
-    exact hb'.trans (by exact_mod_cast (le_max_left C (C * L ^ (α : ℝ))))
-  · exact hJet.mono_const (le_max_right _ _)
-
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem exists_holderOnWith_and_bound_iteratedFDeriv
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -576,8 +499,6 @@ private theorem exists_holderOnWith_and_bound_iteratedFDeriv
   refine ⟨L * D ^ ((1 : ℝ) - (α : ℝ)), Bn, ?_, hbound⟩
   exact hLip.holderOnWith.of_le hdist hα
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem exists_lipschitzOnWith_of_contDiffOn_compact
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -598,8 +519,6 @@ private theorem exists_lipschitzOnWith_of_contDiffOn_compact
       exact hball hy.1
   exact LocallyLipschitzOn.exists_lipschitzOnWith_of_compact hK hLoc
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem holderOnWith_taylorComp_two
     {E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -676,6 +595,11 @@ private theorem holderOnWith_taylorComp_two
     (C' : ENNReal) * edist x y ^ (α : ℝ)
   simpa [edist_dist, ENNReal.ofReal_mul, ENNReal.ofReal_rpow_of_nonneg,
     Real.rpow_nonneg] using hENN
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ⊤ M] [MeasurableSpace M] [BorelSpace M]
+  [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
 private theorem holderBoundOn_comp_contDiffOn_two
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
@@ -903,42 +827,6 @@ private theorem exists_holderBoundOn_of_finite_compact_patch
           mul_le_mul_of_nonneg_right
             (ENNReal.coe_le_coe.mpr (le_max_right C Cfar)) (by positivity)
 
-private theorem holderBoundOn_two_of_interiorSchauder
-    {n : ℕ} (hSch : InteriorSchauderEstimate n)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
-    (lam K : ℝ≥0) (hlam : 0 < lam)
-    (U V : Set (EuclideanSpace ℂ (Fin n))) (hU : IsOpen U)
-    (hV : IsCompact (closure V)) (hVU : closure V ⊆ U)
-    (A : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (u : EuclideanSpace ℂ (Fin n) → ℝ)
-    (hA : ∀ j l, ContDiffOn ℝ 0 (fun z => A z j l) U)
-    (hu : ContDiffOn ℝ 2 u U) (hEll : IsUniformlyEllipticOn A lam U)
-    (hAHolder : ∀ j l, HolderBoundOn 0 α K U (fun z => A z j l))
-    (K₀ K₁ : ℝ≥0)
-    (hLu : ContDiffOn ℝ 0 (complexEllipticOp A u) U)
-    (hLuHolder : HolderBoundOn 0 α K₁ U (complexEllipticOp A u))
-    (huBound : ∀ z ∈ U, |u z| ≤ K₀) :
-    ∃ C : ℝ≥0, ContDiffOn ℝ 2 u U ∧
-      HolderBoundOn 2 α (C * (K₁ + K₀)) V u := by
-  obtain ⟨C, hC⟩ := hSch 0 α hα₀ hα₁ lam K hlam U V hU hV hVU
-  refine ⟨C, ?_⟩
-  exact hC A u hA hu hEll hAHolder K₀ K₁ hLu hLuHolder huBound
-
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem chartPiece_interior_refinement
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M) (i : cover.ι)
-    (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ cover.piece i) :
-    ∃ j : cover.ι, ∃ y : EuclideanSpace ℂ (Fin n),
-      z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).target ∧
-      y ∈ interior (cover.piece j) ∧
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)).symm y =
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm z := by
-  let eᵢ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)
-  let x := eᵢ.symm z
-  obtain ⟨j, y, hy, hxy⟩ := cover.interior_covers x
-  exact ⟨j, y, cover.piece_in_target i hz, hy, hxy⟩
-
 private theorem holderBoundOn_zero_scalar_holder
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {α C : ℝ≥0} {K : Set E} {f : E → ℝ}
@@ -989,213 +877,8 @@ private theorem holderBoundOn_zero_of_scalar_data
   rw [norm_iteratedFDeriv_zero]
   exact hnorm x hx
 
-private theorem transfer_zeroHolder_across_lipschitz
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    {α C L : ℝ≥0} {S R : Set E} {g : E → ℝ} {T : E → E}
-    (hG : HolderBoundOn 0 α C R g) (hT : LipschitzOnWith L T S)
-    (hmap : Set.MapsTo T S R) :
-    HolderOnWith (C * L ^ (α : ℝ)) α (g ∘ T) S := by
-  simpa only [mul_one] using
-    (holderBoundOn_zero_scalar_holder hG).comp hT.holderOnWith hmap
+end
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem transfer_chartwise_rhs_holder
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (q : M → ℝ) (α C L : ℝ≥0) (i j : cover.ι)
-    (S : Set (EuclideanSpace ℂ (Fin n))) (T : EuclideanSpace ℂ (Fin n) → EuclideanSpace ℂ (Fin n))
-    (hGauge : HolderBoundOn 0 α C (cover.piece j)
-      (q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)).symm))
-    (hT : LipschitzOnWith L T S)
-    (hmap : Set.MapsTo T S (cover.piece j))
-    (hEq : Set.EqOn
-      (q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm)
-      ((q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)).symm) ∘ T) S) :
-    HolderOnWith (C * L ^ (α : ℝ)) α
-      (q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm) S := by
-  intro x hx y hy
-  rw [hEq hx, hEq hy]
-  exact transfer_zeroHolder_across_lipschitz hGauge hT hmap x hx y hy
-
-private theorem exists_local_lipschitzOn_ball
-    {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F]
-    {T : E → F} {x : E} (hT : ContDiffAt ℝ 1 T x) :
-    ∃ L : ℝ≥0, ∃ δ : ℝ, 0 < δ ∧
-      LipschitzOnWith L T (Metric.ball x δ) := by
-  obtain ⟨L, t, ht, hLip⟩ := hT.exists_lipschitzOnWith
-  obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp ht
-  exact ⟨L, δ, hδ, hLip.mono hball⟩
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem chartTransition_contDiffAt
-    (x y : M) (z : EuclideanSpace ℂ (Fin n))
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
-    (hzy : (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm z ∈
-      (chartAt (EuclideanSpace ℂ (Fin n)) y).source) :
-    ContDiffAt ℝ 1
-      (fun w => extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y
-        ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm w)) z := by
-  let I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
-  let eₓ := extChartAt I x
-  let eᵧ := extChartAt I y
-  have hsymm : ContMDiffAt I I ∞ eₓ.symm z := by
-    exact (contMDiffOn_extChartAt_symm (I := I) x z hz).contMDiffAt
-      ((isOpen_extChartAt_target (I := I) x).mem_nhds hz)
-  have hchart : ContMDiffAt I I ∞ eᵧ (eₓ.symm z) :=
-    contMDiffAt_extChartAt' (I := I) (x := y) hzy
-  have hcomp : ContMDiffAt I I ∞ (eᵧ ∘ eₓ.symm) z := hchart.comp z hsymm
-  have hcomp' : ContMDiffAt I I ∞
-      (fun w => extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) y
-        ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm w)) z := by
-    simpa [I, eₓ, eᵧ, Function.comp_def] using hcomp
-  exact hcomp'.contDiffAt.of_le (by norm_num)
-
-private theorem exists_local_smoothTransition_holder
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    {α C : ℝ≥0} {R : Set E} {g : E → ℝ} {T : E → E} {x : E}
-    (hG : HolderBoundOn 0 α C R g) (hT : ContDiffAt ℝ 1 T x)
-    (hTx : T x ∈ interior R) :
-    ∃ L : ℝ≥0, ∃ δ : ℝ, 0 < δ ∧
-      Set.MapsTo T (Metric.ball x δ) (interior R) ∧
-      HolderOnWith (C * L ^ (α : ℝ)) α (g ∘ T) (Metric.ball x δ) := by
-  obtain ⟨L, δ₁, hδ₁, hLip⟩ := exists_local_lipschitzOn_ball hT
-  obtain ⟨δ₂, hδ₂, hBall₂⟩ := Metric.mem_nhds_iff.mp
-    (hT.continuousAt.preimage_mem_nhds (isOpen_interior.mem_nhds hTx))
-  let δ : ℝ := min δ₁ δ₂
-  have hδ : 0 < δ := by dsimp [δ]; exact lt_min hδ₁ hδ₂
-  have hBall₁ : Metric.ball x δ ⊆ Metric.ball x δ₁ :=
-    Metric.ball_subset_ball (by dsimp [δ]; exact min_le_left _ _)
-  have hBall₂' : Metric.ball x δ ⊆ Metric.ball x δ₂ :=
-    Metric.ball_subset_ball (by dsimp [δ]; exact min_le_right _ _)
-  have hLip' : LipschitzOnWith L T (Metric.ball x δ) := hLip.mono hBall₁
-  have hmapInterior : Set.MapsTo T (Metric.ball x δ) (interior R) := by
-    intro z hz
-    have hzt : z ∈ Metric.ball x δ₂ := hBall₂' hz
-    apply hBall₂
-    exact hzt
-  have hmap : Set.MapsTo T (Metric.ball x δ) R :=
-    hmapInterior.mono_right interior_subset
-  exact ⟨L, δ, hδ, hmapInterior,
-    transfer_zeroHolder_across_lipschitz hG hLip' hmap⟩
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem exists_chart_rhs_holder_on_overlap
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (q : M → ℝ) (α C : ℝ≥0) (i j : cover.ι)
-    (z y : EuclideanSpace ℂ (Fin n))
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).target)
-    (hy : y ∈ interior (cover.piece j))
-    (hxy : (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)).symm y =
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm z)
-    (hGauge : HolderBoundOn 0 α C (cover.piece j)
-      (q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)).symm)) :
-    ∃ L : ℝ≥0, ∃ ρ : ℝ, 0 < ρ ∧ IsCompact (Metric.closedBall z ρ) ∧
-      HolderBoundOn 0 α (max C (C * L ^ (α : ℝ))) (Metric.closedBall z ρ)
-        (q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm) := by
-  let eᵢ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)
-  let eⱼ := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)
-  let T : EuclideanSpace ℂ (Fin n) → EuclideanSpace ℂ (Fin n) := fun w => eⱼ (eᵢ.symm w)
-  have hyPiece : y ∈ cover.piece j := interior_subset hy
-  have hyTarget : y ∈ eⱼ.target := cover.piece_in_target j hyPiece
-  have hsource : eᵢ.symm z ∈ eⱼ.source := by
-    rw [← hxy]
-    exact eⱼ.map_target hyTarget
-  have hsource' : eᵢ.symm z ∈ (chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).source := by
-    have hs : eⱼ.source = (chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).source :=
-      extChartAt_source (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (cover.base j)
-    rw [← hs]
-    exact hsource
-  have hT : ContDiffAt ℝ 1 T z := by
-    simpa [T, eᵢ, eⱼ] using chartTransition_contDiffAt
-      (cover.base i) (cover.base j) z hz hsource'
-  have hTz : T z ∈ interior (cover.piece j) := by
-    change eⱼ (eᵢ.symm z) ∈ interior (cover.piece j)
-    rw [← hxy, eⱼ.right_inv hyTarget]
-    exact hy
-  obtain ⟨L, δ₁, hδ₁, hmapInterior, hHolder⟩ :=
-    exists_local_smoothTransition_holder hGauge hT hTz
-  have hSymmCont : ContinuousAt eᵢ.symm z := continuousAt_extChartAt_symm'' hz
-  obtain ⟨δ₂, hδ₂, hball₂⟩ := Metric.mem_nhds_iff.mp
-    (hSymmCont.preimage_mem_nhds
-      ((chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).open_source.mem_nhds hsource'))
-  let δ := min δ₁ δ₂
-  have hδ : 0 < δ := by dsimp [δ]; exact lt_min hδ₁ hδ₂
-  have hsub₁ : Metric.ball z δ ⊆ Metric.ball z δ₁ :=
-    Metric.ball_subset_ball (by dsimp [δ]; exact min_le_left _ _)
-  have hsub₂ : Metric.ball z δ ⊆ Metric.ball z δ₂ :=
-    Metric.ball_subset_ball (by dsimp [δ]; exact min_le_right _ _)
-  have hHolder' : HolderOnWith (C * L ^ (α : ℝ)) α
-      ((q ∘ eⱼ.symm) ∘ T) (Metric.ball z δ) := hHolder.mono hsub₁
-  have hEq : Set.EqOn (q ∘ eᵢ.symm) ((q ∘ eⱼ.symm) ∘ T) (Metric.ball z δ) := by
-    intro w hw
-    have hwsource' : eᵢ.symm w ∈
-        (chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).source := hball₂ (hsub₂ hw)
-    have hs : eⱼ.source = (chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).source :=
-      extChartAt_source (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) (cover.base j)
-    have hwsource : eᵢ.symm w ∈ eⱼ.source := by rw [hs]; exact hwsource'
-    have hinv := eⱼ.left_inv hwsource
-    change q (eᵢ.symm w) = q (eⱼ.symm (eⱼ (eᵢ.symm w)))
-    rw [hinv]
-  let ρ := δ / 2
-  have hρ : 0 < ρ := by dsimp [ρ]; positivity
-  have hclosed : Metric.closedBall z ρ ⊆ Metric.ball z δ :=
-    Metric.closedBall_subset_ball (by dsimp [ρ]; linarith)
-  have hHolderClosed : HolderOnWith (C * L ^ (α : ℝ)) α
-      (q ∘ eᵢ.symm) (Metric.closedBall z ρ) := by
-    intro w hw w' hw'
-    rw [hEq (hclosed hw), hEq (hclosed hw')]
-    exact hHolder' w (hclosed hw) w' (hclosed hw')
-  let C' : ℝ≥0 := max C (C * L ^ (α : ℝ))
-  have hNormScalar : ∀ w ∈ Metric.closedBall z ρ, |q (eᵢ.symm w)| ≤ C' := by
-    intro w hw
-    have hTw : T w ∈ interior (cover.piece j) :=
-      hmapInterior (hsub₁ (hclosed hw))
-    have hSourceBound := hGauge.1 0 (by norm_num) (T w) (interior_subset hTw)
-    rw [norm_iteratedFDeriv_zero] at hSourceBound
-    have hSourceAbs :
-        |q ((chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).symm (T w))| ≤ (C : ℝ) := by
-      simpa [Function.comp_def, Real.norm_eq_abs] using hSourceBound
-    have hEqw := hEq (hclosed hw)
-    change q (eᵢ.symm w) = q (eⱼ.symm (eⱼ (eᵢ.symm w))) at hEqw
-    have hValue :
-        q ((chartAt (EuclideanSpace ℂ (Fin n)) (cover.base i)).symm w) =
-          q ((chartAt (EuclideanSpace ℂ (Fin n)) (cover.base j)).symm (T w)) := by
-      rw [extChartAt_coe_symm] at hEqw
-      rw [extChartAt_coe_symm] at hEqw
-      simpa [T, eᵢ, eⱼ, extChartAt_coe_symm] using hEqw
-    change |q ((chartAt (EuclideanSpace ℂ (Fin n)) (cover.base i)).symm w)| ≤ (C' : ℝ)
-    rw [hValue]
-    exact hSourceAbs.trans (by
-      exact_mod_cast (le_max_left C (C * L ^ (α : ℝ))))
-  have hHolderClosed' : HolderOnWith C' α (q ∘ eᵢ.symm) (Metric.closedBall z ρ) :=
-    hHolderClosed.mono_const (le_max_right C _)
-  exact ⟨L, ρ, hρ, isCompact_closedBall z ρ,
-    holderBoundOn_zero_of_scalar_data hNormScalar hHolderClosed'⟩
-
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
-private theorem exists_local_rhs_holder_from_finiteChartGauge
-    (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
-    (q : M → ℝ) (α : ℝ≥0) (i : cover.ι)
-    (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ cover.piece i)
-    (hGauge : finiteChartHolderGauge cover 0 α q < ⊤) :
-    ∃ (C : ℝ≥0) (j : cover.ι) (y : EuclideanSpace ℂ (Fin n))
-      (L : ℝ≥0) (ρ : ℝ),
-      z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).target ∧
-      y ∈ interior (cover.piece j) ∧
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base j)).symm y =
-        (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm z ∧
-      0 < ρ ∧ IsCompact (Metric.closedBall z ρ) ∧
-      HolderBoundOn 0 α (max C (C * L ^ (α : ℝ))) (Metric.closedBall z ρ)
-        (q ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) (cover.base i)).symm) := by
-  obtain ⟨C, hChart⟩ := (finiteChartHolderGauge_lt_top_iff cover 0 α q).mp hGauge
-  obtain ⟨j, y, hzTarget, hy, hxy⟩ := chartPiece_interior_refinement cover i z hz
-  obtain ⟨L, ρ, hρ, hCompact, hHolder⟩ := exists_chart_rhs_holder_on_overlap
-    cover q α C i j z y hzTarget hy hxy (hChart j)
-  exact ⟨C, j, y, L, ρ, hzTarget, hy, hxy, hρ, hCompact, hHolder⟩
-
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem finiteChartHolderGauge_toReal_le_of_chartwiseBound
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α C : ℝ≥0) (f : M → ℝ)
@@ -1217,7 +900,10 @@ private theorem finiteChartHolderGauge_toReal_le_of_chartwiseBound
       ENNReal.toReal_mono ENNReal.coe_ne_top hGauge'
     _ = 4 * (C : ℝ) := by simp
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ⊤ M]
+
 /-- The per-chart interior estimate after coefficient and overlap transfer. The hard local
 nested-ball and finite compact-patch argument is isolated here with its quantitative common bound. -/
 private theorem exists_finiteChart_local_laplacian_holder_chartwise [Nonempty M]
@@ -1330,7 +1016,6 @@ private theorem exists_finiteChart_local_laplacian_holder_chartwise [Nonempty M]
   apply mul_le_mul_of_nonneg_right _ (by positivity)
   exact Finset.single_le_sum (fun j _ => (zero_le : 0 ≤ c j)) (Finset.mem_univ i)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem exists_finiteChart_local_laplacian_holder_inequality [Nonempty M]
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
@@ -1385,7 +1070,6 @@ private theorem exists_finiteChart_local_laplacian_holder_inequality [Nonempty M
       rw [hCcast]
       ring
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- Finite-chart Schauder estimate conditional on the local interior Schauder theorem. -/
 theorem exists_finiteChart_local_laplacian_holder_estimate [Nonempty M]
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
@@ -1401,5 +1085,7 @@ theorem exists_finiteChart_local_laplacian_holder_estimate [Nonempty M]
   have hLapFinite := smooth_finiteChartHolderGauge cover 0 α hα₁
     (ω₁.laplacian f) hLapSmooth
   exact ⟨hfFinite, hLapFinite, hIneq f hf K hbound hfFinite hLapFinite⟩
+
+end
 
 end KahlerForm

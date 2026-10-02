@@ -26,6 +26,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpac
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
   [ConnectedSpace M] [MeasurableSpace M] [BorelSpace M]
 
+omit [ConnectedSpace M] in
 /-- If `Ric(ω₀) = i∂∂̄F`, some `ω₀ + i∂∂̄φ` is Ricci-flat. -/
 theorem exists_isRicciFlat_of_ricciForm_eq_mddbar (ω₀ : KahlerForm n M)
     (hMA : ω₀.MongeAmpereSolvable) {F : M → ℝ}

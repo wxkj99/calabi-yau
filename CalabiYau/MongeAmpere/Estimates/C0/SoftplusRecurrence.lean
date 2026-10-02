@@ -20,6 +20,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M]
   [ConnectedSpace M]
 
+omit [ConnectedSpace M] in
 theorem c0_softplus_powered_recurrence
     (ω₀ : KahlerForm n M) {u : M → ℝ}
     (hu : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ u)

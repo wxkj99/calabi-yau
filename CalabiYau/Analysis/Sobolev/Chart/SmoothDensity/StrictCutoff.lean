@@ -24,34 +24,34 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [T2Space M] [CompactSpace M] [I.Boundaryless]
 
 open CalabiYau.RiemannianVolume
 
-omit [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 private lemma isClosed_compl_chartAt_source (α : M) :
     IsClosed ((chartAt H α).sourceᶜ) :=
   (chartAt H α).open_source.isClosed_compl
 
-omit [I.Boundaryless] in
+section
+
+variable [T2Space M] [CompactSpace M]
+
 private lemma isClosed_tsupport_chartAtlasPOU (α : M) :
     IsClosed (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   isClosed_tsupport _
 
-omit [I.Boundaryless] in
 private lemma tsupport_chartAtlasPOU_subset (α : M) :
     tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
       (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-omit [I.Boundaryless] in
 private lemma disjoint_complSource_tsupport_chartAtlasPOU (α : M) :
     Disjoint ((chartAt H α).sourceᶜ)
       (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   Set.disjoint_compl_left_iff_subset.mpr
     (tsupport_chartAtlasPOU_subset (I := I) α)
 
-private def chartStrictCutoffBundled (α : M) : C^∞⟮I, M; ℝ⟯ :=
+def chartStrictCutoffBundled (α : M) : C^∞⟮I, M; ℝ⟯ :=
   ((Classical.choose
     (exists_contMDiffMap_zero_one_nhds_of_isClosed (I := I) (M := M)
       (n := (⊤ : ℕ∞))
@@ -60,7 +60,6 @@ private def chartStrictCutoffBundled (α : M) : C^∞⟮I, M; ℝ⟯ :=
       (disjoint_complSource_tsupport_chartAtlasPOU (I := I) α))) :
         C^∞⟮I, M; ℝ⟯)
 
-omit [I.Boundaryless] in
 private lemma chartStrictCutoffBundled_spec (α : M) :
     (∀ᶠ x in 𝓝ˢ ((chartAt H α).sourceᶜ),
       ((chartStrictCutoffBundled (I := I) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0) ∧
@@ -78,29 +77,19 @@ private lemma chartStrictCutoffBundled_spec (α : M) :
 def chartStrictCutoff (α : M) : M → ℝ :=
   ((chartStrictCutoffBundled (I := I) α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
 
-omit [I.Boundaryless] in
-private lemma chartStrictCutoff_eq_bundled (α : M) :
-    chartStrictCutoff (I := I) α =
-      ((chartStrictCutoffBundled (I := I) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
-  rfl
-
-omit [I.Boundaryless] in
 theorem chartStrictCutoff_contMDiff (α : M) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (chartStrictCutoff (I := I) α) :=
   (chartStrictCutoffBundled (I := I) α).contMDiff
 
-omit [I.Boundaryless] in
 theorem chartStrictCutoff_eventually_zero_nhdsSet_compl_source (α : M) :
     ∀ᶠ x in 𝓝ˢ ((chartAt H α).sourceᶜ), chartStrictCutoff (I := I) α x = 0 :=
   (chartStrictCutoffBundled_spec (I := I) α).1
 
-omit [I.Boundaryless] in
 theorem chartStrictCutoff_eventually_one_nhdsSet_tsupport_chartAtlasPOU (α : M) :
     ∀ᶠ x in 𝓝ˢ (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)),
       chartStrictCutoff (I := I) α x = 1 :=
   (chartStrictCutoffBundled_spec (I := I) α).2.1
 
-omit [I.Boundaryless] in
 theorem chartStrictCutoff_eq_one_on_tsupport_chartAtlasPOU (α : M) {x : M}
     (hx : x ∈ tsupport
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :
@@ -108,7 +97,6 @@ theorem chartStrictCutoff_eq_one_on_tsupport_chartAtlasPOU (α : M) {x : M}
   (chartStrictCutoff_eventually_one_nhdsSet_tsupport_chartAtlasPOU
     (I := I) α).self_of_nhdsSet _ hx
 
-omit [I.Boundaryless] in
 theorem chartStrictCutoff_tsupport_subset (α : M) :
     tsupport (chartStrictCutoff (I := I) α) ⊆ (chartAt H α).source := by
   classical
@@ -132,6 +120,8 @@ theorem chartStrictCutoff_tsupport_subset (α : M) :
     have : x ∈ U := hUsub hx_not
     exact hx this
   exact htsupp_sub.trans hUcomp_sub
+
+end
 
 end Chart
 end Sobolev

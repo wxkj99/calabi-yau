@@ -2,7 +2,6 @@ module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.BochnerTensors
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionCurvatureIdentity
-import CalabiYau.Geometry.Kahler.MatrixInverse
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian.MetricDerivatives
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian.RaisedCurvature
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian.RicciContraction
@@ -28,6 +27,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- The scalar contraction of the Bianchi identity that the Bochner proof uses.
 The minus sign belongs to the varying Ricci derivative, not the reference term.
 Use the already proved `c3ConnectionDifference_bar_derivative`; do not duplicate it. -/
@@ -40,10 +40,10 @@ theorem c3BochnerConnectionTerm_eq_reference_sub_ricci (ω₀ : KahlerForm n M)
       (x : M) (y : EuclideanSpace ℂ (Fin n))
       (hy : y ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
       (p i j k q : Fin n) :
-      c3PartialZ
+      wirtingerDerivInChart
           (fun w ↦ c3PartialBar
-            (fun v ↦ c3ConnectionDifferenceInChart ω₀ φ x v i j k) w q) y p =
-        c3PartialZ
+            (fun v ↦ connectionDifferenceInChart ω₀ φ x v i j k) w q) y p =
+        wirtingerDerivInChart
           (fun w ↦ -(∑ l, (c3PerturbedMetricInChart ω₀ φ x w)⁻¹ l i *
               chartCurvature (c3PerturbedMetricInChart ω₀ φ x) w j q k l) +
             ∑ l, (ω₀.metricInChart x w)⁻¹ l i *
@@ -58,13 +58,13 @@ theorem c3BochnerConnectionTerm_eq_reference_sub_ricci (ω₀ : KahlerForm n M)
     have hbar := c3ConnectionDifference_bar_derivative ω₀
     have hEq :
         (fun w ↦ c3PartialBar
-            (fun v ↦ c3ConnectionDifferenceInChart ω₀ φ x v i j k) w q) =ᶠ[nhds y]
+            (fun v ↦ connectionDifferenceInChart ω₀ φ x v i j k) w q) =ᶠ[nhds y]
           (fun w ↦ -(∑ l, (gφ w)⁻¹ l i * chartCurvature gφ w j q k l) +
             ∑ l, (g₀ w)⁻¹ l i * chartCurvature g₀ w j q k l) := by
       filter_upwards [hU.mem_nhds hy] with w hw
       exact hbar φ hφ x w hw i j k q
     have hfd := hEq.fderiv_eq (𝕜 := ℝ)
-    simpa [c3PartialZ, gφ, g₀] using congrArg
+    simpa [wirtingerDerivInChart, gφ, g₀] using congrArg
       (fun D : EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ ↦
         (D (EuclideanSpace.single p 1) -
           Complex.I * D (Complex.I • EuclideanSpace.single p 1)) / 2) hfd
@@ -79,7 +79,7 @@ theorem c3BochnerConnectionTerm_eq_reference_sub_ricci (ω₀ : KahlerForm n M)
       (p i j k q : Fin n) :
       c3TensorCovariantZ (c3PerturbedMetricInChart ω₀ φ x)
         (fun w a b c =>
-          c3PartialBar (fun v => c3ConnectionDifferenceInChart ω₀ φ x v a b c) w q)
+          c3PartialBar (fun v => connectionDifferenceInChart ω₀ φ x v a b c) w q)
         y p i j k =
       c3TensorCovariantZ (c3PerturbedMetricInChart ω₀ φ x)
         (fun w a b c =>
@@ -90,7 +90,7 @@ theorem c3BochnerConnectionTerm_eq_reference_sub_ricci (ω₀ : KahlerForm n M)
         y p i j k := by
     have hbar := c3ConnectionDifference_bar_derivative ω₀
     have hbarAt (a b c : Fin n) :
-        c3PartialBar (fun v => c3ConnectionDifferenceInChart ω₀ φ x v a b c) y q =
+        c3PartialBar (fun v => connectionDifferenceInChart ω₀ φ x v a b c) y q =
           -(∑ l, (ω₀.metricInChart x y +
               complexHessian (φ ∘ ↑(chartAt (EuclideanSpace ℂ (Fin n)) x).symm) y)⁻¹ l a *
               chartCurvature (fun w ↦ ω₀.metricInChart x w +
@@ -164,7 +164,7 @@ theorem c3BochnerConnectionTerm_eq_reference_sub_ricci (ω₀ : KahlerForm n M)
     rw [c3Curvature_split_from_lifts ω₀ φ x z i j k hPertLift
       (by simpa only [c3TensorCovariantZ] using hRefLift) hPertDiff hRefDiff]
     rw [hRicci i j k]
-  let T := c3ConnectionDifferenceInChart ω₀ φ x z
+  let T := connectionDifferenceInChart ω₀ φ x z
   have hPair :
       c3Pair gφ z (c3ConnectionTensorLaplacian ω₀ φ x z) T =
         c3Pair gφ z (c3ReferenceTensorDrift ω₀ φ x z) T -

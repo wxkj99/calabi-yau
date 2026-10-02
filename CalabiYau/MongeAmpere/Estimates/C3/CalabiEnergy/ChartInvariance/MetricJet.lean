@@ -17,12 +17,12 @@ theorem pullback_entry_derivative {n : ℕ}
     (hJ : ∀ r s, DifferentiableAt ℂ (fun w ↦ J w r s) z)
     (hG : ∀ r s, DifferentiableAt ℝ (fun w ↦ G w r s) (ψ z))
     (hψ : DifferentiableAt ℂ ψ z) :
-    c3PartialZ
+    wirtingerDerivInChart
         (fun w ↦ ((J w).transpose * G (ψ w) * (J w).map star) j k) z p =
       ∑ r, ∑ s,
-        (c3PartialZ (fun w ↦ J w r j) z p * G (ψ z) r s * star (J z s k) +
+        (wirtingerDerivInChart (fun w ↦ J w r j) z p * G (ψ z) r s * star (J z s k) +
           J z r j * (∑ a, (EuclideanSpace.clmMatrix (fderiv ℂ ψ z)) a p *
-            c3PartialZ (fun w ↦ G w r s) (ψ z) a) * star (J z s k)) := by
+            wirtingerDerivInChart (fun w ↦ G w r s) (ψ z) a) * star (J z s k)) := by
   let T (rs : Fin n × Fin n) (w : EuclideanSpace ℂ (Fin n)) : ℂ :=
     (J w rs.1 j * star (J w rs.2 k)) * G (ψ w) rs.1 rs.2
   have hentry (w : EuclideanSpace ℂ (Fin n)) :
@@ -55,7 +55,7 @@ theorem pullback_entry_derivative {n : ℕ}
     rw [hentry w]
     simp only [T, Fintype.sum_prod_type]
   rw [hfun]
-  rw [c3PartialZ_sum T z p hTdiff]
+  rw [wirtingerDerivInChart_sum T z p hTdiff]
   simp only [Fintype.sum_prod_type]
   apply Finset.sum_congr rfl
   intro r hr
@@ -85,11 +85,11 @@ theorem calabiEnergy_c3PartialZ_metric_pullback {n : ℕ}
         (EuclideanSpace.clmMatrix (fderiv ℂ F w)).map star)
     (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ U) (j k l : Fin n) :
     let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ F w)
-    c3PartialZ (fun w => g' w k l) z j =
+    wirtingerDerivInChart (fun w => g' w k l) z j =
       (∑ r, ∑ s,
-        c3PartialZ (fun w => A w r k) z j * g (F z) r s * star (A z s l)) +
+        wirtingerDerivInChart (fun w => A w r k) z j * g (F z) r s * star (A z s l)) +
       ∑ p, ∑ r, ∑ s, A z p j * A z r k *
-        c3PartialZ (fun w => g w r s) (F z) p * star (A z s l) := by
+        wirtingerDerivInChart (fun w => g w r s) (F z) p * star (A z s l) := by
   dsimp only
   let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ F w)
   have hzV : F z ∈ V := hFV hz
@@ -126,17 +126,17 @@ theorem calabiEnergy_c3PartialZ_metric_pullback {n : ℕ}
       Complex.I * fderiv ℝ (fun w ↦ g' w k l) z
         (Complex.I • EuclideanSpace.single j 1)) / 2 = _
   rw [hderivEq]
-  change c3PartialZ
+  change wirtingerDerivInChart
       (fun w ↦ ((A w).transpose * g (F w) * (A w).map star) k l) z j = _
   let P : Fin n → Fin n → ℂ := fun r s =>
-    c3PartialZ (fun w ↦ A w r k) z j * g (F z) r s * star (A z s l)
+    wirtingerDerivInChart (fun w ↦ A w r k) z j * g (F z) r s * star (A z s l)
   let Q : Fin n → Fin n → ℂ := fun r s =>
-    A z r k * (∑ p, A z p j * c3PartialZ (fun w ↦ g w r s) (F z) p) *
+    A z r k * (∑ p, A z p j * wirtingerDerivInChart (fun w ↦ g w r s) (F z) p) *
       star (A z s l)
   let R : Fin n → Fin n → Fin n → ℂ := fun p r s =>
-    A z p j * A z r k * c3PartialZ (fun w ↦ g w r s) (F z) p *
+    A z p j * A z r k * wirtingerDerivInChart (fun w ↦ g w r s) (F z) p *
       star (A z s l)
-  have hformula : c3PartialZ
+  have hformula : wirtingerDerivInChart
       (fun w ↦ ((A w).transpose * g (F w) * (A w).map star) k l) z j =
       ∑ r, ∑ s, (P r s + Q r s) := by
     simpa [P, Q, A, mul_assoc] using
@@ -161,7 +161,7 @@ theorem calabiEnergy_c3PartialZ_metric_pullback {n : ℕ}
             exact Finset.sum_comm
           _ = ∑ p, ∑ r, ∑ s, R p r s := Finset.sum_comm
   calc
-    c3PartialZ
+    wirtingerDerivInChart
         (fun w ↦ ((A w).transpose * g (F w) * (A w).map star) k l) z j =
         ∑ r, ∑ s, (P r s + Q r s) := hformula
     _ = (∑ r, ∑ s, P r s) + ∑ p, ∑ r, ∑ s, R p r s := by

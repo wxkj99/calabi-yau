@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.RicciDerivative.Basic
-public import CalabiYau.Geometry.Complex.Holder
-import Mathlib.Topology.Compactness.LocallyCompact
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 
 /-!
 # Local fixed-chart bounds for forcing jets
@@ -21,11 +20,8 @@ open Filter
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem forcingChart_closedBall_subset_target (x : M) :
     ∃ r : ℝ, 0 < r ∧ Metric.closedBall
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) r ⊆
@@ -38,7 +34,6 @@ private theorem forcingChart_closedBall_subset_target (x : M) :
   exact ⟨r / 2, by linarith,
     fun z hz => hball (Metric.mem_ball.mpr (lt_of_le_of_lt hz (by linarith)))⟩
 
-omit [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M] in
 private theorem exists_compact_chart_neighborhood_uniform_c3
     (F : Set (M → ℝ))
     (hHolder : HolderBoundedInCharts (EuclideanSpace ℂ (Fin n)) 3 0 F) (x : M) :
@@ -69,6 +64,10 @@ private theorem exists_compact_chart_neighborhood_uniform_c3
   · intro y hy
     have hy' : c y ∈ Metric.ball z₀ r := hy.2
     exact Metric.mem_closedBall.mpr (le_of_lt (Metric.mem_ball.mp hy'))
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
 /-- A fixed chart near x supplies one finite coefficient, uniformly over the
 forcing family and all frames normalized by the reference metric there. -/
@@ -133,7 +132,9 @@ private theorem forcing_inverse_entry_contDiffAt
   rw [Matrix.inv_def]
   simp [Matrix.smul_apply]
 
-omit [T2Space M] [CompactSpace M] in
+end
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 private theorem exists_fixed_chart_frame_entries_bounded
     (ω₀ : KahlerForm n M) (x : M)
     (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
@@ -213,6 +214,10 @@ private theorem exists_fixed_chart_frame_entries_bounded
     nlinarith [Real.sq_sqrt (show 0 ≤ Q by
       dsimp [Q]
       exact add_nonneg (Finset.sum_nonneg (fun a ha => hDnonneg a)) (by norm_num))]
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
 private theorem forcing_twoFrame_bound {n : ℕ} (P : Matrix (Fin n) (Fin n) ℂ)
     (Q : Fin n → Fin n → ℂ) (B C : ℝ)
@@ -452,7 +457,7 @@ private theorem hessian_entry_first_jet_bound
 
 private theorem partialZ_norm_le_fderiv
     {n : ℕ} (f : EuclideanSpace ℂ (Fin n) → ℂ) (z : EuclideanSpace ℂ (Fin n))
-    (k : Fin n) : ‖c3PartialZ f z k‖ ≤ ‖fderiv ℝ f z‖ := by
+    (k : Fin n) : ‖wirtingerDerivInChart f z k‖ ≤ ‖fderiv ℝ f z‖ := by
   let v : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single k 1
   have hv : ‖v‖ = 1 := by simp [v]
   have hiv : ‖Complex.I • v‖ = 1 := by simp [hv, norm_smul, Complex.norm_I]
@@ -478,13 +483,18 @@ private theorem partialZ_norm_le_fderiv
   simpa using (div_le_iff₀ (by norm_num : (0 : ℝ) < 2)).2
     (by nlinarith [norm_nonneg (fderiv ℝ f z)])
 
-omit [T2Space M] [CompactSpace M] in
+end
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+
 private theorem exists_local_background_christoffel_bound
     (ω₀ : KahlerForm n M) (x₀ : M)
     (K : Set (EuclideanSpace ℂ (Fin n))) (hK : IsCompact K)
     (hKt : K ⊆ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target) :
     ∃ R : ℝ, 0 ≤ R ∧ ∀ z ∈ K, ∀ i j k : Fin n,
-      ‖c3ChristoffelInChart (ω₀.metricInChart x₀) z i j k‖ ≤ R := by
+      ‖christoffelInChart (ω₀.metricInChart x₀) z i j k‖ ≤ R := by
   classical
   let U := (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).target
   let g := fun z => ω₀.metricInChart x₀ z
@@ -533,30 +543,30 @@ private theorem exists_local_background_christoffel_bound
       fun_prop (disch := assumption)
     exact hcont.continuousWithinAt
   have hpartial (j k l : Fin n) : ContinuousOn
-      (fun z => c3PartialZ (fun w => g w k l) z j) U := by
+      (fun z => wirtingerDerivInChart (fun w => g w k l) z j) U := by
     have h₁ := hderiv k l j (EuclideanSpace.single j 1)
     have h₂ := hderiv k l j (Complex.I • EuclideanSpace.single j 1)
-    simpa [c3PartialZ] using h₁.sub (continuousOn_const.mul h₂) |>.div_const 2
+    simpa [wirtingerDerivInChart] using h₁.sub (continuousOn_const.mul h₂) |>.div_const 2
   have hγ (i j k : Fin n) : ContinuousOn
-      (fun z => ‖c3ChristoffelInChart g z i j k‖) U := by
+      (fun z => ‖christoffelInChart g z i j k‖) U := by
     have hterm (l : Fin n) : ContinuousOn
-        (fun z => (g z)⁻¹ l i * c3PartialZ (fun w => g w k l) z j) U :=
+        (fun z => (g z)⁻¹ l i * wirtingerDerivInChart (fun w => g w k l) z j) U :=
       (hinv l i).mul (hpartial j k l)
     have hsum : ContinuousOn
         (fun z => ∑ l : Fin n,
-          (g z)⁻¹ l i * c3PartialZ (fun w => g w k l) z j) U :=
+          (g z)⁻¹ l i * wirtingerDerivInChart (fun w => g w k l) z j) U :=
       continuousOn_finsetSum Finset.univ (fun l hl => hterm l)
-    simpa [c3ChristoffelInChart] using hsum.norm
+    simpa [christoffelInChart] using hsum.norm
   choose B hB0 hB using fun i j k =>
     (hK.bddAbove_image ((hγ i j k).mono hKt)).exists_ge 0
   refine ⟨∑ i, ∑ j, ∑ k, B i j k, ?_, ?_⟩
   · exact Finset.sum_nonneg (fun i hi => Finset.sum_nonneg (fun j hj =>
       Finset.sum_nonneg (fun k hk => hB0 i j k)))
   · intro z hz i j k
-    have hval : ‖c3ChristoffelInChart g z i j k‖ ≤ B i j k :=
+    have hval : ‖christoffelInChart g z i j k‖ ≤ B i j k :=
       hB i j k _ (Set.mem_image_of_mem _ hz)
     calc
-      ‖c3ChristoffelInChart g z i j k‖ ≤ B i j k := hval
+      ‖christoffelInChart g z i j k‖ ≤ B i j k := hval
       _ ≤ ∑ a, ∑ b, ∑ c, B a b c := by
         apply le_trans (Finset.single_le_sum (fun c hc => hB0 i j c) (Finset.mem_univ k))
         apply le_trans (Finset.single_le_sum (fun b hb =>
@@ -564,7 +574,6 @@ private theorem exists_local_background_christoffel_bound
         exact Finset.single_le_sum (fun a ha => Finset.sum_nonneg (fun b hb =>
           Finset.sum_nonneg (fun c hc => hB0 a b c))) (Finset.mem_univ i)
 
-omit [T2Space M] [CompactSpace M] in
 theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
     (F : Set (M → ℝ))
     (hF : ∀ G ∈ F, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
@@ -574,7 +583,7 @@ theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
       ∃ A : ℝ, 0 ≤ A ∧ ∀ G ∈ F, ∀ y ∈ U, ∀ P : Matrix (Fin n) (Fin n) ℂ,
         P.transpose * ω₀.metricInChart x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y) * P.map star = 1 →
-          c3ForcingFrameBound ω₀ G x
+          ForcingFrameBound ω₀ G x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y) P A := by
   obtain ⟨K, hK, hKt, C, hC, U, hUopen, hUx, hUs, hUK⟩ :=
     exists_compact_chart_neighborhood_uniform_c3 F hHolder x
@@ -626,10 +635,10 @@ theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
                 (f := fun w => complexHessian u w j l) (x := z) (n := 0))
       have hfirst : ‖fderiv ℝ (fun w => complexHessian u w j l) z‖ ≤
           ‖iteratedFDeriv ℝ 1 (fun w => complexHessian u w j l) z‖ := le_of_eq hfirstEq
-      have hpartial : ‖c3PartialZ (fun w => complexHessian u w j l) z k‖ ≤
+      have hpartial : ‖wirtingerDerivInChart (fun w => complexHessian u w j l) z k‖ ≤
           (C : ℝ) := by
         calc
-          ‖c3PartialZ (fun w => complexHessian u w j l) z k‖ ≤
+          ‖wirtingerDerivInChart (fun w => complexHessian u w j l) z k‖ ≤
               ‖fderiv ℝ (fun w => complexHessian u w j l) z‖ :=
             partialZ_norm_le_fderiv _ _ _
           _ ≤ ‖iteratedFDeriv ℝ 1
@@ -637,12 +646,12 @@ theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
           _ ≤ ‖iteratedFDeriv ℝ 3 u z‖ := hHessDeriv z hz j l
           _ ≤ (C : ℝ) := (hC G hG).1 3 (by norm_num) z hz
       have hcorrection :
-          ‖∑ r, c3ChristoffelInChart (ω₀.metricInChart x) z r k j *
+          ‖∑ r, christoffelInChart (ω₀.metricInChart x) z r k j *
               c3ForcingHessianInChart G x z r l‖ ≤ (n : ℝ) * R * (C : ℝ) := by
         calc
-          ‖∑ r, c3ChristoffelInChart (ω₀.metricInChart x) z r k j *
+          ‖∑ r, christoffelInChart (ω₀.metricInChart x) z r k j *
               c3ForcingHessianInChart G x z r l‖ ≤
-              ∑ r, ‖c3ChristoffelInChart (ω₀.metricInChart x) z r k j *
+              ∑ r, ‖christoffelInChart (ω₀.metricInChart x) z r k j *
                 c3ForcingHessianInChart G x z r l‖ := norm_sum_le _ _
           _ ≤ ∑ r, R * (C : ℝ) := by
             apply Finset.sum_le_sum
@@ -653,12 +662,12 @@ theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
           _ = (n : ℝ) * R * (C : ℝ) := by
             simp [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
             ring
-      change ‖c3PartialZ (fun w => complexHessian u w j l) z k -
-          ∑ r, c3ChristoffelInChart (ω₀.metricInChart x) z r k j *
+      change ‖wirtingerDerivInChart (fun w => complexHessian u w j l) z k -
+          ∑ r, christoffelInChart (ω₀.metricInChart x) z r k j *
             c3ForcingHessianInChart G x z r l‖ ≤ _
       calc
-        _ ≤ ‖c3PartialZ (fun w => complexHessian u w j l) z k‖ +
-            ‖∑ r, c3ChristoffelInChart (ω₀.metricInChart x) z r k j *
+        _ ≤ ‖wirtingerDerivInChart (fun w => complexHessian u w j l) z k‖ +
+            ‖∑ r, christoffelInChart (ω₀.metricInChart x) z r k j *
               c3ForcingHessianInChart G x z r l‖ := norm_sub_le _ _
         _ ≤ (C : ℝ) + (n : ℝ) * R * (C : ℝ) := add_le_add hpartial hcorrection
     have hzK : (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x y) ∈ K := hUK y hy
@@ -682,5 +691,7 @@ theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
       exact (htwo j l).trans (le_max_left _ _)
     · intro k j l
       exact (hthree k j l).trans (le_max_right _ _)
+
+end
 
 end KahlerForm

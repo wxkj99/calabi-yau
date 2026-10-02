@@ -1,7 +1,8 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.RicciDerivative.Basic
-public import CalabiYau.LinearAlgebra.Hermitian.SimultaneousDiagonalization
+public import CalabiYau.Mathlib.Analysis.Matrix.Hermitian.SimultaneousDiagonalization
+public import CalabiYau.Mathlib.LinearAlgebra.Matrix.PullbackInverse
 
 /-!
 # MetricFrame for the differentiated Ricci contraction
@@ -51,38 +52,7 @@ theorem c3_exists_simultaneous_reference_frame {n : ℕ}
   · exact (Matrix.re_trace_inv_mul_eq_sum_inv_of_conjTranspose_mul_mul_eq hQG hQA
       (fun i ↦ (hd i).ne')).symm
 
-theorem c3InversePullbackMetric {n : ℕ}
-    (A B G : Matrix (Fin n) (Fin n) ℂ)
-    (hAB : A * B = 1) (hBA : B * A = 1) :
-    (A.transpose * G * A.map star)⁻¹ = B.map star * G⁻¹ * B.transpose := by
-  have hinvA : A⁻¹ = B := by
-    calc
-      A⁻¹ = 1 * A⁻¹ := by simp
-      _ = (B * A) * A⁻¹ := by rw [hBA]
-      _ = B * (A * A⁻¹) := by rw [Matrix.mul_assoc]
-      _ = B := by
-        rw [Matrix.mul_nonsing_inv A (Matrix.isUnit_det_of_left_inverse hBA), mul_one]
-  rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev]
-  rw [← Matrix.transpose_nonsing_inv, hinvA]
-  have hABstar : A.map star * B.map star = 1 := by
-    ext a b
-    have hij := congrArg star (congrFun (congrFun hAB a) b)
-    simpa [Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul, mul_comm] using hij
-  have hBAstar : B.map star * A.map star = 1 := by
-    ext a b
-    have hij := congrArg star (congrFun (congrFun hBA a) b)
-    simpa [Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul, mul_comm] using hij
-  have hs : IsUnit (A.map star).det := Matrix.isUnit_det_of_right_inverse hABstar
-  have hinvstar : (A.map star)⁻¹ = B.map star := by
-    calc
-      (A.map star)⁻¹ = 1 * (A.map star)⁻¹ := by simp
-      _ = (B.map star * A.map star) * (A.map star)⁻¹ := by rw [hBAstar]
-      _ = B.map star * (A.map star * (A.map star)⁻¹) := by rw [Matrix.mul_assoc]
-      _ = B.map star := by rw [Matrix.mul_nonsing_inv _ hs, mul_one]
-  rw [hinvstar]
-  rw [← Matrix.mul_assoc]
-
-theorem c3InverseMetricPairPullback {n : ℕ}
+theorem sum_inv_metric_mul_eq_pullback {n : ℕ}
     (A G : Matrix (Fin n) (Fin n) ℂ) (q t : Fin n) :
     (∑ x : Fin n × Fin n,
       G⁻¹ x.1 x.2 * A q x.2 * star (A t x.1)) =
@@ -156,9 +126,9 @@ theorem c3_frame_metric_sum_identities {n : ℕ}
   · intro q t
     calc
       _ = (P.map star * D⁻¹ * P.transpose) t q :=
-        c3InverseMetricPairPullback P D q t
+        sum_inv_metric_mul_eq_pullback P D q t
       _ = (Q.transpose * D * Q.map star)⁻¹ t q := by
-        rw [c3InversePullbackMetric Q P D hQP hPQ]
+        rw [Matrix.inv_transpose_mul_mul_map_star Q P D hPQ]
       _ = A⁻¹ t q := by rw [hA]
 
 /-- Two trace sums bound each positive simultaneous eigenvalue in both directions. -/

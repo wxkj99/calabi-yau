@@ -1,7 +1,7 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Tools/Mollification/WeakDerivative.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.WeakDerivatives
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.WeakDerivative
 public import CalabiYau.Analysis.Sobolev.Tools.Mollification.Lp
 
 @[expose] public section
@@ -20,7 +20,7 @@ local notation "E" => EuclideanSpace ℝ (Fin d)
 omit [NeZero d] in
 theorem convolution_fderiv_eq_convolution_weakPartial_univ
     {u g : E → ℝ} {i : Fin d}
-    (hweak : DeGiorgi.HasWeakPartialDeriv i g u Set.univ)
+    (hweak : Sobolev.Euclidean.HasWeakPartialDeriv i g u Set.univ)
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
     (hφ_compact : HasCompactSupport φ) (x : E) :
     ((fun y => (fderiv ℝ φ y) (EuclideanSpace.single i 1))
@@ -90,7 +90,7 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
     {ε : ℝ} (hε : 0 < ε)
     {u g : E → ℝ} {j : Fin d}
     (hu_local : LocallyIntegrable u (volume : Measure E))
-    (hweak : DeGiorgi.HasWeakPartialDeriv (d := d) j g u Set.univ) (x : E) :
+    (hweak : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j g u Set.univ) (x : E) :
     (fderiv ℝ (mollifyEps (d := d) hε u) x)
         (EuclideanSpace.single j 1) =
       mollifyEps (d := d) hε g x := by
@@ -147,25 +147,5 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
       (d := d) (i := j) (g := g) (u := u) hweak hη_smooth' hη_compact x
   rw [h_ibp]
   rfl
-
-omit [NeZero d] in
-theorem eLpNorm_partial_mollifyEps_le_of_weakPartial_univ
-    {ε : ℝ} (hε : 0 < ε)
-    {u g : E → ℝ} {j : Fin d}
-    (hu_local : LocallyIntegrable u (volume : Measure E))
-    (hg : MemLp g 2 (volume : Measure E))
-    (hweak : DeGiorgi.HasWeakPartialDeriv (d := d) j g u Set.univ) :
-    eLpNorm
-      (fun x => (fderiv ℝ (mollifyEps (d := d) hε u) x)
-        (EuclideanSpace.single j 1)) 2 (volume : Measure E) ≤
-      eLpNorm g 2 (volume : Measure E) := by
-  have h_pointwise : (fun x : E =>
-      (fderiv ℝ (mollifyEps (d := d) hε u) x)
-        (EuclideanSpace.single j 1)) =
-      (fun x : E => mollifyEps (d := d) hε g x) := by
-    funext x
-    exact mollifyEps_partial_eq_mollifyEps_weakPartial hε hu_local hweak x
-  rw [h_pointwise]
-  exact eLpNorm_mollifyEps_le hε hg
 
 end Sobolev

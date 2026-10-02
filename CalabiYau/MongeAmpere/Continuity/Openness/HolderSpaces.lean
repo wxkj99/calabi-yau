@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Basic
 public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderMeanZero
-public import CalabiYau.Geometry.Complex.Holder
+public import CalabiYau.Mathlib.Geometry.Manifold.Holder
 
 /-!
 # Concrete mean-zero little Hölder carriers for openness

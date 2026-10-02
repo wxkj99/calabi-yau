@@ -302,7 +302,7 @@ private theorem chart_ball_zero_dimensional
   have hVopen : IsOpen V := by
     simpa [V] using (chartAt (EuclideanSpace ℂ (Fin 0)) a).open_source
   have haV : a ∈ V := by
-    simpa [V] using mem_chart_source (EuclideanSpace ℂ (Fin 0)) a
+    simp [V]
   have : Subsingleton (EuclideanSpace ℂ (Fin 0)) := inferInstance
   have hconst : ∀ y ∈ V, y = a := by
     intro y hy

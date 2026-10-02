@@ -27,8 +27,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [T2Space M] [CompactSpace M] [I.Boundaryless]
+variable [T2Space M] [CompactSpace M]
 
+variable [I.Boundaryless] in
 private noncomputable def chartCompactM (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean ''
@@ -36,7 +37,6 @@ private noncomputable def chartCompactM (α : M) :
       (tsupport ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
-omit [I.Boundaryless] in
 private lemma extChartAt_image_tsupport_pou_compact_subset_target (α : M) :
     IsCompact ((extChartAt I α) ''
         (tsupport ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
@@ -58,14 +58,12 @@ private lemma extChartAt_image_tsupport_pou_compact_subset_target (α : M) :
       : M → ℝ))
     (α := α) hsupp_sub
 
-omit [I.Boundaryless] in
 private lemma chartCompactM_isCompact (α : M) :
     IsCompact (chartCompactM (I := I) (M := M) α) := by
   unfold chartCompactM
   exact (extChartAt_image_tsupport_pou_compact_subset_target
     (I := I) (M := M) α).1.image (toEuclidean (E := E)).continuous
 
-omit [I.Boundaryless] in
 private lemma chartCompactM_subset_chartTargetEuclid (α : M) :
     chartCompactM (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α := by
   unfold chartCompactM chartTargetEuclid
@@ -74,6 +72,9 @@ private lemma chartCompactM_subset_chartTargetEuclid (α : M) :
   exact (extChartAt_image_tsupport_pou_compact_subset_target
     (I := I) (M := M) α).2 hz
 
+section
+
+variable [I.Boundaryless]
 private noncomputable def chartThickeningRadiusM (α : M) : ℝ :=
   ((chartCompactM_isCompact (I := I) (M := M) α).exists_thickening_subset_open
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
@@ -116,7 +117,8 @@ private lemma chartCompactM_subset_chartNeighborhoodM (α : M) :
     (chartThickeningRadiusM_pos (I := I) (M := M) α)
     (chartCompactM (I := I) (M := M) α)
 
-omit [I.Boundaryless] in
+end
+
 private lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompactM
     (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -156,6 +158,7 @@ private lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompactM
     exact hsmul hx_support
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy_target
 
+variable [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_tsupport_subset_chartNeighborhoodM
     (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -183,7 +186,6 @@ private lemma chartPushedRaw_pou_mul_tsupport_subset_chartNeighborhoodM
     exact h_compact_closed.closure_subset_iff.mpr h_support_sub
   exact h_tsupp_sub.trans (chartCompactM_subset_chartNeighborhoodM (I := I) (M := M) α)
 
-omit [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_hasCompactSupport_aux
     (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -211,30 +213,33 @@ private lemma chartPushedRaw_pou_mul_hasCompactSupport_aux
   exact (chartCompactM_isCompact (I := I) (M := M) α).of_isClosed_subset
     isClosed_closure h_tsupp_sub
 
+section
+
+variable [I.Boundaryless]
 private lemma memW1p_chartPushedRaw_pou_mul_chartNeighborhoodM
     {p : ℝ≥0∞}
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) 1 p u)
     (α : M) :
-    DeGiorgi.MemW1p (d := Module.finrank ℝ E) p
+    Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) p
       (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartNeighborhoodM (I := I) (M := M) α) := by
   have h_target := memW1p_chartPushedRaw_pou_mul_of_memWkpChart
     (I := I) (M := M) hu α
-  have hwT : DeGiorgi.MemW1pWitness (d := Module.finrank ℝ E) p
+  have hwT : Sobolev.Euclidean.MemW1pWitness (d := Module.finrank ℝ E) p
       (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartTargetEuclid (I := I) (M := M) α) :=
-    DeGiorgi.MemW1p.someWitness h_target
-  have hwN : DeGiorgi.MemW1pWitness (d := Module.finrank ℝ E) p
+    Sobolev.Euclidean.MemW1p.someWitness h_target
+  have hwN : Sobolev.Euclidean.MemW1pWitness (d := Module.finrank ℝ E) p
       (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartNeighborhoodM (I := I) (M := M) α) :=
-    hwT.restrict (chartNeighborhoodM_isOpen (I := I) (M := M) α)
+    hwT.restrict
       (chartNeighborhoodM_subset_chartTargetEuclid (I := I) (M := M) α)
   exact hwN.memW1p
 
@@ -244,7 +249,7 @@ private lemma memW01p_chartPushedRaw_pou_mul_chartNeighborhoodM
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) 1 (ENNReal.ofReal p) u)
     (α : M) :
-    DeGiorgi.MemW01p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
+    Sobolev.Euclidean.MemW01p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
       (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x))
@@ -255,7 +260,7 @@ private lemma memW01p_chartPushedRaw_pou_mul_chartNeighborhoodM
     (I := I) (M := M) α u
   have h_compact := chartPushedRaw_pou_mul_hasCompactSupport_aux
     (I := I) (M := M) α u
-  exact DeGiorgi.memW01p_of_memW1p_of_tsupport_subset
+  exact Sobolev.Euclidean.memW01p_of_memW1p_of_tsupport_subset
     (chartNeighborhoodM_isOpen (I := I) (M := M) α) hp_one h_w1p h_compact h_support
 
 private lemma eLpNorm_chartPushedRaw_pou_mul_chartNeighborhoodM_le
@@ -303,7 +308,7 @@ private lemma exists_chart_rellich_subseq_aux_M
     chartPushedRaw (I := I) (M := M) α
       (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u (ψ n) x) with hv_def
-  have hv_mem : ∀ n, DeGiorgi.MemW01p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
+  have hv_mem : ∀ n, Sobolev.Euclidean.MemW01p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
       (v n) (chartNeighborhoodM (I := I) (M := M) α) := by
     intro n
     exact memW01p_chartPushedRaw_pou_mul_chartNeighborhoodM
@@ -363,14 +368,14 @@ private lemma exists_chart_rellich_subseq_aux_M
               (chartTargetEuclid (I := I) (M := M) α)) := by
       intro i
       have hChart_w1p :
-          DeGiorgi.MemW1p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
+          Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α (u (ψ n)))
             (chartTargetEuclid (I := I) (M := M) α) := by
         have h := (hu_mem (ψ n)) α
         exact Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp h
       have hChart_chosen_isWeak :
-          DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+          Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
             (Sobolev.Euclidean.chosenWeakPartialOrZero
               (d := Module.finrank ℝ E) (ENNReal.ofReal p) i
               (chartPushed (I := I) (M := M)
@@ -382,7 +387,7 @@ private lemma exists_chart_rellich_subseq_aux_M
         Sobolev.Euclidean.chosenWeakPartialOrZero_isWeakPartial_of_mem
           hChart_w1p i
       have hChart_chosen_isWeak_NeighborhoodM :
-          DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+          Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
             (Sobolev.Euclidean.chosenWeakPartialOrZero
               (d := Module.finrank ℝ E) (ENNReal.ofReal p) i
               (chartPushed (I := I) (M := M)
@@ -391,7 +396,7 @@ private lemma exists_chart_rellich_subseq_aux_M
             (chartPushed (I := I) (M := M)
               (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α (u (ψ n)))
             (chartNeighborhoodM (I := I) (M := M) α) :=
-        DeGiorgi.HasWeakPartialDeriv.restrict (chartNeighborhoodM_isOpen (I := I) (M := M) α)
+        Sobolev.Euclidean.HasWeakPartialDeriv.restrict
           (chartNeighborhoodM_subset_chartTargetEuclid (I := I) (M := M) α)
           hChart_chosen_isWeak
       have h_full := chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M)
@@ -413,7 +418,7 @@ private lemma exists_chart_rellich_subseq_aux_M
                 : C^∞⟮I, M; ℝ⟯) x * u (ψ n) x) :=
         h_full.filter_mono (MeasureTheory.ae_mono h_restrict_le)
       have hChart_chosen_isWeak_raw :
-          DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+          Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
             (Sobolev.Euclidean.chosenWeakPartialOrZero
               (d := Module.finrank ℝ E) (ENNReal.ofReal p) i
               (chartPushed (I := I) (M := M)
@@ -423,8 +428,7 @@ private lemma exists_chart_rellich_subseq_aux_M
               (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
                 : C^∞⟮I, M; ℝ⟯) x * u (ψ n) x))
             (chartNeighborhoodM (I := I) (M := M) α) :=
-        Sobolev.Euclidean.hasWeakPartialDeriv_congr_ae
-          (chartNeighborhoodM_isOpen (I := I) (M := M) α) i h_ae_NeighborhoodM
+        Sobolev.Euclidean.hasWeakPartialDeriv_congr_ae i h_ae_NeighborhoodM
           hChart_chosen_isWeak_NeighborhoodM
       have hWit_isWeak := (Classical.choose (hv_mem n).2).isWeakGrad i
       have hWit_local :=
@@ -462,7 +466,7 @@ private lemma exists_chart_rellich_subseq_aux_M
             (chartPushed (I := I) (M := M)
               (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α (u (ψ n)))
             (chartTargetEuclid (I := I) (M := M) α) :=
-        DeGiorgi.HasWeakPartialDeriv.ae_eq
+        Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq
           (chartNeighborhoodM_isOpen (I := I) (M := M) α) hWit_isWeak
           hChart_chosen_isWeak_raw hWit_local hChosen_local
       rw [eLpNorm_congr_ae h_ae_grad]
@@ -594,6 +598,8 @@ private lemma exists_diagonal_chart_extraction_M
         exact h_tendsto_α.comp (Filter.tendsto_atTop_atTop_of_monotone hσ_a_mono.monotone
           (fun n => ⟨n, hσ_a_mono.id_le n⟩))
 
+end
+
 end Chart
 end Sobolev
 
@@ -612,9 +618,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [T2Space M] [CompactSpace M] [I.Boundaryless]
+variable [T2Space M] [CompactSpace M]
 
-omit [I.Boundaryless] in
 private lemma chartAtlasPOU_measurable_aux (α : M) :
     Measurable
       ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
@@ -622,14 +627,12 @@ private lemma chartAtlasPOU_measurable_aux (α : M) :
   ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
     : C^∞⟮I, M; ℝ⟯).contMDiff.continuous).measurable
 
-omit [I.Boundaryless] in
 private lemma pou_mul_measurable_aux (α : M) {u : M → ℝ} (hu : Measurable u) :
     Measurable (fun x : M =>
       (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x) :=
   (chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu
 
-omit [I.Boundaryless] in
 private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
     (hu : Measurable u) (hv : Measurable v) :
     Measurable (fun x : M =>
@@ -640,7 +643,6 @@ private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
   ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu).sub
     ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hv)
 
-omit [I.Boundaryless] in
 private lemma tsupport_pou_mul_subset_tsupport_pou_aux
     (α : M) (u : M → ℝ) :
     tsupport (fun x : M =>
@@ -658,7 +660,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou_aux
   rw [h_eq]
   exact tsupport_smul_subset_left _ _
 
-omit [I.Boundaryless] in
 private lemma tsupport_pou_mul_sub_subset_tsupport_pou_aux
     (α : M) (u v : M → ℝ) :
     tsupport (fun x : M =>
@@ -710,6 +711,7 @@ private lemma tsupport_pou_mul_sub_subset_tsupport_pou_aux
   · exact tsupport_pou_mul_subset_tsupport_pou_aux (I := I) (M := M) α v
       (subset_tsupport _ hv_support)
 
+variable [I.Boundaryless] in
 private lemma memLp_pou_mul_riemannianMeasure_aux
     (g : CalabiYau.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
@@ -727,7 +729,7 @@ private lemma memLp_pou_mul_riemannianMeasure_aux
       ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p)
   have hp_top : ENNReal.ofReal p ≠ ⊤ := ENNReal.ofReal_ne_top
   have h_raw_w1p :
-      DeGiorgi.MemW1p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
+      Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
         (chartPushedRaw (I := I) (M := M) α
           (fun x : M =>
             (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
@@ -759,7 +761,6 @@ private lemma memLp_pou_mul_riemannianMeasure_aux
   apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
   exact h_raw_memLp.2
 
-omit [I.Boundaryless] in
 private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     (g : CalabiYau.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p) (α : M) :
@@ -802,6 +803,9 @@ private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     (I := I) (M := M) α u v
   exact hC_bnd h_diff_meas h_diff_support
 
+section
+
+variable [I.Boundaryless]
 private lemma eLpNorm_chartPushedRaw_diff_chartTarget_eq_chartNeighborhoodM
     {p : ℝ} (_hp_one : 1 < p) (α : M) (u v : M → ℝ) :
     eLpNorm (chartPushedRaw (I := I) (M := M) α
@@ -1173,6 +1177,8 @@ private lemma exists_riemannianMeasure_limit_pou_mul
     rw [this, hx]
   rw [h_eLpFn_eq] at h_eLp_tendsto
   exact h_eLp_tendsto
+
+end
 
 theorem rellich_kondrachov_chart_seq
     {E H : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

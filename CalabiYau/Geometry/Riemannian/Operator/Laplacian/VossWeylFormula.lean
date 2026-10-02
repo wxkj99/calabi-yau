@@ -6,8 +6,6 @@ public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Local.ChartInvaria
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -28,7 +26,7 @@ def chartInvGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
 
-@[simp] lemma chartInvGramOnE_def
+lemma chartInvGramOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     chartInvGramOnE (I := I) g α i j y =
@@ -41,20 +39,12 @@ def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
       chartInvGramOnE (I := I) g α i j y *
         CalabiYau.Tensor.Coordinates.partialDeriv (E := E) j (scalarOnE (I := I) α f) y
 
-@[simp] lemma gradChartCoeffOnE_def
-    (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
-    (i : Fin (Module.finrank ℝ E)) (y : E) :
-    gradChartCoeffOnE (I := I) g α f i y =
-      ∑ j : Fin (Module.finrank ℝ E),
-        chartInvGramOnE (I := I) g α i j y *
-          CalabiYau.Tensor.Coordinates.partialDeriv (E := E) j (scalarOnE (I := I) α f) y := rfl
-
 def chartVossWeylIntegrand (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y =>
     gradChartCoeffOnE (I := I) g α f i y * chartDensityOnE (I := I) g α y
 
-@[simp] lemma chartVossWeylIntegrand_def
+lemma chartVossWeylIntegrand_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
     chartVossWeylIntegrand (I := I) g α f i y =
@@ -69,7 +59,7 @@ def chartVossWeylLaplacian (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
         (extChartAt I α x))
     / chartDensity (I := I) g α x
 
-@[simp] lemma chartVossWeylLaplacian_def
+lemma chartVossWeylLaplacian_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartVossWeylLaplacian (I := I) g α f x =
       (∑ i : Fin (Module.finrank ℝ E),

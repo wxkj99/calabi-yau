@@ -16,10 +16,12 @@ open scoped Manifold ContDiff NNReal Topology
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [T2Space M] [CompactSpace M]
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem ddbar_lower_bound_of_secondJet
     {n : ℕ} (f : EuclideanSpace ℂ (Fin n) → ℝ) (z : EuclideanSpace ℂ (Fin n))
@@ -157,7 +159,8 @@ private theorem exists_uniform_chartQuadratic_margin
       _ = ‖v‖ ^ 2 * α z ![u, Complex.I • u] := by ring
       _ = α z ![v, Complex.I • v] := hscale.symm
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem chartQuadratic_continuousOn
     (ω₀ : KahlerForm n M) {φ : M → ℝ}
     (hφ : ω₀.IsC2Potential φ) (x : M) {K : Set (EuclideanSpace ℂ (Fin n))}
@@ -241,6 +244,10 @@ private theorem chartQuadratic_continuousOn
     rw [ContinuousAlternatingMap.add_apply,
       chartRep_mddbar_of_contMDiff_two hφ.1 x (hKt hp.1)]
   exact (hωeval.add hddbar).congr (fun p hp => hrepr p hp)
+
+section
+
+variable [T2Space M] [CompactSpace M]
 
 private theorem positive_add_of_uniform_quadratic_bound
     {n : ℕ} (α β : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
@@ -420,7 +427,8 @@ private theorem pointwise_isPositive_of_chartRep
   rw [hbackEq] at hback
   exact hback
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem chartRep_approximation_positive
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsC2Potential φ)
     (A : ChartwiseC2SmoothingData (n := n) (M := M) φ)
@@ -492,7 +500,6 @@ private theorem chartRep_approximation_positive
   rw [hform]
   exact hsumpos
 
-omit [T2Space M] [CompactSpace M] in
 private theorem exists_chartPiece_positiveMargin
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsC2Potential φ)
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M) (i : cover.ι)
@@ -514,7 +521,6 @@ private theorem exists_chartPiece_positiveMargin
     intro z hz v
     exact (hne ⟨z, hz⟩).elim
 
-omit [T2Space M] [CompactSpace M] in
 /-- A chartwise `C²`-convergent smooth approximation to a strictly positive `C²` potential is
 positive from some index onward. -/
 theorem ChartwiseC2SmoothingData.eventually_isPotential

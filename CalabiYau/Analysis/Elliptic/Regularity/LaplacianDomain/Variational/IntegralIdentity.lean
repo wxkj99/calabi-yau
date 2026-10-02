@@ -4,7 +4,7 @@ module
 public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Variational.Identity
 public import CalabiYau.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
-public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.ToLpChartBridge
+public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.ChartLp
 public import CalabiYau.Analysis.Elliptic.Regularity.H1Compl.GradientH1LipschitzBound
 public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Variational.SmoothApproximation
 
@@ -22,7 +22,7 @@ namespace Laplacian
 namespace LaplacianDomainVariationalIdentityIntegralForm
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -52,10 +52,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma chartPulledWeightedMeasure_lt_top_of_compact_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -90,8 +87,6 @@ private lemma chartPulledWeightedMeasure_lt_top_of_compact_subset
     rw [hKne, measure_empty]
     exact ENNReal.zero_lt_top
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma chartPulledWeightedMeasure_restrict_lt_top_of_compact_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -104,8 +99,6 @@ private lemma chartPulledWeightedMeasure_restrict_lt_top_of_compact_subset
   exact chartPulledWeightedMeasure_lt_top_of_compact_subset
     (I := I) (M := M) g α hK_compact hK_in
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 lemma continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
@@ -133,6 +126,9 @@ lemma continuous_compactSupport_memLp_chartPulledWeighted_restrict
   refine h_top.mono_exponent_of_measure_support_ne_top h_zero_off h_support_finite ?_
   exact le_top
 
+variable [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private def principalMultiplier
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (ψ : EuclN → ℝ) : EuclN → ℝ :=
@@ -141,8 +137,6 @@ private def principalMultiplier
       invGramOnEuclid (I := I) g α i j y *
         (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma principalMultiplier_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -168,8 +162,6 @@ private lemma principalMultiplier_eq_zero_off_tsupport
   refine Finset.sum_eq_zero (fun j _ => ?_)
   rw [h_fder_zero, mul_zero]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma principalMultiplier_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -190,7 +182,7 @@ private lemma principalMultiplier_continuousOn
     (hψ1.continuous_fderiv (by norm_cast)).clm_apply continuous_const
   exact h_inv.mul h_fder.continuousOn
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 private lemma principalMultiplier_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -214,8 +206,6 @@ private lemma principalMultiplier_continuous
     refine ContinuousAt.congr ?_ h_ev.symm
     exact continuousAt_const
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma principalMultiplier_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -225,8 +215,6 @@ private lemma principalMultiplier_hasCompactSupport
   refine HasCompactSupport.intro (hψ_cs : IsCompact (tsupport ψ)) (fun y hy => ?_)
   exact principalMultiplier_eq_zero_off_tsupport (I := I) (M := M) g α i hy
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma principalMultiplier_tsupport_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -240,6 +228,9 @@ private lemma principalMultiplier_tsupport_subset
   by_contra hyψ
   exact hy (principalMultiplier_eq_zero_off_tsupport (I := I) (M := M) g α i hyψ)
 
+variable [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private noncomputable def principalMultiplierLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -253,7 +244,7 @@ private noncomputable def principalMultiplierLp
     (principalMultiplier_hasCompactSupport (I := I) (M := M) g α i hψ_cs)
     (principalMultiplier_tsupport_subset (I := I) (M := M) g α i hψ_support)).toLp _
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 private lemma principalMultiplierLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -268,6 +259,9 @@ private lemma principalMultiplierLp_coeFn
   unfold principalMultiplierLp
   exact MemLp.coeFn_toLp _
 
+variable [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 private noncomputable def massMultiplierLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -278,8 +272,6 @@ private noncomputable def massMultiplierLp
   (continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (I := I) (M := M) g α hψ.continuous hψ_cs hψ_support).toLp _
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma massMultiplierLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -294,7 +286,7 @@ private lemma massMultiplierLp_coeFn
   unfold massMultiplierLp
   exact MemLp.coeFn_toLp _
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 private lemma densityOnEuclid_aemeasurable_restrict_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     AEMeasurable (fun y : EuclN => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
@@ -305,8 +297,6 @@ private lemma densityOnEuclid_aemeasurable_restrict_chartTarget
   exact (densityOnEuclid_continuousOn (I := I) g α).aemeasurable
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
-    [CompactSpace M] in
 private lemma densityOnEuclid_lt_top_ae_restrict_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ᵐ y ∂((volume : Measure EuclN).restrict
@@ -314,7 +304,7 @@ private lemma densityOnEuclid_lt_top_ae_restrict_chartTarget
       ENNReal.ofReal (densityOnEuclid (I := I) g α y) < ⊤ :=
   Filter.Eventually.of_forall (fun _ => ENNReal.ofReal_lt_top)
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
+variable [I.Boundaryless] in
 lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ) :
     ∫ y in chartTargetEuclid (I := I) (M := M) α, f y
@@ -338,8 +328,11 @@ lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
   rw [show (ENNReal.ofReal (densityOnEuclid (I := I) g α y)).toReal • f y =
       (ENNReal.ofReal (densityOnEuclid (I := I) g α y)).toReal * f y from rfl]
   rw [this]
+section
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
+
+
 private lemma smooth_lhs_principal_per_i_integral_eq_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -392,7 +385,6 @@ private lemma smooth_lhs_principal_per_i_integral_eq_weighted
     (fun y => principalMultiplier (I := I) (M := M) g α i ψ y *
       chartPushedPartial (I := I) (M := M) g α i v y)]
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_principal_per_i_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -451,7 +443,6 @@ noncomputable def chartPushedLpFromLp
     (Lp.stronglyMeasurable u).measurable
     (Lp.memLp u)).toLp _
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedLpFromLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -465,7 +456,6 @@ lemma chartPushedLpFromLp_coeFn
   unfold chartPushedLpFromLp
   exact MemLp.coeFn_toLp _
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedLpFromLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : ℕ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -593,7 +583,6 @@ lemma chartPushedLpFromLp_tendsto
     exact h_comp
   exact h_toReal_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_mass_integral_eq_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (ψ : EuclN → ℝ) :
@@ -628,7 +617,6 @@ private lemma smooth_lhs_mass_integral_eq_weighted
       Sobolev.Chart.chartPushed (I := I) (M := M)
         (chartAtlasPOU I M) α v.toFun y * ψ y)]
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedLpFromLp_smoothToLp_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
@@ -719,7 +707,6 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
         (chartAtlasPOU I M) α v.toFun y = 0 := hy
   linarith
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_mass_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -758,7 +745,6 @@ private lemma smooth_lhs_mass_eq_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_ψy, h_Cy]
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_principal_per_i_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -832,7 +818,6 @@ private lemma smooth_lhs_principal_per_i_tendsto
     rw [h_per_n n, h_smooth_case_eq n]]
   exact h_inner_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_mass_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -850,7 +835,7 @@ private lemma smooth_lhs_mass_tendsto
           ∂(volume : Measure EuclN)) atTop
       (𝓝 ⟪massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support,
         chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ) := by
+          (h1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ) := by
   classical
   have h_per_n : ∀ n,
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -863,13 +848,13 @@ private lemma smooth_lhs_mass_tendsto
             (smoothToLp (I := I) (M := M) g (v n))⟫_ℝ := fun n =>
     smooth_lhs_mass_eq_inner (I := I) (M := M) g α hψ hψ_cs hψ_support (v n)
   have h_lp_tendsto : Tendsto (fun n => smoothToLp (I := I) (M := M) g (v n))
-      atTop (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) :=
+      atTop (𝓝 (h1ComplToLp (I := I) (M := M) g u_h)) :=
     smoothToLp_tendsto_H1ComplToLp_of_h1_tendsto (I := I) (M := M) g h_tendsto
   have h_cPL_tendsto :
       Tendsto (fun n => chartPushedLpFromLp (I := I) (M := M) g α
           (smoothToLp (I := I) (M := M) g (v n))) atTop
         (𝓝 (chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h))) :=
+          (h1ComplToLp (I := I) (M := M) g u_h))) :=
     chartPushedLpFromLp_tendsto (I := I) (M := M) g α h_lp_tendsto
   have h_inner_tendsto : Tendsto (fun n =>
         ⟪massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support,
@@ -877,7 +862,7 @@ private lemma smooth_lhs_mass_tendsto
             (smoothToLp (I := I) (M := M) g (v n))⟫_ℝ) atTop
       (𝓝 ⟪massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support,
         chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ) :=
+          (h1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ) :=
     Filter.Tendsto.inner tendsto_const_nhds h_cPL_tendsto
   rw [show (fun n =>
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -892,97 +877,6 @@ private lemma smooth_lhs_mass_tendsto
     funext h_per_n]
   exact h_inner_tendsto
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma general_lhs_principal_per_i_eq_inner
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
-    (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (hψ_cs : HasCompactSupport ψ)
-    (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α)
-    (u_h : H1Compl g) :
-    ∫ y in chartTargetEuclid (I := I) (M := M) α,
-        (∑ j : Fin (Module.finrank ℝ E),
-          weightedInvGramOnEuclid (I := I) g α i j y *
-            ((chartPushedWeakPartialLp (I := I) (M := M) g α i
-              (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-              Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-                (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y *
-            (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
-        ∂(volume : Measure EuclN) =
-      ⟪principalMultiplierLp (I := I) (M := M) g α i hψ hψ_cs hψ_support,
-        chartPushedWeakPartialLp (I := I) (M := M) g α i
-          (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h⟫_ℝ := by
-  classical
-  have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
-    (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  have h_pointwise : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
-      (∑ j : Fin (Module.finrank ℝ E),
-          weightedInvGramOnEuclid (I := I) g α i j y *
-            ((chartPushedWeakPartialLp (I := I) (M := M) g α i
-              (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-              Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-                (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y *
-            (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) =
-        densityOnEuclid (I := I) g α y *
-          (principalMultiplier (I := I) (M := M) g α i ψ y *
-            ((chartPushedWeakPartialLp (I := I) (M := M) g α i
-              (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-              Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-                (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
-    intro y _hy
-    unfold principalMultiplier
-    have h_each : ∀ j : Fin (Module.finrank ℝ E),
-        weightedInvGramOnEuclid (I := I) g α i j y *
-            ((chartPushedWeakPartialLp (I := I) (M := M) g α i
-              (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-              Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-                (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y *
-            (fderiv ℝ ψ y) (EuclideanSpace.single j 1) =
-          densityOnEuclid (I := I) g α y *
-            (invGramOnEuclid (I := I) g α i j y *
-              (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) *
-            ((chartPushedWeakPartialLp (I := I) (M := M) g α i
-              (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-              Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-                (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y := by
-      intro j
-      have h_w : weightedInvGramOnEuclid (I := I) g α i j y =
-          densityOnEuclid (I := I) g α y * invGramOnEuclid (I := I) g α i j y := rfl
-      rw [h_w]
-      ring
-    rw [Finset.sum_congr rfl (fun j _ => h_each j)]
-    rw [← Finset.sum_mul, ← Finset.mul_sum]
-    ring
-  rw [MeasureTheory.setIntegral_congr_fun h_meas_chartTarget h_pointwise]
-  rw [← setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
-    (I := I) (M := M) g α
-    (fun y => principalMultiplier (I := I) (M := M) g α i ψ y *
-      ((chartPushedWeakPartialLp (I := I) (M := M) g α i
-        (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-        Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-          (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y)]
-  rw [L2.inner_def (𝕜 := ℝ)]
-  refine MeasureTheory.integral_congr_ae ?_
-  have h_P := principalMultiplierLp_coeFn (I := I) (M := M) g α i hψ hψ_cs hψ_support
-  filter_upwards [h_P] with y h_Py
-  rw [show @inner ℝ _ _
-      (((principalMultiplierLp (I := I) (M := M) g α i hψ hψ_cs hψ_support :
-          Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y)
-      (((chartPushedWeakPartialLp (I := I) (M := M) g α i
-          (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-          Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) =
-      (((chartPushedWeakPartialLp (I := I) (M := M) g α i
-          (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h :
-          Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) *
-      (((principalMultiplierLp (I := I) (M := M) g α i hψ hψ_cs hψ_support :
-          Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
-  rw [h_Py]
-  ring
-
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma general_lhs_mass_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -993,12 +887,12 @@ private lemma general_lhs_mass_eq_inner
         densityOnEuclid (I := I) g α y *
           Sobolev.Chart.chartPushed (I := I) (M := M)
             (chartAtlasPOU I M) α
-            (((H1ComplToLp (I := I) (M := M) g u_h) :
+            (((h1ComplToLp (I := I) (M := M) g u_h) :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) y * ψ y
         ∂(volume : Measure EuclN) =
       ⟪massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support,
         chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ := by
+          (h1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ := by
   classical
   have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -1006,14 +900,14 @@ private lemma general_lhs_mass_eq_inner
         densityOnEuclid (I := I) g α y *
           Sobolev.Chart.chartPushed (I := I) (M := M)
             (chartAtlasPOU I M) α
-            (((H1ComplToLp (I := I) (M := M) g u_h) :
+            (((h1ComplToLp (I := I) (M := M) g u_h) :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) y * ψ y
         ∂(volume : Measure EuclN) =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           (Sobolev.Chart.chartPushed (I := I) (M := M)
             (chartAtlasPOU I M) α
-            (((H1ComplToLp (I := I) (M := M) g u_h) :
+            (((h1ComplToLp (I := I) (M := M) g u_h) :
               Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) y * ψ y)
         ∂(volume : Measure EuclN) from by
       refine MeasureTheory.setIntegral_congr_fun h_meas_chartTarget (fun y _hy => ?_)
@@ -1023,24 +917,24 @@ private lemma general_lhs_mass_eq_inner
     (fun y =>
       Sobolev.Chart.chartPushed (I := I) (M := M)
         (chartAtlasPOU I M) α
-        (((H1ComplToLp (I := I) (M := M) g u_h) :
+        (((h1ComplToLp (I := I) (M := M) g u_h) :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) y * ψ y)]
   rw [L2.inner_def (𝕜 := ℝ)]
   refine MeasureTheory.integral_congr_ae ?_
   have h_ψ := massMultiplierLp_coeFn (I := I) (M := M) g α hψ hψ_cs hψ_support
   have h_C := chartPushedLpFromLp_coeFn (I := I) (M := M) g α
-    (H1ComplToLp (I := I) (M := M) g u_h)
+    (h1ComplToLp (I := I) (M := M) g u_h)
   filter_upwards [h_ψ, h_C] with y h_ψy h_Cy
   rw [show @inner ℝ _ _
       (((massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y)
       (((chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h) :
+          (h1ComplToLp (I := I) (M := M) g u_h) :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) =
       (((chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h) :
+          (h1ComplToLp (I := I) (M := M) g u_h) :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) *
       (((massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support :
@@ -1048,7 +942,6 @@ private lemma general_lhs_mass_eq_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_ψy, h_Cy]
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma general_lhs_principal_full_integrand_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -1095,7 +988,6 @@ private lemma general_lhs_principal_full_integrand_pointwise
   rw [← Finset.sum_mul, ← Finset.mul_sum]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma general_lhs_principal_eq_sum_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -1173,7 +1065,6 @@ private lemma general_lhs_principal_eq_sum_inner
   rw [h_Py]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1285,7 +1176,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
             (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-              (H1ComplToLp (I := I) (M := M) g u_h -
+              (h1ComplToLp (I := I) (M := M) g u_h -
                 laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) -
           (2 : ℝ) *
             chartPulledIntegralCLM (I := I) (M := M) g α
@@ -1300,7 +1191,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g
               (laplacianOfChartPOU (I := I) (M := M) g α)
-              (H1ComplToLp (I := I) (M := M) g u_h)))) := by
+              (h1ComplToLp (I := I) (M := M) g u_h)))) := by
     refine (h_lim_1.sub ?_).sub h_lim_3
     exact (tendsto_const_nhds.mul h_lim_2 : Tendsto _ _ _)
   have h_target_eq :
@@ -1309,7 +1200,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
             (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
-              (H1ComplToLp (I := I) (M := M) g u_h -
+              (h1ComplToLp (I := I) (M := M) g u_h -
                 laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)) -
           (2 : ℝ) *
             chartPulledIntegralCLM (I := I) (M := M) g α
@@ -1324,7 +1215,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
             (densityPsi_support (I := I) (M := M) (g := g) (α := α) hψ_support)
             (smoothMulLp (I := I) (M := M) g
               (laplacianOfChartPOU (I := I) (M := M) g α)
-              (H1ComplToLp (I := I) (M := M) g u_h)) =
+              (h1ComplToLp (I := I) (M := M) g u_h)) =
         chartPulledIntegralCLM (I := I) (M := M) g α
           (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
           (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
@@ -1363,6 +1254,11 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
   rw [← h_target_eq]
   exact h_sum_lim
 
+end
+
+variable [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
+  [T2Space M] [CompactSpace M] in
 theorem laplacianDomain_variational_identity
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -1382,7 +1278,7 @@ theorem laplacianDomain_variational_identity
       densityOnEuclid (I := I) g α y *
         Sobolev.Chart.chartPushed (I := I) (M := M)
           (chartAtlasPOU I M) α
-          (((H1ComplToLp (I := I) (M := M) g u_h) :
+          (((h1ComplToLp (I := I) (M := M) g u_h) :
             Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) y * ψ y
       ∂(volume : Measure EuclN)) =
     chartPulledIntegralCLM (I := I) (M := M) g α
@@ -1583,7 +1479,7 @@ theorem laplacianDomain_variational_identity
             (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h⟫_ℝ) +
       ⟪massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support,
         chartPushedLpFromLp (I := I) (M := M) g α
-          (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ =
+          (h1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ =
     chartPulledIntegralCLM (I := I) (M := M) g α
       (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_support)
       (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
@@ -1625,7 +1521,7 @@ theorem laplacianDomain_variational_identity
               (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α i) u_h⟫_ℝ) +
         ⟪massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_support,
           chartPushedLpFromLp (I := I) (M := M) g α
-            (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ)) := h_lhs_sum_tendsto
+            (h1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ)) := h_lhs_sum_tendsto
     rw [h_seq_eq] at h_lhs_lim
     exact tendsto_nhds_unique h_lhs_lim h_rhs_tendsto
   rw [general_lhs_principal_eq_sum_inner (I := I) (M := M) g α hψ hψ_cs hψ_support u_h,

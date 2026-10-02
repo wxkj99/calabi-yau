@@ -3,7 +3,25 @@
 module
 public import CalabiYau.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionIBP
 public import CalabiYau.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionGradTendsto
-public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearTrivialCases
+public import CalabiYau.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionIBPExpand
+public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmoothChartBilinear
+public import CalabiYau.Analysis.Sobolev.Tools.Mollification.Basic
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
+public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Distribution
+public import Mathlib.Analysis.Normed.Lp.SmoothApprox
+public import Mathlib.Analysis.Normed.Operator.Extend
+public import Mathlib.Analysis.InnerProductSpace.Dual
+public import Mathlib.MeasureTheory.Function.L2Space
+public import CalabiYau.Analysis.Sobolev.Tools.Mollification.Kernel
+public import CalabiYau.Analysis.Sobolev.Tools.Convolution
+public import Mathlib.MeasureTheory.Integral.MeanInequalities
+public import Mathlib.Analysis.Calculus.MeanValue
+public import CalabiYau.Analysis.Sobolev.Euclidean.Density
+public import CalabiYau.Analysis.Sobolev.Tools.Mollification.WeakDerivative
 
 @[expose] public section
 
@@ -719,8 +737,8 @@ theorem variational_identity_at_v_h_of_compact_support
           (Metric.cthickening |h| K_0))) atTop (𝓝 0) := by
     intro j
     exact nirenbergTestFunction_seq_grad_tendsto_eLpNorm (I := I) (M := M) D
-      hχ_smooth hχ_cs hχ_support hη hη_support hK_0_compact hχ_one hχ_dx_zero
-      hη_support_in_K_0 k hh hu_seq_smooth hu_seq_cs hu_seq_l2
+      hχ_smooth hχ_cs hχ_support hη hη_support hχ_one hχ_dx_zero
+      hη_support_in_K_0 k hh hu_seq_smooth hu_seq_l2
       hu_seq_grad_l2 j
   set wpv : Fin (Module.finrank ℝ E) → EuclN → ℝ := fun j y =>
     Sobolev.diffQuot
@@ -819,22 +837,6 @@ private lemma diffQuot_weightedInvGram_weak_partial_expand
     (fun z => weightedInvGramOnEuclid (I := I) g α i j z) (D.weakPartial i) y
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-private lemma eta_sq_factor_zero_outside_tsupport
-    {η : EuclN → ℝ} (A : EuclN → ℝ) {z : EuclN} (hz : z ∉ tsupport η) :
-    (η z)^2 * A z = 0 := by
-  have hηz : η z = 0 := image_eq_zero_of_notMem_tsupport hz
-  rw [show (η z)^2 = 0 from by rw [hηz]; ring, zero_mul]
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-private lemma two_eta_partial_factor_zero_outside_tsupport
-    {η : EuclN → ℝ} (j : Fin (Module.finrank ℝ E))
-    (B A : EuclN → ℝ) {z : EuclN} (hz : z ∉ tsupport η) :
-    2 * B z * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) * A z = 0 := by
-  have hηz : η z = 0 := image_eq_zero_of_notMem_tsupport hz
-  rw [show (η z) = 0 from hηz]
-  ring
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integral_cthickening_eq_integral_K_0
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
     {h : ℝ}
@@ -875,27 +877,6 @@ private lemma integral_cthickening_eq_integral_K_0
       ∫ y, K_0.indicator f y ∂(volume : Measure EuclN) :=
     (MeasureTheory.integral_indicator hK_0_meas).symm
   rw [h_lhs_eq, h_rhs_eq, h_indicator_eq]
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-private lemma exists_uniform_bound_continuous_compactSupport
-    {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ x, |f x| ≤ M := by
-  classical
-  by_cases hSupport_empty : (tsupport f).Nonempty
-  · obtain ⟨xMax, _hxMax_in, hxMax_max⟩ :=
-      hf_cs.exists_isMaxOn hSupport_empty hf_cont.abs.continuousOn
-    refine ⟨|f xMax|, abs_nonneg _, ?_⟩
-    intro x
-    by_cases hx : x ∈ tsupport f
-    · exact hxMax_max hx
-    · have hfx : f x = 0 := image_eq_zero_of_notMem_tsupport hx
-      rw [hfx, abs_zero]; exact abs_nonneg _
-  · refine ⟨0, le_refl _, ?_⟩
-    intro x
-    by_cases hx : x ∈ tsupport f
-    · exact absurd ⟨x, hx⟩ hSupport_empty
-    · have hfx : f x = 0 := image_eq_zero_of_notMem_tsupport hx
-      rw [hfx, abs_zero]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_uniform_bound_on_compact

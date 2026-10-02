@@ -2,6 +2,7 @@ module
 
 public import CalabiYau.Geometry.Kahler.Laplacian
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates
+public import CalabiYau.MongeAmpere.Estimates.C2.NormalFrameGradient
 
 /-!
 # The scalar Laplacian in a holomorphic normal frame
@@ -23,70 +24,6 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 
 /-- A complex-linear continuous equivalence representing the differential of a holomorphic normal
 frame at its center. -/
-private theorem normalFrame_jacobian_equiv
-    (ω₀ ω₁ : KahlerForm n M) (x : M) (F : YauNormalFrame ω₀ ω₁ x) :
-    ∃ A : EuclideanSpace ℂ (Fin n) ≃L[ℂ] EuclideanSpace ℂ (Fin n),
-      (A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)) =
-        fderiv ℂ F.map F.center := by
-  let A := fderiv ℂ F.map F.center
-  have hmatrix : (EuclideanSpace.clmMatrix A).det ≠ 0 := by
-    simpa [A, holomorphicJacobianMatrix] using F.jacobian_det_ne_zero
-  have hclmMatrix : EuclideanSpace.clmMatrix A =
-      LinearMap.toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
-        (EuclideanSpace.basisFun (Fin n) ℂ).toBasis A.toLinearMap := by
-    ext i j
-    simp [EuclideanSpace.clmMatrix, LinearMap.toMatrix_apply,
-      EuclideanSpace.basisFun_apply]
-  have hdetEq : LinearMap.det A.toLinearMap = (EuclideanSpace.clmMatrix A).det := by
-    calc
-      LinearMap.det A.toLinearMap =
-          Matrix.det (LinearMap.toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
-            (EuclideanSpace.basisFun (Fin n) ℂ).toBasis A.toLinearMap) :=
-        (LinearMap.det_toMatrix (EuclideanSpace.basisFun (Fin n) ℂ).toBasis
-          A.toLinearMap).symm
-      _ = (EuclideanSpace.clmMatrix A).det := by rw [← hclmMatrix]
-  have hdet : LinearMap.det A.toLinearMap ≠ 0 := fun h ↦ hmatrix (hdetEq ▸ h)
-  have hker : LinearMap.ker A.toLinearMap = ⊥ := by
-    by_contra hk
-    have hzero : LinearMap.det A.toLinearMap = 0 :=
-      (LinearMap.det_eq_zero_iff_ker_ne_bot).2 hk
-    exact hdet hzero
-  have hinj : Function.Injective A.toLinearMap := LinearMap.ker_eq_bot.mp hker
-  have hsurj : Function.Surjective A.toLinearMap :=
-    LinearMap.surjective_of_injective hinj
-  let eLin := LinearEquiv.ofBijective A.toLinearMap ⟨hinj, hsurj⟩
-  exact ⟨eLin.toContinuousLinearEquivOfContinuous
-    eLin.toLinearMap.continuous_of_finiteDimensional, rfl⟩
-
-private theorem normalFrame_varying_metric_coeffMatrix
-    (ω₀ ω₁ : KahlerForm n M) (x : M) (F : YauNormalFrame ω₀ ω₁ x) :
-    ∃ A : EuclideanSpace ℂ (Fin n) ≃L[ℂ] EuclideanSpace ℂ (Fin n),
-      (A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)) =
-        fderiv ℂ F.map F.center ∧
-      ((ω₁ x).compContinuousLinearMap
-        ((A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)).restrictScalars ℝ)).coeffMatrix =
-        Matrix.diagonal (RCLike.ofReal ∘ F.eigenvalue) := by
-  obtain ⟨A, hA⟩ := normalFrame_jacobian_equiv ω₀ ω₁ x F
-  have hcenter : F.map F.center =
-      extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x := F.center_eq_chart_center
-  have hmetric : ω₁.metricInChart x (F.map F.center) = (ω₁ x).coeffMatrix := by
-    rw [hcenter, ω₁.metricInChart_self]
-  have hJ : holomorphicJacobianMatrix F.map F.center = EuclideanSpace.clmMatrix A := by
-    simp [holomorphicJacobianMatrix, hA]
-  have hnormal := F.varying_diagonal
-  change Matrix.transpose (holomorphicJacobianMatrix F.map F.center) *
-      ω₁.metricInChart x (F.map F.center) *
-        (holomorphicJacobianMatrix F.map F.center).map star = _ at hnormal
-  rw [hJ, hmetric] at hnormal
-  refine ⟨A, hA, ?_⟩
-  calc
-    ((ω₁ x).compContinuousLinearMap
-        ((A : EuclideanSpace ℂ (Fin n) →L[ℂ] EuclideanSpace ℂ (Fin n)).restrictScalars ℝ)).coeffMatrix =
-      Matrix.transpose (EuclideanSpace.clmMatrix A) * (ω₁ x).coeffMatrix *
-        (EuclideanSpace.clmMatrix A).map star :=
-      (ω₁.isOneOne x).coeffMatrix_compContinuousLinearMap A
-    _ = Matrix.diagonal (RCLike.ofReal ∘ F.eigenvalue) := hnormal
-
 private theorem relTrace_eq_sum_of_diagonal_coeffMatrix
     (α β : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
     (eig : Fin n → ℝ) (heig : ∀ p, 0 < eig p)

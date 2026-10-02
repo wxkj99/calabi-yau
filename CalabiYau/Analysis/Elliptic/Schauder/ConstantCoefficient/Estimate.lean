@@ -6,12 +6,10 @@ public import CalabiYau.Analysis.Parabolic.Euclidean.Duhamel.FrozenPositiveDefin
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatPotential.Estimate
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatSemigroup.Schauder
 public import CalabiYau.Analysis.Elliptic.Schauder.ConstantCoefficient.Operator
-public import CalabiYau.Analysis.Holder.Scaling
+public import CalabiYau.Mathlib.Analysis.Holder.Scaling
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -25,15 +23,16 @@ open HeatEquation
 variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
-  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+  [NormedAddCommGroup F]
 
-private abbrev Euc (n : Type*) := EuclideanSpace Real n
+abbrev Euc (n : Type*) := EuclideanSpace Real n
 
 def laplacianSchauderConst
     (alpha K B : NNReal) (u : BoundedContinuousFunction V F) : NNReal :=
   heatSupSchauderConst (V := V) 1 u +
     heatDuhamelConstSchauderConst (V := V) alpha K B 1
 
+variable [NormedSpace Real F] [CompleteSpace F] in
 theorem laplacian_schauder_estimate
     {alpha K B : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
@@ -87,59 +86,12 @@ theorem laplacian_schauder_estimate
   exact (add_le_add hheat hduh).trans_eq (by
     simp only [laplacianSchauderConst, ENNReal.coe_add])
 
-def laplacianSchauderNormConst
-    (alpha : NNReal)
-    (u : ContDiffHolderSpace (V := V) (F := F) 2 alpha) : NNReal :=
-  let f := contDiffHolderSpaceLaplacian alpha u
-  laplacianSchauderConst alpha ‖f‖₊ ‖f‖₊
-    (contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u)
-
-theorem laplacian_schauder_norm_estimate
-    {alpha : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
-    (u : ContDiffHolderSpace (V := V) (F := F) 2 alpha) :
-    ‖u‖ ≤ laplacianSchauderNormConst alpha u := by
-  let u0 := contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u
-  let du := contDiffHolderSpaceFDeriv 2 alpha (by omega) u
-  let d2u := contDiffHolderSpaceHessian 2 alpha (by omega) u
-  let f := contDiffHolderSpaceLaplacian alpha u
-  let f0 := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 f
-  have hu : ∀ x : V, HasFDerivAt (u0 : V → F) (du x) x := by
-    intro x
-    let h : HasFDerivAt (u0 : V → F) (du x) x :=
-      contDiffHolderSpace_hasFDerivAt 2 alpha (by omega) u x
-    exact h
-  have hdu : ∀ x : V,
-      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x := by
-    intro x
-    simpa only [du, d2u] using
-      contDiffHolderSpaceFDeriv_hasFDerivAt 2 alpha (by omega) u x
-  have hcore : coreLap d2u = f0 := by
-    apply BoundedContinuousFunction.ext
-    intro x
-    change lapEval (d2u x) = laplacianEval
-      (iteratedFDeriv Real 2 (contDiffHolderSpaceFun u) x)
-    rw [contDiffHolderSpaceHessian_apply, laplacianEval_apply,
-      hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv]
-  have hbound : ‖coreLap d2u‖ ≤ ‖f‖₊ := by
-    rw [hcore, BoundedContinuousFunction.norm_le (by positivity)]
-    intro x
-    change ‖f x‖ ≤ (‖f‖₊ : Real)
-    simpa using norm_boundedHolderSpace_apply_le f x
-  have hholder : HolderWith ‖f‖₊ alpha (coreLap d2u) := by
-    rw [hcore]
-    let h : HolderWith ‖f‖₊ alpha (f0 : V → F) :=
-      boundedHolderSpace_holderWith f
-    exact h
-  have hgauge := laplacian_schauder_estimate halpha0 halpha1
-    u0 du d2u hu hdu hbound hholder
-  rw [norm_contDiffHolderSpace_eq]
-  have hreal := ENNReal.toReal_mono ENNReal.coe_ne_top hgauge
-  let h : ‖u‖ ≤ laplacianSchauderNormConst alpha u := hreal
-  exact h
-
 section PositiveDefinite
 
-variable {n : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
+section
+
+variable [NormedSpace Real F]
+variable {n : Type*} [Fintype n] [DecidableEq n]
 
 def spdMatrixLap (A : Matrix n n Real) (hA : A.PosDef)
     (d2u : BoundedContinuousFunction (Euc n)
@@ -148,7 +100,6 @@ def spdMatrixLap (A : Matrix n n Real) (hA : A.PosDef)
   linPullBoundedContinuousFunction (spdSqrtEquiv A hA).symm
     (coreLap (pullJet2 (spdSqrtEquiv A hA) d2u))
 
-omit [Nonempty n] [CompleteSpace F] in
 @[simp]
 theorem spdMatrixLap_apply (A : Matrix n n Real) (hA : A.PosDef)
     (d2u : BoundedContinuousFunction (Euc n)
@@ -168,6 +119,12 @@ theorem spdMatrixLap_apply (A : Matrix n n Real) (hA : A.PosDef)
       simp only [pullJet2_apply, ContinuousLinearEquiv.apply_symm_apply]
     _ = matrixLap A (d2u x) := spd_factorLap A hA (d2u x)
 
+end
+
+section
+
+variable {n : Type*} [Fintype n] [DecidableEq n]
+
 def spdLaplacianSchauderConst
     (A : Matrix n n Real) (hA : A.PosDef)
     (alpha K B : NNReal) (u : BoundedContinuousFunction (Euc n) F) : NNReal :=
@@ -184,7 +141,6 @@ def spdLaplacianSchauderDefectConst
   contDiffHolderLinearEquivConst L alpha
     (heatDuhamelConstSchauderConst (V := Euc n) alpha K' B 1)
 
-omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
 theorem spdLaplacianSchauderConst_add_source
     {alpha : NNReal} (halpha1 : alpha < 1)
     (A : Matrix n n Real) (hA : A.PosDef)
@@ -213,7 +169,6 @@ theorem spdLaplacianSchauderConst_add_source
   unfold contDiffHolderLinearEquivConst
   ring
 
-omit [Nonempty n] [CompleteSpace F] in
 theorem spdLaplacianSchauderDefectConst_nnreal_mul
     (A : Matrix n n Real) (hA : A.PosDef)
     (alpha c K B : NNReal) :
@@ -232,6 +187,14 @@ theorem spdLaplacianSchauderDefectConst_nnreal_mul
     heatDuhamelConstSchauderConst_nnreal_mul]
   unfold contDiffHolderLinearEquivConst
   ring
+
+end
+
+section
+
+variable [NormedSpace Real F]
+variable [CompleteSpace F]
+variable {n : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
 
 theorem spd_laplacian_schauder_estimate
     {alpha K B : NNReal}
@@ -286,57 +249,7 @@ theorem spd_laplacian_schauder_estimate
       laplacianSchauderConst alpha K' B up := hpull
   exact h
 
-def spdLaplacianSchauderNormConst
-    (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
-    (u : ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha) : NNReal :=
-  let f := contDiffHolderSpaceMatrixLaplacian A alpha u
-  spdLaplacianSchauderConst A hA alpha ‖f‖₊ ‖f‖₊
-    (contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u)
-
-theorem spd_laplacian_schauder_norm_estimate
-    {alpha : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
-    (A : Matrix n n Real) (hA : A.PosDef)
-    (u : ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha) :
-    ‖u‖ ≤ spdLaplacianSchauderNormConst A hA alpha u := by
-  let u0 := contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u
-  let du := contDiffHolderSpaceFDeriv 2 alpha (by omega) u
-  let d2u := contDiffHolderSpaceHessian 2 alpha (by omega) u
-  let f := contDiffHolderSpaceMatrixLaplacian A alpha u
-  let f0 := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 f
-  have hu : ∀ x : Euc n, HasFDerivAt (u0 : Euc n → F) (du x) x := by
-    intro x
-    let h : HasFDerivAt (u0 : Euc n → F) (du x) x :=
-      contDiffHolderSpace_hasFDerivAt 2 alpha (by omega) u x
-    exact h
-  have hdu : ∀ x : Euc n,
-      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x := by
-    intro x
-    simpa only [du, d2u] using
-      contDiffHolderSpaceFDeriv_hasFDerivAt 2 alpha (by omega) u x
-  have hcore : spdMatrixLap A hA d2u = f0 := by
-    apply BoundedContinuousFunction.ext
-    intro x
-    simp only [spdMatrixLap_apply, f0, f,
-      boundedHolderSpaceToBoundedContinuousFunction_apply,
-      contDiffHolderSpaceMatrixLaplacian_apply]
-    rw [contDiffHolderSpaceHessian_apply, matrixLaplacianEval_apply,
-      hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv]
-  have hbound : ‖spdMatrixLap A hA d2u‖ ≤ ‖f‖₊ := by
-    rw [hcore, BoundedContinuousFunction.norm_le (by positivity)]
-    intro x
-    change ‖f x‖ ≤ (‖f‖₊ : Real)
-    simpa using norm_boundedHolderSpace_apply_le f x
-  have hholder : HolderWith ‖f‖₊ alpha (spdMatrixLap A hA d2u) := by
-    rw [hcore]
-    let h : HolderWith ‖f‖₊ alpha (f0 : Euc n → F) :=
-      boundedHolderSpace_holderWith f
-    exact h
-  have hgauge := spd_laplacian_schauder_estimate halpha0 halpha1
-    A hA u0 du d2u hu hdu hbound hholder
-  rw [norm_contDiffHolderSpace_eq]
-  have hreal := ENNReal.toReal_mono ENNReal.coe_ne_top hgauge
-  let h : ‖u‖ ≤ spdLaplacianSchauderNormConst A hA alpha u := hreal
-  exact h
+end
 
 end PositiveDefinite
 

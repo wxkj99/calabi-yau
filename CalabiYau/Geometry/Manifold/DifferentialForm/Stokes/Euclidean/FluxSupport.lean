@@ -1,8 +1,6 @@
 module
 
 public import CalabiYau.Geometry.Manifold.DifferentialForm.Stokes.Euclidean.CoordinateFlux
-import Mathlib.Analysis.Calculus.ContDiff.Comp
-import Mathlib.Topology.Algebra.Support
 
 @[expose] public section
 

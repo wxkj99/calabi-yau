@@ -5,7 +5,7 @@ public import CalabiYau.Analysis.Sobolev.Chart.Defs
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.Smooth
 public import CalabiYau.Analysis.Sobolev.Tools.StrictStrongSupport
-public import CalabiYau.Geometry.Riemannian.Volume.Chart.MeasureComparison
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
 public import CalabiYau.Geometry.Riemannian.Volume.Basic
 public import Mathlib.Analysis.Calculus.ContDiff.Basic
 
@@ -24,7 +24,7 @@ namespace Chart
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -32,6 +32,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+variable [IsManifold I ∞ M] in
 
 lemma exists_chart_cutoff_M
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
@@ -57,7 +58,6 @@ def smoothExtensionScalar (α : M) (f : M → ℝ) : EuclN → ℝ := by
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
-omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_apply_of_mem_target
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target) :
@@ -69,7 +69,6 @@ private lemma smoothExtensionScalar_apply_of_mem_target
     else 0) = f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
   rw [if_pos hy]
 
-omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : (toEuclidean (E := E)).symm y ∉ (extChartAt I α).target) :
@@ -80,7 +79,6 @@ private lemma smoothExtensionScalar_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
-omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_apply_of_mem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -90,7 +88,6 @@ private lemma smoothExtensionScalar_apply_of_mem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -98,6 +95,10 @@ private lemma smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
   apply smoothExtensionScalar_apply_of_notMem_target
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
+section
+
+variable [IsManifold I ∞ M]
+
 
 private lemma contDiffOn_smoothExtensionScalar_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -139,7 +140,8 @@ private lemma contDiffAt_smoothExtensionScalar_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [smoothExtensionScalar_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
-omit [IsManifold I ∞ M] in
+end
+
 private lemma smoothExtensionScalar_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_support : tsupport f ⊆ (chartAt H α).source) {y : EuclN}
@@ -164,7 +166,6 @@ private lemma smoothExtensionScalar_eq_zero_off_image_tsupport
   · exact smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
       (I := I) (M := M) α f hy_target
 
-omit [IsManifold I ∞ M] in
 private lemma image_extChartAt_tsupport_isCompact_local
     [CompactSpace M] {f : M → ℝ} {α : M}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -175,7 +176,6 @@ private lemma image_extChartAt_tsupport_isCompact_local
       (I := I) (M := M) (u := f) (α := α) hf_support
   exact hKE.1.image (toEuclidean (E := E)).continuous
 
-omit [IsManifold I ∞ M] in
 private lemma image_extChartAt_tsupport_subset_chartTargetEuclid_local
     {f : M → ℝ} {α : M}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -184,6 +184,7 @@ private lemma image_extChartAt_tsupport_subset_chartTargetEuclid_local
       chartTargetEuclid (I := I) (M := M) α :=
   Sobolev.Chart.image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     (I := I) (M := M) (u := f) (α := α) hf_support
+variable [IsManifold I ∞ M] in
 
 lemma contDiff_smoothExtensionScalar
     [CompactSpace M] [I.Boundaryless]
@@ -212,7 +213,6 @@ lemma contDiff_smoothExtensionScalar
     exact smoothExtensionScalar_eq_zero_off_image_tsupport
       (I := I) (M := M) α (f := f) hf_support hz
 
-omit [IsManifold I ∞ M] in
 private lemma hasCompactSupport_smoothExtensionScalar
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -230,6 +230,7 @@ private lemma hasCompactSupport_smoothExtensionScalar
     (I := I) (M := M) α (f := f) hf_support hyK
 
 omit [FiniteDimensional ℝ E] in
+variable [IsManifold I ∞ M] in
 private lemma iteratedFDeriv_uniformBound_of_compactSupport
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ ∞ ψ) (hψ_compact : HasCompactSupport ψ)
     (k : ℕ) :
@@ -262,6 +263,7 @@ private lemma iteratedFDeriv_uniformBound_of_compactSupport
         rw [hj_eq]
         refine (hD y).trans ?_
         exact le_trans (le_max_left _ _) (le_max_right _ _)
+variable [IsManifold I ∞ M] in
 
 lemma smoothExtensionScalar_iteratedFDeriv_bound
     [CompactSpace M] [I.Boundaryless]

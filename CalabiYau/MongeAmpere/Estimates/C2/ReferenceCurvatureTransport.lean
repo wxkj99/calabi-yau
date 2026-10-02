@@ -4,8 +4,6 @@ public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalFrameJets
 public import CalabiYau.Geometry.Kahler.Curvature.ReferenceBound
 import CalabiYau.MongeAmpere.Estimates.C2.ReferenceCurvatureTransport.HolomorphicJacobianJet
 import CalabiYau.MongeAmpere.Estimates.C2.ReferenceCurvatureTransport.PullbackConnectionGerm
-import CalabiYau.MongeAmpere.Estimates.C2.ReferenceCurvatureTransport.PullbackConnectionBarDerivative
-import CalabiYau.MongeAmpere.Estimates.C2.ReferenceCurvatureTransport.NormalConnectionJet
 
 /-!
 # Reference curvature transport in an actual normal frame

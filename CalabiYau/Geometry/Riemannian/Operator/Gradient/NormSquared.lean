@@ -1,8 +1,11 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Geometry/Operator/Gradient/NormSquared.lean
 -- Locally modified.
 module
-public import CalabiYau.Geometry.Riemannian.Operator.Hessian.Basic
-public import CalabiYau.Geometry.Riemannian.Curvature.Riemann.Defs
+public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.Basic
+public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.VossWeylFormula
+public import Mathlib.Algebra.Order.Chebyshev
+public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 public import CalabiYau.Geometry.Riemannian.TensorInner.Tangent.Riemannian
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 
@@ -17,11 +20,12 @@ open scoped Manifold Topology ContDiff Matrix
 namespace CalabiYau.Riemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open CalabiYau.RiemannianVolume
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 def normGradSqFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : ℝ :=
   g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g f x)
@@ -31,7 +35,6 @@ namespace BochnerInternal
 
 attribute [-instance] Tensor0SBundle.tangentSpaceNormedAddCommGroup
   Tensor0SBundle.tangentSpaceNormedSpace in
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contMDiff_g_inner
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x}
@@ -52,7 +55,6 @@ private lemma contMDiff_g_inner
 
 end BochnerInternal
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem contMDiff_g_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -66,7 +68,8 @@ theorem contMDiff_g_inner_of_smooth_sections
   exact BochnerInternal.contMDiff_g_inner (I := I) (M := M) g hX hY
 
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 theorem normGradSqFun_contMDiff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

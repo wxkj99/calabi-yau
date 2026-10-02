@@ -6,7 +6,6 @@ public import CalabiYau.Analysis.Spectral.Scalar.Resolvent
 
 @[expose] public section
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -50,32 +49,9 @@ noncomputable def iteratedResolventL2 (g : SmoothRiemannianMetric I M) (k : ℕ)
       (resolventL2 (I := I) (M := M) g).comp
         (iteratedResolventL2 (I := I) (M := M) g k) := rfl
 
-lemma iteratedResolventL2_one (g : SmoothRiemannianMetric I M) :
-    iteratedResolventL2 (I := I) (M := M) g 1 =
-      resolventL2 (I := I) (M := M) g := by
-  rw [iteratedResolventL2_succ]
-  rw [iteratedResolventL2_zero]
-  exact ContinuousLinearMap.comp_id _
-
 @[simp] lemma iteratedResolventL2_zero_apply (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     iteratedResolventL2 (I := I) (M := M) g 0 f = f := rfl
-
-lemma iteratedResolventL2_succ_apply (g : SmoothRiemannianMetric I M) (k : ℕ)
-    (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
-    iteratedResolventL2 (I := I) (M := M) g (k + 1) f =
-      resolventL2 (I := I) (M := M) g
-        (iteratedResolventL2 (I := I) (M := M) g k f) := rfl
-
-lemma iteratedResolventL2_add (g : SmoothRiemannianMetric I M) (j k : ℕ) :
-    iteratedResolventL2 (I := I) (M := M) g (j + k) =
-      (iteratedResolventL2 (I := I) (M := M) g j).comp
-        (iteratedResolventL2 (I := I) (M := M) g k) := by
-  induction j with
-  | zero => simp [iteratedResolventL2_zero]
-  | succ j ih =>
-    rw [Nat.succ_add, iteratedResolventL2_succ, iteratedResolventL2_succ, ih]
-    rw [ContinuousLinearMap.comp_assoc]
 
 noncomputable def laplacianDomainPow (g : SmoothRiemannianMetric I M) (k : ℕ) :
     Submodule ℝ (H1Compl (I := I) (M := M) g) :=
@@ -93,14 +69,6 @@ lemma laplacianDomainPow_succ (g : SmoothRiemannianMetric I M) (k : ℕ) :
       LinearMap.range
         ((resolvent (I := I) (M := M) g).toLinearMap.comp
           (iteratedResolventL2 (I := I) (M := M) g k).toLinearMap) := rfl
-
-lemma laplacianDomainPow_one (g : SmoothRiemannianMetric I M) :
-    laplacianDomainPow (I := I) (M := M) g 1 =
-      laplacianDomain (I := I) (M := M) g := by
-  rw [laplacianDomainPow_succ]
-  unfold laplacianDomain
-  rw [iteratedResolventL2_zero]
-  rfl
 
 lemma laplacianDomainPow_succ_mem_iff (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u : H1Compl (I := I) (M := M) g} :
@@ -132,23 +100,6 @@ lemma laplacianDomainPow_succ_subset_laplacianDomain
   rw [SetLike.mem_coe]
   rw [laplacianDomain_mem_iff]
   exact ⟨iteratedResolventL2 (I := I) (M := M) g k f, hf⟩
-
-lemma laplacianDomainPow_succ_preimage_in_range
-    (g : SmoothRiemannianMetric I M) (k : ℕ)
-    {u_h : H1Compl (I := I) (M := M) g}
-    (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g (k + 1)) :
-    laplacianDomain.preimage (I := I) (M := M) g
-        ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
-          (I := I) (M := M) g k hu_h⟩ ∈
-      LinearMap.range
-        (iteratedResolventL2 (I := I) (M := M) g k).toLinearMap := by
-  rw [laplacianDomainPow_succ_mem_iff] at hu_h
-  obtain ⟨f, hf⟩ := hu_h
-  rw [LinearMap.mem_range]
-  refine ⟨f, ?_⟩
-  apply resolvent_injective (I := I) (M := M) g
-  rw [resolvent_laplacianDomain_preimage_eq]
-  exact hf.symm
 
 end Laplacian
 end Analysis

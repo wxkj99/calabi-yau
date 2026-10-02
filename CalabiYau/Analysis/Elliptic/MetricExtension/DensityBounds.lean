@@ -14,10 +14,9 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace CalabiYau.Laplacian.MetricExtension
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
 open CalabiYau.RiemannianVolume
 
 private local instance : MeasurableSpace E := borel E
@@ -31,7 +30,6 @@ noncomputable def densityOnEuclidClosureSup
     (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) : ℝ :=
   sSup ((fun x => |densityOnEuclid (I := I) g α x|) '' closure Ω')
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclidClosureSup_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) :
     0 ≤ densityOnEuclidClosureSup (I := I) (M := M) g α Ω' := by
@@ -40,7 +38,6 @@ lemma densityOnEuclidClosureSup_nonneg
   rintro y ⟨x, _, rfl⟩
   exact abs_nonneg _
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma abs_densityOnEuclid_le_closureSup
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
@@ -59,7 +56,6 @@ lemma abs_densityOnEuclid_le_closureSup
     hΩ'_closure_compact.bddAbove_image h_abs_contOn
   exact le_csSup h_bddAbove (Set.mem_image_of_mem _ hx)
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_mul_memLp
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
@@ -93,7 +89,6 @@ lemma densityOnEuclid_mul_memLp
   exact MemLp.mono (hf.const_mul Mden)
     (h_dens_aesm.mul hf.aestronglyMeasurable) h_pt_le
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma eLpNorm_densityOnEuclid_mul_sq_le
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))

@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.BochnerIdentity.OrderedJets
-import CalabiYau.Geometry.Kahler.MatrixInverse
+import CalabiYau.Mathlib.Analysis.Matrix.EntrywiseSmoothness
 
 /-!
 # The second mixed Hessian of the actual tensor norm
@@ -23,91 +23,6 @@ namespace KahlerForm
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
-
-private noncomputable def c3PairMixedJetLaplacian
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n))
-    (T : Fin n → Fin n → Fin n → ℂ)
-    (D B : Fin n → Fin n → Fin n → Fin n → ℂ)
-    (H : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ) : ℝ :=
-  ((∑ p, ∑ q, (g z)⁻¹ q p *
-      c3Pair g z (fun i j k ↦ H p q i j k) T) +
-    (∑ p, ∑ q, (g z)⁻¹ q p * c3Pair g z (D p) (D q)) +
-    (∑ p, ∑ q, (g z)⁻¹ q p * c3Pair g z (B q) (B p)) +
-    (∑ p, ∑ q, (g z)⁻¹ q p *
-      c3Pair g z T (fun i j k ↦ H q p i j k))).re
-
-private theorem c3Pair_fixed_metric_mixed_jet
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n))
-    (T : Fin n → Fin n → Fin n → ℂ)
-    (D B : Fin n → Fin n → Fin n → Fin n → ℂ)
-    (H : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ) :
-    c3PairMixedJetLaplacian g z T D B H =
-      c3DerivativeSquares g D B z +
-        (∑ p, ∑ q, (g z)⁻¹ q p *
-          c3Pair g z (fun i j k ↦ H p q i j k) T).re +
-        (∑ p, ∑ q, (g z)⁻¹ q p *
-          c3Pair g z T (fun i j k ↦ H q p i j k)).re := by
-  have hB :
-      (∑ p, ∑ q, (g z)⁻¹ q p * c3Pair g z (B q) (B p)) =
-        ∑ p, ∑ q, (g z)⁻¹ p q * c3Pair g z (B p) (B q) := by
-    calc
-      _ = ∑ q, ∑ p, (g z)⁻¹ q p * c3Pair g z (B q) (B p) := Finset.sum_comm
-      _ = _ := rfl
-  unfold c3PairMixedJetLaplacian c3DerivativeSquares
-  rw [hB]
-  simp only [Complex.add_re]
-  ring
-
-omit [T2Space M] [CompactSpace M] in
-private theorem c3ChartPairHessianLaplacian_eq_realWirtinger_sum
-    (ω₀ : KahlerForm n M) (φ : M → ℝ) (x : M)
-    (hE : ContDiffAt ℝ 2
-      (fun w ↦ (c3Pair (c3PerturbedMetricInChart ω₀ φ x) w
-        (c3ConnectionDifferenceInChart ω₀ φ x w)
-        (c3ConnectionDifferenceInChart ω₀ φ x w)).re)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)) :
-    c3ChartPairHessianLaplacian ω₀ φ x =
-      (∑ p, ∑ q,
-        (c3PerturbedMetricInChart ω₀ φ x
-          (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))⁻¹ q p *
-          chartPartialZComplex
-            (fun w ↦ chartPartialBar
-              (fun v ↦ (c3Pair (c3PerturbedMetricInChart ω₀ φ x) v
-                (c3ConnectionDifferenceInChart ω₀ φ x v)
-                (c3ConnectionDifferenceInChart ω₀ φ x v)).re) w q)
-            (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) p).re := by
-  let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
-  let z := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x
-  change (((g z)⁻¹ * complexHessian (fun w ↦ (c3Pair g w (T w) (T w)).re) z).trace).re = _
-  simp only [Matrix.trace, Matrix.diag, Matrix.mul_apply]
-  simp_rw [← chartPartialZComplex_chartPartialBar
-    (fun v ↦ (c3Pair g v (T v) (T v)).re) z hE]
-  change (∑ p, ∑ q, (g z)⁻¹ p q *
-    chartPartialZComplex
-      (fun w ↦ chartPartialBar (fun v ↦ (c3Pair g v (T v) (T v)).re) w p) z q).re = _
-  calc
-    _ = (∑ p, ∑ q, (g z)⁻¹ q p *
-        chartPartialZComplex
-          (fun w ↦ chartPartialBar (fun v ↦ (c3Pair g v (T v) (T v)).re) w q) z p).re := by
-      congr 1
-      calc
-        _ = ∑ q, ∑ p, (g z)⁻¹ p q *
-            chartPartialZComplex
-              (fun w ↦ chartPartialBar (fun v ↦ (c3Pair g v (T v) (T v)).re) w p) z q :=
-          Finset.sum_comm
-        _ = _ := rfl
-    _ = _ := rfl
-
-private theorem c3ConnectionDifference_contDiffOn_target
-    (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ) (x : M) :
-    ∀ i j k, ContDiffOn ℝ ∞
-      (fun z ↦ c3ConnectionDifferenceInChart ω₀ φ x z i j k)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
-  intro i j k z hz
-  exact (c3ConnectionDifference_contDiffAt ω₀ φ hφ x z hz i j k).contDiffWithinAt
 
 private abbrev PairTuple3 (n : ℕ) := Fin n × (Fin n × Fin n)
 private abbrev PairTuple4 (n : ℕ) := Fin n × PairTuple3 n
@@ -206,7 +121,7 @@ private theorem c3Pair_star_of_isHermitian {n : ℕ}
 private theorem c3PartialBar_eq_star_partialZ_star {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ) (z : EuclideanSpace ℂ (Fin n))
     (q : Fin n) (hf : DifferentiableAt ℝ f z) :
-    c3PartialBar f z q = star (c3PartialZ (fun w ↦ star (f w)) z q) := by
+    c3PartialBar f z q = star (wirtingerDerivInChart (fun w ↦ star (f w)) z q) := by
   have h := c3Pair_partialZ_star f z q hf
   simpa only [star_star] using (congrArg star h).symm
 
@@ -214,7 +129,7 @@ private theorem c3Pair_bar_firstjet_of_hermitian
     {n : ℕ}
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (U : Set (EuclideanSpace ℂ (Fin n))) (hU : IsOpen U)
-    (hLeibniz : c3MetricPairLeibnizOn g U)
+    (hLeibniz : MetricPairLeibnizOn g U)
     (hG : ∀ w ∈ U, (g w).IsHermitian)
     (A B : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ)
     (hA : ∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ A w i j k) U)
@@ -231,9 +146,9 @@ private theorem c3Pair_bar_firstjet_of_hermitian
     simpa using congrArg star (c3Pair_star_of_isHermitian g w (A w) (B w) (hG w hw))
   have hder := Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) hEq
   have hpart :
-      c3PartialZ (fun w ↦ star (c3Pair g w (A w) (B w))) z q =
-        c3PartialZ (fun w ↦ c3Pair g w (B w) (A w)) z q := by
-    unfold c3PartialZ
+      wirtingerDerivInChart (fun w ↦ star (c3Pair g w (A w) (B w))) z q =
+        wirtingerDerivInChart (fun w ↦ c3Pair g w (B w) (A w)) z q := by
+    unfold wirtingerDerivInChart
     rw [hder]
   rw [c3PartialBar_eq_star_partialZ_star _ _ q hf, hpart,
     hLeibniz B A hB hA z hz q]
@@ -244,56 +159,11 @@ private theorem c3Pair_bar_firstjet_of_hermitian
     (fun i j k ↦ c3PartialBar (fun w ↦ A w i j k) z q) (B z) (hG z hz)]
   exact add_comm _ _
 
-private theorem c3Pair_first_derivative_of_leibniz
-    (ω₀ : KahlerForm n M) {φ : M → ℝ}
-    (hφ : ω₀.IsPotential φ) (x : M)
-    (hLeibniz : c3MetricPairLeibnizOn (c3PerturbedMetricInChart ω₀ φ x)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
-    (z : EuclideanSpace ℂ (Fin n))
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
-    (p : Fin n) :
-    c3PartialZ
-        (fun w ↦ c3Pair (c3PerturbedMetricInChart ω₀ φ x) w
-          (c3ConnectionDifferenceInChart ω₀ φ x w)
-          (c3ConnectionDifferenceInChart ω₀ φ x w)) z p =
-      c3Pair (c3PerturbedMetricInChart ω₀ φ x) z
-        (c3TensorCovariantZ (c3PerturbedMetricInChart ω₀ φ x)
-          (c3ConnectionDifferenceInChart ω₀ φ x) z p)
-        (c3ConnectionDifferenceInChart ω₀ φ x z) +
-      c3Pair (c3PerturbedMetricInChart ω₀ φ x) z
-        (c3ConnectionDifferenceInChart ω₀ φ x z)
-        (fun i j k ↦ c3PartialBar
-          (fun w ↦ c3ConnectionDifferenceInChart ω₀ φ x w i j k) z p) := by
-  let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
-  have hT : ∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ T w i j k)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
-    simpa [T] using c3ConnectionDifference_contDiffOn_target ω₀ φ hφ x
-  simpa [g, T] using hLeibniz T T hT hT z hz p
-
-private theorem c3ConnectionDifference_mixed_derivative_commute
-    (ω₀ : KahlerForm n M) (φ : M → ℝ) (hφ : ω₀.IsPotential φ) (x : M)
-    (z : EuclideanSpace ℂ (Fin n))
-    (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target)
-    (i j k p q : Fin n) :
-    c3PartialBar
-        (fun w ↦ c3PartialZ
-          (fun v ↦ c3ConnectionDifferenceInChart ω₀ φ x v i j k) w p) z q =
-      c3PartialZ
-        (fun w ↦ c3PartialBar
-          (fun v ↦ c3ConnectionDifferenceInChart ω₀ φ x v i j k) w q) z p := by
-  have hT : ContDiffAt ℝ ∞
-      (fun v ↦ c3ConnectionDifferenceInChart ω₀ φ x v i j k) z :=
-    c3ConnectionDifference_contDiffAt ω₀ φ hφ x z hz i j k
-  simpa [c3PartialBar, c3PartialZ, chartPartialBarComplex, chartPartialZComplex] using
-    (c3PartialBar_partialZ_comm
-      (fun v ↦ c3ConnectionDifferenceInChart ω₀ φ x v i j k) z hT p q)
-
 private theorem c3Pair_secondjet_of_leibniz
     {n : ℕ}
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (U : Set (EuclideanSpace ℂ (Fin n))) (hU : IsOpen U)
-    (hLeibniz : c3MetricPairLeibnizOn g U)
+    (hLeibniz : MetricPairLeibnizOn g U)
     (hG : ∀ w ∈ U, (g w).IsHermitian)
     (A B : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ)
     (hA : ∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ A w i j k) U)
@@ -309,7 +179,7 @@ private theorem c3Pair_secondjet_of_leibniz
     (hBbarPair : DifferentiableAt ℝ
       (fun w ↦ c3Pair g w (A w)
         (fun i j k ↦ c3PartialBar (fun v ↦ B v i j k) w p)) z) :
-    c3PartialBar (fun w ↦ c3PartialZ (fun v ↦ c3Pair g v (A v) (B v)) w p) z q =
+    c3PartialBar (fun w ↦ wirtingerDerivInChart (fun v ↦ c3Pair g v (A v) (B v)) w p) z q =
       c3Pair g z (fun i j k ↦
         c3PartialBar (fun w ↦ c3TensorCovariantZ g A w p i j k) z q) (B z) +
       c3Pair g z (c3TensorCovariantZ g A z p)
@@ -324,12 +194,12 @@ private theorem c3Pair_secondjet_of_leibniz
     fun w i j k ↦ c3PartialBar (fun v ↦ B v i j k) w p
   let F : EuclideanSpace ℂ (Fin n) → ℂ := fun w ↦ c3Pair g w (D w) (B w)
   let G : EuclideanSpace ℂ (Fin n) → ℂ := fun w ↦ c3Pair g w (A w) (C w)
-  have hEq : (fun w ↦ c3PartialZ (fun v ↦ c3Pair g v (A v) (B v)) w p) =ᶠ[𝓝 z]
+  have hEq : (fun w ↦ wirtingerDerivInChart (fun v ↦ c3Pair g v (A v) (B v)) w p) =ᶠ[𝓝 z]
       (F + G) := by
     filter_upwards [hU.mem_nhds hz] with w hw
     simpa [F, G, D, C] using hLeibniz A B hA hB w hw p
   have hbarEq : c3PartialBar
-      (fun w ↦ c3PartialZ (fun v ↦ c3Pair g v (A v) (B v)) w p) z q =
+      (fun w ↦ wirtingerDerivInChart (fun v ↦ c3Pair g v (A v) (B v)) w p) z q =
       c3PartialBar (F + G) z q := by
     unfold c3PartialBar
     rw [Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) hEq]
@@ -364,7 +234,7 @@ private theorem c3SecondDirectionalFDeriv {n : ℕ}
 private theorem c3PartialZDerivApply {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℂ) (z : EuclideanSpace ℂ (Fin n))
     (hf : ContDiffAt ℝ 2 f z) (u : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
-    fderiv ℝ (fun y ↦ c3PartialZ f y j) z u =
+    fderiv ℝ (fun y ↦ wirtingerDerivInChart f y j) z u =
       (fderiv ℝ (fderiv ℝ f) z u (EuclideanSpace.single j 1) -
         Complex.I * fderiv ℝ (fderiv ℝ f) z u (Complex.I • EuclideanSpace.single j 1)) / 2 := by
   have he : DifferentiableAt ℝ
@@ -379,7 +249,7 @@ private theorem c3PartialZDerivApply {n : ℕ}
       (fun y ↦ fderiv ℝ f y (EuclideanSpace.single j 1) -
         Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) z :=
     he.sub (hie.const_mul Complex.I)
-  unfold c3PartialZ
+  unfold wirtingerDerivInChart
   rw [show (fun y ↦ (fderiv ℝ f y (EuclideanSpace.single j 1) -
         Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) / 2) =
       (fun y ↦ (fderiv ℝ f y (EuclideanSpace.single j 1) -
@@ -389,38 +259,6 @@ private theorem c3PartialZDerivApply {n : ℕ}
   rw [fderiv_fun_sub he (hie.const_mul Complex.I)]
   rw [fderiv_const_mul hie Complex.I]
   simp only [_root_.sub_apply, _root_.smul_apply, smul_eq_mul]
-  rw [c3SecondDirectionalFDeriv f z hf u (EuclideanSpace.single j 1),
-    c3SecondDirectionalFDeriv f z hf u (Complex.I • EuclideanSpace.single j 1)]
-  ring
-
-private theorem c3PartialBarDerivApply {n : ℕ}
-    (f : EuclideanSpace ℂ (Fin n) → ℂ) (z : EuclideanSpace ℂ (Fin n))
-    (hf : ContDiffAt ℝ 2 f z) (u : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
-    fderiv ℝ (fun y ↦ c3PartialBar f y j) z u =
-      (fderiv ℝ (fderiv ℝ f) z u (EuclideanSpace.single j 1) +
-        Complex.I * fderiv ℝ (fderiv ℝ f) z u (Complex.I • EuclideanSpace.single j 1)) / 2 := by
-  have he : DifferentiableAt ℝ
-      (fun y ↦ fderiv ℝ f y (EuclideanSpace.single j 1)) z :=
-    (ContDiffAt.clm_apply ((hf).fderiv_right (m := 1) (by norm_num))
-      contDiffAt_const).differentiableAt (by norm_num : (1 : ℕ∞ω) ≠ 0)
-  have hie : DifferentiableAt ℝ
-      (fun y ↦ fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) z :=
-    (ContDiffAt.clm_apply ((hf).fderiv_right (m := 1) (by norm_num))
-      contDiffAt_const).differentiableAt (by norm_num : (1 : ℕ∞ω) ≠ 0)
-  have hs : DifferentiableAt ℝ
-      (fun y ↦ fderiv ℝ f y (EuclideanSpace.single j 1) +
-        Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) z :=
-    he.add (hie.const_mul Complex.I)
-  unfold c3PartialBar
-  rw [show (fun y ↦ (fderiv ℝ f y (EuclideanSpace.single j 1) +
-        Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) / 2) =
-      (fun y ↦ (fderiv ℝ f y (EuclideanSpace.single j 1) +
-        Complex.I * fderiv ℝ f y (Complex.I • EuclideanSpace.single j 1)) * (2 : ℂ)⁻¹) by
-        funext y; rw [div_eq_mul_inv]]
-  rw [fderiv_mul_const hs (2 : ℂ)⁻¹]
-  rw [fderiv_fun_add he (hie.const_mul Complex.I)]
-  rw [fderiv_const_mul hie Complex.I]
-  simp only [_root_.add_apply, _root_.smul_apply, smul_eq_mul]
   rw [c3SecondDirectionalFDeriv f z hf u (EuclideanSpace.single j 1),
     c3SecondDirectionalFDeriv f z hf u (Complex.I • EuclideanSpace.single j 1)]
   ring
@@ -475,7 +313,7 @@ private theorem c3ComplexHessian_eq_mixedWirtinger {n : ℕ}
     (f : EuclideanSpace ℂ (Fin n) → ℝ) (z : EuclideanSpace ℂ (Fin n))
     (hf : ContDiffAt ℝ 2 f z) (p q : Fin n) :
     complexHessian f z p q =
-      c3PartialBar (fun w ↦ c3PartialZ (fun v ↦ (f v : ℂ)) w p) z q := by
+      c3PartialBar (fun w ↦ wirtingerDerivInChart (fun v ↦ (f v : ℂ)) w p) z q := by
   let fc : EuclideanSpace ℂ (Fin n) → ℂ := fun w ↦ (f w : ℂ)
   have hCLM : ContDiffAt ℝ 2 (fun r : ℝ ↦ (r : ℂ)) (f z) :=
     Complex.ofRealCLM.contDiff.contDiffAt
@@ -539,7 +377,7 @@ private theorem c3ContDiffOnPartialZScalar
     {n : ℕ} {U : Set (EuclideanSpace ℂ (Fin n))} (hU : IsOpen U)
     {f : EuclideanSpace ℂ (Fin n) → ℂ} (hf : ContDiffOn ℝ ∞ f U)
     (j : Fin n) :
-    ContDiffOn ℝ ∞ (fun z ↦ c3PartialZ f z j) U := by
+    ContDiffOn ℝ ∞ (fun z ↦ wirtingerDerivInChart f z j) U := by
   have hD : ContDiffOn ℝ ∞ (fderiv ℝ f) U :=
     hf.fderiv_of_isOpen hU (by rw [ENat.coe_top_add_one])
   have hD₁ : ContDiffOn ℝ ∞
@@ -571,113 +409,12 @@ private theorem c3ContDiffOnPartialBarScalar
       Complex.I * fderiv ℝ f z (Complex.I • EuclideanSpace.single j 1)) / 2) U
   exact (hD₁.add (contDiffOn_const.mul hD₂)).div_const (2 : ℂ)
 
-private theorem c3TensorCovariantZ_contDiffOn
-    {n : ℕ} {U : Set (EuclideanSpace ℂ (Fin n))} (hU : IsOpen U)
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (A : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ)
-    (hA : ∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ A w i j k) U)
-    (hG : ∀ i j, ContDiffOn ℝ ∞ (fun w ↦ g w i j) U)
-    (hGinv : ∀ i j, ContDiffOn ℝ ∞ (fun w ↦ (g w)⁻¹ i j) U)
-    (p i j k : Fin n) :
-    ContDiffOn ℝ ∞ (fun w ↦ c3TensorCovariantZ g A w p i j k) U := by
-  have hPart := c3ContDiffOnPartialZScalar hU (hA i j k) p
-  have hUpper : ContDiffOn ℝ ∞
-      (fun w ↦ ∑ r, c3ChristoffelInChart g w i p r * A w r j k) U := by
-    apply ContDiffOn.sum
-    intro r hr
-    exact (c3Christoffel_contDiffOn hU hG hGinv i p r).mul (hA r j k)
-  have hLower₁ : ContDiffOn ℝ ∞
-      (fun w ↦ ∑ r, c3ChristoffelInChart g w r p j * A w i r k) U := by
-    apply ContDiffOn.sum
-    intro r hr
-    exact (c3Christoffel_contDiffOn hU hG hGinv r p j).mul (hA i r k)
-  have hLower₂ : ContDiffOn ℝ ∞
-      (fun w ↦ ∑ r, c3ChristoffelInChart g w r p k * A w i j r) U := by
-    apply ContDiffOn.sum
-    intro r hr
-    exact (c3Christoffel_contDiffOn hU hG hGinv r p k).mul (hA i j r)
-  change ContDiffOn ℝ ∞
-    (fun w ↦ c3PartialZ (fun v ↦ A v i j k) w p +
-      (∑ r, c3ChristoffelInChart g w i p r * A w r j k) -
-      (∑ r, c3ChristoffelInChart g w r p j * A w i r k) -
-      (∑ r, c3ChristoffelInChart g w r p k * A w i j r)) U
-  exact ((hPart.add hUpper).sub hLower₁).sub hLower₂
-
-private theorem fourthScalarHermitianSwap {n : ℕ}
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (hG : (g z).IsHermitian)
-    (a : ℂ) (T V : Fin n → Fin n → Fin n → ℂ) :
-    (a * c3Pair g z T V).re = (star a * c3Pair g z V T).re := by
-  rw [c3Pair_star_of_isHermitian g z T V hG]
-  calc
-    (a * star (c3Pair g z V T)).re =
-        (star (a * star (c3Pair g z V T))).re := by
-          rw [Complex.star_def, Complex.conj_re]
-    _ = (star (star (c3Pair g z V T)) * star a).re := by rw [star_mul]
-    _ = (c3Pair g z V T * star a).re := by rw [star_star]
-    _ = (star a * c3Pair g z V T).re := by rw [mul_comm]
-
-private theorem fourthScalarInverseSwap {n : ℕ}
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (hG : (g z).IsHermitian)
-    (p q : Fin n) (T V : Fin n → Fin n → Fin n → ℂ) :
-    ((g z)⁻¹ q p * c3Pair g z T V).re =
-      ((g z)⁻¹ p q * c3Pair g z V T).re := by
-  rw [fourthScalarHermitianSwap g z hG ((g z)⁻¹ q p) T V]
-  have hInv : ((g z)⁻¹).IsHermitian := hG.inv
-  have hEntry : star ((g z)⁻¹ q p) = (g z)⁻¹ p q := by
-    have h := hInv.apply q p
-    simpa only [star_star] using (congrArg star h).symm
-  rw [hEntry]
-
-private theorem fourthScalarDoubleSumSwap {n : ℕ}
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (hG : (g z).IsHermitian)
-    (T : Fin n → Fin n → Fin n → ℂ)
-    (V : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ) :
-    (∑ q, ∑ p, ((g z)⁻¹ q p * c3Pair g z T (V q p)).re) =
-      ∑ q, ∑ p, ((g z)⁻¹ q p * c3Pair g z (V p q) T).re := by
-  calc
-    _ = ∑ q, ∑ p,
-        ((g z)⁻¹ p q * c3Pair g z (V q p) T).re := by
-      apply Finset.sum_congr rfl
-      intro q hq
-      apply Finset.sum_congr rfl
-      intro p hp
-      exact fourthScalarInverseSwap g z hG p q T (V q p)
-    _ = ∑ p, ∑ q,
-        ((g z)⁻¹ p q * c3Pair g z (V q p) T).re := by
-      rw [Finset.sum_comm]
-    _ = ∑ q, ∑ p,
-        ((g z)⁻¹ q p * c3Pair g z (V p q) T).re := by
-      rw [Finset.sum_comm]
-
-private theorem c3Pair_double_sum_left {n : ℕ}
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (A : Fin n → Fin n → ℂ)
-    (V : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ)
-    (T : Fin n → Fin n → Fin n → ℂ) :
-    c3Pair g z (fun i j k ↦ ∑ p, ∑ q, A q p * V p q i j k) T =
-      ∑ p, ∑ q, A q p * c3Pair g z (V p q) T := by
-  simp_rw [c3Pair, pairSum6, Finset.mul_sum, Finset.sum_mul]
-  simp_rw [pairSum2]
-  let e : PairTuple6 n × (Fin n × Fin n) ≃ Fin n × (Fin n × PairTuple6 n) :=
-    ⟨fun x ↦ (x.2.1, (x.2.2, x.1)),
-      fun x ↦ (x.2.2, (x.1, x.2.1)),
-      by intro x; rcases x with ⟨I, p, q⟩; rfl,
-      by intro x; rcases x with ⟨p, q, I⟩; rfl⟩
-  apply Fintype.sum_equiv e
-  intro x
-  rcases x with ⟨I, ⟨p, q⟩⟩
-  rcases I with ⟨i, j, k, a, b, c⟩
-  simp only [e, Equiv.coe_fn_mk, PairTuple6, PairTuple5, PairTuple4, PairTuple3]
-  ring
-
 set_option maxHeartbeats 1000000 in
+omit [T2Space M] [CompactSpace M] in
 theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
     (ω₀ : KahlerForm n M) {φ : M → ℝ}
     (hφ : ω₀.IsPotential φ) (x : M)
-    (hLeibniz : c3MetricPairLeibnizOn (c3PerturbedMetricInChart ω₀ φ x)
+    (hLeibniz : MetricPairLeibnizOn (c3PerturbedMetricInChart ω₀ φ x)
       (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
     c3ChartPairHessianLaplacian ω₀ φ x =
       c3BochnerDerivativeSquares ω₀ φ x +
@@ -685,23 +422,23 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
           (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)
           (c3OppositeConnectionTensorLaplacian ω₀ φ x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
-          (c3ConnectionDifferenceInChart ω₀ φ x
+          (connectionDifferenceInChart ω₀ φ x
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))).re +
         c3BochnerConnectionTerm ω₀ φ x := by
   let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
   let U := e.target
   let g := c3PerturbedMetricInChart ω₀ φ x
-  let T := c3ConnectionDifferenceInChart ω₀ φ x
+  let T := connectionDifferenceInChart ω₀ φ x
   let z := e x
   have hcenterExt : z = (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x) x := by rfl
   have hgcenterExt : g z = c3PerturbedMetricInChart ω₀ φ x
       ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x) x) := by rfl
-  have hTcenterExt : T z = c3ConnectionDifferenceInChart ω₀ φ x
+  have hTcenterExt : T z = connectionDifferenceInChart ω₀ φ x
       ((extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x) x) := by rfl
   have hcenterChart : z = (chartAt (EuclideanSpace ℂ (Fin n)) x) x := by rfl
   have hgcenterChart : g z = c3PerturbedMetricInChart ω₀ φ x
       ((chartAt (EuclideanSpace ℂ (Fin n)) x) x) := by rfl
-  have hTcenterChart : T z = c3ConnectionDifferenceInChart ω₀ φ x
+  have hTcenterChart : T z = connectionDifferenceInChart ω₀ φ x
       ((chartAt (EuclideanSpace ℂ (Fin n)) x) x) := by rfl
   have hEndpointCenter : c3ChartPairHessianLaplacian ω₀ φ x =
       (((g z)⁻¹ * complexHessian (fun w ↦ (c3Pair g w (T w) (T w)).re) z).trace).re := by rfl
@@ -716,7 +453,7 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
           (fun q i j k ↦ c3PartialBar (fun w ↦ T w i j k) z q) z := by rfl
   have hU : IsOpen U := isOpen_extChartAt_target x
   have hz : z ∈ U := by
-    simpa [z, U, e] using mem_extChartAt_target x
+    simp [z, U, e]
   have hTOn : ∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ T w i j k) U := by
     intro i j k
     apply hU.contDiffOn_iff.mpr
@@ -739,7 +476,7 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
     exact hunit
   have hGinv := Matrix.contDiffOn_inverse_entries hG hGUnit
   have hΓ : ∀ i j k, ContDiffOn ℝ ∞
-      (fun w ↦ c3ChristoffelInChart g w i j k) U := by
+      (fun w ↦ christoffelInChart g w i j k) U := by
     intro i j k
     exact c3Christoffel_contDiffOn hU hG hGinv i j k
   let D (p : Fin n) : EuclideanSpace ℂ (Fin n) → Fin n → Fin n → Fin n → ℂ :=
@@ -750,25 +487,25 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
     intro i j k
     have hpart := c3ContDiffOnPartialZScalar hU (hTOn i j k) p
     have hupper : ContDiffOn ℝ ∞
-        (fun w ↦ ∑ r, c3ChristoffelInChart g w i p r * T w r j k) U := by
+        (fun w ↦ ∑ r, christoffelInChart g w i p r * T w r j k) U := by
       apply ContDiffOn.sum
       intro r hr
       exact (hΓ i p r).mul (hTOn r j k)
     have hlower₁ : ContDiffOn ℝ ∞
-        (fun w ↦ ∑ r, c3ChristoffelInChart g w r p j * T w i r k) U := by
+        (fun w ↦ ∑ r, christoffelInChart g w r p j * T w i r k) U := by
       apply ContDiffOn.sum
       intro r hr
       exact (hΓ r p j).mul (hTOn i r k)
     have hlower₂ : ContDiffOn ℝ ∞
-        (fun w ↦ ∑ r, c3ChristoffelInChart g w r p k * T w i j r) U := by
+        (fun w ↦ ∑ r, christoffelInChart g w r p k * T w i j r) U := by
       apply ContDiffOn.sum
       intro r hr
       exact (hΓ r p k).mul (hTOn i j r)
     change ContDiffOn ℝ ∞
-      (fun w ↦ c3PartialZ (fun v ↦ T v i j k) w p +
-        (∑ r, c3ChristoffelInChart g w i p r * T w r j k) -
-        (∑ r, c3ChristoffelInChart g w r p j * T w i r k) -
-        (∑ r, c3ChristoffelInChart g w r p k * T w i j r)) U
+      (fun w ↦ wirtingerDerivInChart (fun v ↦ T v i j k) w p +
+        (∑ r, christoffelInChart g w i p r * T w r j k) -
+        (∑ r, christoffelInChart g w r p j * T w i r k) -
+        (∑ r, christoffelInChart g w r p k * T w i j r)) U
     exact ((hpart.add hupper).sub hlower₁).sub hlower₂
   have hCOn (p : Fin n) : ∀ i j k, ContDiffOn ℝ ∞ (fun w ↦ C p w i j k) U := by
     intro i j k
@@ -823,22 +560,22 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
     · rfl
     · simp [him]
   have hFirstEq (w : EuclideanSpace ℂ (Fin n)) (hw : w ∈ U) (p : Fin n) :
-      c3PartialZ (fun v ↦ c3Pair g v (T v) (T v)) w p =
-        c3PartialZ (fun v ↦ ((c3Pair g v (T v) (T v)).re : ℂ)) w p := by
-    unfold c3PartialZ
+      wirtingerDerivInChart (fun v ↦ c3Pair g v (T v) (T v)) w p =
+        wirtingerDerivInChart (fun v ↦ ((c3Pair g v (T v) (T v)).re : ℂ)) w p := by
+    unfold wirtingerDerivInChart
     have heq : (fun v ↦ c3Pair g v (T v) (T v)) =ᶠ[𝓝 w]
         (fun v ↦ ((c3Pair g v (T v) (T v)).re : ℂ)) := by
       filter_upwards [hU.mem_nhds hw] with v hv
       exact hPairReal v hv
     rw [Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) heq]
   have hOuterEq (p : Fin n) :
-      (fun w ↦ c3PartialZ (fun v ↦ c3Pair g v (T v) (T v)) w p) =ᶠ[𝓝 z]
-        (fun w ↦ c3PartialZ (fun v ↦ ((c3Pair g v (T v) (T v)).re : ℂ)) w p) := by
+      (fun w ↦ wirtingerDerivInChart (fun v ↦ c3Pair g v (T v) (T v)) w p) =ᶠ[𝓝 z]
+        (fun w ↦ wirtingerDerivInChart (fun v ↦ ((c3Pair g v (T v) (T v)).re : ℂ)) w p) := by
     filter_upwards [hU.mem_nhds hz] with w hw
     exact hFirstEq w hw p
   have hHessEq (p q : Fin n) :
       complexHessian (fun w ↦ (c3Pair g w (T w) (T w)).re) z p q =
-        c3PartialBar (fun w ↦ c3PartialZ (fun v ↦ c3Pair g v (T v) (T v)) w p) z q := by
+        c3PartialBar (fun w ↦ wirtingerDerivInChart (fun v ↦ c3Pair g v (T v) (T v)) w p) z q := by
     rw [hHessian p q]
     unfold c3PartialBar
     rw [Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) (hOuterEq p)]
@@ -853,7 +590,7 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
           (fun w i j k ↦ c3PartialBar (fun v ↦ T v i j k) w p) z q) := by
     calc
       _ = c3PartialBar
-          (fun w ↦ c3PartialZ (fun v ↦ c3Pair g v (T v) (T v)) w p) z q := hHessEq p q
+          (fun w ↦ wirtingerDerivInChart (fun v ↦ c3Pair g v (T v) (T v)) w p) z q := hHessEq p q
       _ = _ := hSecond p q
   have hTerm2Alias :
       (∑ i, ∑ j, (g z)⁻¹ i j *
@@ -936,7 +673,7 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
         (chartAt (EuclideanSpace ℂ (Fin n)) x x)
         (ω₀.c3OppositeConnectionTensorLaplacian φ x
           (chartAt (EuclideanSpace ℂ (Fin n)) x x))
-        (ω₀.c3ConnectionDifferenceInChart φ x (chartAt (EuclideanSpace ℂ (Fin n)) x x))).re =
+        (ω₀.connectionDifferenceInChart φ x (chartAt (EuclideanSpace ℂ (Fin n)) x x))).re =
       (∑ p, ∑ q, (g z)⁻¹ q p *
         c3Pair g z (fun i j k ↦
           c3PartialBar (fun w ↦ c3TensorCovariantZ g T w p i j k) z q) (T z)).re := by
@@ -959,7 +696,7 @@ theorem c3ChartPairHessianLaplacian_eq_ordered_pair_of_leibniz
         (chartAt (EuclideanSpace ℂ (Fin n)) x x)
         (ω₀.c3ConnectionTensorLaplacian φ x
           (chartAt (EuclideanSpace ℂ (Fin n)) x x))
-        (ω₀.c3ConnectionDifferenceInChart φ x (chartAt (EuclideanSpace ℂ (Fin n)) x x))).re =
+        (ω₀.connectionDifferenceInChart φ x (chartAt (EuclideanSpace ℂ (Fin n)) x x))).re =
       (∑ p, ∑ q, (g z)⁻¹ q p * c3Pair g z (Dbar q p) (T z)).re := by
     change (c3Pair g (chartAt (EuclideanSpace ℂ (Fin n)) x x)
       (ω₀.c3ConnectionTensorLaplacian φ x

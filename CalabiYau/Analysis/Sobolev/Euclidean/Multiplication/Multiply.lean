@@ -70,8 +70,8 @@ theorem MemW1p.mulSmoothBounded
     {C : ℝ}
     (hη_bound : ∀ x ∈ Ω, ‖η x‖ ≤ C)
     (hη_grad_bound : ∀ x ∈ Ω, ‖fderiv ℝ η x‖ ≤ C)
-    (hu : DeGiorgi.MemW1p (d := d) p u Ω) :
-    DeGiorgi.MemW1p (d := d) p (fun x => η x * u x) Ω := by
+    (hu : Sobolev.Euclidean.MemW1p (d := d) p u Ω) :
+    Sobolev.Euclidean.MemW1p (d := d) p (fun x => η x * u x) Ω := by
   classical
   refine ⟨?_, ?_⟩
   · refine MemLp.of_le_mul (g := u) (c := C) hu.1 ?_ ?_
@@ -122,7 +122,7 @@ theorem MemW1p.mulSmoothBounded
         hu.1.locallyIntegrable hp
       have hg_local : LocallyIntegrable g (volume.restrict Ω) :=
         hg_memLp.locallyIntegrable hp
-      exact DeGiorgi.HasWeakPartialDeriv.mul_smooth hΩ hg_weak hη hu_local hg_local
+      exact Sobolev.Euclidean.HasWeakPartialDeriv.mul_smooth hg_weak hη hu_local hg_local
 
 theorem chosenWeakPartialOrZero_smul_smooth_bounded_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
@@ -131,29 +131,29 @@ theorem chosenWeakPartialOrZero_smul_smooth_bounded_ae
     {C : ℝ}
     (hη_bound : ∀ x ∈ Ω, ‖η x‖ ≤ C)
     (hη_grad_bound : ∀ x ∈ Ω, ‖fderiv ℝ η x‖ ≤ C)
-    (hu : DeGiorgi.MemW1p (d := d) p u Ω) (i : Fin d) :
+    (hu : Sobolev.Euclidean.MemW1p (d := d) p u Ω) (i : Fin d) :
     chosenWeakPartialOrZero (d := d) p i (fun x => η x * u x) Ω
       =ᵐ[volume.restrict Ω]
       (fun x => η x * chosenWeakPartialOrZero (d := d) p i u Ω x +
         (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) := by
   classical
-  have hηu : DeGiorgi.MemW1p (d := d) p (fun x => η x * u x) Ω :=
+  have hηu : Sobolev.Euclidean.MemW1p (d := d) p (fun x => η x * u x) Ω :=
     MemW1p.mulSmoothBounded (d := d) hp hΩ hη hη_bound hη_grad_bound hu
-  have hLHS : DeGiorgi.HasWeakPartialDeriv (d := d) i
+  have hLHS : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
       (chosenWeakPartialOrZero p i (fun x => η x * u x) Ω) (fun x => η x * u x) Ω :=
     chosenWeakPartialOrZero_isWeakPartial_of_mem hηu i
   have hu_local : LocallyIntegrable u (volume.restrict Ω) :=
     hu.1.locallyIntegrable hp
   have hcwp_local : LocallyIntegrable (chosenWeakPartialOrZero p i u Ω) (volume.restrict Ω) :=
     (chosenWeakPartialOrZero_memLp_of_mem hu i).locallyIntegrable hp
-  have hcwp_weak : DeGiorgi.HasWeakPartialDeriv (d := d) i
+  have hcwp_weak : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
       (chosenWeakPartialOrZero p i u Ω) u Ω :=
     chosenWeakPartialOrZero_isWeakPartial_of_mem hu i
-  have hRHS : DeGiorgi.HasWeakPartialDeriv (d := d) i
+  have hRHS : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
       (fun x => η x * chosenWeakPartialOrZero p i u Ω x +
         (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x)
       (fun x => η x * u x) Ω :=
-    DeGiorgi.HasWeakPartialDeriv.mul_smooth hΩ hcwp_weak hη hu_local hcwp_local
+    Sobolev.Euclidean.HasWeakPartialDeriv.mul_smooth hcwp_weak hη hu_local hcwp_local
   have hLHS_local : LocallyIntegrable
       (chosenWeakPartialOrZero p i (fun x => η x * u x) Ω) (volume.restrict Ω) :=
     (chosenWeakPartialOrZero_memLp_of_mem hηu i).locallyIntegrable hp
@@ -196,7 +196,7 @@ theorem chosenWeakPartialOrZero_smul_smooth_bounded_ae
       (fun x => η x * chosenWeakPartialOrZero p i u Ω x +
         (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) (volume.restrict Ω) :=
     (hηcwp_memLp.add hdηu_memLp).locallyIntegrable hp
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ hLHS hRHS hLHS_local hRHS_local
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ hLHS hRHS hLHS_local hRHS_local
 
 theorem MemWkp.smul_smooth_bounded
     (k : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -270,18 +270,6 @@ theorem MemWkp.smul_smooth_bounded
             h_inner_smooth h_inner_bound hu_inner
         exact MemWkp.add (d := d) hp hΩ hT1 hT2
       exact (MemWkp_congr_ae (d := d) hp hΩ hae).mpr hRHS_in_Wk
-
-theorem wkpNorm_smul_smooth_bounded_lt_top
-    (k : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
-    {Ω : Set E} (hΩ : IsOpen Ω)
-    {η : E → ℝ}
-    (hη : ContDiff ℝ (⊤ : ℕ∞) η)
-    {C : ℝ}
-    (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C)
-    {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
-    iteratedWeakSobolevNorm (d := d) k p (fun x => η x * u x) Ω < (⊤ : ℝ≥0∞) :=
-  wkpNorm_lt_top_of_memWkp
-    (MemWkp.smul_smooth_bounded (d := d) k hp hΩ hη hη_bound hu)
 
 end Euclidean
 end Sobolev

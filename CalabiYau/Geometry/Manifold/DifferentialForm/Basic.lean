@@ -15,8 +15,6 @@ public import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -204,7 +202,7 @@ private lemma rep_eqOn_pullback (α : DifferentialForm IM M k) {x₀ x : M}
   exact (localRep_eq_pullback (IM := IM) (M := M) (x₀ := x) (x := x₀) (z := z)
     (hx := hy₀s) (hx₀ := hy₀s₁) (m := k) (L := α z))
 
-private noncomputable def exteriorDerivativeAtRaw (α : DifferentialForm IM M k)
+noncomputable def exteriorDerivativeAtRaw (α : DifferentialForm IM M k)
     (x : {x : M // ModelWithCorners.IsInteriorPoint IM x}) :
     Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
       (Bundle.Trivial M ℝ) x.1 :=

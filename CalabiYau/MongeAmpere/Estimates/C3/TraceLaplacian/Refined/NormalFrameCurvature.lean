@@ -2,6 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.NormalCoordinateFrame
 public import CalabiYau.MongeAmpere.Estimates.C3.TraceLaplacian.Refined.ReferenceCurvatureError
+public import CalabiYau.Mathlib.LinearAlgebra.Matrix.PullbackInverse
 
 /-!
 # Reference-curvature contraction in a holomorphic normal frame
@@ -91,7 +92,7 @@ private theorem c3RefinedTrace_referenceCurvature_eq_chartCurvature
     c3RefinedTraceReferenceCurvatureInChart g z p q j k =
       chartCurvature g z p q j k := by
   have hc (a : Fin n) :
-      c3RefinedTracePartialBar (fun w ↦ c3ChristoffelInChart g w a p j) z q =
+      c3RefinedTracePartialBar (fun w ↦ christoffelInChart g w a p j) z q =
         -(∑ l, (g z)⁻¹ l a * chartCurvature g z p q j l) := by
     change chartPartialBarComplex
       (fun w ↦ ∑ l, (g w)⁻¹ l a * chartPartialZComplex (fun v ↦ g v j l) w p) z q = _
@@ -102,10 +103,10 @@ private theorem c3RefinedTrace_referenceCurvature_eq_chartCurvature
     have h := congrFun (congrFun hmul l) k
     simpa only [Matrix.mul_apply, Matrix.one_apply] using h
   change -∑ a : Fin n, g z a k *
-      c3RefinedTracePartialBar (fun w ↦ c3ChristoffelInChart g w a p j) z q = _
+      c3RefinedTracePartialBar (fun w ↦ christoffelInChart g w a p j) z q = _
   have hsum :
       ∑ a : Fin n, g z a k *
-          c3RefinedTracePartialBar (fun w ↦ c3ChristoffelInChart g w a p j) z q =
+          c3RefinedTracePartialBar (fun w ↦ christoffelInChart g w a p j) z q =
         ∑ a : Fin n, g z a k *
           (-(∑ l : Fin n, (g z)⁻¹ l a * chartCurvature g z p q j l)) := by
     apply Finset.sum_congr rfl
@@ -129,44 +130,13 @@ private theorem c3RefinedTrace_referenceCurvature_eq_chartCurvature
     _ = chartCurvature g z p q j k := by
       simp [hcontract]
 
-private lemma c3RefinedTrace_pullback_metric_inverse {n : ℕ}
-    (A B G : Matrix (Fin n) (Fin n) ℂ)
-    (hAB : A * B = 1) (hBA : B * A = 1) :
-    (A.transpose * G * A.map star)⁻¹ = B.map star * G⁻¹ * B.transpose := by
-  have hinvA : A⁻¹ = B := by
-    calc
-      A⁻¹ = 1 * A⁻¹ := by simp
-      _ = (B * A) * A⁻¹ := by rw [hBA]
-      _ = B * (A * A⁻¹) := by rw [Matrix.mul_assoc]
-      _ = B := by
-        rw [Matrix.mul_nonsing_inv A (Matrix.isUnit_det_of_left_inverse hBA), mul_one]
-  rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev]
-  rw [← Matrix.transpose_nonsing_inv, hinvA]
-  have hABstar : A.map star * B.map star = 1 := by
-    ext a b
-    have hij := congrArg star (congrFun (congrFun hAB a) b)
-    simpa [Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul, mul_comm] using hij
-  have hBAstar : B.map star * A.map star = 1 := by
-    ext a b
-    have hij := congrArg star (congrFun (congrFun hBA a) b)
-    simpa [Matrix.mul_apply, Matrix.one_apply, star_sum, star_mul, mul_comm] using hij
-  have hs : IsUnit (A.map star).det := Matrix.isUnit_det_of_right_inverse hABstar
-  have hinvstar : (A.map star)⁻¹ = B.map star := by
-    calc
-      (A.map star)⁻¹ = 1 * (A.map star)⁻¹ := by simp
-      _ = (B.map star * A.map star) * (A.map star)⁻¹ := by rw [hBAstar]
-      _ = B.map star * (A.map star * (A.map star)⁻¹) := by rw [Matrix.mul_assoc]
-      _ = B.map star := by rw [Matrix.mul_nonsing_inv _ hs, mul_one]
-  rw [hinvstar]
-  rw [← Matrix.mul_assoc]
-
 private lemma c3RefinedTrace_pullback_double_inverse {n : ℕ}
     (A B G H : Matrix (Fin n) (Fin n) ℂ)
     (hAB : A * B = 1) (hBA : B * A = 1) :
     (A.transpose * G * A.map star)⁻¹ * (A.transpose * H * A.map star) *
         (A.transpose * G * A.map star)⁻¹ =
       B.map star * (G⁻¹ * H * G⁻¹) * B.transpose := by
-  rw [c3RefinedTrace_pullback_metric_inverse A B G hAB hBA]
+  rw [Matrix.inv_transpose_mul_mul_map_star A B G hBA]
   have htranspose : B.transpose * A.transpose = 1 := by
     rw [← Matrix.transpose_mul, hAB]
     simp
@@ -527,7 +497,7 @@ private theorem c3RefinedTrace_chartCurvature_pullback_of_frame
     (Matrix.isUnit_iff_isUnit_det (A := g (F frame.center))).mp
       (ω₀.posDef_metricInChart x htarget).isUnit
   have hcurv := chartCurvature_pullback U frame.open_domain F hFreal hFhol gF g
-    hg' hmetric hkahler frame.center frame.center_mem hjac hgdet p q j k
+    hg' hmetric frame.center frame.center_mem hjac hgdet p q j k
   simpa [U, F, g, gF, frame.center_eq] using hcurv
 
 private theorem c3RefinedTrace_pulledReferenceMetric_smooth
@@ -575,10 +545,8 @@ private theorem c3RefinedTrace_pulledReferenceMetric_smooth
 /-- The ordered inverse-metric contractions and the K four-index curvature
 law give the same signed error in the old chart and the holomorphic normal
 frame. At `g=1`, `h=diag λ`, the coefficient is `λⱼ/λₚ−1`, not its negative. -/
-@[deprecated "unused hypothesis `hsol`; will be removed" (since := "2026-10-02")]
 theorem c3RefinedTrace_normalFrame_referenceCurvature
-    (ω₀ : KahlerForm n M) (G φ : M → ℝ)
-    (hsol : ω₀.SolvesMongeAmpere G φ) (x : M)
+    (ω₀ : KahlerForm n M) (φ : M → ℝ) (x : M)
     (frame : C3RefinedTraceNormalCoordinateFrame ω₀ φ x) :
     let g := c3RefinedTracePulledReferenceMetric ω₀ x frame.coord
     c3RefinedTraceReferenceCurvatureSignedError ω₀ φ x =
@@ -616,10 +584,10 @@ theorem c3RefinedTrace_normalFrame_referenceCurvature
     rw [frame.center_eq]
   have hGinvPull : (gF frame.center)⁻¹ = B.map star * (g₀ z)⁻¹ * B.transpose := by
     rw [hGpull]
-    exact c3RefinedTrace_pullback_metric_inverse A B (g₀ z) hAB hBA
+    exact Matrix.inv_transpose_mul_mul_map_star A B (g₀ z) hBA
   have hHinvPull : (hF frame.center)⁻¹ = B.map star * h₀⁻¹ * B.transpose := by
     rw [hHpull]
-    exact c3RefinedTrace_pullback_metric_inverse A B h₀ hAB hBA
+    exact Matrix.inv_transpose_mul_mul_map_star A B h₀ hBA
   have hDoublePull :
       (gF frame.center)⁻¹ * hF frame.center * (gF frame.center)⁻¹ =
         B.map star * ((g₀ z)⁻¹ * h₀ * (g₀ z)⁻¹) * B.transpose := by

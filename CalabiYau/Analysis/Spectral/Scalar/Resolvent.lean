@@ -37,12 +37,12 @@ variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 noncomputable def resolventL2 (g : SmoothRiemannianMetric I M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
-  (H1ComplToLp (I := I) (M := M) g).comp (resolvent (I := I) (M := M) g)
+  (h1ComplToLp (I := I) (M := M) g).comp (resolvent (I := I) (M := M) g)
 
 @[simp] lemma resolventL2_apply (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     resolventL2 (I := I) (M := M) g f =
-      H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) := rfl
+      h1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) := rfl
 
 private lemma inner_resolventL2_eq_inner_resolvent
     (g : SmoothRiemannianMetric I M)

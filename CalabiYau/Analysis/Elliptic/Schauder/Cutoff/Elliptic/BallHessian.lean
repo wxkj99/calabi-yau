@@ -5,8 +5,6 @@ public import CalabiYau.Analysis.Elliptic.Schauder.Cutoff.Elliptic.Ball
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -18,10 +16,10 @@ namespace CalabiYau.Schauder
 variable {V : Type*}
   [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
 
-private abbrev Hess (V : Type*) [NormedAddCommGroup V] [NormedSpace Real V] :=
+abbrev Hess (V : Type*) [NormedAddCommGroup V] [NormedSpace Real V] :=
   V →L[Real] V →L[Real] Real
 
-private abbrev Third (V : Type*) [NormedAddCommGroup V] [NormedSpace Real V] :=
+abbrev Third (V : Type*) [NormedAddCommGroup V] [NormedSpace Real V] :=
   V →L[Real] Hess V
 
 local instance : NormedAddCommGroup (Hess V) :=

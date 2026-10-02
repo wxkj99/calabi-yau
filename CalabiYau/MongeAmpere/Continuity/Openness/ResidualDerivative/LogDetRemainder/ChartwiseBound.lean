@@ -31,7 +31,7 @@ theorem exists_centeredResidual_chartwiseRemainderBound
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
     (t : ℝ) (φ : M → ℝ)
     (hsol : ω₀.SolvesMongeAmpere (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (α : ℝ≥0) (hα₁ : α < 1)
     [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
     (D : CenteredPathResidualData ω₀ F hF t φ hsol α)
     (L : P.C2 ≃L[ℝ] P.C0)
@@ -51,7 +51,7 @@ theorem exists_centeredResidual_chartwiseRemainderBound
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n))
               (P.finiteChartCover.base i)).symm) := by
   exact exists_centeredResidual_chartwiseRemainderBound_transfer
-    ω₀ F hF t φ hsol α hα₀ hα₁ D L hL b hb
+    ω₀ F hF t φ hsol α hα₁ D L hL b hb
     (fun A X Y μ hμ hA hAinv hsegment hsegmentInv =>
       Matrix.logDetTaylorRemainder_sub_bound A X Y μ hμ hA hAinv hsegment hsegmentInv)
     (fun Mbound hMbound =>
@@ -66,6 +66,5 @@ theorem exists_centeredResidual_chartwiseRemainderBound
       exact smoothChartHolderContinuousMapExtension_holderBoundOn
         P.finiteChartCover α P.normedDataC2
         (u : LittleHolder P.finiteChartCover 2 α P.normedDataC2) i)
-    CalabiYau.Schauder.holderWith_bilinear_of_norm_le
 
 end KahlerForm

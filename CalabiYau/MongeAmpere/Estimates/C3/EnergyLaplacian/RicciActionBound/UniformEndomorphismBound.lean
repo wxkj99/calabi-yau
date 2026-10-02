@@ -81,6 +81,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] in
 /-- One finite coefficient bound for the raised Ricci endomorphism, uniformly
 in the family and the point, in a frame unitary for the perturbed metric. -/
 theorem exists_uniform_c3RicciEndomorphism_frame_bound
@@ -120,7 +121,7 @@ theorem exists_uniform_c3RicciEndomorphism_frame_bound
       (mem_extChartAt_source x)
   obtain ⟨U, hU⟩ := exists_c3NormalizedFrameMatrix (ω₀.metricInChart x z)
     (ω₀.posDef_metricInChart x hz)
-  have hUref : referenceOrthonormalFrameMatrix ω₀ x U := hU
+  have hUref : IsReferenceOrthonormalFrame ω₀ x U := hU
   have hg : (g z).PosDef := by
     have hpos := (ω₀.perturb p.2 (hS p hp).2.1).posDef_metricInChart x hz
     rw [ω₀.metricInChart_perturb (hS p hp).2.1 x hz] at hpos

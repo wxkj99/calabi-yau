@@ -64,9 +64,9 @@ theorem c3_connection_pullback_lowered {n : ℕ}
     (hgdet : IsUnit (g' (f z)).det) :
     let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ f w)
     ∀ a s p : Fin n,
-      (∑ i, A z a i * c3ChristoffelInChart g z i s p) =
+      (∑ i, A z a i * christoffelInChart g z i s p) =
         chartPartialZComplex (fun w => A w a p) z s +
-          ∑ u, ∑ v, A z u s * A z v p * c3ChristoffelInChart g' (f z) a u v := by
+          ∑ u, ∑ v, A z u s * A z v p * christoffelInChart g' (f z) a u v := by
   classical
   dsimp only
   let A := fun w => EuclideanSpace.clmMatrix (fderiv ℂ f w)
@@ -83,9 +83,9 @@ theorem c3_connection_pullback_lowered {n : ℕ}
     have hh := (htrans i s p).eq_of_nhds
     exact hh
   have hGamma (i : Fin n) :
-      c3ChristoffelInChart g z i s p =
+      christoffelInChart g z i s p =
         ∑ t, B i t *
-          ((∑ c, ∑ b, A z c s * A z b p * c3ChristoffelInChart g' (f z) t c b) +
+          ((∑ c, ∑ b, A z c s * A z b p * christoffelInChart g' (f z) t c b) +
             chartPartialZComplex (fun w => A w t p) z s) := by
     change (∑ l, (g z)⁻¹ l i *
         chartPartialZComplex (fun v => g v p l) z s) =
@@ -128,20 +128,20 @@ theorem c3_connection_pullback_lowered {n : ℕ}
     rw [hprod]
     ring
   calc
-    ∑ i, A z a i * c3ChristoffelInChart g z i s p =
+    ∑ i, A z a i * christoffelInChart g z i s p =
         ∑ i, A z a i *
           ∑ t, B i t *
-            ((∑ c, ∑ b, A z c s * A z b p * c3ChristoffelInChart g' (f z) t c b) +
+            ((∑ c, ∑ b, A z c s * A z b p * christoffelInChart g' (f z) t c b) +
               chartPartialZComplex (fun w => A w t p) z s) := by
       apply Finset.sum_congr rfl
       intro i hi
       rw [hGamma i]
     _ = (∑ c, ∑ b, A z c s * A z b p *
-          c3ChristoffelInChart g' (f z) a c b) +
+          christoffelInChart g' (f z) a c b) +
           chartPartialZComplex (fun w => A w a p) z s := by
       simpa using connectionJet_left_inverse_action (A z) B hAB
         (fun t => (∑ c, ∑ b, A z c s * A z b p *
-          c3ChristoffelInChart g' (f z) t c b) +
+          christoffelInChart g' (f z) t c b) +
           chartPartialZComplex (fun w => A w t p) z s) a
     _ = _ := by ring
 

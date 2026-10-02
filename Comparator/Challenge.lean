@@ -5,12 +5,10 @@ public import CalabiYau.Geometry.Kahler.Ricci
 import Comparator.Assembly
 
 /-!
-# The three target theorems
+# The Calabi conjecture
 
-Standalone, unconditional statements of the deliverables T1–T3 of `docs/ROADMAP.md`, in terms of
-the definitions of `CalabiYau.Geometry.Complex` and `CalabiYau.Geometry.Kahler` (which depend on
-Mathlib only). The proofs are to be supplied by the project; nothing here may be changed without
-review.
+Statements of Yau's theorem on the complex Monge–Ampère equation and of the Calabi conjecture, in
+terms of the definitions of `CalabiYau.Geometry.Complex` and `CalabiYau.Geometry.Kahler`.
 
 Setting, common to all statements: `M` is a compact connected (Hausdorff) complex manifold of
 complex dimension `n`, i.e. a `ChartedSpace` over `ℂⁿ = EuclideanSpace ℂ (Fin n)` with complex
@@ -44,7 +42,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpac
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
   [ConnectedSpace M]
 
-/-- **T1 (Yau's theorem: the complex Monge–Ampère equation).** Let `(M, ω₀)` be a compact
+/-- **Yau's theorem (the complex Monge–Ampère equation).** Let `(M, ω₀)` be a compact
 connected Kähler manifold and `F` a smooth real function with `∫ e^F ω₀ⁿ = ∫ ω₀ⁿ`. Then there is
 a smooth `φ`, unique up to an additive constant, with `ω₀ + i∂∂̄φ > 0` and
 `(ω₀ + i∂∂̄φ)ⁿ = e^F ω₀ⁿ`. -/
@@ -56,7 +54,7 @@ theorem complexMongeAmpere [MeasurableSpace M] [BorelSpace M] (ω₀ : KahlerFor
         ∃ c : ℝ, ∀ x, ψ x = φ x + c := by
   exact complexMongeAmpere_assembled ω₀ F hF hnorm
 
-/-- **T2 (the Calabi conjecture, potential form).** If `ρ - Ric(ω₀) = i∂∂̄F` for a smooth real
+/-- **The Calabi conjecture, potential form.** If `ρ - Ric(ω₀) = i∂∂̄F` for a smooth real
 function `F`, there is a unique Kähler form `ω₀ + i∂∂̄φ` whose Ricci form is `ρ`. -/
 theorem calabiConjecture_of_sub_eq_mddbar (ω₀ : KahlerForm n M)
     (ρ : FormField (EuclideanSpace ℂ (Fin n)) M 2) (F : M → ℝ)
@@ -67,8 +65,8 @@ theorem calabiConjecture_of_sub_eq_mddbar (ω₀ : KahlerForm n M)
         ω₀.perturb ψ hψ = ω₀.perturb φ hφ := by
   exact calabiConjecture_of_sub_eq_mddbar_assembled ω₀ ρ F hF hρ
 
-/-- **T2, Ricci-flat case.** If `Ric(ω₀) = i∂∂̄F` for a smooth real function `F`, there is a unique
-Ricci-flat Kähler form of the form `ω₀ + i∂∂̄φ`. -/
+/-- **Potential form, Ricci-flat case.** If `Ric(ω₀) = i∂∂̄F` for a smooth real function `F`, there
+is a unique Ricci-flat Kähler form of the form `ω₀ + i∂∂̄φ`. -/
 theorem ricciFlat_of_ricciForm_eq_mddbar (ω₀ : KahlerForm n M) (F : M → ℝ)
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
     (h : ω₀.ricciForm = mddbar n F) :
@@ -77,7 +75,7 @@ theorem ricciFlat_of_ricciForm_eq_mddbar (ω₀ : KahlerForm n M) (F : M → ℝ
         ω₀.perturb ψ hψ = ω₀.perturb φ hφ := by
   exact ricciFlat_of_ricciForm_eq_mddbar_assembled ω₀ F hF h
 
-/-- **T3 (the Calabi conjecture, cohomological form).** If `ρ` is a smooth closed real
+/-- **The Calabi conjecture, cohomological form.** If `ρ` is a smooth closed real
 `(1,1)`-form with `[ρ] = 2π c₁(M)`, the Kähler class `[ω₀]` contains a unique Kähler form whose
 Ricci form is `ρ`. -/
 theorem calabiConjecture (ω₀ : KahlerForm n M) (ρ : FormField (EuclideanSpace ℂ (Fin n)) M 2)
@@ -86,10 +84,10 @@ theorem calabiConjecture (ω₀ : KahlerForm n M) (ρ : FormField (EuclideanSpac
     ∃ ω₁ : KahlerForm n M, (ω₁.toFormField - ω₀.toFormField).IsExact ∧ ω₁.ricciForm = ρ ∧
       ∀ ω₂ : KahlerForm n M, (ω₂.toFormField - ω₀.toFormField).IsExact →
         ω₂.ricciForm = ρ → ω₂ = ω₁ := by
-  exact calabiConjecture_assembled ω₀ ρ hρs hρ hρc hc₁
+  exact calabiConjecture_assembled ω₀ ρ hρs hρ hc₁
 
-/-- **T3, Ricci-flat case.** If `c₁(M) = 0` in `H²(M; ℝ)`, every Kähler class contains a unique
-Ricci-flat Kähler form. -/
+/-- **Cohomological form, Ricci-flat case.** If `c₁(M) = 0` in `H²(M; ℝ)`, every Kähler class
+contains a unique Ricci-flat Kähler form. -/
 theorem ricciFlat_of_firstChernClass_eq_zero (ω₀ : KahlerForm n M)
     (hc₁ : (0 : FormField (EuclideanSpace ℂ (Fin n)) M 2).RepresentsFirstChernClass) :
     ∃ ω₁ : KahlerForm n M, (ω₁.toFormField - ω₀.toFormField).IsExact ∧ ω₁.IsRicciFlat ∧

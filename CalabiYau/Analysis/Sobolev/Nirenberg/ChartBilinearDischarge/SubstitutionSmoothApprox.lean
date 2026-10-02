@@ -5,7 +5,7 @@ public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.Substitu
 public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.SmoothRegularity
 public import CalabiYau.Analysis.Sobolev.Tools.Mollification.Basic
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
 
 @[expose] public section
 
@@ -21,7 +21,6 @@ namespace Sobolev
 namespace SubstitutionDischargeSmoothApprox
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -40,7 +39,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma cutoff_uChart_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -106,7 +106,8 @@ lemma cutoff_uChart_memLp_two_univ
   rw [h_indicator_eq] at h_indicator_lp
   exact h_indicator_lp
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma cutoff_uChart_partial_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -263,7 +264,8 @@ lemma cutoff_uChart_partial_memLp_two_univ
   rw [h_indicator_eq] at h_indicator_lp
   exact h_indicator_lp
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma cutoff_uChart_hasWeakPartialDeriv_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -272,7 +274,7 @@ lemma cutoff_uChart_hasWeakPartialDeriv_univ
     (hχ_cs : HasCompactSupport χ)
     (hχ_support_in : tsupport χ ⊆ chartTargetEuclid (I := I) (M := M) α)
     (i : Fin (Module.finrank ℝ E)) :
-    DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+    Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
       (fun x => (fderiv ℝ χ x) (EuclideanSpace.single i 1) * D.uChart x +
         χ x * D.weakPartial i x)
       (fun x => χ x * D.uChart x) Set.univ := by
@@ -617,6 +619,9 @@ lemma cutoff_uChart_hasWeakPartialDeriv_univ
   rw [h_LHS_pt, h_RHS_split]
   linarith [h_ibp_chart]
 
+variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H]
+  {I : ModelWithCorners ℝ E H} {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] in
 private noncomputable def cutoff_uChart_witness
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -624,7 +629,7 @@ private noncomputable def cutoff_uChart_witness
     {χ : EuclN → ℝ} (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ)
     (hχ_cs : HasCompactSupport χ)
     (hχ_support_in : tsupport χ ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    DeGiorgi.MemW1pWitness (d := Module.finrank ℝ E) (ENNReal.ofReal 2)
+    Sobolev.Euclidean.MemW1pWitness (d := Module.finrank ℝ E) (ENNReal.ofReal 2)
       (fun x => χ x * D.uChart x) Set.univ where
   memLp := by
     have h_lp := cutoff_uChart_memLp_two_univ (I := I) (M := M) D
@@ -672,6 +677,9 @@ private noncomputable def cutoff_uChart_witness
     exact cutoff_uChart_hasWeakPartialDeriv_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_support_in i
 
+variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] {H : Type*} [TopologicalSpace H]
+  {I : ModelWithCorners ℝ E H} {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] in
 theorem exists_smooth_uChart_approx
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -702,7 +710,7 @@ theorem exists_smooth_uChart_approx
     rw [hχx, zero_mul]
   have hp : (1 : ℝ) < 2 := by norm_num
   obtain ⟨uSeq, hu_smooth, hu_cs, _hu_support_thicken, hu_tendsto, hu_grad_tendsto⟩ :=
-    DeGiorgi.exists_smooth_compactSupport_W1p_approx_univ
+    Sobolev.Euclidean.exists_smooth_compactSupport_W1p_approx_univ
       (d := Module.finrank ℝ E) hp hw h_χu_cs
   refine ⟨uSeq, hu_smooth, hu_cs, ?_, ?_⟩
   · have h_two_eq : ENNReal.ofReal 2 = (2 : ℝ≥0∞) := by norm_num
@@ -748,7 +756,6 @@ theorem exists_smooth_uChart_approx
     rw [h_eq_tendsto]
     exact hu_grad_tendsto i
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem nirenbergTestFunction_smooth_seq
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_support : HasCompactSupport η)
     (k : Fin (Module.finrank ℝ E))
@@ -769,7 +776,6 @@ theorem nirenbergTestFunction_smooth_seq
   · exact hasCompactSupport_nirenbergTestFunction
       (d := Module.finrank ℝ E) hη_support k h
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : ℝ)
     (F : EuclN → ℝ) :
     eLpNorm (Sobolev.translate
@@ -790,7 +796,6 @@ private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : �
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_diffQuot_le_local
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -854,7 +859,6 @@ private lemma eLpNorm_diffQuot_le_local
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma nirenbergTestFunction_sub
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (η u₁ u₂ : EuclN → ℝ) :
     (nirenbergTestFunction (d := Module.finrank ℝ E) k h η u₁) -
@@ -880,7 +884,8 @@ private lemma nirenbergTestFunction_sub
   rw [Sobolev.diffQuot_sub
     (d := Module.finrank ℝ E) k (-h)]
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 theorem nirenbergTestFunction_seq_tendsto_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

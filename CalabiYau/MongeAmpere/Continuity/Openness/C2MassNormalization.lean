@@ -3,7 +3,7 @@ module
 public import CalabiYau.MongeAmpere.Continuity.Openness.HolderSpaces
 public import CalabiYau.MongeAmpere.Continuity.Openness.C2Approximation
 public import CalabiYau.MongeAmpere.Continuity.Openness.C2MassNormalization.DensityConvergence
-public import CalabiYau.MongeAmpere.Continuity.Openness.C2MassNormalization.IntegralLimit
+public import CalabiYau.Mathlib.MeasureTheory.Integral.Bochner.UniformLimit
 
 /-!
 # Monge–Ampère mass for `C²` potentials

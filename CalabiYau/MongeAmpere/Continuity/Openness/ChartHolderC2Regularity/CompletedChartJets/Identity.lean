@@ -26,6 +26,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] in
 /-- Genuine first derivative of completed evaluation on the open chart-piece interior. The
 uniform derivative-limit argument (Gilbarg–Trudinger, §4.1, pp. 51–53) gives `HasFDerivAt`, not merely
 an equality of totalized `fderiv` values. The supplied normed data suffice even at exponent zero. -/
@@ -41,9 +42,9 @@ public theorem smoothChartHolderCompletedHasFDerivAt
         (smoothChartHolderJetCanonicalExtension cover 2 α N 1
           (Nat.le_succ 1) u i ⟨z, interior_subset hz⟩)) z := by
   classical
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   have hdense (n : ℕ) : ∃ f : SmoothChartHolderCore cover 2 α,
       dist (f : LittleHolder cover 2 α N) u < 1 / ((n : ℝ) + 1) := by
@@ -150,6 +151,7 @@ public theorem smoothChartHolderCompletedHasFDerivAt
   simpa only [g, g', dif_pos (interior_subset hz), value, jets, chart,
     Function.comp_def] using hHas
 
+omit [FiniteDimensional ℝ E] in
 /-- First derivative identification on the interior of a chart piece. Its proof uses the
 uniform limit of smooth-core first jets and the line-segment FTC. This statement is conditional only
 on the supplied normed data, so it also covers exponent zero. -/
@@ -177,6 +179,7 @@ private theorem smoothChartHolderCompletedJetIdentity_orderOne
       simp [iteratedFDeriv_one_apply]
     _ = _ := (smoothChartHolderCompletedHasFDerivAt cover α N u i z hz).fderiv
 
+omit [FiniteDimensional ℝ E] in
 /-- Genuine derivative of the first derivative of completed evaluation on the open chart-piece
 interior. Apply the same uniform derivative-limit theorem to the first-jet extensions, then use
 first-derivative identification throughout an open neighborhood. With the existing `curryRight`
@@ -193,9 +196,9 @@ public theorem smoothChartHolderCompletedFDerivHasFDerivAt
         ((smoothChartHolderJetCanonicalExtension cover 2 α N 2
           (Nat.le_refl 2) u i ⟨z, interior_subset hz⟩).curryRight)) z := by
   classical
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   have hdense (n : ℕ) : ∃ f : SmoothChartHolderCore cover 2 α,
       dist (f : LittleHolder cover 2 α N) u < 1 / ((n : ℝ) + 1) := by
@@ -379,6 +382,7 @@ public theorem smoothChartHolderCompletedFDerivHasFDerivAt
   simpa only [F₀, value, chart, jet₂, rlim, dif_pos (interior_subset hz),
     Function.comp_def] using hFderiv
 
+omit [FiniteDimensional ℝ E] in
 /-- Second derivative identification on the interior of a chart piece. It follows by applying the
 uniform derivative-limit argument to the first-jet extensions, again without restricting the
 exponent or assuming normed data exists at any additional exponent. -/
@@ -402,6 +406,7 @@ private theorem smoothChartHolderCompletedJetIdentity_orderTwo
   simpa [hm, continuousMultilinearCurryFin1_apply,
     ContinuousMultilinearMap.curryRight_apply, iteratedFDeriv_two_apply] using hpoint
 
+omit [FiniteDimensional ℝ E] in
 /-- Every chart-coordinate derivative through order two of the completed evaluation is its
 canonical completed chart jet, for arbitrary exponent and supplied normed data. -/
 theorem smoothChartHolderCompletedJetIdentity
@@ -418,9 +423,9 @@ theorem smoothChartHolderCompletedJetIdentity
   classical
   by_cases hj0 : j = 0
   · subst j
-    letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+    let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
       smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-    letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+    let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
       smoothChartHolderCoreNormedSpace cover 2 α N
     let x : M := (extChartAt 𝓘(ℝ, E) (cover.base i)).symm z
     let p : cover.piece i := ⟨z, interior_subset hz⟩
@@ -461,6 +466,7 @@ theorem smoothChartHolderCompletedJetIdentity
     · subst j
       exact smoothChartHolderCompletedJetIdentity_orderTwo cover α N u i z hz
 
+omit [FiniteDimensional ℝ E] in
 /-- The completed coordinate function is genuinely `C²` at every point in the open chart-piece
 interior. The derivative witnesses hold throughout that neighborhood, and the second canonical
 jet is continuous on it; identities for totalized derivative values alone would not suffice. -/

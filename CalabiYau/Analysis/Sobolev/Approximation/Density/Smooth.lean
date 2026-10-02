@@ -2,14 +2,24 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.Preliminaries
-public import CalabiYau.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBound
+public import CalabiYau.Analysis.Sobolev.Chart.Defs
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Normed.Group.NullSubmodule
+public import Mathlib.Analysis.Normed.Group.Uniform
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.Defs
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
+public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
+public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
+public import CalabiYau.Analysis.Sobolev.Euclidean.Density
+public import CalabiYau.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
+public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.Multiply
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
+public import CalabiYau.Geometry.Riemannian.Volume.Basic
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

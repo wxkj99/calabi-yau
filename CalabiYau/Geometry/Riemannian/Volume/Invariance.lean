@@ -26,16 +26,14 @@ open scoped Manifold Topology ContDiff ENNReal Matrix
 namespace CalabiYau.RiemannianVolume
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_symm_preimage_inter_target_eq_empty
     (x₀ : M) {A : Set M} (hA : Disjoint A (chartAt H x₀).source) :
     (extChartAt I x₀).symm ⁻¹' A ∩ (extChartAt I x₀).target = ∅ := by
@@ -56,13 +54,14 @@ lemma extChartAt_symm_preimage_inter_target_eq_empty
   rw [this] at hne
   exact hne
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma measurableSet_extChartAt_target (x₀ : M) :
     MeasurableSet (extChartAt I x₀).target := by
   rw [extChartAt_target (I := I)]
   refine MeasurableSet.inter ?_ ?_
   · exact (I.continuous_symm.isOpen_preimage _ (chartAt H x₀).open_target).measurableSet
   · exact I.isClosed_range.measurableSet
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 theorem chartLocalMeasure_apply_of_disjoint_source
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -96,35 +95,8 @@ theorem chartLocalMeasure_apply_of_disjoint_source
     rw [extChartAt_symm_preimage_inter_target_eq_empty (I := I) x₀ hA]
     exact MeasureTheory.measure_empty
   exact hν_ac hbase_zero
-
-variable (E) in
-theorem euclideanChangeOfVariablesMap
-    {s : Set E}
-    (hs : NullMeasurableSet s (modelHaar (E := E)))
-    {f : E → E} {f' : E → E →L[ℝ] E}
-    (hf' : ∀ x ∈ s, HasFDerivWithinAt f (f' x) s x) (hf : InjOn f s) :
-    Measure.map f
-        (((modelHaar (E := E)).restrict s).withDensity
-          (fun x => ENNReal.ofReal |(f' x).det|)) =
-      (modelHaar (E := E)).restrict (f '' s) :=
-  MeasureTheory.map_withDensity_abs_det_fderiv_eq_addHaar (modelHaar (E := E)) hs hf' hf
-
-omit [Module.Finite ℝ E] in
-lemma tangentCoordChange_eq_fderivWithin
-    (x₀ x₁ : M) {x : M}
-    :
-    tangentCoordChange I x₀ x₁ x =
-      fderivWithin ℝ (extChartAt I x₁ ∘ (extChartAt I x₀).symm) (range I)
-        (extChartAt I x₀ x) :=
-  tangentCoordChange_def
-
-omit [Module.Finite ℝ E] in
-lemma tangentCoordChange_hasFDerivWithinAt
-    (x₀ x₁ : M) {x : M}
-    (h : x ∈ (extChartAt I x₀).source ∩ (extChartAt I x₁).source) :
-    HasFDerivWithinAt (extChartAt I x₁ ∘ (extChartAt I x₀).symm)
-      (tangentCoordChange I x₀ x₁ x) (range I) (extChartAt I x₀ x) :=
-  hasFDerivWithinAt_tangentCoordChange (I := I) h
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] in
 
 lemma chartModelBasis_repr_sum
     (L : E →L[ℝ] E) (i : Fin (Module.finrank ℝ E)) :
@@ -132,18 +104,27 @@ lemma chartModelBasis_repr_sum
       ∑ k, ((CalabiYau.Tensor.Coordinates.chartModelBasis E).repr (L ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i)) k)
             • (CalabiYau.Tensor.Coordinates.chartModelBasis E) k :=
   (((CalabiYau.Tensor.Coordinates.chartModelBasis E).sum_repr (L ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i)))).symm
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 def transitionMatrix (x₀ x₁ : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k i =>
     (CalabiYau.Tensor.Coordinates.chartModelBasis E).repr
       ((tangentCoordChange I x₁ x₀ x) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i)) k
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 @[simp] lemma transitionMatrix_apply (x₀ x₁ : M) (x : M)
     (k i : Fin (Module.finrank ℝ E)) :
     transitionMatrix (I := I) x₀ x₁ x k i =
       (CalabiYau.Tensor.Coordinates.chartModelBasis E).repr
         ((tangentCoordChange I x₁ x₀ x) ((CalabiYau.Tensor.Coordinates.chartModelBasis E) i)) k := rfl
+section
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
 
 lemma tangentCoordChange_chartModelBasis_eq_sum
     (x₀ x₁ : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
@@ -330,6 +311,8 @@ theorem chartDensity_pullback_eq_abs_det_jacobian
 export CalabiYau.Tensor.Coordinates
   (trivializationAt_baseSet_eq_chartAt_source extChartAt_source_eq_chartAt_source)
 
+end
+
 lemma isOpen_chartAt_source_inter (x₀ x₁ : M) :
     IsOpen ((chartAt H x₀).source ∩ (chartAt H x₁).source) :=
   (chartAt H x₀).open_source.inter (chartAt H x₁).open_source
@@ -337,6 +320,8 @@ lemma isOpen_chartAt_source_inter (x₀ x₁ : M) :
 lemma measurableSet_chartAt_source_inter (x₀ x₁ : M) :
     MeasurableSet ((chartAt H x₀).source ∩ (chartAt H x₁).source) :=
   (isOpen_chartAt_source_inter (H := H) (M := M) x₀ x₁).measurableSet
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 lemma chartDensity_continuousOn
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -345,10 +330,14 @@ lemma chartDensity_continuousOn
   (chartDensity_contMDiffOn (I := I) g x₀).continuousOn
 
 variable (I M) in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
+  (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 def riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) : MeasureTheory.Measure M :=
   riemannianMeasure (I := I) g (chartAtlasPOU I M)
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 lemma riemannianVolumeMeasure_def
     [T2Space M] [SigmaCompactSpace M]
@@ -356,7 +345,8 @@ lemma riemannianVolumeMeasure_def
     riemannianVolumeMeasure (I := I) (M := M) g =
       riemannianMeasure (I := I) g (chartAtlasPOU I M) := rfl
 
-omit [IsManifold I ∞ M] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] in
 lemma aemeasurable_extChartAt_symm_restrict_target
     (x₀ : M) :
     AEMeasurable ((extChartAt I x₀).symm)
@@ -364,6 +354,11 @@ lemma aemeasurable_extChartAt_symm_restrict_target
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
     measurableSet_extChartAt_target (I := I) x₀
   exact (continuousOn_extChartAt_symm (I := I) x₀).aemeasurable htarget_meas
+section
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
 
 lemma aemeasurable_chartDensity_symm_pullback
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -426,7 +421,12 @@ theorem chartLocalMeasure_lintegral
   simp only [Pi.mul_apply] at hcomp
   rw [hcomp]
 
-omit [Module.Finite ℝ E] in
+end
+section
+
+variable [IsManifold I ∞ M]
+
+
 lemma tangentCoordChange_comp_self_overlap
     (x₀ x₁ : M) {x : M}
     (h : x ∈ (extChartAt I x₀).source ∩ (extChartAt I x₁).source) (v : E) :
@@ -438,7 +438,6 @@ lemma tangentCoordChange_comp_self_overlap
   rw [this]
   exact tangentCoordChange_self (I := I) h.1
 
-omit [Module.Finite ℝ E] in
 lemma tangentCoordChange_det_mul_inv_det_eq_one
     (x₀ x₁ : M) {x : M}
     (h : x ∈ (extChartAt I x₀).source ∩ (extChartAt I x₁).source) :
@@ -462,7 +461,6 @@ lemma tangentCoordChange_det_mul_inv_det_eq_one
     ((tangentCoordChange I x₀ x₁ x : E →L[ℝ] E).det)
     ((tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det)]
 
-omit [Module.Finite ℝ E] in
 lemma abs_det_tangentCoordChange_mul_abs_det_inv
     (x₀ x₁ : M) {x : M}
     (h : x ∈ (extChartAt I x₀).source ∩ (extChartAt I x₁).source) :
@@ -471,7 +469,6 @@ lemma abs_det_tangentCoordChange_mul_abs_det_inv
   rw [← abs_mul, tangentCoordChange_det_mul_inv_det_eq_one (I := I) x₀ x₁ h,
     abs_one]
 
-omit [Module.Finite ℝ E] in
 lemma ennreal_abs_det_tangentCoordChange_mul_abs_det_inv
     (x₀ x₁ : M) {x : M}
     (h : x ∈ (extChartAt I x₀).source ∩ (extChartAt I x₁).source) :
@@ -481,6 +478,10 @@ lemma ennreal_abs_det_tangentCoordChange_mul_abs_det_inv
   rw [← ENNReal.ofReal_mul (abs_nonneg _)]
   rw [abs_det_tangentCoordChange_mul_abs_det_inv (I := I) x₀ x₁ h]
   exact ENNReal.ofReal_one
+
+end
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 theorem chartLocalMeasure_setLintegral_indicator
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -493,7 +494,6 @@ theorem chartLocalMeasure_setLintegral_indicator
   rw [← MeasureTheory.lintegral_indicator hUmeas]
   exact chartLocalMeasure_lintegral (I := I) g x₀ (hF.indicator hUmeas)
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_image_isOpen_of_open_subset_source_of_boundaryless
     [I.Boundaryless] (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source) :
@@ -507,7 +507,6 @@ lemma extChartAt_image_isOpen_of_open_subset_source_of_boundaryless
   rw [himg_eq]
   exact I.toHomeomorph.isOpenMap _ hchart_image
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_image_measurableSet_of_open_subset_source (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source) :
     MeasurableSet ((extChartAt I x₀) '' U) := by
@@ -521,15 +520,6 @@ lemma extChartAt_image_measurableSet_of_open_subset_source (x₀ : M)
   exact I.isClosedEmbedding.measurableEmbedding.measurableSet_image.mpr
     hchart_image.measurableSet
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma extChartAt_image_measurableSet_of_overlap (x₀ x₁ : M) :
-    MeasurableSet ((extChartAt I x₀) ''
-      ((chartAt H x₀).source ∩ (chartAt H x₁).source)) :=
-  extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
-    (isOpen_chartAt_source_inter (H := H) (M := M) x₀ x₁)
-    Set.inter_subset_left
-
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_transition_image
     (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) :
@@ -543,7 +533,6 @@ lemma extChartAt_transition_image
   change extChartAt I x₁ ((extChartAt I x₀).symm (extChartAt I x₀ x)) = _
   rw [(extChartAt I x₀).left_inv hxsrc0]
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_transition_injOn_overlap_image
     (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (hUsub1 : U ⊆ (chartAt H x₁).source) :
@@ -565,7 +554,7 @@ lemma extChartAt_transition_injOn_overlap_image
   have := (extChartAt I x₁).injOn haS1 hbS1 hyz
   rw [this]
 
-omit [Module.Finite ℝ E] in
+variable [IsManifold I ∞ M] in
 lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
     (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (hUsub1 : U ⊆ (chartAt H x₁).source) :
@@ -592,7 +581,8 @@ lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
   rw [hsymm_eq]
   exact hfull.mono himage_sub
 
-omit [IsManifold I ∞ M] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] in
 lemma setLIntegral_target_eq_setLIntegral_image
     (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source)
@@ -630,6 +620,11 @@ lemma setLIntegral_target_eq_setLIntegral_image
     rw [himg]; ext y; constructor
     · rintro ⟨⟨hy_t, hy_u⟩, _⟩; exact ⟨hy_t, hy_u⟩
     · rintro ⟨hy_t, hy_u⟩; exact ⟨⟨hy_t, hy_u⟩, hy_t⟩]
+section
+
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
 
 lemma chartLocalMeasure_lintegral_U_eq_setLIntegral_image
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -781,46 +776,7 @@ lemma chartLocalMeasure_lintegral_eq_of_support_in_overlap
   rw [hUeq, hUeq']
   exact chartLocalMeasure_lintegral_U_eq_of_overlap (I := I) g x₀ x₁ hf
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma pou_product_support_subset_overlap
-    (ρ ρ' : SmoothPartitionOfUnity M I M univ)
-    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
-    (hρ' : ρ'.IsSubordinate (fun α : M => (chartAt H α).source))
-    (α β : M) (f : M → ℝ≥0∞) :
-    ∀ x, x ∉ (chartAt H α).source ∩ (chartAt H β).source →
-      ENNReal.ofReal (ρ α x) * ENNReal.ofReal (ρ' β x) * f x = 0 := by
-  intro x hx
-  have : x ∉ (chartAt H α).source ∨ x ∉ (chartAt H β).source := by
-    by_contra h
-    apply hx
-    constructor <;> (by_contra habs; exact h (by tauto))
-  rcases this with h | h
-  · have : x ∉ tsupport (ρ α) := fun h' => h (hρ α h')
-    have hρα : ρ α x = 0 := by
-      by_contra hne
-      exact this (subset_tsupport _ hne)
-    rw [hρα, ENNReal.ofReal_zero, zero_mul, zero_mul]
-  · have : x ∉ tsupport (ρ' β) := fun h' => h (hρ' β h')
-    have hρβ : ρ' β x = 0 := by
-      by_contra hne
-      exact this (subset_tsupport _ hne)
-    rw [hρβ, ENNReal.ofReal_zero, mul_zero, zero_mul]
-
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma countable_nonempty_support_of_pou
-    [SigmaCompactSpace M]
-    (ρ : SmoothPartitionOfUnity M I M univ) :
-    Set.Countable {α : M | (Function.support (ρ α)).Nonempty} := by
-  have hloc : LocallyFinite (fun α : M => Function.support (ρ α)) :=
-    ρ.locallyFinite
-  set S : Set M := {α : M | (Function.support (ρ α)).Nonempty}
-  have hsubfam :
-      LocallyFinite (fun α : S => Function.support (ρ α.val)) :=
-    hloc.comp_injective Subtype.val_injective
-  have hne : ∀ α : S, (Function.support (ρ α.val)).Nonempty := fun α => α.2
-  have hsub_univ : (Set.univ : Set S).Countable := hsubfam.countable_univ hne
-  have : Countable S := Set.countable_univ_iff.mp hsub_univ
-  exact Set.countable_coe_iff.mp this
+end
 
 omit [TopologicalSpace M] in
 lemma tsum_subtype_eq_of_support_subset {s : Set M} {f : M → ℝ≥0∞}
@@ -834,237 +790,21 @@ lemma tsum_subtype_eq_of_support_subset {s : Set M} {f : M → ℝ≥0∞}
   · rw [Set.indicator_of_notMem hx]
     by_contra hne
     exact hx (h hne)
-
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma tsum_ofReal_pou_eq_one
-    (ρ' : SmoothPartitionOfUnity M I M univ) (x : M) :
-    ∑' β : M, ENNReal.ofReal (ρ' β x) = 1 := by
-  classical
-  have hfinsupp_sum :
-      ∑ β ∈ ρ'.finsupport x, ρ' β x = 1 :=
-    SmoothPartitionOfUnity.sum_finsupport (ρ := ρ') (x₀ := x) (mem_univ x)
-  rw [tsum_eq_sum (s := ρ'.finsupport x) (f := fun β => ENNReal.ofReal (ρ' β x))]
-  · rw [show (∑ β ∈ ρ'.finsupport x, ENNReal.ofReal (ρ' β x))
-            = ENNReal.ofReal (∑ β ∈ ρ'.finsupport x, ρ' β x) by
-      rw [ENNReal.ofReal_sum_of_nonneg (fun β _ => ρ'.nonneg β x)]]
-    rw [hfinsupp_sum, ENNReal.ofReal_one]
-  · intro β hβ
-    rw [ρ'.mem_finsupport] at hβ
-    simp only [Function.mem_support, ne_eq, not_not] at hβ
-    rw [hβ, ENNReal.ofReal_zero]
-
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma lintegral_ofReal_pou_zero_of_support_empty
-    (ρ : SmoothPartitionOfUnity M I M univ) (α : M)
-    (h : Function.support (ρ α) = ∅)
-    (μ : MeasureTheory.Measure M) (F : M → ℝ≥0∞) :
-    ∫⁻ x, ENNReal.ofReal (ρ α x) * F x ∂μ = 0 := by
-  have h_zero : ∀ x, ENNReal.ofReal (ρ α x) * F x = 0 := by
-    intro x
-    have : ρ α x = 0 := by
-      by_contra hne
-      have : x ∈ Function.support (ρ α) := hne
-      rw [h] at this
-      exact (Set.notMem_empty _) this
-    rw [this, ENNReal.ofReal_zero, zero_mul]
-  simp [h_zero]
-
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma tsum_integral_pou_eq_subtype
-    (ρ : SmoothPartitionOfUnity M I M univ)
-    (cLM : M → MeasureTheory.Measure M) (F : M → ℝ≥0∞) :
-    (∑' α : M, ∫⁻ x, ENNReal.ofReal (ρ α x) * F x ∂(cLM α)) =
-      ∑' α : {α : M | (Function.support (ρ α)).Nonempty},
-        ∫⁻ x, ENNReal.ofReal (ρ α.val x) * F x ∂(cLM α.val) := by
-  classical
-  refine tsum_subtype_eq_of_support_subset (s := {α : M | (Function.support (ρ α)).Nonempty})
-    (f := fun α => ∫⁻ x, ENNReal.ofReal (ρ α x) * F x ∂(cLM α)) ?_
-  intro α hα
-  simp only [Set.mem_ofPred_eq]
-  by_contra hne
-  rw [Set.not_nonempty_iff_eq_empty] at hne
-  exact hα (lintegral_ofReal_pou_zero_of_support_empty ρ α hne (cLM α) F)
-
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
-lemma ofReal_pou_mul_expand_on_subtype
-    (ρ ρ' : SmoothPartitionOfUnity M I M univ) (α : M)
-    (F : M → ℝ≥0∞) (x : M) :
-    ENNReal.ofReal (ρ α x) * F x =
-      ∑' β : {β : M | (Function.support (ρ' β)).Nonempty},
-        ENNReal.ofReal (ρ α x) * ENNReal.ofReal (ρ' β.val x) * F x := by
-  classical
-  have h_inner :
-      (∑' β : {β : M | (Function.support (ρ' β)).Nonempty},
-          ENNReal.ofReal (ρ α x) * ENNReal.ofReal (ρ' β.val x) * F x) =
-        ENNReal.ofReal (ρ α x) *
-          (∑' β : {β : M | (Function.support (ρ' β)).Nonempty},
-            ENNReal.ofReal (ρ' β.val x)) * F x := by
-    rw [ENNReal.tsum_mul_right]
-    congr 1
-    rw [ENNReal.tsum_mul_left]
-  have h_full :
-      (∑' β : {β : M | (Function.support (ρ' β)).Nonempty},
-        ENNReal.ofReal (ρ' β.val x)) =
-      ∑' β : M, ENNReal.ofReal (ρ' β x) := by
-    symm
-    refine tsum_subtype_eq_of_support_subset (s := {β : M | (Function.support (ρ' β)).Nonempty})
-      (f := fun β => ENNReal.ofReal (ρ' β x)) ?_
-    intro β hβ
-    simp only [Function.mem_support, ne_eq, ENNReal.ofReal_eq_zero, not_le] at hβ
-    refine Set.nonempty_iff_ne_empty.mpr ?_
-    intro h_empty
-    have : ρ' β x = 0 := by
-      by_contra hne
-      have : x ∈ Function.support (ρ' β) := hne
-      rw [h_empty] at this
-      exact (Set.notMem_empty _) this
-    linarith
-  rw [h_inner, h_full, tsum_ofReal_pou_eq_one (I := I) ρ' x, mul_one]
-
-theorem riemannianMeasure_eq_of_pou_independent
-    [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    (ρ ρ' : SmoothPartitionOfUnity M I M univ)
-    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
-    (hρ' : ρ'.IsSubordinate (fun α : M => (chartAt H α).source)) :
-    riemannianMeasure (I := I) g ρ = riemannianMeasure (I := I) g ρ' := by
-  classical
-  refine MeasureTheory.Measure.ext_of_lintegral _ (fun F hF => ?_)
-  rw [riemannianMeasure_lintegral_eq (I := I) g ρ hF]
-  rw [riemannianMeasure_lintegral_eq (I := I) g ρ' hF]
-  set Tρ : Set M := {α : M | (Function.support (ρ α)).Nonempty}
-  set Tρ' : Set M := {β : M | (Function.support (ρ' β)).Nonempty}
-  have hCρ : Countable Tρ :=
-    (countable_nonempty_support_of_pou (I := I) ρ).to_subtype
-  have hCρ' : Countable Tρ' :=
-    (countable_nonempty_support_of_pou (I := I) ρ').to_subtype
-  rw [tsum_integral_pou_eq_subtype (I := I) ρ (chartLocalMeasure (I := I) g) F]
-  rw [tsum_integral_pou_eq_subtype (I := I) ρ' (chartLocalMeasure (I := I) g) F]
-  have hLHS :
-      (∑' α : Tρ, ∫⁻ x, ENNReal.ofReal (ρ α.val x) * F x
-          ∂(chartLocalMeasure (I := I) g α.val)) =
-        ∑' α : Tρ, ∑' β : Tρ', ∫⁻ x,
-          ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x
-            ∂(chartLocalMeasure (I := I) g α.val) := by
-    refine tsum_congr (fun α => ?_)
-    have hpt : (fun x : M => ENNReal.ofReal (ρ α.val x) * F x)
-        = fun x => ∑' β : Tρ',
-            ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x := by
-      funext x
-      exact ofReal_pou_mul_expand_on_subtype (I := I) ρ ρ' α.val F x
-    rw [hpt]
-    refine MeasureTheory.lintegral_tsum (fun β => ?_)
-    refine (((ENNReal.measurable_ofReal.comp
-      (ρ α.val).contMDiff.continuous.measurable).mul
-      (ENNReal.measurable_ofReal.comp
-        (ρ' β.val).contMDiff.continuous.measurable)).mul hF).aemeasurable
-  have hRHS :
-      (∑' β : Tρ', ∫⁻ x, ENNReal.ofReal (ρ' β.val x) * F x
-          ∂(chartLocalMeasure (I := I) g β.val)) =
-        ∑' β : Tρ', ∑' α : Tρ, ∫⁻ x,
-          ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x
-            ∂(chartLocalMeasure (I := I) g β.val) := by
-    refine tsum_congr (fun β => ?_)
-    have hpt : (fun x : M => ENNReal.ofReal (ρ' β.val x) * F x)
-        = fun x => ∑' α : Tρ,
-            ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x := by
-      funext x
-      have := ofReal_pou_mul_expand_on_subtype (I := I) ρ' ρ β.val
-        (fun x => F x) x
-      have h_inner :
-          (∑' α : Tρ,
-              ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x) =
-            (∑' α : Tρ, ENNReal.ofReal (ρ α.val x)) *
-              ENNReal.ofReal (ρ' β.val x) * F x := by
-        rw [ENNReal.tsum_mul_right, ENNReal.tsum_mul_right]
-      have h_full :
-          (∑' α : Tρ, ENNReal.ofReal (ρ α.val x)) =
-            ∑' α : M, ENNReal.ofReal (ρ α x) := by
-        symm
-        refine tsum_subtype_eq_of_support_subset (s := Tρ)
-          (f := fun α => ENNReal.ofReal (ρ α x)) ?_
-        intro α hα
-        simp only [Function.mem_support, ne_eq, ENNReal.ofReal_eq_zero, not_le] at hα
-        refine Set.nonempty_iff_ne_empty.mpr ?_
-        intro h_empty
-        have : ρ α x = 0 := by
-          by_contra hne
-          have : x ∈ Function.support (ρ α) := hne
-          rw [h_empty] at this
-          exact (Set.notMem_empty _) this
-        linarith
-      rw [h_inner, h_full, tsum_ofReal_pou_eq_one (I := I) ρ x, one_mul]
-    rw [hpt]
-    refine MeasureTheory.lintegral_tsum (fun α => ?_)
-    refine (((ENNReal.measurable_ofReal.comp
-      (ρ α.val).contMDiff.continuous.measurable).mul
-      (ENNReal.measurable_ofReal.comp
-        (ρ' β.val).contMDiff.continuous.measurable)).mul hF).aemeasurable
-  rw [hLHS, hRHS]
-  rw [ENNReal.tsum_comm]
-  refine tsum_congr (fun β => ?_)
-  refine tsum_congr (fun α => ?_)
-  apply chartLocalMeasure_lintegral_eq_of_support_in_overlap (I := I) g α.val β.val
-  · refine (((ENNReal.measurable_ofReal.comp
-      (ρ α.val).contMDiff.continuous.measurable).mul
-      (ENNReal.measurable_ofReal.comp
-        (ρ' β.val).contMDiff.continuous.measurable)).mul hF)
-  · exact pou_product_support_subset_overlap (I := I) ρ ρ' hρ hρ' α.val β.val F
-
-theorem riemannianMeasure_independent_of_atlas
-    [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    (ρ ρ' : SmoothPartitionOfUnity M I M univ)
-    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
-    (hρ' : ρ'.IsSubordinate (fun α : M => (chartAt H α).source)) :
-    riemannianMeasure (I := I) g ρ = riemannianMeasure (I := I) g ρ' :=
-  riemannianMeasure_eq_of_pou_independent (I := I) g ρ ρ' hρ hρ'
-
-theorem riemannianMeasure_eq_riemannianVolumeMeasure
-    [T2Space M] [SigmaCompactSpace M]
-    (g : SmoothRiemannianMetric I M)
-    (ρ : SmoothPartitionOfUnity M I M univ)
-    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source)) :
-    riemannianMeasure (I := I) g ρ = riemannianVolumeMeasure (I := I) (M := M) g := by
-  rw [riemannianVolumeMeasure_def]
-  exact riemannianMeasure_eq_of_pou_independent (I := I) g ρ
-    (chartAtlasPOU I M) hρ (chartAtlasPOU_isSubordinate I M)
-
-lemma finBasis_repr_sum
-    (L : E →L[ℝ] E) (i : Fin (Module.finrank ℝ E)) :
-    L ((Module.finBasis ℝ E) i) =
-      ∑ k, ((Module.finBasis ℝ E).repr (L ((Module.finBasis ℝ E) i)) k)
-            • (Module.finBasis ℝ E) k :=
-  (((Module.finBasis ℝ E).sum_repr (L ((Module.finBasis ℝ E) i)))).symm
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 def transitionMatrixFinBasis (x₀ x₁ : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k i =>
     (Module.finBasis ℝ E).repr
       ((tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i)) k
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 
 @[simp] lemma transitionMatrixFinBasis_apply (x₀ x₁ : M) (x : M)
     (k i : Fin (Module.finrank ℝ E)) :
     transitionMatrixFinBasis (I := I) x₀ x₁ x k i =
       (Module.finBasis ℝ E).repr
         ((tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i)) k := rfl
-
-lemma tangentCoordChange_finBasis_eq_sum
-    (x₀ x₁ : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
-    (tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i) =
-      ∑ k, transitionMatrixFinBasis (I := I) x₀ x₁ x k i • (Module.finBasis ℝ E) k :=
-  finBasis_repr_sum (tangentCoordChange I x₁ x₀ x) i
-
-lemma transitionMatrixFinBasis_det (x₀ x₁ : M) (x : M) :
-    (transitionMatrixFinBasis (I := I) x₀ x₁ x).det =
-      (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det := by
-  have hL :
-      transitionMatrixFinBasis (I := I) x₀ x₁ x =
-        LinearMap.toMatrix (Module.finBasis ℝ E) (Module.finBasis ℝ E)
-          (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).toLinearMap := by
-    ext k i
-    simp [transitionMatrixFinBasis, LinearMap.toMatrix_apply]
-  rw [hL]
-  rw [LinearMap.det_toMatrix]
 
 end CalabiYau.RiemannianVolume

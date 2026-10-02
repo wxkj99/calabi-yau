@@ -16,10 +16,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 omit [FiniteDimensional ℝ E] in
 /-- Smooth functions have finite finite-chart Hölder gauge on a compact chart cover when
 `0 < α < 1`. -/
-@[deprecated "unused hypothesis `hα₀`; will be removed" (since := "2026-10-02")]
 theorem smoothChartHolderGauge_finite
-    (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0)
-    (hα₀ : 0 < α) (hα₁ : α < 1)
+    (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0) (hα₁ : α < 1)
     (f : SmoothChartHolderCore cover k α) :
     HasFiniteChartHolderGauge cover k α f.smoothMap := by
   classical

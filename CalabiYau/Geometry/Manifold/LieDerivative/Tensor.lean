@@ -35,15 +35,6 @@ variable {s : ℕ}
 
 variable {s : ℕ}
 
-noncomputable def fderivTensor0S (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s)
-    (x : E) : E →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-  fderiv 𝕜 α x
-
-noncomputable def vectorFieldActionOnTensor0S
-    (X : E → E) (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s) (x : E) :
-    Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-  fderivTensor0S α x (X x)
-
 noncomputable def substituteArg (s : ℕ) (i : Fin s)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
     (f : E →L[𝕜] E) :
@@ -54,16 +45,6 @@ noncomputable def lieDerivCorrection (s : ℕ)
     (DX : E →L[𝕜] E) (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s) :
     Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
   ∑ i : Fin s, substituteArg s i α DX
-
-noncomputable def lieDerivTensor0S (s : ℕ)
-    (X : E → E) (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s) (x : E) :
-    Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-  vectorFieldActionOnTensor0S X α x - lieDerivCorrection s (fderiv 𝕜 X x) (α x)
-
-noncomputable def lieDerivTensor0SWithin (s : ℕ)
-    (X : E → E) (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s) (t : Set E) (x : E) :
-    Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-  fderivWithin 𝕜 α t x (X x) - lieDerivCorrection s (fderivWithin 𝕜 X t x) (α x)
 
 end VectorSpaceLieDeriv
 
@@ -81,14 +62,12 @@ variable {α β : (x : M) → Tensor0SSpace s I x}
 
 end SmoothVectorFieldLieDeriv
 
-variable [CompleteSpace 𝕜]
 
 section SmoothVectorFieldRSLieDeriv
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
 end SmoothVectorFieldRSLieDeriv
-
 
 lemma lieDeriv_correction_add (DX : E →L[𝕜] E)
     (α β : Tensor0SModel (𝕜 := 𝕜) (E := E) s) :
@@ -151,67 +130,9 @@ lemma lieDeriv_correction_smul_right (α : Tensor0SModel (𝕜 := 𝕜) (E := E)
   apply Finset.sum_congr rfl
   intro i _
   exact substituteArg_smul_right (s := s) i α c DX
+section
 
-lemma lieDeriv_correction_zero (DX : E →L[𝕜] E)
-    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) 0) :
-    lieDerivCorrection 0 DX α = 0 := by
-  dsimp[lieDerivCorrection]
-  simp only [Finset.univ_eq_empty, Finset.sum_empty]
-
-lemma lieDeriv_correction_modelProduct (s q : ℕ) (DX : E →L[𝕜] E)
-    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
-    (β : Tensor0SModel (𝕜 := 𝕜) (E := E) q) :
-    lieDerivCorrection (s + q) DX
-        (Bundle.continuousMultilinearMap.modelProduct s q α β) =
-      Bundle.continuousMultilinearMap.modelProduct s q
-          (lieDerivCorrection s DX α) β +
-        Bundle.continuousMultilinearMap.modelProduct s q
-          α (lieDerivCorrection q DX β) := by
-  ext v
-  rw [lieDerivCorrection, Fin.sum_univ_add]
-  simp only [lieDerivCorrection, sum_apply,
-    add_apply, Bundle.continuousMultilinearMap.modelProduct_apply]
-  congr 1
-  · rw [Finset.sum_mul]
-    apply Finset.sum_congr rfl
-    intro i _
-    simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
-      Bundle.continuousMultilinearMap.modelProduct_apply, Function.comp_apply]
-    congr 1
-    · congr 1
-      funext j
-      by_cases hji : j = i
-      · subst j
-        simp
-      · simp [hji]
-    · congr 1
-      funext j
-      have hneq : Fin.natAdd s j ≠ Fin.castAdd q i := by
-        intro h
-        have hval := congrArg Fin.val h
-        simp [Fin.val_natAdd, Fin.val_castAdd] at hval
-        omega
-      simp [hneq]
-  · rw [Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro i _
-    simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
-      Bundle.continuousMultilinearMap.modelProduct_apply, Function.comp_apply]
-    congr 1
-    · congr 1
-      funext j
-      have hneq : Fin.castAdd q j ≠ Fin.natAdd s i := by
-        intro h
-        have hval := congrArg Fin.val h
-        simp [Fin.val_natAdd, Fin.val_castAdd] at hval
-        omega
-      simp [hneq]
-    · congr 1
-      funext j
-      by_cases hji : j = i
-      · subst j
-        simp
-      · simp [hji]
+variable [CompleteSpace 𝕜]
 
 
 noncomputable def lieDerivCorrectionL (s : ℕ) (DX : E →L[𝕜] E) :
@@ -246,6 +167,8 @@ theorem lieDeriv_correctionOpL_apply (DX : E →L[𝕜] E) :
     lieDerivCorrectionOpL (𝕜 := 𝕜) (E := E) s DX =
       lieDerivCorrectionL (𝕜 := 𝕜) (E := E) s DX := by
   simp [lieDerivCorrectionOpL]
+
+end
 
 end ManifoldLieDeriv
 

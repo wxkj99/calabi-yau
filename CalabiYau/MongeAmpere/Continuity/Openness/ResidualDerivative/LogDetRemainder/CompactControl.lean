@@ -23,9 +23,9 @@ private theorem exists_smoothChartHolderCore_seq_tendsto
     ∃ fseq : ℕ → SmoothChartHolderCore cover 2 α,
       Filter.Tendsto (fun n => (fseq n : LittleHolder cover 2 α N))
         Filter.atTop (𝓝 u) := by
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   have hmem : u ∈ closure (Set.range
       (fun f : SmoothChartHolderCore cover 2 α =>
@@ -49,6 +49,7 @@ private theorem exists_smoothChartHolderCore_seq_tendsto
   filter_upwards [hsmall.eventually (gt_mem_nhds hε)] with n hn
   exact (hdist n).trans hn
 
+omit [FiniteDimensional ℝ E] in
 /-- Pointwise C² regularity of the continuous evaluation extension. The finite-chart gauge controls
 all coordinate jets through order two uniformly on a chart piece; convergence of those jets and the
 line-segment fundamental theorem of calculus identify the limiting jets with derivatives of the
@@ -71,9 +72,9 @@ private theorem compactControl_smoothChartHolderContinuousMapExtension_contMDiff
     ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ) 2
       (smoothChartHolderContinuousMapExtension cover 2 α N u) x := by
   classical
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedAddCommGroup cover 2 α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover 2 α) :=
     smoothChartHolderCoreNormedSpace cover 2 α N
   obtain ⟨fseq, hfseq⟩ :=
     exists_smoothChartHolderCore_seq_tendsto cover α N u
@@ -288,6 +289,7 @@ private theorem compactControl_smoothChartHolderContinuousMapExtension_contMDiff
   simpa [F, e, extChartAt, chartAt_self_eq, Set.range, Function.comp_def,
     Function.comp_apply] using hzF.contDiffWithinAt
 
+omit [FiniteDimensional ℝ E] in
 /-- Global order-two regularity follows from the completed chart-jet identity and bound. This
 all-exponent regularity is conditional on the supplied normed data and makes no claim that such data exist
 for every exponent. -/
@@ -1226,6 +1228,7 @@ private theorem evalC2_chart_contDiffAt_two
   exact (contMDiffAt_iff_contDiffAt).mp
     ((evalC2_contMDiff_two ω₁ α u (e.symm z)).comp_of_eq hsmooth rfl)
 
+omit [ConnectedSpace M] in
 private theorem chartTaylorH_sub
     (ω₁ : KahlerForm n M) (α : ℝ≥0) [P : ContinuityHolderPair ω₁ α]
     (u v : P.C2) (i : P.finiteChartCover.ι) (z : EuclideanSpace ℂ (Fin n))
@@ -1285,6 +1288,7 @@ private theorem chartTaylorH_sub
   push_cast
   ring
 
+omit [ConnectedSpace M] in
 private theorem chartTaylorH_hermitian
     (ω₁ : KahlerForm n M) (α : ℝ≥0) [P : ContinuityHolderPair ω₁ α]
     (u : P.C2) (i : P.finiteChartCover.ι) (z : EuclideanSpace ℂ (Fin n))
@@ -1305,6 +1309,7 @@ private theorem real_toNNReal_mul_coe (r : ℝ) (hr : 0 ≤ r) (c : ℝ≥0) :
   rw [Real.coe_toNNReal _ (mul_nonneg hr (NNReal.coe_nonneg c))]
   rw [Real.coe_toNNReal _ hr]
 
+omit [ConnectedSpace M] in
 private theorem exists_actualChartTaylorControl_of_commonCone
     (ω₁ : KahlerForm n M) (α : ℝ≥0) (hα₁ : α < 1)
     [P : ContinuityHolderPair ω₁ α]
@@ -1373,6 +1378,7 @@ private theorem exists_actualChartTaylorControl_of_commonCone
       exact hinv
   }⟩
 
+omit [ConnectedSpace M] in
 /-- A single strictly positive Hermitian neighborhood and finite inverse bound,
 with the order-two bounds transported to the actual evaluated Hessian matrices. -/
 theorem exists_actualChartTaylorControl

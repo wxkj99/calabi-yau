@@ -10,8 +10,6 @@ public import CalabiYau.Geometry.Riemannian.Metric.PointwiseInner.Algebra
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -59,32 +57,6 @@ private lemma chartTensorInnerPointwise_0s_symm
         have := hherm.apply i j
         simpa [star_trivial] using this
       rw [ih, hG]
-
-private lemma chartTensorInnerPointwise_0s_nonneg
-    (g : SmoothRiemannianMetric I M) (α : M) {b : M}
-    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (n : ℕ)
-    (T : Tensor0SModel n ℝ E) :
-    0 ≤ chartTensorInnerPointwise0s (I := I) (M := M) n g α b T T := by
-  set Tback : Tensor0SModel n ℝ E :=
-    T.compContinuousLinearMap (fun _ : Fin n =>
-      chartTrivializationLinearMap (I := I) (M := M) α b) with hTback_def
-  have hbridge :=
-    tensorInnerPointwise_0s_bridge_identity (I := I) (M := M) g α n hb Tback Tback
-  have hcomp_id :
-      Tback.compContinuousLinearMap
-          (fun _ : Fin n => chartTrivializationLinearMapSymm (I := I) (M := M) α b)
-        = T := by
-    refine ContinuousMultilinearMap.ext ?_
-    intro v
-    rw [hTback_def]
-    rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-    rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-    congr 1
-    funext k
-    exact chartJ_chartJinv (I := I) (M := M) α hb (v k)
-  rw [hcomp_id] at hbridge
-  rw [← hbridge]
-  exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g b n Tback
 
 def chartTensorInnerPointwiseRsModel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)

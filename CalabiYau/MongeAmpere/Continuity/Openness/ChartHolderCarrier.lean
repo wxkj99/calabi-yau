@@ -26,16 +26,17 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M]
 
+omit [FiniteDimensional ℝ E] in
 /-- Existence of the gauge normed structure on the actual smooth-function core. The finite-gauge
 field, norm formula, and operation-coherence fields rule out infinite gauges and twisted algebra
 structures. -/
 theorem exists_smoothChartHolderNormedData
     (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0)
-    (hα₀ : 0 < α) (hα₁ : α < 1) :
+    (hα₁ : α < 1) :
     Nonempty (SmoothChartHolderNormedData cover k α) := by
   have hfinite : ∀ f : SmoothChartHolderCore cover k α,
       HasFiniteChartHolderGauge cover k α f.smoothMap :=
-    fun f => smoothChartHolderGauge_finite cover k α hα₀ hα₁ f
+    fun f => smoothChartHolderGauge_finite cover k α hα₁ f
   have hcore : NormedSpace.Core ℝ (SmoothChartHolderCore cover k α) := by
     refine {
       norm_nonneg := ?_

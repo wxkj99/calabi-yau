@@ -24,7 +24,9 @@ commit and original path.
    Authors: Scott Armstrong, Julia Kempe
    License: licenses/DeGiorgi/LICENSE
    Upstream modification log: licenses/DeGiorgi/MODIFICATIONS.md
-   Extracted here to CalabiYau/Analysis/DeGiorgi/.
+   Extracted files now live under CalabiYau/Analysis/Sobolev/Euclidean/ (and
+   CalabiYau/Analysis/Elliptic/Coefficients.lean); each starts with a comment
+   naming its upstream path.
 
 Modifications made in this repository (Apache-2.0 §4(b)):
 - files were moved to new module paths under CalabiYau/, renamed into the

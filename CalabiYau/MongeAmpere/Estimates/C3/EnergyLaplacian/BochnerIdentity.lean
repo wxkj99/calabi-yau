@@ -24,13 +24,13 @@ private theorem c3Bochner_of_ordered_pair_and_commutator (ω₀ : KahlerForm n M
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)
             (c3OppositeConnectionTensorLaplacian ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
-            (c3ConnectionDifferenceInChart ω₀ φ x
+            (connectionDifferenceInChart ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))).re +
           (c3Pair (c3PerturbedMetricInChart ω₀ φ x)
             (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x)
             (c3ConnectionTensorLaplacian ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
-            (c3ConnectionDifferenceInChart ω₀ φ x
+            (connectionDifferenceInChart ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))).re)
     (hComm :
       c3OppositeConnectionTensorLaplacian ω₀ φ x
@@ -39,7 +39,7 @@ private theorem c3Bochner_of_ordered_pair_and_commutator (ω₀ : KahlerForm n M
           c3ConnectionTensorLaplacian ω₀ φ x
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) i j k +
             c3RicciTensorAction (c3PerturbedMetricInChart ω₀ φ x)
-              (c3ConnectionDifferenceInChart ω₀ φ x
+              (connectionDifferenceInChart ω₀ φ x
                 (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x))
               (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x x) i j k) :
     (ω₀.perturb φ hφ).laplacian (calabiEnergy ω₀ φ) x =

@@ -74,7 +74,7 @@ lemma eLpNorm_chosenWeakPartialOrZero_smul_smooth_bounded_le
     {C : ℝ}
     (hη_bound : ∀ x ∈ Ω, ‖η x‖ ≤ C)
     (hη_grad_bound : ∀ x ∈ Ω, ‖fderiv ℝ η x‖ ≤ C)
-    {u : E → ℝ} (hu : DeGiorgi.MemW1p (d := d) p u Ω) (i : Fin d) :
+    {u : E → ℝ} (hu : Sobolev.Euclidean.MemW1p (d := d) p u Ω) (i : Fin d) :
     eLpNorm (chosenWeakPartialOrZero (d := d) p i (fun x => η x * u x) Ω) p
         (volume.restrict Ω) ≤
       ENNReal.ofReal C *
@@ -152,7 +152,7 @@ lemma natCast_one_add_d_mul_ofReal (d : ℕ) (C : ℝ) :
 
 theorem wkpNorm_smul_smooth_bounded_le_one
     (k : ℕ) (hk : k ≤ 1) {d : ℕ}
-    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ_open : IsOpen Ω)
     {η : EuclideanSpace ℝ (Fin d) → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -191,7 +191,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       have h := hη_bound 1 (by omega) x hx
       rwa [norm_iteratedFDeriv_one] at h
     classical
-    let _ := hp_top
     set K : ℝ := ((1 + d : ℕ) : ℝ) * (max C 0 + 1) with hK_def
     have h_natpos : (0 : ℝ) < ((1 + d : ℕ) : ℝ) := by
       have h : (0 : ℕ) < 1 + d := Nat.lt_of_lt_of_le Nat.zero_lt_one (Nat.le_add_right _ _)
@@ -202,7 +201,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       exact mul_pos h_natpos h1
     refine ⟨K, hK_pos, ?_⟩
     intro v hv
-    have hv_W1p : DeGiorgi.MemW1p (d := d) p v Ω := hv.memW1p
+    have hv_W1p : Sobolev.Euclidean.MemW1p (d := d) p v Ω := hv.memW1p
     set Au : ℝ≥0∞ := eLpNorm v p (volume.restrict Ω) with hAu_def
     set Bu : Fin d → ℝ≥0∞ :=
       fun i => eLpNorm (chosenWeakPartialOrZero p i v Ω) p (volume.restrict Ω)

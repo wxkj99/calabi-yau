@@ -33,7 +33,7 @@ noncomputable def c3RefinedTracePartialBar (f : EuclideanSpace ℂ (Fin n) → �
 noncomputable def c3RefinedTraceMatrixPartialZ
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
     (z : EuclideanSpace ℂ (Fin n)) (p : Fin n) : Matrix (Fin n) (Fin n) ℂ :=
-  fun i j ↦ c3PartialZ (fun w ↦ g w i j) z p
+  fun i j ↦ wirtingerDerivInChart (fun w ↦ g w i j) z p
 
 /-- Entrywise antiholomorphic derivative of a matrix-valued coordinate field. -/
 noncomputable def c3RefinedTraceMatrixPartialBar

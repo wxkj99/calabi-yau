@@ -9,8 +9,6 @@ public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.IntrinsicToChart.
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 open CalabiYau.Riemannian
 
 noncomputable section

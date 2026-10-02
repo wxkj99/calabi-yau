@@ -9,7 +9,7 @@ public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Defs
 public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Curry.Basic
 public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.TensorProduct
 public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Coordinates.Field
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.PredualBasis
+public import CalabiYau.Mathlib.LinearAlgebra.Dual.PredualBasis
 public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 public import Mathlib.Topology.VectorBundle.Basic
 public import Mathlib.LinearAlgebra.Trace

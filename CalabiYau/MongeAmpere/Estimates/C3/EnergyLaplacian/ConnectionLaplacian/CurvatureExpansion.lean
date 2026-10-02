@@ -149,9 +149,9 @@ theorem c3CurvatureCovariantZ_eq_jet_of_expansion
       c3JetCovariantCurvature (g z)⁻¹ (c3MetricJetZ g z) (c3MetricJetBar g z)
         (c3MetricJetZBar g z) (c3MetricJetZZ g z) (c3MetricJetZZBar g z) p j q k l := by
   change
-    (c3PartialZ (fun w => chartCurvature g w j q k l) z p -
-      ∑ r, c3ChristoffelInChart g z r p j * chartCurvature g z r q k l -
-      ∑ r, c3ChristoffelInChart g z r p k * chartCurvature g z j q r l) =
+    (wirtingerDerivInChart (fun w => chartCurvature g w j q k l) z p -
+      ∑ r, christoffelInChart g z r p j * chartCurvature g z r q k l -
+      ∑ r, christoffelInChart g z r p k * chartCurvature g z j q r l) =
     (c3JetCurvatureDerivative (g z)⁻¹ (c3MetricJetZ g z) (c3MetricJetBar g z)
       (c3MetricJetZBar g z) (c3MetricJetZZ g z) (c3MetricJetZZBar g z) p j q k l -
       ∑ r, c3JetChristoffel (g z)⁻¹ (c3MetricJetZ g z) r p j *
@@ -160,7 +160,7 @@ theorem c3CurvatureCovariantZ_eq_jet_of_expansion
       ∑ r, c3JetChristoffel (g z)⁻¹ (c3MetricJetZ g z) r p k *
         c3JetCurvature (g z)⁻¹ (c3MetricJetZ g z) (c3MetricJetBar g z)
           (c3MetricJetZBar g z) j q r l)
-  rw [show c3PartialZ (fun w => chartCurvature g w j q k l) z p =
+  rw [show wirtingerDerivInChart (fun w => chartCurvature g w j q k l) z p =
     chartPartialZComplex (fun w => chartCurvature g w j q k l) z p from rfl,
     hExpand p j q k l]
   rfl

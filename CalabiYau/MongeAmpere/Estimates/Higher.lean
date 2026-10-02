@@ -1,8 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
-import CalabiYau.Geometry.Complex.Forms.Positive
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.MongeAmpere.Estimates.Higher.InitialBounds
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep
 import CalabiYau.MongeAmpere.Estimates.Higher.LinearizedMongeAmpere
@@ -78,24 +77,6 @@ private theorem contDiffOn_complexHessian_entries_of_contDiffOn
   change (ddbar f z).coeffMatrix j k = _
   simp [ContinuousAlternatingMap.coeffMatrix, f₁, f₂]
 
-omit [T2Space M] [CompactSpace M] in
-private theorem contDiffOn_chart_perturbedMetric_entries (ω₀ : KahlerForm n M)
-    {φ : M → ℝ} (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
-    (x : M) :
-    ∀ j k, ContDiffOn ℝ ∞ (fun z ↦ ω₀.metricInChart x z j k +
-      complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z j k)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
-  let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
-  have hφon : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ Set.univ :=
-    contMDiffOn_univ.mpr hφ
-  have hφchart : ContDiffOn ℝ ∞ (φ ∘ e.symm) e.target := by
-    have h := hφon.comp (contMDiffOn_extChartAt_symm x) (by intro z hz; simp)
-    exact h.contDiffOn
-  have hHess := contDiffOn_complexHessian_entries_of_contDiffOn
-    (isOpen_extChartAt_target x) hφchart
-  intro j k
-  exact (ω₀.contDiffOn_metricInChart x j k).add (hHess j k)
-
 private theorem contDiffOn_matrixDet_of_contDiffOn_entries
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {U : Set E} {G : E → Matrix (Fin n) (Fin n) ℂ}
@@ -142,33 +123,6 @@ private theorem contDiffOn_matrixInverse_entries_of_contDiffOn
   exact (hinvdet.mul (hadj i j))
 
 omit [T2Space M] [CompactSpace M] in
-private theorem contDiffOn_chart_perturbedMetric_inv_entries (ω₀ : KahlerForm n M)
-    {G φ : M → ℝ} (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ)
-    (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) :
-    ∀ j k, ContDiffOn ℝ ∞ (fun z ↦
-      (ω₀.metricInChart x z + complexHessian
-        (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm) z)⁻¹ j k)
-      (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
-  let e := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
-  let A : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ := fun z ↦
-    ω₀.metricInChart x z + complexHessian (φ ∘ e.symm) z
-  have hA := contDiffOn_chart_perturbedMetric_entries ω₀ hφ x
-  have hA' : ∀ j k, ContDiffOn ℝ ∞ (fun z ↦ A z j k) e.target := by
-    simpa [A, e] using hA
-  have hdet : ∀ z ∈ e.target,
-      (A z).det ≠ 0 := by
-    intro z hz
-    have hp := (ω₀.perturb φ hsol.1).posDef_metricInChart x hz
-    rw [KahlerForm.metricInChart_perturb hsol.1 x hz] at hp
-    have hreal : 0 < RCLike.re (A z).det := by
-      apply (RCLike.pos_iff.mp hp.det_pos).1
-    intro hzero
-    rw [hzero] at hreal
-    norm_num at hreal
-  have hInv := contDiffOn_matrixInverse_entries_of_contDiffOn hA' hdet
-  simpa [A, e] using hInv
-
-omit [T2Space M] [CompactSpace M] in
 
 private theorem segment_dist_left_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {x y z : E} (hz : z ∈ segment ℝ x y) : dist x z ≤ dist x y := by
@@ -197,100 +151,7 @@ private theorem exists_pos_segment_radius
     exact (segment_dist_left_le hz).trans hxy
   exact (not_lt_of_ge hnear) hfar'
 
-private theorem exists_uniform_holderBoundOn_of_succ_bounds
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
-    {U K : Set E} (hU : IsOpen U) (hK : IsCompact K) (hKU : K ⊆ U)
-    (k : ℕ) (α : ℝ≥0) (hα : α ≤ 1) {S : Set (E → F)}
-    (hSmooth : ∀ f ∈ S, ContDiffOn ℝ (k + 1) f U) (C : ℝ≥0)
-    (hBound : ∀ f ∈ S, ∀ j ≤ k + 1, ∀ z ∈ U,
-      ‖iteratedFDeriv ℝ j f z‖ ≤ C) :
-    ∃ C' : ℝ≥0, ∀ f ∈ S, HolderBoundOn k α C' K f := by
-  obtain ⟨δ, hδ, hsegment⟩ := exists_pos_segment_radius hU hK hKU
-  have hklt : (k : ℕ∞ω) < (k + 1 : ℕ∞ω) := by
-    exact_mod_cast Nat.lt_succ_self k
-  let L : ℝ≥0 := max C (2 * C / δ)
-  let D : ℝ≥0 := (Metric.ediam K).toNNReal
-  have hdiam : Metric.ediam K ≠ ⊤ := hK.isBounded.ediam_ne_top
-  have hD : (D : ENNReal) = Metric.ediam K := by
-    change ↑(Metric.ediam K).toNNReal = Metric.ediam K
-    exact ENNReal.coe_toNNReal hdiam
-  have hdist (x : E) (hx : x ∈ K) (y : E) (hy : y ∈ K) :
-      edist x y ≤ (D : ENNReal) := by
-    rw [hD]
-    exact Metric.edist_le_ediam_of_mem hx hy
-  let Cα : ℝ≥0 := L * D ^ ((1 : ℝ) - (α : ℝ))
-  let Ctot : ℝ≥0 := max C Cα
-  refine ⟨Ctot, ?_⟩
-  intro f hf
-  let g : E → E [×k]→L[ℝ] F := iteratedFDeriv ℝ k f
-  have hLip : LipschitzOnWith L g K := by
-    apply LipschitzOnWith.of_dist_le_mul
-    intro x hx y hy
-    by_cases hclose : dist x y ≤ δ
-    · have hseg := hsegment x hx y hy hclose
-      have hsegLip : LipschitzOnWith C g (segment ℝ x y) := by
-        apply Convex.lipschitzOnWith_of_nnnorm_fderiv_le (𝕜 := ℝ)
-        · intro z hz
-          have hAt : ContDiffAt ℝ (k + 1) f z :=
-            (hSmooth f hf).contDiffAt (hU.mem_nhds (hseg hz))
-          exact hAt.differentiableAt_iteratedFDeriv hklt
-        · intro z hz
-          change ‖fderiv ℝ (iteratedFDeriv ℝ k f) z‖₊ ≤ C
-          have hreal : ‖fderiv ℝ (iteratedFDeriv ℝ k f) z‖ ≤ (C : ℝ) := by
-            rw [norm_fderiv_iteratedFDeriv]
-            exact hBound f hf (k + 1) (Nat.le_refl _) z (hseg hz)
-          exact_mod_cast hreal
-        · exact convex_segment x y
-      have hxseg : x ∈ segment ℝ x y := left_mem_segment ℝ x y
-      have hyseg : y ∈ segment ℝ x y := right_mem_segment ℝ x y
-      exact (hsegLip.dist_le_mul x hxseg y hyseg).trans
-        (mul_le_mul_of_nonneg_right (by exact_mod_cast le_max_left C (2 * C / δ)) dist_nonneg)
-    · have hfar : (δ : ℝ) < dist x y := lt_of_not_ge hclose
-      have hxBound : ‖g x‖ ≤ C := hBound f hf k (Nat.le_succ k) x (hKU hx)
-      have hyBound : ‖g y‖ ≤ C := hBound f hf k (Nat.le_succ k) y (hKU hy)
-      have hratio : (↑(2 * C / δ) : ℝ) * (δ : ℝ) = 2 * (C : ℝ) := by
-        rw [NNReal.coe_div, NNReal.coe_mul]
-        field_simp [ne_of_gt (NNReal.coe_pos.mpr hδ)]
-        exact mul_comm _ _
-      calc
-        dist (g x) (g y) ≤ ‖g x‖ + ‖g y‖ := dist_le_norm_add_norm _ _
-        _ ≤ 2 * (C : ℝ) := by
-          calc
-            ‖g x‖ + ‖g y‖ ≤ (C : ℝ) + C := add_le_add hxBound hyBound
-            _ = 2 * (C : ℝ) := by rw [two_mul]
-        _ = (↑(2 * C / δ) : ℝ) * (δ : ℝ) := hratio.symm
-        _ ≤ (↑(2 * C / δ) : ℝ) * dist x y :=
-          mul_le_mul_of_nonneg_left hfar.le (by positivity)
-        _ ≤ (L : ℝ) * dist x y :=
-          mul_le_mul_of_nonneg_right (by exact_mod_cast le_max_right C (2 * C / δ)) dist_nonneg
-  have hholder : HolderOnWith Cα α g K := by
-    simpa [Cα] using hLip.holderOnWith.of_le hdist hα
-  refine ⟨?_, ?_⟩
-  · intro j hj z hz
-    exact (hBound f hf j (le_trans hj (Nat.le_succ k)) z (hKU hz)).trans <| by
-      exact_mod_cast (le_max_left C Cα)
-  · exact hholder.mono_const (le_max_right C Cα)
-
-private theorem exists_holderBoundOn_of_schauder
-    (hSch : InteriorSchauderEstimate n) (k : ℕ) (α : ℝ≥0)
-    (hα₀ : 0 < α) (hα₁ : α < 1) (lam K : ℝ≥0) (hlam : 0 < lam)
-    (U V : Set (EuclideanSpace ℂ (Fin n))) (hU : IsOpen U)
-    (hV : IsCompact (closure V)) (hVU : closure V ⊆ U)
-    (A : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (u : EuclideanSpace ℂ (Fin n) → ℝ)
-    (hA : ∀ j l, ContDiffOn ℝ ∞ (fun z ↦ A z j l) U)
-    (hu : ContDiffOn ℝ ∞ u U)
-    (hEll : IsUniformlyEllipticOn A lam U)
-    (hAHolder : ∀ j l, HolderBoundOn k α K U fun z ↦ A z j l)
-    (K₀ K₁ : ℝ≥0)
-    (hLuHolder : HolderBoundOn k α K₁ U (complexEllipticOp A u))
-    (huBound : ∀ z ∈ U, |u z| ≤ K₀) :
-    ∃ C : ℝ≥0, HolderBoundOn (k + 2) α C V u := by
-  obtain ⟨C, hC⟩ := hSch.holderBoundOn_of_contDiffOn k α hα₀ hα₁ lam K hlam
-    U V hU hV hVU
-  exact ⟨C * (K₁ + K₀), hC A u hA hu hEll hAHolder K₀ K₁ hLuHolder huBound⟩
-
+omit [T2Space M] [CompactSpace M] in
 /-- **Higher-order estimates.** Uniform `C⁰`, `C²` and `C³` bounds on a family of solutions, with
 right-hand sides bounded in every `C^k`, give uniform `C^k` bounds for every `k`. -/
 theorem holderBoundedInCharts_of_solvesMongeAmpere (hSch : InteriorSchauderEstimate n)

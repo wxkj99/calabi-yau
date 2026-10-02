@@ -1,20 +1,17 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Chart/SmoothDensity/ChartSobolevDensity.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.Transition
 public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
+public import CalabiYau.Analysis.Sobolev.Euclidean.Density
 public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.Defs
 public import CalabiYau.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
-public import CalabiYau.Analysis.Sobolev.Euclidean.Density
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 public import CalabiYau.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -534,43 +531,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-omit [IsManifold I ∞ M] in
-private lemma chartPushed_chartPullback_apply_of_mem
-    (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
-    (ψ : EuclN → ℝ) {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    chartPushed (I := I) (M := M) ρ α (chartPullback I α ψ) y =
-      (ρ α : C^∞⟮I, M; ℝ⟯) ((extChartAt I α).symm (toEuclidean.symm y)) * ψ y := by
-  classical
-  unfold chartPushed
-  set z : M := (extChartAt I α).symm (toEuclidean.symm y) with hz_def
-  have hsymm_target : toEuclidean.symm y ∈ (extChartAt I α).target := by
-    rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
-    exact hy
-  have hz_source : z ∈ (extChartAt I α).source :=
-    (extChartAt I α).map_target hsymm_target
-  have hz_chartAt_source : z ∈ (chartAt H α).source := by
-    rw [CalabiYau.RiemannianVolume.extChartAt_source_eq_chartAt_source
-      (I := I) (M := M)] at hz_source
-    exact hz_source
-  rw [chartPullback_apply_of_mem (I := I) (M := M) α ψ hz_chartAt_source]
-  have hz_inv : (extChartAt I α) z = toEuclidean.symm y :=
-    (extChartAt I α).right_inv hsymm_target
-  rw [hz_inv, toEuclidean.apply_symm_apply]
-
-private lemma chartPushed_chartPullback_self
-    [T2Space M] [SigmaCompactSpace M]
-    (α : M) (χ : EuclN → ℝ) {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    chartPushed (I := I) (M := M)
-        (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α
-        (chartPullback I α χ) y =
-      (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-        : C^∞⟮I, M; ℝ⟯) ((extChartAt I α).symm (toEuclidean.symm y)) *
-      χ y :=
-  chartPushed_chartPullback_apply_of_mem (I := I) (M := M)
-    (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α χ hy
 
 end Chart
 end Sobolev

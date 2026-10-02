@@ -107,7 +107,7 @@ theorem referenceContraction_component_bound_of_energy
   have hnorm : 0 ≤ ‖T i j k‖ := norm_nonneg _
   nlinarith [Real.sq_sqrt hE]
 
-theorem referenceContraction_diagonal_drift_component_bound {n : ℕ}
+theorem referenceContractionDiagonalDrift_component_bound {n : ℕ}
     (d : Fin n → ℝ) (X : Fin n → Fin n → Fin n → Fin n → Fin n → ℂ)
     (R : Fin n → Fin n → Fin n → Fin n → ℂ) (T : Fin n → Fin n → Fin n → ℂ)
     (B A K E : ℝ) (hB : 0 < B) (hE : 0 ≤ E)
@@ -116,7 +116,7 @@ theorem referenceContraction_diagonal_drift_component_bound {n : ℕ}
       (d i / (d j * d k)) * ‖T i j k‖ ^ 2 ≤ E)
     (hX : ∀ p j k i, ‖X p j p k i‖ ≤ A)
     (hR : ∀ i j k l, ‖R i j k l‖ ≤ K) :
-    ∀ i j k, ‖referenceContraction_diagonal_drift d X R T i j k‖ ≤
+    ∀ i j k, ‖referenceContractionDiagonalDrift d X R T i j k‖ ≤
       (n : ℝ) * B * (A + 3 * (n : ℝ) * K * Real.sqrt (B ^ 3 * E)) := by
   have hweighted := referenceContraction_unweighted_energy_bound T d B E hB hd hdb henergy
   have hnonneg : 0 ≤ B ^ 3 * E := mul_nonneg (pow_nonneg (le_of_lt hB) 3) hE
@@ -133,7 +133,7 @@ theorem referenceContraction_diagonal_drift_component_bound {n : ℕ}
     rw [norm_inv, hnorm]
     exact hinv p
   intro i j k
-  simp only [referenceContraction_diagonal_drift]
+  simp only [referenceContractionDiagonalDrift]
   calc
     ‖∑ p, ((d p)⁻¹ : ℂ) *
         (X p j p k i + ∑ r, T i p r * R j p k r -

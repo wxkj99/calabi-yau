@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.SmoothBootstrap.ChartLogDetEquation
-public import CalabiYau.LinearAlgebra.Hermitian.LogDetDeriv
+public import CalabiYau.Mathlib.Analysis.Matrix.PosDef.LogDet
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
@@ -223,10 +223,8 @@ private theorem logDet_segment_secant_avgInverse {n : ℕ}
       exact (re_trace_intervalIntegral_matrix_mul
         (fun s ↦ (A + s • (C - A))⁻¹) (C - A) hF).symm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
-  [T2Space M] [CompactSpace M] [ConnectedSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
 /-- The matrix of the perturbed Kähler form in the chart based at `x`. -/
 noncomputable def chartBootstrapMatrix (ω₀ : KahlerForm n M) (φ : M → ℝ) (x : M)
@@ -247,6 +245,10 @@ noncomputable def averagedChartInverse (ω₀ : KahlerForm n M) (φ : M → ℝ)
 noncomputable def chartMatrixDifferenceQuotient {n : ℕ} (A B : Matrix (Fin n) (Fin n) ℂ)
     (h : ℝ) : Matrix (Fin n) (Fin n) ℂ :=
   fun j l ↦ (B j l - A j l) / (h : ℂ)
+
+section
+
+variable [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
 private theorem logDet_segment_differenceQuotient {n : ℕ}
     (A C : Matrix (Fin n) (Fin n) ℂ) (hA : A.PosDef) (hC : C.PosDef) (h : ℝ) :
@@ -305,7 +307,8 @@ private theorem complexHessian_differenceQuotient {n : ℕ}
   ext i j
   simp [chartMatrixDifferenceQuotient, div_eq_mul_inv, mul_comm]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+end
+
 private theorem translatedPotentialQuotient_contDiffOn
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hφ : ω₀.SolvesMongeAmpereC2 G φ)
@@ -382,7 +385,6 @@ def HasExactDifferenceQuotientData (ω₀ : KahlerForm n M) (G φ : M → ℝ) :
             ∀ z ∈ U, complexEllipticOp A q z =
               chartDifferenceQuotientRhs ω₀ G φ x v h z
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 private theorem chartMatrix_logDet_differenceQuotient
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
     (hEquation : HasChartLogDetEquation ω₀ G φ)
@@ -429,7 +431,6 @@ private theorem chartMatrix_logDet_differenceQuotient
   simpa [B, g, e, chartBootstrapMatrix] using
     (logDet_segment_differenceQuotient (B z) (B (z + h • v)) hB₀pos hB₁pos h)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 /-- The `C²` Monge–Ampère equation yields its exact nonzero difference-quotient equation and
 `C²` regularity of each quotient. -/
 theorem solvesMongeAmpereC2_hasExactDifferenceQuotientData

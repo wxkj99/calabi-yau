@@ -2,15 +2,12 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
-public import CalabiYau.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartIdentity
 public import CalabiYau.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -20,33 +17,6 @@ open scoped Manifold ContDiff ENNReal NNReal
 namespace Sobolev
 
 namespace Euclidean
-
-private lemma indicator_eq_of_tsupport_subset
-    {α : Type*} [Zero α]
-    {X : Type*} [TopologicalSpace X] {f : X → α}
-    {Ω Ω' : Set X} (hΩΩ' : Ω' ⊆ Ω)
-    (hf_support : tsupport f ⊆ Ω') :
-    Ω.indicator f = Ω'.indicator f := by
-  funext x
-  by_cases hxΩ' : x ∈ Ω'
-  · simp [Set.indicator_of_mem hxΩ', Set.indicator_of_mem (hΩΩ' hxΩ')]
-  · simp only [Set.indicator_of_notMem hxΩ']
-    by_cases hxΩ : x ∈ Ω
-    · rw [Set.indicator_of_mem hxΩ]
-      have hx_off : x ∉ tsupport f := fun h => hxΩ' (hf_support h)
-      exact image_eq_zero_of_notMem_tsupport hx_off
-    · simp [Set.indicator_of_notMem hxΩ]
-
-private lemma eLpNorm_restrict_eq_of_tsupport_subset_aux
-    {X : Type*} [MeasurableSpace X] [TopologicalSpace X] {μ : Measure X}
-    {α : Type*} [NormedAddCommGroup α] {p : ℝ≥0∞}
-    {f : X → α}
-    {Ω Ω' : Set X} (hΩ_meas : MeasurableSet Ω) (hΩ'_meas : MeasurableSet Ω')
-    (hΩΩ' : Ω' ⊆ Ω) (hf_support : tsupport f ⊆ Ω') :
-    eLpNorm f p (μ.restrict Ω) = eLpNorm f p (μ.restrict Ω') := by
-  rw [← eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas,
-      ← eLpNorm_indicator_eq_eLpNorm_restrict hΩ'_meas]
-  rw [indicator_eq_of_tsupport_subset hΩΩ' hf_support]
 
 private lemma eLpNorm_restrict_eq_of_ae_zero_off
     {X : Type*} [MeasurableSpace X] {μ : Measure X}
@@ -103,12 +73,12 @@ lemma wkpNorm_eq_of_tsupport_subset_one
     MemWkp (d := d) 1 p u Ω' ∧
     iteratedWeakSobolevNorm (d := d) 1 p u Ω = iteratedWeakSobolevNorm (d := d) 1 p u Ω' := by
   classical
-  have hu_W1p_Ω : DeGiorgi.MemW1p (d := d) p u Ω := hu.memW1p
-  have hu_witness_Ω : DeGiorgi.MemW1pWitness (d := d) p u Ω :=
+  have hu_W1p_Ω : Sobolev.Euclidean.MemW1p (d := d) p u Ω := hu.memW1p
+  have hu_witness_Ω : Sobolev.Euclidean.MemW1pWitness (d := d) p u Ω :=
     hu_W1p_Ω.someWitness
-  have hu_witness_Ω' : DeGiorgi.MemW1pWitness (d := d) p u Ω' :=
-    DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ' hu_witness_Ω
-  have hu_W1p_Ω' : DeGiorgi.MemW1p (d := d) p u Ω' := hu_witness_Ω'.memW1p
+  have hu_witness_Ω' : Sobolev.Euclidean.MemW1pWitness (d := d) p u Ω' :=
+    Sobolev.Euclidean.MemW1pWitness.restrict (d := d) hΩΩ' hu_witness_Ω
+  have hu_W1p_Ω' : Sobolev.Euclidean.MemW1p (d := d) p u Ω' := hu_witness_Ω'.memW1p
   have hu_mem_Ω' : MemWkp (d := d) 1 p u Ω' :=
     MemWkp.one_iff_memW1p.mpr hu_W1p_Ω'
   refine ⟨hu_mem_Ω', ?_⟩
@@ -120,9 +90,9 @@ lemma wkpNorm_eq_of_tsupport_subset_one
       chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu_W1p_Ω i
     have hP_Ω' :=
       chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu_W1p_Ω' i
-    have hP_Ω_restricted : DeGiorgi.HasWeakPartialDeriv i
+    have hP_Ω_restricted : Sobolev.Euclidean.HasWeakPartialDeriv i
         (chosenWeakPartialOrZero (d := d) p i u Ω) u Ω' :=
-      DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hΩ' hΩΩ' hP_Ω
+      Sobolev.Euclidean.HasWeakPartialDeriv.restrict (d := d) hΩΩ' hP_Ω
     have hP_Ω_local : LocallyIntegrable
         (chosenWeakPartialOrZero (d := d) p i u Ω) (volume.restrict Ω') := by
       have hmem : MeasureTheory.MemLp
@@ -138,7 +108,7 @@ lemma wkpNorm_eq_of_tsupport_subset_one
           (chosenWeakPartialOrZero (d := d) p i u Ω') p (volume.restrict Ω') :=
         chosenWeakPartialOrZero_memLp_of_mem (d := d) hu_W1p_Ω' i
       exact hmem.locallyIntegrable hp_one
-    exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
+    exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
       hP_Ω_local hP_Ω'_local
   set U : Set (EuclideanSpace ℝ (Fin d)) := Ω \ tsupport u with hU_def
   have hU_open : IsOpen U := hΩ.sdiff (isClosed_tsupport _)
@@ -147,7 +117,7 @@ lemma wkpNorm_eq_of_tsupport_subset_one
     intro x hx
     exact image_eq_zero_of_notMem_tsupport hx.2
   have hZero_isWeakPartial : ∀ i : Fin d,
-      DeGiorgi.HasWeakPartialDeriv (d := d) i (fun _ => (0 : ℝ)) u U := by
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i (fun _ => (0 : ℝ)) u U := by
     intro i φ hφ_smooth hφ_support hφ_sub
     have h_integrand_zero : ∀ᵐ x ∂(volume.restrict U),
         u x * (fderiv ℝ φ x) (EuclideanSpace.single i 1) = 0 := by
@@ -161,9 +131,9 @@ lemma wkpNorm_eq_of_tsupport_subset_one
     have hzero : ∀ x, (0 : ℝ) * φ x = 0 := fun x => zero_mul _
     simp [hzero]
   have hP_Ω_restricted_U : ∀ i : Fin d,
-      DeGiorgi.HasWeakPartialDeriv (d := d) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
         (chosenWeakPartialOrZero (d := d) p i u Ω) u U := fun i =>
-    DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hU_open hU_subset
+    Sobolev.Euclidean.HasWeakPartialDeriv.restrict (d := d) hU_subset
       (chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu_W1p_Ω i)
   have hZero_local_U : LocallyIntegrable
         (fun _ : EuclideanSpace ℝ (Fin d) => (0 : ℝ)) (volume.restrict U) :=
@@ -181,7 +151,7 @@ lemma wkpNorm_eq_of_tsupport_subset_one
   have h_partial_zero_ae_U : ∀ i : Fin d,
       chosenWeakPartialOrZero (d := d) p i u Ω =ᵐ[volume.restrict U]
         (fun _ => (0 : ℝ)) := fun i =>
-    DeGiorgi.HasWeakPartialDeriv.ae_eq hU_open
+    Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hU_open
       (hP_Ω_restricted_U i) (hZero_isWeakPartial i)
       (hP_Ω_local_U i) hZero_local_U
   have h_diff_subset_U : Ω \ Ω' ⊆ U := by
@@ -295,7 +265,7 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_one
   have hp_zero : p ≠ 0 := by
     intro hpz; rw [hpz] at hp_one
     exact absurd hp_one (by norm_num)
-  have hu_W1p_Ω' : DeGiorgi.MemW1p (d := d) p u Ω' := hu.memW1p
+  have hu_W1p_Ω' : Sobolev.Euclidean.MemW1p (d := d) p u Ω' := hu.memW1p
   have hu_L_Ω' : MeasureTheory.MemLp u p (volume.restrict Ω') := hu.memLp
   have hu_zero_diff : ∀ x ∈ Ω \ Ω', u x = 0 := by
     intro x hx
@@ -340,14 +310,14 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_one
       eLpNorm (chosenWeakPartialOrZero (d := d) p i u Ω) p (volume.restrict Ω) ≤
         eLpNorm (chosenWeakPartialOrZero (d := d) p i u Ω') p (volume.restrict Ω') := by
     intro i
-    by_cases hu_Ω : DeGiorgi.MemW1p (d := d) p u Ω
+    by_cases hu_Ω : Sobolev.Euclidean.MemW1p (d := d) p u Ω
     · have hP_Ω :=
         chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu_Ω i
       have hP_Ω' :=
         chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu_W1p_Ω' i
-      have hP_Ω_restricted : DeGiorgi.HasWeakPartialDeriv i
+      have hP_Ω_restricted : Sobolev.Euclidean.HasWeakPartialDeriv i
           (chosenWeakPartialOrZero (d := d) p i u Ω) u Ω' :=
-        DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hΩ' hΩΩ' hP_Ω
+        Sobolev.Euclidean.HasWeakPartialDeriv.restrict (d := d) hΩΩ' hP_Ω
       have hP_Ω_local_Ω' : LocallyIntegrable
           (chosenWeakPartialOrZero (d := d) p i u Ω) (volume.restrict Ω') := by
         have hmem : MeasureTheory.MemLp
@@ -366,7 +336,7 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_one
       have h_partials_ae :
           chosenWeakPartialOrZero (d := d) p i u Ω =ᵐ[volume.restrict Ω']
             chosenWeakPartialOrZero (d := d) p i u Ω' :=
-        DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
+        Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
           hP_Ω_local_Ω' hP_Ω'_local_Ω'
       set U : Set (EuclideanSpace ℝ (Fin d)) := Ω \ tsupport u
       have hU_open : IsOpen U := hΩ.sdiff (isClosed_tsupport _)
@@ -374,7 +344,7 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_one
       have hu_zero_on_U : ∀ x ∈ U, u x = 0 := by
         intro x hx
         exact image_eq_zero_of_notMem_tsupport hx.2
-      have hZero_isWeakPartial : DeGiorgi.HasWeakPartialDeriv (d := d) i
+      have hZero_isWeakPartial : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
           (fun _ => (0 : ℝ)) u U := by
         intro φ hφ_smooth hφ_support hφ_sub
         have h_integrand_zero : ∀ᵐ x ∂(volume.restrict U),
@@ -388,9 +358,9 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_one
         rw [hint_lhs]
         have hzero : ∀ x, (0 : ℝ) * φ x = 0 := fun x => zero_mul _
         simp [hzero]
-      have hP_Ω_restricted_U : DeGiorgi.HasWeakPartialDeriv (d := d) i
+      have hP_Ω_restricted_U : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
           (chosenWeakPartialOrZero (d := d) p i u Ω) u U :=
-        DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hU_open hU_subset hP_Ω
+        Sobolev.Euclidean.HasWeakPartialDeriv.restrict (d := d) hU_subset hP_Ω
       have hZero_local_U : LocallyIntegrable
           (fun _ : EuclideanSpace ℝ (Fin d) => (0 : ℝ)) (volume.restrict U) :=
         locallyIntegrable_const (μ := volume.restrict U) (0 : ℝ)
@@ -406,7 +376,7 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_one
       have h_partial_zero_ae_U :
           chosenWeakPartialOrZero (d := d) p i u Ω =ᵐ[volume.restrict U]
             (fun _ => (0 : ℝ)) :=
-        DeGiorgi.HasWeakPartialDeriv.ae_eq hU_open
+        Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hU_open
           hP_Ω_restricted_U hZero_isWeakPartial hP_Ω_local_U hZero_local_U
       have h_diff_subset_U : Ω \ Ω' ⊆ U := by
         intro x hx
@@ -472,19 +442,19 @@ private lemma chosenWeakPartial_ae_eq_on_subset
     {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
     {u : EuclideanSpace ℝ (Fin d) → ℝ}
-    (hu : DeGiorgi.MemW1p (d := d) p u Ω) (i : Fin d) :
+    (hu : Sobolev.Euclidean.MemW1p (d := d) p u Ω) (i : Fin d) :
     chosenWeakPartialOrZero (d := d) p i u Ω =ᵐ[volume.restrict Ω']
       chosenWeakPartialOrZero (d := d) p i u Ω' := by
   classical
-  have hu_Ω' : DeGiorgi.MemW1p (d := d) p u Ω' :=
-    DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ' hu.someWitness |>.memW1p
+  have hu_Ω' : Sobolev.Euclidean.MemW1p (d := d) p u Ω' :=
+    Sobolev.Euclidean.MemW1pWitness.restrict (d := d) hΩΩ' hu.someWitness |>.memW1p
   have hP_Ω :=
     chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu i
   have hP_Ω' :=
     chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hu_Ω' i
-  have hP_Ω_restricted : DeGiorgi.HasWeakPartialDeriv (d := d) i
+  have hP_Ω_restricted : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) i
       (chosenWeakPartialOrZero (d := d) p i u Ω) u Ω' :=
-    DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hΩ' hΩΩ' hP_Ω
+    Sobolev.Euclidean.HasWeakPartialDeriv.restrict (d := d) hΩΩ' hP_Ω
   have hP_Ω_local_Ω' : LocallyIntegrable
       (chosenWeakPartialOrZero (d := d) p i u Ω) (volume.restrict Ω') := by
     have hmem : MeasureTheory.MemLp
@@ -500,7 +470,7 @@ private lemma chosenWeakPartial_ae_eq_on_subset
         (chosenWeakPartialOrZero (d := d) p i u Ω') p (volume.restrict Ω') :=
       chosenWeakPartialOrZero_memLp_of_mem (d := d) hu_Ω' i
     exact hmem.locallyIntegrable hp_one
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
     hP_Ω_local_Ω' hP_Ω'_local_Ω'
 
 private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
@@ -530,7 +500,7 @@ private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
         exact hu_mem.2 (α 0)
       have hf_zero : f =ᵐ[volume.restrict U] (fun _ => 0) := by
         rw [hf_def]
-        have hu_memW1p : DeGiorgi.MemW1p (d := d) p u Ω := by
+        have hu_memW1p : Sobolev.Euclidean.MemW1p (d := d) p u Ω := by
           rw [MemWkp_succ] at hu_mem; exact hu_mem.1
         have h_ae_eq : chosenWeakPartialOrZero (d := d) p (α 0) u Ω =ᵐ[volume.restrict U]
             chosenWeakPartialOrZero (d := d) p (α 0) u U :=
@@ -541,7 +511,7 @@ private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
         exact h_ae_eq.trans h_ae_zero
       have h_ae_fg : f =ᵐ[volume.restrict Ω'] g := by
         rw [hf_def, hg_def]
-        have hu_memW1p : DeGiorgi.MemW1p (d := d) p u Ω := by
+        have hu_memW1p : Sobolev.Euclidean.MemW1p (d := d) p u Ω := by
           rw [MemWkp_succ] at hu_mem; exact hu_mem.1
         exact chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hΩ' hΩΩ'
           hu_memW1p (α 0)
@@ -603,9 +573,9 @@ lemma wkpNorm_eq_of_tsupport_subset
         exact hu.mono_measure (Measure.restrict_mono_set volume hΩΩ')
     | succ k ih =>
         rw [MemWkp_succ] at hu ⊢
-        have hu_memW1p : DeGiorgi.MemW1p (d := d) p u Ω := hu.1
-        have hu_memW1p_Ω' : DeGiorgi.MemW1p (d := d) p u Ω' :=
-          DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ'
+        have hu_memW1p : Sobolev.Euclidean.MemW1p (d := d) p u Ω := hu.1
+        have hu_memW1p_Ω' : Sobolev.Euclidean.MemW1p (d := d) p u Ω' :=
+          Sobolev.Euclidean.MemW1pWitness.restrict (d := d) hΩΩ'
             hu_memW1p.someWitness |>.memW1p
         refine ⟨hu_memW1p_Ω', fun i => ?_⟩
         have h_partial_ae :
@@ -630,7 +600,7 @@ lemma wkpNorm_eq_of_tsupport_subset
               refine Filter.Eventually.of_forall ?_
               intro x hx
               exact image_eq_zero_of_notMem_tsupport hx.2
-            have hu_memW1p_Ω : DeGiorgi.MemW1p (d := d) p u Ω := hu.1
+            have hu_memW1p_Ω : Sobolev.Euclidean.MemW1p (d := d) p u Ω := hu.1
             have h_ae_eq : chosenWeakPartialOrZero (d := d) p i u Ω =ᵐ[volume.restrict U]
                 chosenWeakPartialOrZero (d := d) p i u U :=
               chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hU_open hU_sub hu_memW1p_Ω i
@@ -646,9 +616,9 @@ lemma wkpNorm_eq_of_tsupport_subset
                 exact hg_mem.mono_measure (Measure.restrict_mono_set volume hΩΩ'))
               (fun m ih g hg_mem hg_zero => by
                 rw [MemWkp_succ] at hg_mem ⊢
-                have hg_memW1p : DeGiorgi.MemW1p (d := d) p g Ω := hg_mem.1
-                have hg_memW1p_Ω' : DeGiorgi.MemW1p (d := d) p g Ω' :=
-                  DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ'
+                have hg_memW1p : Sobolev.Euclidean.MemW1p (d := d) p g Ω := hg_mem.1
+                have hg_memW1p_Ω' : Sobolev.Euclidean.MemW1p (d := d) p g Ω' :=
+                  Sobolev.Euclidean.MemW1pWitness.restrict (d := d) hΩΩ'
                     hg_memW1p.someWitness |>.memW1p
                 refine ⟨hg_memW1p_Ω', fun i' => ?_⟩
                 set g_partial : EuclideanSpace ℝ (Fin d) → ℝ :=
@@ -707,7 +677,7 @@ lemma wkpNorm_eq_of_tsupport_subset
             simpa [iterWeakPartial_zero] using hzero)
           (fun j' ih α' v hv_mem hzero => by
             rw [iterWeakPartial_succ]
-            have hv_memW1p : DeGiorgi.MemW1p (d := d) p v Ω :=
+            have hv_memW1p : Sobolev.Euclidean.MemW1p (d := d) p v Ω :=
               hv_mem.memW1p
             have h_chosen_zero_U : chosenWeakPartialOrZero (d := d) p (α' 0) v Ω
                 =ᵐ[volume.restrict U] (fun _ => 0) := by
@@ -775,7 +745,7 @@ private lemma eLpNorm_iterWeakPartial_Ω_le_Ω'_with_U
         chosenWeakPartialOrZero (d := d) p (α 0) u Ω with hf_Ω_def
       set f_Ω' : EuclideanSpace ℝ (Fin d) → ℝ :=
         chosenWeakPartialOrZero (d := d) p (α 0) u Ω' with hf_Ω'_def
-      by_cases hu_memW1p_Ω : DeGiorgi.MemW1p (d := d) p u Ω
+      by_cases hu_memW1p_Ω : Sobolev.Euclidean.MemW1p (d := d) p u Ω
       · have h_ae_f : f_Ω =ᵐ[volume.restrict Ω'] f_Ω' := by
           rw [hf_Ω_def, hf_Ω'_def]
           exact chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hΩ' hΩΩ'
@@ -877,14 +847,14 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small
           simpa [iterWeakPartial_zero] using hv_zero)
         (fun j' ih α' v hv_zero => by
           rw [iterWeakPartial_succ]
-          by_cases hv_memW1p_Ω : DeGiorgi.MemW1p (d := d) p v Ω
-          · have hP_Ω : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
+          by_cases hv_memW1p_Ω : Sobolev.Euclidean.MemW1p (d := d) p v Ω
+          · have hP_Ω : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) (α' 0)
                 (chosenWeakPartialOrZero (d := d) p (α' 0) v Ω) v Ω :=
               chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hv_memW1p_Ω (α' 0)
-            have hP_U : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
+            have hP_U : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) (α' 0)
                 (chosenWeakPartialOrZero (d := d) p (α' 0) v Ω) v U :=
-              DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hU_open hU_sub hP_Ω
-            have hZero_isWeak : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
+              Sobolev.Euclidean.HasWeakPartialDeriv.restrict (d := d) hU_sub hP_Ω
+            have hZero_isWeak : Sobolev.Euclidean.HasWeakPartialDeriv (d := d) (α' 0)
                 (fun _ => (0 : ℝ)) v U := by
               intro φ hφ hφ_support hφ_sub
               have h_integrand_zero : (fun x => v x * (fderiv ℝ φ x)
@@ -909,7 +879,7 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small
               locallyIntegrable_const (0 : ℝ)
             have h_chosen_zero_U : chosenWeakPartialOrZero (d := d) p (α' 0) v Ω
                 =ᵐ[volume.restrict U] (fun _ => (0 : ℝ)) :=
-              DeGiorgi.HasWeakPartialDeriv.ae_eq hU_open hP_U hZero_isWeak hP_local_U hZero_local_U
+              Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hU_open hP_U hZero_isWeak hP_local_U hZero_local_U
             exact ih (fun i : Fin j' => α' i.succ)
               (chosenWeakPartialOrZero (d := d) p (α' 0) v Ω) h_chosen_zero_U
           · rw [chosenWeakPartialOrZero_of_not_mem hv_memW1p_Ω]
@@ -1176,7 +1146,7 @@ theorem cross_chart_bound_strict_strong_memWkp
     · rw [norm_iteratedFDeriv_one]; exact hCmax_combined_grad y
   obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩγα_open hη_combined_smooth
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hΩγα_open hη_combined_smooth
       hCmax_combined_nonneg hη_combined_iter_bound
   have hCmax_η_α_nonneg : 0 ≤ Cmax_η_α :=
     le_trans zero_le_one (le_max_left _ _)
@@ -1188,7 +1158,7 @@ theorem cross_chart_bound_strict_strong_memWkp
     · rw [norm_iteratedFDeriv_one]; exact hCmax_η_α_grad y
   obtain ⟨K_leib_α, hK_leib_α_pos, hK_leib_α_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_target_open hη_α_local_smooth
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hΩα_target_open hη_α_local_smooth
       hCmax_η_α_nonneg hη_α_local_iter_bound
   set K_chain : ℝ := Φ.wkpCompositionConstant 1 p with hK_chain_def
   have hK_chain_pos : 0 < K_chain := by

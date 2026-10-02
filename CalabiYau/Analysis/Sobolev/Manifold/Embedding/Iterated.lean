@@ -3,12 +3,23 @@
 module
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Subcritical
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.Basic
-public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.Basic
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Witness
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.Ball
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.SobolevPoincare
+public import CalabiYau.Analysis.Sobolev.Euclidean.Ball.Approximation
+public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
+public import Mathlib.MeasureTheory.Covering.DensityTheorem
+public import Mathlib.MeasureTheory.Integral.Average
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.RieszKernel
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.SmoothHolderBound
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.SmoothInequality
 public import CalabiYau.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
 public import CalabiYau.Analysis.Sobolev.Intrinsic.Equivalence.Basic
 public import CalabiYau.Analysis.Sobolev.Approximation.Density.FirstOrder
-public import CalabiYau.Analysis.DeGiorgi.WholeSpaceSobolev
+public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.GagliardoNirenberg
 
 @[expose] public section
 
@@ -56,7 +67,7 @@ theorem wkpNorm_mono_order
 theorem chosenWeakPartialOrZero_cross_exponent_ae_eq
     {p q : ℝ≥0∞} (hp : 1 ≤ p) (hq : 1 ≤ q) {Ω : Set EuN}
     (hΩ_open : IsOpen Ω) {f : EuN → ℝ}
-    (hfp : DeGiorgi.MemW1p p f Ω) (hfq : DeGiorgi.MemW1p q f Ω) (i : Fin d) :
+    (hfp : Sobolev.Euclidean.MemW1p p f Ω) (hfq : Sobolev.Euclidean.MemW1p q f Ω) (i : Fin d) :
     Sobolev.Euclidean.chosenWeakPartialOrZero (d := d)
         p i f Ω
       =ᵐ[volume.restrict Ω]
@@ -79,7 +90,7 @@ theorem chosenWeakPartialOrZero_cross_exponent_ae_eq
       (volume.restrict Ω) :=
     (Sobolev.Euclidean.chosenWeakPartialOrZero_memLp_of_mem
       (d := d) hfq i).locallyIntegrable hq
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_p_isWeak h_q_isWeak
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ_open h_p_isWeak h_q_isWeak
     h_p_local h_q_local
 
 open Sobolev.Euclidean in
@@ -251,9 +262,13 @@ theorem iterated_sobolev_embedding_chart_C0_supercritical
 
 namespace TowerStep
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 def pOne (d : ℕ) (p : ℝ) : ℝ := (d : ℝ) * p / ((d : ℝ) - p)
+
+section
+
+variable [NeZero d]
 
 lemma pOne_pos {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) :
     0 < pOne d p := by
@@ -276,17 +291,24 @@ lemma pOne_ge_one {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) :
     1 ≤ pOne d p :=
   le_trans hp_one (pOne_ge_p hp_one hp_dim)
 
-noncomputable def subcriticalConstantBase (d : ℕ) [NeZero d] (p : ℝ) : ℝ :=
-  DeGiorgi.CGns d p * (d : ℝ)
+end
 
+noncomputable def subcriticalConstantBase (d : ℕ) [NeZero d] (p : ℝ) : ℝ :=
+  Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p * (d : ℝ)
+
+variable [NeZero d] in
 lemma subcriticalConstantBase_nonneg (d : ℕ) [NeZero d] (p : ℝ) :
     0 ≤ subcriticalConstantBase d p := by
   unfold subcriticalConstantBase
-  exact mul_nonneg (DeGiorgi.C_gns_nonneg d p) (Nat.cast_nonneg _)
+  exact mul_nonneg (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant_nonneg d p) (Nat.cast_nonneg _)
 
 noncomputable def subcriticalConstant : ∀ (_k : ℕ) (d : ℕ) [NeZero d] (_p : ℝ), ℝ
   | 0,     d, _, p => subcriticalConstantBase d p
   | k + 1, d, _, p => subcriticalConstantBase d p + (d : ℝ) * subcriticalConstant k d p
+
+section
+
+variable [NeZero d]
 
 lemma subcriticalConstant_zero (d : ℕ) [NeZero d] (p : ℝ) :
     subcriticalConstant 0 d p = subcriticalConstantBase d p := rfl
@@ -334,7 +356,7 @@ theorem MemWkp_subcritical_iterated
       intro f hf_compact hf_support hf
       have h_subcritical :
           eLpNorm f p_1_enn (volume.restrict Ω) ≤
-            ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) *
+            ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) *
               iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω := by
         have h := eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp (d := d)
           hp_one hp_dim hΩ_open (f := f) hf hf_compact hf_support
@@ -344,13 +366,13 @@ theorem MemWkp_subcritical_iterated
         rw [show p_1_enn = ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p)) from by
           rw [hp_1_enn_def, hpOne_eq]]
         exact h
-      have hf_W1p : DeGiorgi.MemW1p p_enn f Ω := MemWkp.one_iff_memW1p.mp hf
+      have hf_W1p : Sobolev.Euclidean.MemW1p p_enn f Ω := MemWkp.one_iff_memW1p.mp hf
       have hf_aem : AEStronglyMeasurable f (volume.restrict Ω) := hf.memLp.aestronglyMeasurable
       have h_eLp_lt_top : eLpNorm f p_1_enn (volume.restrict Ω) < ⊤ := by
         refine lt_of_le_of_lt h_subcritical ?_
         have h_wkp_lt_top : iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω < ⊤ :=
           wkpNorm_lt_top_of_memWkp hf
-        have h_first : (ENNReal.ofReal (DeGiorgi.CGns d p) : ℝ≥0∞) ≠ ⊤ := ENNReal.ofReal_ne_top
+        have h_first : (ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) : ℝ≥0∞) ≠ ⊤ := ENNReal.ofReal_ne_top
         have h_d_top : (d : ℝ≥0∞) ≠ ⊤ := ENNReal.natCast_ne_top _
         refine ENNReal.mul_lt_top ?_ h_wkp_lt_top
         exact ENNReal.mul_lt_top h_first.lt_top h_d_top.lt_top
@@ -362,10 +384,10 @@ theorem MemWkp_subcritical_iterated
       · rw [wkpNorm_zero]
         rw [subcriticalConstant_zero]
         unfold subcriticalConstantBase
-        have hC_nn : 0 ≤ DeGiorgi.CGns d p := DeGiorgi.C_gns_nonneg d p
+        have hC_nn : 0 ≤ Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p := Sobolev.Euclidean.gagliardoNirenbergSobolevConstant_nonneg d p
         have hd_nn : 0 ≤ (d : ℝ) := Nat.cast_nonneg _
-        rw [show ENNReal.ofReal (DeGiorgi.CGns d p * (d : ℝ)) =
-            ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) from by
+        rw [show ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p * (d : ℝ)) =
+            ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) from by
           rw [ENNReal.ofReal_mul hC_nn, ENNReal.ofReal_natCast]]
         exact h_subcritical
   | succ k ih =>
@@ -374,7 +396,7 @@ theorem MemWkp_subcritical_iterated
       have hK_compact : IsCompact K := hf_compact
       have hK_closed : IsClosed K := isClosed_tsupport f
       have hKΩ : K ⊆ Ω := hf_support
-      have hf_W1p : DeGiorgi.MemW1p p_enn f Ω := hf.memW1p
+      have hf_W1p : Sobolev.Euclidean.MemW1p p_enn f Ω := hf.memW1p
       have h_base :
           MemWkp (d := d) 0 p_1_enn f Ω ∧
             iteratedWeakSobolevNorm (d := d) 0 p_1_enn f Ω ≤
@@ -384,7 +406,7 @@ theorem MemWkp_subcritical_iterated
           MemWkp.le_of_le (Nat.succ_le_succ (Nat.zero_le _)) hf
         have h_subcritical :
             eLpNorm f p_1_enn (volume.restrict Ω) ≤
-              ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) *
+              ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) *
                 iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω := by
           have h := eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp (d := d)
             hp_one hp_dim hΩ_open (f := f) hf1 hf_compact hf_support
@@ -407,9 +429,9 @@ theorem MemWkp_subcritical_iterated
         · rw [MemWkp_zero]; exact ⟨hf_aem, h_eLp_lt_top⟩
         · rw [wkpNorm_zero, subcriticalConstant_zero]
           unfold subcriticalConstantBase
-          have hC_nn : 0 ≤ DeGiorgi.CGns d p := DeGiorgi.C_gns_nonneg d p
-          rw [show ENNReal.ofReal (DeGiorgi.CGns d p * (d : ℝ)) =
-              ENNReal.ofReal (DeGiorgi.CGns d p) * (d : ℝ≥0∞) from by
+          have hC_nn : 0 ≤ Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p := Sobolev.Euclidean.gagliardoNirenbergSobolevConstant_nonneg d p
+          rw [show ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p * (d : ℝ)) =
+              ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) from by
             rw [ENNReal.ofReal_mul hC_nn, ENNReal.ofReal_natCast]]
           exact h_subcritical
       let g : Fin d → EuN → ℝ :=
@@ -468,7 +490,7 @@ theorem MemWkp_subcritical_iterated
           iteratedWeakSobolevNorm (d := d) (k + 1) p_enn (chosenWeakPartialOrZero p_enn i f Ω) Ω =
             iteratedWeakSobolevNorm (d := d) (k + 1) p_enn (g i) Ω := fun i =>
         (wkpNorm_congr_ae (d := d) hp_enn_one hΩ_open (hg_ae i)).symm
-      have hf_W1p_p1 : DeGiorgi.MemW1p p_1_enn f Ω := by
+      have hf_W1p_p1 : Sobolev.Euclidean.MemW1p p_1_enn f Ω := by
         refine ⟨?_, ?_⟩
         · exact h_base.1
         · intro i
@@ -585,13 +607,14 @@ theorem MemWkp_succ_subcritical_step
       ENNReal.ofReal (pOne d p) from by rw [hpOne_eq]]
     exact h_norm
 
+end
+
 end TowerStep
 
 namespace ChartTower
 
-variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+variable [T2Space M] [SigmaCompactSpace M]
 
-omit [I.Boundaryless] in
 lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
     [CompactSpace M] (α : M) :
     IsCompact (toEuclidean ''
@@ -624,7 +647,6 @@ lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
   rw [← hxz]
   exact (extChartAt I α).map_source (hTα_ext_source hx_support)
 
-omit [I.Boundaryless] in
 lemma tsupport_chartPushedRaw_pou_mul_subset
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -676,7 +698,6 @@ lemma tsupport_chartPushedRaw_pou_mul_subset
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_support_sub
 
-omit [I.Boundaryless] in
 lemma hasCompactSupport_chartPushedRaw_pou_mul
     [CompactSpace M] (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -689,7 +710,6 @@ lemma hasCompactSupport_chartPushedRaw_pou_mul
   exact hK_compact.of_isClosed_subset (isClosed_tsupport _)
     (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u)
 
-omit [I.Boundaryless] in
 lemma tsupport_chartPushedRaw_pou_mul_subset_target
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -698,6 +718,10 @@ lemma tsupport_chartPushedRaw_pou_mul_subset_target
       chartTargetEuclid (I := I) (M := M) α :=
   (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u).trans
     (toEuclidean_extChartAt_tsupport_pou_compact_subset (I := I) (M := M) α).2
+
+section
+
+variable [I.Boundaryless]
 
 lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -747,6 +771,8 @@ private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
     (chartTargetEuclid_isOpen (I := I) (M := M) α) ?_
   exact (chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M)
       (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u).symm
+
+end
 
 end ChartTower
 
@@ -940,9 +966,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-variable [NeZero (Module.finrank ℝ E)]
+variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
 
+variable [I.Boundaryless] in
+variable [NeZero (Module.finrank ℝ E)] in
 private def Statement
     (g : CalabiYau.SmoothRiemannianMetric I M)
     (k : ℕ) (p : ℝ) (u : M → ℝ) : Prop :=
@@ -953,79 +980,6 @@ private def Statement
       ũ x = u x) ∧
     (∀ x : M, ‖ũ x‖ ≤ C *
       (wkpNormChart (I := I) (M := M) k (ENNReal.ofReal p) u).toReal)
-
-private theorem succ_subcritical_step
-    (g : CalabiYau.SmoothRiemannianMetric I M)
-    (k : ℕ) {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (Module.finrank ℝ E : ℝ))
-    (hu_meas_persists : ∀ {v : M → ℝ}, Measurable v →
-      MemWkpChart (I := I) (M := M) k
-        (ENNReal.ofReal ((Module.finrank ℝ E : ℝ) * p /
-          ((Module.finrank ℝ E : ℝ) - p))) v →
-      Statement (I := I) (M := M) g k
-        ((Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p)) v) :
-    ∀ {u : M → ℝ}, Measurable u →
-      MemWkpChart (I := I) (M := M) (k + 1) (ENNReal.ofReal p) u →
-        Statement (I := I) (M := M) g (k + 1) p u := by
-  classical
-  intro u hu_meas hu
-  obtain ⟨C_step, hC_step_nn, h_step⟩ :=
-    wkpNormChart_succ_subcritical_step (I := I) (M := M) g (k := k) hp_one hp_dim
-  obtain ⟨h_mem_p1, h_norm_p1⟩ := h_step hu
-  obtain ⟨ũ, C_IH, hũ_cont, hC_IH_nn, hũ_ae, hũ_bound⟩ :=
-    hu_meas_persists hu_meas h_mem_p1
-  refine ⟨ũ, C_IH * C_step, hũ_cont, mul_nonneg hC_IH_nn hC_step_nn, hũ_ae, ?_⟩
-  intro x
-  refine (hũ_bound x).trans ?_
-  have h_wkp_kplus1_lt_top :
-      wkpNormChart (I := I) (M := M) (k + 1) (ENNReal.ofReal p) u < ⊤ := by
-    have hp_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
-      rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
-      exact ENNReal.ofReal_le_ofReal hp_one
-    exact wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) hp_enn_one hu
-  have h_p_1_real_pos : 0 <
-      (Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p) := by
-    have hp_pos : 0 < p := by linarith
-    have hd_pos : 0 < (Module.finrank ℝ E : ℝ) := by
-      have : 0 < Module.finrank ℝ E := NeZero.pos _
-      exact_mod_cast this
-    have hd_p_pos : 0 < (Module.finrank ℝ E : ℝ) - p := by linarith
-    exact div_pos (mul_pos hd_pos hp_pos) hd_p_pos
-  have h_p_1_real_one : 1 ≤
-      (Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p) := by
-    have hd_p_pos : 0 < (Module.finrank ℝ E : ℝ) - p := by
-      have hd_pos : 0 < (Module.finrank ℝ E : ℝ) := by
-        have : 0 < Module.finrank ℝ E := NeZero.pos _
-        exact_mod_cast this
-      linarith
-    have hp_pos : 0 < p := by linarith
-    rw [le_div_iff₀ hd_p_pos]
-    nlinarith [hp_pos]
-  have h_p_1_enn_one : (1 : ℝ≥0∞) ≤
-      ENNReal.ofReal ((Module.finrank ℝ E : ℝ) * p /
-        ((Module.finrank ℝ E : ℝ) - p)) := by
-    rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
-    exact ENNReal.ofReal_le_ofReal h_p_1_real_one
-  have h_wkp_p1_lt_top :
-      wkpNormChart (I := I) (M := M) k
-        (ENNReal.ofReal ((Module.finrank ℝ E : ℝ) * p /
-          ((Module.finrank ℝ E : ℝ) - p))) u < ⊤ :=
-    wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) h_p_1_enn_one h_mem_p1
-  have h_wkp_p1_ne_top := h_wkp_p1_lt_top.ne
-  have h_C_wkp_lt_top : ENNReal.ofReal C_step *
-      wkpNormChart (I := I) (M := M) (k + 1) (ENNReal.ofReal p) u < ⊤ :=
-    ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_wkp_kplus1_lt_top
-  have h_toReal_le := ENNReal.toReal_mono h_C_wkp_lt_top.ne h_norm_p1
-  rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC_step_nn] at h_toReal_le
-  calc C_IH *
-        (wkpNormChart (I := I) (M := M) k
-          (ENNReal.ofReal ((Module.finrank ℝ E : ℝ) * p /
-            ((Module.finrank ℝ E : ℝ) - p))) u).toReal
-      ≤ C_IH * (C_step *
-          (wkpNormChart (I := I) (M := M) (k + 1) (ENNReal.ofReal p) u).toReal) :=
-        mul_le_mul_of_nonneg_left h_toReal_le hC_IH_nn
-    _ = C_IH * C_step *
-          (wkpNormChart (I := I) (M := M) (k + 1) (ENNReal.ofReal p) u).toReal := by
-        ring
 
 end IteratedC0
 
@@ -1285,19 +1239,17 @@ end RegularExponent
 
 namespace EuclideanIteratedMonoExp
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
 open Sobolev.Euclidean
 
-omit [NeZero d] in
 private lemma diff_K_subset_diff_subset
     {S K Ω : Set EuN} (hSK : S ⊆ K) :
     Ω \ K ⊆ Ω \ S := fun _ ⟨hx_Ω, hx_notK⟩ =>
   ⟨hx_Ω, fun h => hx_notK (hSK h)⟩
 
-omit [NeZero d] in
 private lemma ae_eq_indicator_of_ae_zero_off_subset
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) {S K : Set EuN} (hSK : S ⊆ K)
     (hK_meas : MeasurableSet K)
@@ -1324,13 +1276,12 @@ private lemma ae_eq_indicator_of_ae_zero_off_subset
     have : g x = 0 := hx hx_diff
     simp [Set.indicator_of_notMem h_in_K, this]
 
-omit [NeZero d] in
 private lemma chosenWeakPartialOrZero_ae_eq_indicator_of_tsupport_subset
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {K : Set EuN} (hK_meas : MeasurableSet K)
     {f : EuN → ℝ}
-    (hf_W1p : DeGiorgi.MemW1p p f Ω)
+    (hf_W1p : Sobolev.Euclidean.MemW1p p f Ω)
     (hf_support : tsupport f ⊆ K) (i : Fin d) :
     chosenWeakPartialOrZero (d := d) p i f Ω
       =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure EuN).restrict Ω]
@@ -1344,7 +1295,6 @@ private lemma chosenWeakPartialOrZero_ae_eq_indicator_of_tsupport_subset
   exact ae_eq_indicator_of_ae_zero_off_subset (Ω := Ω) hΩ_open
     (S := tsupport f) (K := K) hf_support hK_meas h_ae_zero_sdiff
 
-omit [NeZero d] in
 theorem memWkp_mono_exponent_of_tsupport_subset
     (k : ℕ) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {K : Set EuN} (hK_closed : IsClosed K)
@@ -1409,14 +1359,14 @@ theorem memWkp_mono_exponent_of_tsupport_subset
       rw [MemWkp_succ] at hfp ⊢
       obtain ⟨hf_W1p, hf_recursive⟩ := hfp
       have hf_ae_eq_indicator := ae_eq_indicator_of_tsupport hf_support
-      have hf_W1p' : DeGiorgi.MemW1p p' f Ω := by
+      have hf_W1p' : Sobolev.Euclidean.MemW1p p' f Ω := by
         refine ⟨memLp_mono hp'_le_p hf_ae_eq_indicator hf_W1p.1, ?_⟩
         intro i
         set g : EuN → ℝ := chosenWeakPartialOrZero (d := d) p i f Ω with hg_def
         have hg_memLp_p : MeasureTheory.MemLp g p
             ((MeasureTheory.volume : MeasureTheory.Measure EuN).restrict Ω) :=
           chosenWeakPartialOrZero_memLp_of_mem (d := d) hf_W1p i
-        have hg_weak : DeGiorgi.HasWeakPartialDeriv i g f Ω :=
+        have hg_weak : Sobolev.Euclidean.HasWeakPartialDeriv i g f Ω :=
           chosenWeakPartialOrZero_isWeakPartial_of_mem (d := d) hf_W1p i
         have hg_ae_eq_indicator : g =ᵐ[(MeasureTheory.volume :
             MeasureTheory.Measure EuN).restrict Ω] K.indicator g :=
@@ -1450,10 +1400,11 @@ end EuclideanIteratedMonoExp
 
 namespace ChartLevelMonoExp
 
-variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+variable [T2Space M] [SigmaCompactSpace M]
 
 open Sobolev.Euclidean
 
+variable [I.Boundaryless] in
 private noncomputable def carrierK (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean ''
@@ -1461,29 +1412,19 @@ private noncomputable def carrierK (α : M) :
       (tsupport ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
-omit [I.Boundaryless] in
 private lemma carrierK_isCompact [CompactSpace M] (α : M) :
     IsCompact (carrierK (I := I) (M := M) α) :=
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).1
 
-omit [I.Boundaryless] in
 private lemma carrierK_isClosed [CompactSpace M] (α : M) :
     IsClosed (carrierK (I := I) (M := M) α) :=
   (carrierK_isCompact (I := I) (M := M) α).isClosed
 
-omit [I.Boundaryless] in
 private lemma carrierK_volume_lt_top [CompactSpace M] (α : M) :
     MeasureTheory.volume (carrierK (I := I) (M := M) α) ≠ ⊤ :=
   (carrierK_isCompact (I := I) (M := M) α).measure_lt_top.ne
 
-omit [I.Boundaryless] in
-private lemma carrierK_subset_target [CompactSpace M] (α : M) :
-    carrierK (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
-  (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
-    (I := I) (M := M) α).2
-
-omit [I.Boundaryless] in
 private lemma tsupport_chartPushedRaw_pou_mul_subset_carrier [CompactSpace M]
     (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -1492,6 +1433,10 @@ private lemma tsupport_chartPushedRaw_pou_mul_subset_carrier [CompactSpace M]
       carrierK (I := I) (M := M) α := by
   unfold carrierK
   exact ChartTower.tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u
+
+section
+
+variable [I.Boundaryless]
 
 theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
     {k : ℕ} {p p' : ℝ≥0∞} (hp'_one : 1 ≤ p') (hp'_le_p : p' ≤ p)
@@ -1557,6 +1502,8 @@ theorem memWkpChart_mono_exponent [CompactSpace M]
     MemWkpChart (I := I) (M := M) k p' u := by
   intro α
   exact memWkp_chartPushed_mono_exponent (I := I) (M := M) hp'_one hp'_le_p hu α
+
+end
 
 end ChartLevelMonoExp
 

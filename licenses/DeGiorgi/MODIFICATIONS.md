@@ -585,3 +585,15 @@ declaration names, and removed the redundant supplied Sobolev witness from the p
 The witness-independence identity and the new pairing theorem hold in every finite dimension,
 including dimension zero; removed their unnecessary `NeZero` assumption. The weak gradient used
 in the proof remains the witness tied to the `H₀¹` approximation.
+
+### 2026-10-03 — integration into the Calabi–Yau Sobolev library
+
+**Change**: the retained files were moved into the project's Euclidean Sobolev library
+(`CalabiYau/Analysis/Sobolev/Euclidean/{W1p,Ball,Poincare,Embedding}` and
+`CalabiYau/Analysis/Elliptic/Coefficients.lean`), the `DeGiorgi` namespace was merged into
+`Sobolev.Euclidean`, the empty `Common` and `Foundations` modules were removed, unused declarations
+and hypotheses were deleted, and several constants were renamed (`CPoincVal` → `poincareConstant`,
+`CSobolevPoincare` → `sobolevPoincareConstant`, `CGns` → `gagliardoNirenbergSobolevConstant`,
+`CUnitBallExtensionFun`/`CUnitBallExtensionGrad` → `unitBallExtensionFunConstant`/
+`unitBallExtensionGradConstant`, `Mst` → `smoothTransitionDerivBound`). Each file keeps its
+provenance comment.

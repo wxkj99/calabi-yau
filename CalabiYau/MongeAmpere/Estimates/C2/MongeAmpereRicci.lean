@@ -26,10 +26,8 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
 
 /-- The Ricci form of a Monge–Ampère solution is the reference Ricci form minus
 `i∂∂̄G`; this is the differentiated equation in trace form. -/
-@[deprecated "unused hypothesis `hG`; will be removed" (since := "2026-10-02")]
 theorem ricciForm_trace_perturb_eq_of_solvesMongeAmpere
     (ω₀ : KahlerForm n M) {G φ : M → ℝ}
-    (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
     (hsol : ω₀.SolvesMongeAmpere G φ) (x : M) :
     relTrace (ω₀ x) ((ω₀.perturb φ hsol.1).ricciForm x) =
       relTrace (ω₀ x) (ω₀.ricciForm x) - ω₀.laplacian G x := by

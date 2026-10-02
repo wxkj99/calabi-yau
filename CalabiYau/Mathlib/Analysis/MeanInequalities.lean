@@ -1,8 +1,7 @@
 module
 
 public import Mathlib.Analysis.MeanInequalities
-import Mathlib.Algebra.Order.BigOperators.Ring.Finset
-import Mathlib.Algebra.Order.Chebyshev
+import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Elementary inequalities between sums, products and reciprocals of positive reals

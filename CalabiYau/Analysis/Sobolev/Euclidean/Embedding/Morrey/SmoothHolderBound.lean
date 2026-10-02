@@ -1,11 +1,11 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Euclidean/Embedding/Morrey/SmoothHolderBound.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Witnesses
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.Approximation
-public import CalabiYau.Analysis.DeGiorgi.Poincare
-public import CalabiYau.Analysis.DeGiorgi.SobolevPoincare
-public import CalabiYau.Analysis.DeGiorgi.UnitBallApproximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Witness
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.Approximation
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.Ball
+public import CalabiYau.Analysis.Sobolev.Euclidean.Poincare.SobolevPoincare
+public import CalabiYau.Analysis.Sobolev.Euclidean.Ball.Approximation
 public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 public import Mathlib.MeasureTheory.Covering.DensityTheorem
@@ -15,8 +15,6 @@ public import CalabiYau.Analysis.Sobolev.Euclidean.Embedding.Morrey.RieszKernel
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -25,16 +23,14 @@ open scoped ENNReal NNReal
 
 namespace Sobolev
 namespace EuclideanMorrey
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma continuous_norm_fderiv {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
     Continuous (fun y : E => ‖fderiv ℝ u y‖) :=
   continuous_norm.comp (hu.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0))
 
-omit [NeZero d] in
 theorem smooth_grad_memLp_on_ball
     {p : ℝ} {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -63,6 +59,7 @@ theorem smooth_grad_memLp_on_ball
     rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] at this
     exact this
 
+variable [NeZero d] in
 private theorem smooth_pointwise_holder_bound
     {p : ℝ} (hp : (d : ℝ) < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -338,6 +335,10 @@ def smoothHolderConst (d : ℕ) (p : ℝ) : ℝ :=
     ((d : ℝ) * (volume (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)).toReal)
   C₁ * ((d : ℝ) * (volume (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)).toReal *
     (2 : ℝ) ^ dα / dα) ^ (1 / q)
+
+section
+
+variable [NeZero d]
 
 theorem smoothHolderConst_nonneg {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p) :
     0 ≤ smoothHolderConst d p := by
@@ -689,7 +690,8 @@ theorem smooth_pointwise_holder_bound_explicit
             (ENNReal.toReal_rpow _ _).symm]
         rw [ENNReal.toReal_ofReal hIint_nn]
 
-omit [NeZero d] in
+end
+
 lemma norm_fderiv_eq_norm_partials_local
     {ψ : E → ℝ} (y : E) :
     ‖fderiv ℝ ψ y‖ =
@@ -715,7 +717,6 @@ lemma norm_fderiv_eq_norm_partials_local
             (fun j : Fin d => (fderiv ℝ ψ y) (EuclideanSpace.single j 1))) i := by simp
   rw [h_fderiv_norm_eq_v, h_v_eq_components]
 
-omit [NeZero d] in
 lemma euclidean_norm_le_sum_norms (v : E) :
     ‖v‖ ≤ ∑ i : Fin d, ‖v i‖ := by
   classical
@@ -729,249 +730,6 @@ lemma euclidean_norm_le_sum_norms (v : E) :
   intro i _
   simp
 
-private theorem smooth_holder_bound_unit_ball_components
-    {p : ℝ} (hp : (d : ℝ) < p)
-    {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    {z : E} (hz : z ∈ Metric.ball (0 : E) 1) :
-    ‖ψ z - ⨍ y in Metric.ball (0 : E) 1, ψ y ∂volume‖ ≤
-      smoothHolderConst d p *
-        (∑ i : Fin d, eLpNorm
-          (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball (0 : E) 1))).toReal := by
-  classical
-  have hd_pos : (0 : ℝ) < d := Nat.cast_pos.mpr (NeZero.pos d)
-  have hd_one_le : (1 : ℝ) ≤ d :=
-    by exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (NeZero.ne d))
-  have hp_pos : 0 < p := lt_trans hd_pos hp
-  have hp_one : 1 < p := lt_of_le_of_lt hd_one_le hp
-  have h1_pow : (1 : ℝ) ^ (1 - (d : ℝ) / p) = 1 := Real.one_rpow _
-  have hbound := smooth_pointwise_holder_bound_explicit (d := d) hp (z := (0 : E))
-    (r := 1) one_pos hψ hz
-  rw [h1_pow, mul_one] at hbound
-  have hC_nn : 0 ≤ smoothHolderConst d p := smoothHolderConst_nonneg hp
-  have hpp_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
-    rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
-    exact ENNReal.ofReal_le_ofReal hp_one.le
-  have h_norm_le : ∀ y : E,
-      ‖fderiv ℝ ψ y‖ ≤
-        ∑ i : Fin d, ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖ := by
-    intro y
-    rw [norm_fderiv_eq_norm_partials_local (d := d) (ψ := ψ) y]
-    refine (euclidean_norm_le_sum_norms (d := d) _).trans ?_
-    apply le_of_eq
-    refine Finset.sum_congr rfl ?_
-    intro i _
-    simp
-  have h_eLpNorm_le :
-      eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball (0 : E) 1)) ≤
-        eLpNorm (fun y => ∑ i : Fin d,
-          ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball (0 : E) 1)) := by
-    refine eLpNorm_mono ?_
-    intro y
-    rw [Real.norm_of_nonneg (norm_nonneg _),
-      Real.norm_of_nonneg (Finset.sum_nonneg fun i _ => norm_nonneg _)]
-    exact h_norm_le y
-  have h_sum_eLpNorm_le :
-      eLpNorm (fun y => ∑ i : Fin d,
-        ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) ≤
-      ∑ i : Fin d, eLpNorm (fun y =>
-        ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) := by
-    have h_eq : (fun y => ∑ i : Fin d,
-        ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) =
-        ∑ i : Fin d, (fun y =>
-          ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) := by
-      ext y; simp [Finset.sum_apply]
-    rw [h_eq]
-    have h_aesm : ∀ i : Fin d,
-        AEStronglyMeasurable (fun y => ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖)
-          (volume.restrict (Metric.ball (0 : E) 1)) := by
-      intro i
-      have hcont : Continuous (fun y => ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) :=
-        (((hψ.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).clm_apply
-          continuous_const).norm)
-      exact hcont.aestronglyMeasurable.restrict
-    exact eLpNorm_sum_le (fun i _ => h_aesm i) hpp_one
-  have h_comp_eq : ∀ i : Fin d,
-      eLpNorm (fun y => ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) =
-      eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) := fun i => eLpNorm_norm _
-  have h_eLpNorm_total :
-      eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) ≤
-      ∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1))
-        (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1)) := by
-    refine h_eLpNorm_le.trans (h_sum_eLpNorm_le.trans (le_of_eq ?_))
-    refine Finset.sum_congr rfl ?_
-    intro i _; exact h_comp_eq i
-  have h_eLpNorm_lt : eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-      (volume.restrict (Metric.ball (0 : E) 1)) ≠ ⊤ := by
-    have h_memLp : MemLp (fun y : E => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) :=
-      smooth_grad_memLp_on_ball (d := d) one_pos hψ
-    exact h_memLp.eLpNorm_ne_top
-  have h_sum_lt :
-      (∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1))
-        (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1))) ≠ ⊤ := by
-    refine ne_of_lt ?_
-    refine ENNReal.sum_lt_top.mpr ?_
-    intro i _
-    refine lt_of_le_of_lt (b := eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1))) ?_ (lt_of_le_of_ne le_top h_eLpNorm_lt)
-    refine eLpNorm_mono ?_
-    intro y
-    have hbound_pt : ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖ ≤
-        ‖fderiv ℝ ψ y‖ * ‖EuclideanSpace.single i (1 : ℝ)‖ :=
-      ContinuousLinearMap.le_opNorm _ _
-    have hsingle_norm : ‖(EuclideanSpace.single i (1 : ℝ) : E)‖ = 1 := by
-      simp
-    rw [hsingle_norm, mul_one] at hbound_pt
-    rw [Real.norm_of_nonneg (norm_nonneg _)]
-    exact hbound_pt
-  have h_real_le :
-      (eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1))).toReal ≤
-      (∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1))
-        (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1))).toReal :=
-    ENNReal.toReal_mono h_sum_lt h_eLpNorm_total
-  calc ‖ψ z - ⨍ y in Metric.ball (0 : E) 1, ψ y ∂volume‖
-      ≤ smoothHolderConst d p *
-          (eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
-            (volume.restrict (Metric.ball (0 : E) 1))).toReal := hbound
-    _ ≤ smoothHolderConst d p *
-          (∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1))
-            (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1))).toReal :=
-        mul_le_mul_of_nonneg_left h_real_le hC_nn
-
-private theorem smooth_pair_holder_bound_unit_ball
-    {p : ℝ} (hp : (d : ℝ) < p)
-    {ψ₁ ψ₂ : E → ℝ}
-    (hψ₁ : ContDiff ℝ (⊤ : ℕ∞) ψ₁) (hψ₂ : ContDiff ℝ (⊤ : ℕ∞) ψ₂)
-    {z : E} (hz : z ∈ Metric.ball (0 : E) 1) :
-    ‖ψ₁ z - ψ₂ z‖ ≤
-      ‖⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
-        ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume‖ +
-      smoothHolderConst d p *
-        (∑ i : Fin d, eLpNorm
-          (fun y => (fderiv ℝ ψ₁ y) (EuclideanSpace.single i 1) -
-            (fderiv ℝ ψ₂ y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball (0 : E) 1))).toReal := by
-  classical
-  have hd_pos : (0 : ℝ) < d := Nat.cast_pos.mpr (NeZero.pos d)
-  have hd_one_le : (1 : ℝ) ≤ d :=
-    by exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (NeZero.ne d))
-  have hp_pos : 0 < p := lt_trans hd_pos hp
-  have hp_one : 1 < p := lt_of_le_of_lt hd_one_le hp
-  set ψ_diff : E → ℝ := fun y => ψ₁ y - ψ₂ y with hψ_diff_def
-  have hψ_diff : ContDiff ℝ (⊤ : ℕ∞) ψ_diff := hψ₁.sub hψ₂
-  have hbound := smooth_holder_bound_unit_ball_components (d := d) hp hψ_diff hz
-  have hψ₁_int : Integrable ψ₁ (volume.restrict (Metric.ball (0 : E) 1)) :=
-    (hψ₁.continuous.continuousOn.integrableOn_compact (isCompact_closedBall (0 : E) 1)).mono_set
-      ball_subset_closedBall
-  have hψ₂_int : Integrable ψ₂ (volume.restrict (Metric.ball (0 : E) 1)) :=
-    (hψ₂.continuous.continuousOn.integrableOn_compact (isCompact_closedBall (0 : E) 1)).mono_set
-      ball_subset_closedBall
-  have h_avg_diff_eq :
-      ⨍ y in Metric.ball (0 : E) 1, ψ_diff y ∂volume =
-      ⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
-      ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume := by
-    rw [hψ_diff_def]
-    change ⨍ y, (ψ₁ y - ψ₂ y) ∂(volume.restrict (Metric.ball (0 : E) 1)) =
-      ⨍ y, ψ₁ y ∂(volume.restrict (Metric.ball (0 : E) 1)) -
-      ⨍ y, ψ₂ y ∂(volume.restrict (Metric.ball (0 : E) 1))
-    simp only [average_eq, integral_sub hψ₁_int hψ₂_int, smul_sub]
-  rw [hψ_diff_def] at hbound
-  have hpt_diff_bound : ‖ψ₁ z - ψ₂ z‖ ≤
-      ‖(ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume‖ +
-      ‖⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
-        ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume‖ := by
-    have h_decomp : ψ₁ z - ψ₂ z =
-        ((ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume) +
-        (⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
-          ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume) := by
-      rw [← h_avg_diff_eq]; ring
-    calc ‖ψ₁ z - ψ₂ z‖
-        = ‖((ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume) +
-            (⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
-              ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume)‖ := by rw [← h_decomp]
-      _ ≤ ‖(ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume‖ +
-          ‖⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
-            ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume‖ := norm_add_le _ _
-  have hfderiv_diff : ∀ y i, (fderiv ℝ ψ_diff y) (EuclideanSpace.single i 1) =
-      (fderiv ℝ ψ₁ y) (EuclideanSpace.single i 1) -
-      (fderiv ℝ ψ₂ y) (EuclideanSpace.single i 1) := by
-    intro y i
-    have hψ₁_diff : Differentiable ℝ ψ₁ := hψ₁.differentiable (by simp)
-    have hψ₂_diff : Differentiable ℝ ψ₂ := hψ₂.differentiable (by simp)
-    rw [hψ_diff_def]
-    rw [show (fun y => ψ₁ y - ψ₂ y) = (ψ₁ - ψ₂) from rfl]
-    rw [fderiv_sub hψ₁_diff.differentiableAt hψ₂_diff.differentiableAt]
-    rfl
-  have h_eLpNorm_diff_eq : ∀ i,
-      eLpNorm (fun y => (fderiv ℝ ψ_diff y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) =
-      eLpNorm (fun y => (fderiv ℝ ψ₁ y) (EuclideanSpace.single i 1) -
-          (fderiv ℝ ψ₂ y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1)) := by
-    intro i
-    refine eLpNorm_congr_ae ?_
-    filter_upwards with y
-    rw [hfderiv_diff y i]
-  have hbound_final : ‖ψ_diff z - ⨍ y in Metric.ball (0 : E) 1, ψ_diff y ∂volume‖ ≤
-      smoothHolderConst d p *
-        (∑ i : Fin d, eLpNorm
-          (fun y => (fderiv ℝ ψ₁ y) (EuclideanSpace.single i 1) -
-            (fderiv ℝ ψ₂ y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball (0 : E) 1))).toReal := by
-    have hbound_eq : (∑ i : Fin d, eLpNorm
-        (fun y => (fderiv ℝ ψ_diff y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1))) =
-      (∑ i : Fin d, eLpNorm
-        (fun y => (fderiv ℝ ψ₁ y) (EuclideanSpace.single i 1) -
-          (fderiv ℝ ψ₂ y) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
-        (volume.restrict (Metric.ball (0 : E) 1))) := by
-      refine Finset.sum_congr rfl ?_
-      intro i _
-      exact h_eLpNorm_diff_eq i
-    rw [hbound_eq] at hbound
-    exact hbound
-  have h_first :
-      ‖(ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume‖ =
-      ‖ψ_diff z - ⨍ y in Metric.ball (0 : E) 1, ψ_diff y ∂volume‖ := by
-    rw [hψ_diff_def]
-  rw [h_first] at hpt_diff_bound
-  linarith [hpt_diff_bound, hbound_final]
-
-omit [NeZero d] in
-lemma smooth_grad_eLpNorm_le_of_ball_subset
-    {p : ℝ} {x₀ z : E} {R r : ℝ} (hR : 0 < R)
-    {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
-    (hsub : Metric.ball z r ⊆ Metric.ball x₀ R) :
-    (eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
-      (volume.restrict (Metric.ball z r))).toReal ≤
-    (eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
-      (volume.restrict (Metric.ball x₀ R))).toReal := by
-  have h_meas_le :
-      (volume.restrict (Metric.ball z r) : Measure E) ≤
-        (volume.restrict (Metric.ball x₀ R) : Measure E) :=
-    Measure.restrict_mono_set _ hsub
-  have h_eLp_le :
-      eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball z r)) ≤
-        eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball x₀ R)) :=
-    eLpNorm_mono_measure _ h_meas_le
-  have h_eLp_ne_top :
-      eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
-          (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ :=
-    (smooth_grad_memLp_on_ball (d := d) hR hu).eLpNorm_ne_top
-  exact ENNReal.toReal_mono h_eLp_ne_top h_eLp_le
-
-omit [NeZero d] in
 private theorem smooth_memLp_on_ball
     {p : ℝ} (_hp_pos : 0 < p) {x₀ : E} {R : ℝ} (_hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -992,7 +750,6 @@ private theorem smooth_memLp_on_ball
     rw [norm_one, mul_one]
     exact h_at_y
 
-omit [NeZero d] in
 private lemma smooth_setIntegral_norm_le_eLpNorm
     {p : ℝ} (hp_one : 1 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -1051,7 +808,6 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
   rw [hμ_def, Measure.restrict_apply_univ] at h_le_real
   exact h_le_real
 
-omit [NeZero d] in
 lemma smooth_norm_average_le
     {p : ℝ} (hp_one : 1 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :

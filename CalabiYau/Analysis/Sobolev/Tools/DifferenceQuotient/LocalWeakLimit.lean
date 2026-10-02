@@ -1,7 +1,7 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Tools/DifferenceQuotient/LocalWeakLimit.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Calculus.Cutoff.Compact
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
 public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Distribution
 public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
 public import Mathlib.Analysis.InnerProductSpace.Dual
@@ -21,11 +21,10 @@ namespace CalabiYau
 namespace Analysis
 namespace Sobolev
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma smoothCompactlySupportedIn_zero_mem (Ω'' : Set E) :
     ContDiff ℝ (⊤ : ℕ∞) (0 : E → ℝ) ∧
       HasCompactSupport (0 : E → ℝ) ∧
@@ -36,7 +35,6 @@ private lemma smoothCompactlySupportedIn_zero_mem (Ω'' : Set E) :
   rw [tsupport, h_support, closure_empty]
   exact empty_subset _
 
-omit [NeZero d] in
 private lemma smoothCompactlySupportedIn_add_mem
     {Ω'' : Set E}
     {φ ψ : E → ℝ}
@@ -49,7 +47,6 @@ private lemma smoothCompactlySupportedIn_add_mem
   refine subset_trans (tsupport_add (f := φ) (g := ψ)) ?_
   exact union_subset hφ.2.2 hψ.2.2
 
-omit [NeZero d] in
 private lemma smoothCompactlySupportedIn_smul_mem
     {Ω'' : Set E}
     (c : ℝ) {φ : E → ℝ}
@@ -68,6 +65,7 @@ private lemma smoothCompactlySupportedIn_smul_mem
     rw [hφx]; simp
   exact closure_mono hsubset
 
+variable [NeZero d] in
 private def smoothCompactlySupportedInSubmodule (Ω'' : Set E) : Submodule ℝ (E → ℝ) where
   carrier := {φ | ContDiff ℝ (⊤ : ℕ∞) φ ∧ HasCompactSupport φ ∧
     tsupport φ ⊆ Ω''}
@@ -75,19 +73,18 @@ private def smoothCompactlySupportedInSubmodule (Ω'' : Set E) : Submodule ℝ (
   zero_mem' := smoothCompactlySupportedIn_zero_mem (Ω'' := Ω'')
   smul_mem' := fun c _ hφ => smoothCompactlySupportedIn_smul_mem (Ω'' := Ω'') c hφ
 
-omit [NeZero d] in
 @[simp] private lemma mem_smoothCompactlySupportedInSubmodule {Ω'' : Set E} {φ : E → ℝ} :
     φ ∈ (smoothCompactlySupportedInSubmodule (d := d) Ω'') ↔
       ContDiff ℝ (⊤ : ℕ∞) φ ∧ HasCompactSupport φ ∧ tsupport φ ⊆ Ω'' :=
   Iff.rfl
 
-omit [NeZero d] in
 private lemma memLp_two_restrict_of_smoothCompactlySupported
     {Ω'' : Set E}
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_support : HasCompactSupport φ) :
     MemLp φ 2 ((volume : Measure E).restrict Ω'') :=
   (hφ.continuous.memLp_of_hasCompactSupport hφ_support).restrict _
 
+variable [NeZero d] in
 private def smoothCompactlySupportedInToLp (Ω'' : Set E) :
     smoothCompactlySupportedInSubmodule (d := d) Ω'' →ₗ[ℝ]
       Lp ℝ 2 ((volume : Measure E).restrict Ω'') where
@@ -161,14 +158,12 @@ private def smoothCompactlySupportedInToLp (Ω'' : Set E) :
     filter_upwards [h2, h3] with x hx2 hx3
     rw [hx2, Pi.smul_apply, Pi.smul_apply, hx3]
 
-omit [NeZero d] in
 @[simp] private lemma smoothCompactlySupportedInToLp_apply
     (Ω'' : Set E) (φ : smoothCompactlySupportedInSubmodule (d := d) Ω'') :
     smoothCompactlySupportedInToLp (d := d) Ω'' φ =
       (memLp_two_restrict_of_smoothCompactlySupported (d := d)
         (Ω'' := Ω'') φ.2.1 φ.2.2.1).toLp φ.1 := rfl
 
-omit [NeZero d] in
 private lemma denseRange_smoothCompactlySupportedInToLp
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω'')) :
@@ -443,6 +438,7 @@ private lemma denseRange_smoothCompactlySupportedInToLp
       exact this
     linarith
 
+variable [NeZero d] in
 private def smoothTestFunctionalLocal
     {Ω Ω'' : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -541,7 +537,6 @@ private def smoothTestFunctionalLocal
     rw [h_int_eq]
     rw [smul_eq_mul]; ring
 
-omit [NeZero d] in
 @[simp] private lemma smoothTestFunctional_local_apply
     {Ω Ω'' : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -550,7 +545,6 @@ omit [NeZero d] in
       -∫ x in Ω, w x * (fderiv ℝ φ.1 x) (EuclideanSpace.single k 1)
         ∂(volume : Measure E) := rfl
 
-omit [NeZero d] in
 private lemma diffQuot_eq_zero_of_notMem_cthickening_local
     {φ : E → ℝ} (_hφ_support : HasCompactSupport φ)
     (k : Fin d) {h₀ : ℝ} (_hh₀ : 0 ≤ h₀) {h : ℝ} (hh_bd : |h| ≤ h₀) :
@@ -582,7 +576,6 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening_local
     rw [hφx, hφxhe]
     simp
 
-omit [NeZero d] in
 private lemma tendsto_integral_w_diffQuot_phi_local
     {Ω : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -732,7 +725,6 @@ private lemma tendsto_integral_w_diffQuot_phi_local
     bound (Filter.Eventually.of_forall h_aesm_seq)
     h_pointwise_bound h_bound_int h_pointwise_convergence
 
-omit [NeZero d] in
 private lemma abs_integral_mul_le_eLpNorm_two_local
     {μ : Measure E} {f g : E → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     ENNReal.ofReal |∫ x, f x * g x ∂μ| ≤ eLpNorm f 2 μ * eLpNorm g 2 μ := by
@@ -768,7 +760,6 @@ private lemma abs_integral_mul_le_eLpNorm_two_local
     _ ≤ eLpNorm g 2 μ * eLpNorm f 2 μ := h_smul_bound
     _ = eLpNorm f 2 μ * eLpNorm g 2 μ := mul_comm _ _
 
-omit [NeZero d] in
 private lemma abs_integral_mul_le_norm_lp_mul_norm_lp_local
     {μ : Measure E} {f g : E → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     |∫ x, f x * g x ∂μ| ≤
@@ -784,11 +775,9 @@ private lemma abs_integral_mul_le_norm_lp_mul_norm_lp_local
   rw [ENNReal.toReal_mul] at h_toReal
   exact h_toReal
 
-omit [NeZero d] in
 private lemma abs_smoothTestFunctional_local_le
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
-    (hΩ''_compact_closure : IsCompact (closure Ω''))
     {h₀ : ℝ} (hh₀ : 0 < h₀)
     (h_room : Metric.cthickening h₀ (closure Ω'') ⊆ Ω)
     {w : E → ℝ}
@@ -800,9 +789,6 @@ private lemma abs_smoothTestFunctional_local_le
     (φ : smoothCompactlySupportedInSubmodule (d := d) Ω'') :
     |smoothTestFunctionalLocal (d := d) (Ω := Ω) (Ω'' := Ω'') hw_l2 k φ| ≤
       M * (eLpNorm φ.1 2 ((volume : Measure E).restrict Ω'')).toReal := by
-  let _ := hΩ_open
-  let _ := hΩ''_open
-  let _ := hΩ''_compact_closure
   rw [smoothTestFunctional_local_apply]
   rw [abs_neg]
   set hₙ : ℕ → ℝ := fun n => h₀ / (n + 1)
@@ -1082,11 +1068,9 @@ private lemma abs_smoothTestFunctional_local_le
   exact le_of_tendsto_of_tendsto'
     h_abs_convergence tendsto_const_nhds (fun n => h_dual_bound_restrict n)
 
-omit [NeZero d] in
 private lemma abs_smoothTestFunctional_local_le_lpNorm
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
-    (hΩ''_compact_closure : IsCompact (closure Ω''))
     {h₀ : ℝ} (hh₀ : 0 < h₀)
     (h_room : Metric.cthickening h₀ (closure Ω'') ⊆ Ω)
     {w : E → ℝ}
@@ -1099,7 +1083,7 @@ private lemma abs_smoothTestFunctional_local_le_lpNorm
     |smoothTestFunctionalLocal (d := d) (Ω := Ω) (Ω'' := Ω'') hw_l2 k φ| ≤
       M * ‖smoothCompactlySupportedInToLp (d := d) Ω'' φ‖ := by
   have h := abs_smoothTestFunctional_local_le (d := d) hΩ_open hΩ''_open
-    hΩ''_compact_closure hh₀ h_room hw_l2 k hM_nn h_bdd φ
+    hh₀ h_room hw_l2 k hM_nn h_bdd φ
   have h_norm_eq :
       ‖smoothCompactlySupportedInToLp (d := d) Ω'' φ‖ =
         (eLpNorm φ.1 2 ((volume : Measure E).restrict Ω'')).toReal := by
@@ -1111,6 +1095,7 @@ private lemma abs_smoothTestFunctional_local_le_lpNorm
   rw [h_norm_eq]
   exact h
 
+variable [NeZero d] in
 private def smoothTestFunctionalLocalExt
     {Ω Ω'' : Set E}
     {w : E → ℝ}
@@ -1120,7 +1105,6 @@ private def smoothTestFunctionalLocalExt
   (smoothTestFunctionalLocal (d := d) (Ω := Ω) (Ω'' := Ω'') hw_l2 k).extendOfNorm
     (smoothCompactlySupportedInToLp (d := d) Ω'')
 
-omit [NeZero d] in
 private lemma opNorm_smoothTestFunctional_local_ext_le
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1139,10 +1123,8 @@ private lemma opNorm_smoothTestFunctional_local_ext_le
     (denseRange_smoothCompactlySupportedInToLp (d := d) hΩ''_open hΩ''_compact_closure)
     hM_nn ?_
   intro φ
-  exact abs_smoothTestFunctional_local_le_lpNorm (d := d) hΩ_open hΩ''_open
-    hΩ''_compact_closure hh₀ h_room hw_l2 k hM_nn h_bdd φ
+  exact abs_smoothTestFunctional_local_le_lpNorm (d := d) hΩ_open hΩ''_open hh₀ h_room hw_l2 k hM_nn h_bdd φ
 
-omit [NeZero d] in
 private lemma smoothTestFunctional_local_ext_apply
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1164,9 +1146,9 @@ private lemma smoothTestFunctional_local_ext_apply
     (denseRange_smoothCompactlySupportedInToLp (d := d) hΩ''_open hΩ''_compact_closure)
     ⟨M, ?_⟩ φ
   intro ψ
-  exact abs_smoothTestFunctional_local_le_lpNorm (d := d) hΩ_open hΩ''_open
-    hΩ''_compact_closure hh₀ h_room hw_l2 k hM_nn h_bdd ψ
+  exact abs_smoothTestFunctional_local_le_lpNorm (d := d) hΩ_open hΩ''_open hh₀ h_room hw_l2 k hM_nn h_bdd ψ
 
+variable [NeZero d] in
 private def smoothTestFunctionalLocalRiesz
     {Ω Ω'' : Set E}
     {w : E → ℝ}
@@ -1177,7 +1159,6 @@ private def smoothTestFunctionalLocalRiesz
       (Lp ℝ 2 ((volume : Measure E).restrict Ω''))).symm
     (smoothTestFunctionalLocalExt (d := d) (Ω := Ω) (Ω'' := Ω'') hw_l2 k)
 
-omit [NeZero d] in
 private lemma norm_smoothTestFunctional_local_riesz
     {Ω Ω'' : Set E}
     {w : E → ℝ}
@@ -1189,7 +1170,6 @@ private lemma norm_smoothTestFunctional_local_riesz
   exact (InnerProductSpace.toDual ℝ
     (Lp ℝ 2 ((volume : Measure E).restrict Ω''))).symm.norm_map _
 
-omit [NeZero d] in
 private lemma smoothTestFunctional_local_ext_eq_inner
     {Ω Ω'' : Set E}
     {w : E → ℝ}
@@ -1201,7 +1181,6 @@ private lemma smoothTestFunctional_local_ext_eq_inner
   unfold smoothTestFunctionalLocalRiesz
   rw [InnerProductSpace.toDual_symm_apply]
 
-omit [NeZero d] in
 theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_local
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1216,7 +1195,7 @@ theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_local
         ≤ ENNReal.ofReal M) :
     ∃ g : E → ℝ,
       MemLp g 2 ((volume : Measure E).restrict Ω'') ∧
-      DeGiorgi.HasWeakPartialDeriv (d := d) k g w Ω'' ∧
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) k g w Ω'' ∧
       eLpNorm g 2 ((volume : Measure E).restrict Ω'') ≤ ENNReal.ofReal M := by
   have h_closure_in_room :
       closure Ω'' ⊆ Metric.cthickening h₀ (closure Ω'') := by

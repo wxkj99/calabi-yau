@@ -37,7 +37,6 @@ theorem integrable_pointwiseHermitianInner
   have hfinite : IsFiniteMeasure (CalabiYau.RiemannianVolume.riemannianVolumeMeasure
       (I := 𝓘(ℝ, E)) (M := M) g) :=
     CalabiYau.RiemannianVolume.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
-  let := hfinite
   exact (continuous_pointwiseHermitianInner g k α β hα hβ).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 

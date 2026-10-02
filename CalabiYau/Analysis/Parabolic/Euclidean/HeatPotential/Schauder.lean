@@ -3,14 +3,12 @@
 module
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatKernel.Schauder.TimeDerivative
 public import CalabiYau.Analysis.Parabolic.Euclidean.HeatPotential.Realization
-public import CalabiYau.Analysis.Holder.Basic
+public import CalabiYau.Mathlib.Analysis.Holder.Basic
 public import Mathlib.MeasureTheory.Integral.Prod
 
 @[expose] public section
 
 -- and its private helpers occur in public declarations.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

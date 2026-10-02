@@ -91,7 +91,6 @@ theorem integral_pointwiseHermitianInner_self_eq_zero_iff
       (integral_eq_zero_iff_of_nonneg hnonneg hint.re).mp hzeroInt
     have hop : μ.IsOpenPosMeasure :=
       CalabiYau.RiemannianVolume.riemannianVolumeMeasure_isOpenPosMeasure g
-    let := hop
     have hcontRe : Continuous (fun x : M => (pointwiseHermitianInner g k x α α).re) :=
       Complex.continuous_re.comp (continuous_pointwiseHermitianInner g k α α hα hα)
     have hzero := MeasureTheory.Measure.eq_of_ae_eq hzeroAE hcontRe continuous_const

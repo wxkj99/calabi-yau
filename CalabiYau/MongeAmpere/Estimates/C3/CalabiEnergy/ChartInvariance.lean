@@ -533,7 +533,7 @@ private theorem calabiEnergy_inChart_tensorContract
           complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) z) i a)
         (fun b j => ((ω₀.metricInChart x₀ z +
           complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) z)⁻¹) b j)
-        (fun i j k => c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k)) := by
+        (fun i j k => connectionDifferenceInChart ω₀ φ x₀ z i j k)) := by
   unfold calabiEnergyInChart
   dsimp only
   apply congrArg RCLike.re
@@ -542,7 +542,7 @@ private theorem calabiEnergy_inChart_tensorContract
       complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) z) i a)
     (fun b j => ((ω₀.metricInChart x₀ z +
       complexHessian (φ ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm) z)⁻¹) b j)
-    (fun i j k => c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k)
+    (fun i j k => connectionDifferenceInChart ω₀ φ x₀ z i j k)
 
 omit [T2Space M] [CompactSpace M] in
 private theorem calabiEnergy_connectionDifference_transition
@@ -551,7 +551,7 @@ private theorem calabiEnergy_connectionDifference_transition
     (hy₀ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source)
     (hy₁ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₁).source)
     (i j k : Fin n) :
-    c3ConnectionDifferenceInChart ω₀ φ x₀
+    connectionDifferenceInChart ω₀ φ x₀
         (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀ y) i j k =
       ∑ p : CalabiEnergyTriple (Fin n),
         (EuclideanSpace.clmMatrix
@@ -560,7 +560,7 @@ private theorem calabiEnergy_connectionDifference_transition
           (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) p.2.1 j *
         (EuclideanSpace.clmMatrix
           (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) p.2.2 k *
-        c3ConnectionDifferenceInChart ω₀ φ x₁
+        connectionDifferenceInChart ω₀ φ x₁
           (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₁ y) p.1 p.2.1 p.2.2 := by
   classical
   let IC := 𝓘(ℂ, EuclideanSpace ℂ (Fin n))
@@ -758,44 +758,44 @@ private theorem calabiEnergy_connectionDifference_transition
     rw [hchart x₁]
   have hpert₀ := calabiEnergy_c3Christoffel_perturb ω₀ hφ x₀ z₀ hz₀R i j k
   have hpert₁ (a b c : Fin n) :
-      c3ChristoffelInChart
+      christoffelInChart
           (fun w ↦ ω₀.metricInChart x₁ w +
             complexHessian (φ ∘ (extChartAt IR x₁).symm) w) z₁ a b c =
-        c3ChristoffelInChart g z₁ a b c := by
+        christoffelInChart g z₁ a b c := by
     exact calabiEnergy_c3Christoffel_perturb ω₀ hφ x₁ z₁ hz₁R a b c
-  have hleft : c3ConnectionDifferenceInChart ω₀ φ x₀
+  have hleft : connectionDifferenceInChart ω₀ φ x₀
       (extChartAt IR x₀ y) i j k =
-      (∑ l, (g' z₀)⁻¹ l i * c3PartialZ (fun w ↦ g' w k l) z₀ j) -
-        ∑ l, (h' z₀)⁻¹ l i * c3PartialZ (fun w ↦ h' w k l) z₀ j := by
+      (∑ l, (g' z₀)⁻¹ l i * wirtingerDerivInChart (fun w ↦ g' w k l) z₀ j) -
+        ∑ l, (h' z₀)⁻¹ l i * wirtingerDerivInChart (fun w ↦ h' w k l) z₀ j := by
     rw [hcoord₀]
-    change c3ChristoffelInChart
+    change christoffelInChart
         (fun w ↦ ω₀.metricInChart x₀ w +
           complexHessian (φ ∘ (extChartAt IR x₀).symm) w) z₀ i j k -
-      c3ChristoffelInChart (fun w ↦ ω₀.metricInChart x₀ w) z₀ i j k = _
+      christoffelInChart (fun w ↦ ω₀.metricInChart x₀ w) z₀ i j k = _
     rw [hpert₀]
     rfl
   have hgen := calabiEnergy_connectionDifference_transition_generic F g h g' h'
     U V hU hV hF hg hh hFV hgmetric hhmetric z₀ hz₀U B hAB hBA hdetg hdeth i j k
   have hconn₁ (a b c : Fin n) :
-      c3ConnectionDifferenceInChart ω₀ φ x₁
+      connectionDifferenceInChart ω₀ φ x₁
           (extChartAt IR x₁ y) a b c =
-        c3ChristoffelInChart g z₁ a b c - c3ChristoffelInChart h z₁ a b c := by
+        christoffelInChart g z₁ a b c - christoffelInChart h z₁ a b c := by
     rw [hcoord₁]
-    change c3ChristoffelInChart
+    change christoffelInChart
         (fun w ↦ ω₀.metricInChart x₁ w +
           complexHessian (φ ∘ (extChartAt IR x₁).symm) w) z₁ a b c -
-      c3ChristoffelInChart (fun w ↦ ω₀.metricInChart x₁ w) z₁ a b c = _
+      christoffelInChart (fun w ↦ ω₀.metricInChart x₁ w) z₁ a b c = _
     rw [hpert₁ a b c]
   have hright :
       (∑ p : CalabiEnergyTriple (Fin n),
         B i p.1 * A p.2.1 j * A p.2.2 k *
-          c3ConnectionDifferenceInChart ω₀ φ x₁
+          connectionDifferenceInChart ω₀ φ x₁
             (extChartAt IR x₁ y) p.1 p.2.1 p.2.2) =
         ∑ p, ∑ q, ∑ r, B i p * A q j * A r k *
-          ((∑ s, (g (F z₀))⁻¹ s p * c3PartialZ (fun w ↦ g w r s) (F z₀) q) -
-            ∑ s, (h (F z₀))⁻¹ s p * c3PartialZ (fun w ↦ h w r s) (F z₀) q) := by
+          ((∑ s, (g (F z₀))⁻¹ s p * wirtingerDerivInChart (fun w ↦ g w r s) (F z₀) q) -
+            ∑ s, (h (F z₀))⁻¹ s p * wirtingerDerivInChart (fun w ↦ h w r s) (F z₀) q) := by
     simp_rw [hconn₁, hFz]
-    simp only [c3ChristoffelInChart]
+    simp only [christoffelInChart]
     simp only [Fintype.sum_prod_type]
   have hAconv :
       (∑ p : CalabiEnergyTriple (Fin n),
@@ -804,22 +804,22 @@ private theorem calabiEnergy_connectionDifference_transition
             (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) p.2.1 j *
           (EuclideanSpace.clmMatrix
             (tangentCoordChange 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) x₀ x₁ y)) p.2.2 k *
-          c3ConnectionDifferenceInChart ω₀ φ x₁
+          connectionDifferenceInChart ω₀ φ x₁
             (extChartAt IR x₁ y) p.1 p.2.1 p.2.2) =
       ∑ p : CalabiEnergyTriple (Fin n),
         B i p.1 * A p.2.1 j * A p.2.2 k *
-          c3ConnectionDifferenceInChart ω₀ φ x₁
+          connectionDifferenceInChart ω₀ φ x₁
             (extChartAt IR x₁ y) p.1 p.2.1 p.2.2 := by
     rw [← hA]
   calc
-    _ = (∑ l, (g' z₀)⁻¹ l i * c3PartialZ (fun w ↦ g' w k l) z₀ j) -
-        ∑ l, (h' z₀)⁻¹ l i * c3PartialZ (fun w ↦ h' w k l) z₀ j := hleft
+    _ = (∑ l, (g' z₀)⁻¹ l i * wirtingerDerivInChart (fun w ↦ g' w k l) z₀ j) -
+        ∑ l, (h' z₀)⁻¹ l i * wirtingerDerivInChart (fun w ↦ h' w k l) z₀ j := hleft
     _ = ∑ p, ∑ q, ∑ r, B i p * A q j * A r k *
-        ((∑ s, (g (F z₀))⁻¹ s p * c3PartialZ (fun w ↦ g w r s) (F z₀) q) -
-          ∑ s, (h (F z₀))⁻¹ s p * c3PartialZ (fun w ↦ h w r s) (F z₀) q) := hgen
+        ((∑ s, (g (F z₀))⁻¹ s p * wirtingerDerivInChart (fun w ↦ g w r s) (F z₀) q) -
+          ∑ s, (h (F z₀))⁻¹ s p * wirtingerDerivInChart (fun w ↦ h w r s) (F z₀) q) := hgen
     _ = ∑ p : CalabiEnergyTriple (Fin n),
         B i p.1 * A p.2.1 j * A p.2.2 k *
-          c3ConnectionDifferenceInChart ω₀ φ x₁
+          connectionDifferenceInChart ω₀ φ x₁
             (extChartAt IR x₁ y) p.1 p.2.1 p.2.2 := hright.symm
     _ = _ := hAconv.symm
 
@@ -861,9 +861,9 @@ theorem calabiEnergy_chartFormula (ω₀ : KahlerForm n M) {φ : M → ℝ}
   obtain ⟨hOut, hIn⟩ :=
     calabiEnergy_perturbedChart_pairContractions ω₀ hφ x₀ y hy₀ hy₁
   let T₀ : Fin n → Fin n → Fin n → ℂ := fun i j k =>
-    c3ConnectionDifferenceInChart ω₀ φ x₀ (c₀ y) i j k
+    connectionDifferenceInChart ω₀ φ x₀ (c₀ y) i j k
   let T₁ : Fin n → Fin n → Fin n → ℂ := fun i j k =>
-    c3ConnectionDifferenceInChart ω₀ φ y (c₁ y) i j k
+    connectionDifferenceInChart ω₀ φ y (c₁ y) i j k
   have hOutFun : ∀ p s, ∑ x : CalabiEnergyPair (Fin n),
       g₀Fun x.1 x.2 * B x.1 p * star (B x.2 s) = g₁Fun p s := by
     intro p s

@@ -93,19 +93,6 @@ private noncomputable def c3TensorFrameTransform {n : ℕ}
     Fin n → Fin n → Fin n → ℂ := fun i j k ↦
       ∑ a, ∑ b, ∑ c, B i a * P b j * P c k * T a b c
 
-private theorem c3_star_sum {ι : Type*} [Fintype ι] (f : ι → ℂ) :
-    star (∑ i, f i) = ∑ i, star (f i) := by
-  change starRingEnd ℂ (∑ i, f i) = _
-  exact map_sum (starRingEnd ℂ) f Finset.univ
-
-private theorem c3_fintype_mul_sum {ι : Type*} [Fintype ι] (a : ℂ) (f : ι → ℂ) :
-    a * (∑ i, f i) = ∑ i, a * f i := by
-  exact map_sum (AddMonoidHom.mulLeft a) f Finset.univ
-
-private theorem c3_fintype_sum_mul {ι : Type*} [Fintype ι] (f : ι → ℂ) (a : ℂ) :
-    (∑ i, f i) * a = ∑ i, f i * a := by
-  exact map_sum (AddMonoidHom.mulRight a) f Finset.univ
-
 set_option maxHeartbeats 1000000 in
 private theorem c3Pair_eq_frame_components {n : ℕ}
     (g : Matrix (Fin n) (Fin n) ℂ) (z : EuclideanSpace ℂ (Fin n))
@@ -120,7 +107,7 @@ private theorem c3Pair_eq_frame_components {n : ℕ}
   classical
   unfold c3Pair c3TensorFrameTransform
   simp_rw [hUpper, hLower]
-  simp_rw [c3_fintype_mul_sum, c3_fintype_sum_mul, c3_star_sum]
+  simp_rw [Finset.mul_sum, Finset.sum_mul, star_sum]
   let ι := Fin n × (Fin n × (Fin n × (Fin n × (Fin n × (Fin n × (Fin n × (Fin n × Fin n)))))) )
   let e : ι ≃ ι := {
     toFun := fun p ↦
@@ -160,7 +147,7 @@ private theorem c3Pair_eq_frame_components {n : ℕ}
       simp only [f, g, ι, star_mul]
       ac_rfl)
   simpa only [ι, f, g, Fintype.sum_prod_type, Finset.mul_sum, Finset.sum_mul,
-    c3_fintype_mul_sum, c3_fintype_sum_mul, c3_star_sum] using hsum
+    Finset.mul_sum, Finset.sum_mul, star_sum] using hsum
 
 private def tensorCycleEquiv {n : ℕ} :
     (Fin n × (Fin n × Fin n)) ≃ (Fin n × (Fin n × Fin n)) where
@@ -651,25 +638,6 @@ private theorem c3_full_covariance {n : ℕ}
       rw [hu, h2, h3]
     _ = _ := rfl
 
-private theorem c3RicciAction_frame_covariance {n : ℕ}
-    (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (z : EuclideanSpace ℂ (Fin n)) (T : Fin n → Fin n → Fin n → ℂ)
-    (P B : Matrix (Fin n) (Fin n) ℂ)
-    (hBP : B * P = 1) (hPB : P * B = 1) :
-    c3TensorFrameTransform B P (c3RicciTensorAction g T z) =
-      fun i j k ↦ algebraicRicciAction
-        (B * Matrix.of (c3RicciEndomorphism g z) * P)
-        (c3TensorFrameTransform B P T) i j k := by
-  have _ := hBP
-  funext i j k
-  have h := c3_full_covariance B P (Matrix.of (c3RicciEndomorphism g z)) T hPB i j k
-  change c3FrameChange B P P
-      (fun a b c ↦ c3RicciTensorAction g T z a b c) i j k =
-    algebraicRicciAction (B * Matrix.of (c3RicciEndomorphism g z) * P)
-      (c3FrameChange B P P T) i j k
-  simpa [c3ActionChange, c3RicciTensorAction] using h
-
-@[deprecated "unused hypothesis `hg`; will be removed" (since := "2026-10-02")]
 theorem c3RicciTensorAction_pair_bound_of_unitary_frame
     {n : ℕ}
     (g : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
@@ -677,7 +645,6 @@ theorem c3RicciTensorAction_pair_bound_of_unitary_frame
     (T : Fin n → Fin n → Fin n → ℂ)
     (P : Matrix (Fin n) (Fin n) ℂ)
     (R : ℝ)
-    (hg : (g z).PosDef)
     (hP : P.transpose * g z * P.map star = 1)
     (hR : 0 ≤ R)
     (hA : ∀ i j,

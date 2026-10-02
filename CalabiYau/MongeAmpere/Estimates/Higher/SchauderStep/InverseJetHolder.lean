@@ -6,8 +6,7 @@ public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.Topology.MetricSpace.Holder
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
-import CalabiYau.Geometry.Kahler.MatrixInverse
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseHolder
+import CalabiYau.Mathlib.Analysis.Matrix.EntrywiseSmoothness
 
 /-!
 # Uniform Hölder bounds of inverse matrix coefficient jets
@@ -145,16 +144,12 @@ private theorem product_iterated_jet_bound_real
 /-- Common bounds on input jets and their Hölder seminorms, together with a common norm bound
 on inverse jets, give ONE finite Hölder constant for every inverse jet through order `k`.
 All lower input Hölder bounds are explicit, not inferred from convexity of the comparison set. -/
-@[deprecated "unused hypotheses `hα₀`, `hα₁`, and `hAJet`; will be removed" (since := "2026-10-02")]
 public theorem exists_holderConstantOn_matrix_inverse_entry_jets
     {P E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {n k : ℕ} {α C N : ℝ≥0} {W K : Set E}
-    (S : Set P) (hα₀ : 0 < α) (hα₁ : α < 1)
-    (hW : IsOpen W) (hKW : K ⊆ W)
+    (S : Set P) (hW : IsOpen W) (hKW : K ⊆ W)
     (A : P → E → Matrix (Fin n) (Fin n) ℂ)
     (hASmooth : ∀ p ∈ S, ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ A p z i j) W)
-    (hAJet : ∀ p ∈ S, ∀ i j, ∀ m ≤ k, ∀ z ∈ K,
-      ‖iteratedFDeriv ℝ m (fun z ↦ A p z i j) z‖ ≤ C)
     (hAHolder : ∀ p ∈ S, ∀ i j, ∀ m ≤ k,
       HolderOnWith C α (iteratedFDeriv ℝ m (fun z ↦ A p z i j)) K)
     (hUnit : ∀ p ∈ S, ∀ z ∈ W, IsUnit (A p z))

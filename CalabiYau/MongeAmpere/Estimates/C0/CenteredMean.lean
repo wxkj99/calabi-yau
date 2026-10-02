@@ -54,6 +54,7 @@ private theorem integral_sq_eq_centered_add_mean
 
 set_option maxHeartbeats 1000000 in
 
+omit [ConnectedSpace M] in
 /-- A centered softplus upper-tail estimate, together with the `p = 1` energy and Poincaré
 inequalities, gives a uniform initial `L²` bound for a potential whose maximum is `-1`.
 

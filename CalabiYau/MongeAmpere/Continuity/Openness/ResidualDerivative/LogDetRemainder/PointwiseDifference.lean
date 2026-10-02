@@ -29,19 +29,17 @@ theorem logDetTaylorRemainder_sub_shift_base
   ring
 
 set_option maxHeartbeats 200000 in
-@[deprecated "unused hypotheses `hM`, `hΔ`, `hd`, and `hDy`; will be removed" (since := "2026-10-02")]
 theorem matrixDifferenceRemainder_pointwise
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (M Q Δ a k d Cb Cf : ℝ)
     (Ax Ay Hx Kx Hy Ky : Matrix ι ι ℂ)
-    (hM : 0 ≤ M) (hQ : 0 ≤ Q) (hΔ : 0 ≤ Δ)
-    (ha : 0 ≤ a) (hk : 0 ≤ k) (hd : 0 ≤ d)
+    (hQ : 0 ≤ Q) (ha : 0 ≤ a) (hk : 0 ≤ k)
     (hAx : Ax.PosDef) (hAy : Ay.PosDef)
     (hUx : (Ax + Kx).PosDef) (hUy : (Ay + Ky).PosDef)
     (hAxInv : ‖Ax⁻¹‖ ≤ M) (hAyInv : ‖Ay⁻¹‖ ≤ M)
     (hUxInv : ‖(Ax + Kx)⁻¹‖ ≤ M) (hUyInv : ‖(Ay + Ky)⁻¹‖ ≤ M)
     (hKx : ‖Kx‖ ≤ Q) (hKy : ‖Ky‖ ≤ Q)
-    (hDx : ‖Hx - Kx‖ ≤ Δ) (hDy : ‖Hy - Ky‖ ≤ Δ)
+    (hDx : ‖Hx - Kx‖ ≤ Δ)
     (hAxAy : ‖Ax - Ay‖ ≤ a) (hKxKy : ‖Kx - Ky‖ ≤ k)
     (hDxDy : ‖(Hx - Kx) - (Hy - Ky)‖ ≤ d)
     (hbase : |Matrix.logDetTaylorRemainder (Ax + Kx) (Hx - Kx) -

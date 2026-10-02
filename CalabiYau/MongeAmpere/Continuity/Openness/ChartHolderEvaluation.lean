@@ -123,6 +123,7 @@ noncomputable def smoothChartHolderContinuousMapExtension
     smoothChartHolderCoreNormedSpace cover k α N
   exact (smoothChartHolderContinuousMapCLM cover k α N).fromCompletion
 
+omit [FiniteDimensional ℝ E] [IsManifold 𝓘(ℝ, E) ∞ M] in
 @[simp]
 theorem smoothChartHolderContinuousMapExtension_coe
     (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0)
@@ -134,9 +135,9 @@ theorem smoothChartHolderContinuousMapExtension_coe
       smoothChartHolderCoreNormedSpace cover k α N
     smoothChartHolderContinuousMapExtension cover k α N f =
       smoothChartHolderContinuousMapLinearMap cover k α f := by
-  letI : NormedAddCommGroup (SmoothChartHolderCore cover k α) :=
+  let : NormedAddCommGroup (SmoothChartHolderCore cover k α) :=
     smoothChartHolderCoreNormedAddCommGroup cover k α N
-  letI : NormedSpace ℝ (SmoothChartHolderCore cover k α) :=
+  let : NormedSpace ℝ (SmoothChartHolderCore cover k α) :=
     smoothChartHolderCoreNormedSpace cover k α N
   simp only [smoothChartHolderContinuousMapExtension,
     ContinuousLinearMap.fromCompletion_apply_coe,

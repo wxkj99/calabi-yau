@@ -1,7 +1,7 @@
 module
 
-public import CalabiYau.Analysis.MoserIteration.Sequence
-public import CalabiYau.Analysis.MoserIteration.LpSup
+public import CalabiYau.Mathlib.Analysis.SpecialFunctions.Pow.GeometricIteration
+public import CalabiYau.Mathlib.MeasureTheory.Function.LpSpace.EssSupLimit
 
 public section
 

@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.SmoothBootstrap.DifferenceQuotientEquation
-import CalabiYau.Analysis.Holder.Compactness
+import CalabiYau.Mathlib.Analysis.Holder.Compactness
 
 /-!
 # The initial regularity gain
@@ -20,9 +20,11 @@ open scoped Manifold ContDiff NNReal Topology
 
 namespace KahlerForm
 
-variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
+variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
   [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
 /-- Apply the `k = 0` Schauder estimate to a single quotient equation.  The uniformity in the
@@ -43,26 +45,6 @@ private theorem contDiffOn_zero_of_holderBoundOn_zero
     simp [iteratedFDeriv_zero_eq_comp, e]
   rw [← heq]
   exact htemp
-
-private theorem interiorSchauder_holderBoundOn_two
-    (hSch : InteriorSchauderEstimate n) {α : ℝ≥0} (hα₀ : 0 < α) (hα₁ : α < 1)
-    {lam K : ℝ≥0} (hlam : 0 < lam)
-    {U V : Set (EuclideanSpace ℂ (Fin n))} (hU : IsOpen U)
-    (hV : IsCompact (closure V)) (hVU : closure V ⊆ U)
-    (A : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ)
-    (u : EuclideanSpace ℂ (Fin n) → ℝ)
-    (hA : ∀ j l, ContDiffOn ℝ 0 (fun z ↦ A z j l) U)
-    (hu : ContDiffOn ℝ 2 u U)
-    (hEll : IsUniformlyEllipticOn A lam U)
-    (hAHolder : ∀ j l, HolderBoundOn 0 α K U fun z ↦ A z j l)
-    (K₀ K₁ : ℝ≥0)
-    (hLu : ContDiffOn ℝ 0 (complexEllipticOp A u) U)
-    (hLuHolder : HolderBoundOn 0 α K₁ U (complexEllipticOp A u))
-    (huBound : ∀ z ∈ U, |u z| ≤ K₀) :
-    ∃ C' : ℝ≥0, ContDiffOn ℝ 2 u U ∧ HolderBoundOn 2 α C' V u := by
-  obtain ⟨C, hC⟩ := hSch 0 α hα₀ hα₁ lam K hlam U V hU hV hVU
-  obtain ⟨hregular, hHolder⟩ := hC A u hA hu hEll hAHolder K₀ K₁ hLu hLuHolder huBound
-  exact ⟨C * (K₁ + K₀), hregular, hHolder⟩
 
 /-- Apply the same interior Schauder estimate to every member of a family of quotient equations.
 Because its constant depends only on the fixed domains, ellipticity and coefficient bound, the
@@ -110,8 +92,10 @@ private theorem uniform_interiorSchauder_holderBoundOn_two
     (hEll h hh) (hAHolder h hh) K₀ K₁ hLq hLqHolder (hqBound h hh)
   exact ⟨hregular, hHolder⟩
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 
+end
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 /-- A chartwise first-derivative bound controls all small difference quotients whose connecting
 segments stay in the compact chart piece. -/
 private theorem differenceQuotient_abs_bound_of_chartHolderGauge
@@ -164,8 +148,6 @@ private theorem differenceQuotient_abs_bound_of_chartHolderGauge
     _ = C * ‖v‖ := by
       field_simp [ne_of_gt (abs_pos.mpr hne)]
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 
 /-- A point in the interior of a relatively compact chart piece has nested ball domains on which
 all sufficiently small difference-quotient segments remain in that piece. -/
@@ -241,7 +223,10 @@ private theorem exists_nested_chart_balls
       (convex_ball z₀ r).segment_subset hzball hendpoint
     exact hsegment.trans (hball.trans interior_subset)
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
 /-- On a fixed nested chart domain, the exact quotient equations and common coefficient bounds
 supply the hypotheses of the uniform Schauder-family estimate. Positive-exponent Hölder bounds
@@ -352,7 +337,6 @@ private theorem local_differenceQuotient_schauder_bound
     exact ⟨hne, hsmall, htrans⟩
   simpa [q, e] using hC' h hh
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 
 /-- Package the local nested-domain construction with the exact difference-quotient data. This
 produces the uniform `C^{2,α}` quotient family on a smaller chart ball at every point of a compact
@@ -424,6 +408,13 @@ private theorem exists_local_differenceQuotient_schauder_bound
   refine ⟨U, V, δ, C, hδ, hU', hUcompact', hUtarget, hV', hVU', ?_⟩
   intro h hne hsmall htrans
   simpa [U, V] using hC h hne hsmall htrans
+
+end
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
+  [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
 /-- A common `C^{2,α}` bound on a compact domain gives a subsequence of quotient Hessians
 converging uniformly there. The output is stated on the compact subtype so the published local
@@ -508,58 +499,6 @@ private theorem quotient_tendsto_fderiv_along_sequence
       field_simp [hk]
     rw [halg, norm_mul, norm_inv]
   exact (tendsto_iff_norm_sub_tendsto_zero).2 (by simpa using hdiff)
-
-private theorem quotient_step_segments_in_closedBall
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (z₀ v : E) {r δ : ℝ} (hr : 0 < r) (hδ : 0 < δ) :
-    let η : ℝ := min δ (r / (8 * (1 + ‖v‖)));
-    let h : ℕ → ℝ := fun k ↦ η / ((k : ℝ) + 2);
-    ∀ k, ∀ z ∈ Metric.closedBall z₀ (r / 4),
-      segment ℝ z (z + h k • v) ⊆ Metric.closedBall z₀ (r / 2) := by
-  dsimp only
-  intro k z hz
-  have hη : 0 < min δ (r / (8 * (1 + ‖v‖))) := by positivity
-  have hseq : 0 < min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2) :=
-    div_pos hη (by positivity)
-  have hdisp : (min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) * ‖v‖ ≤ r / 8 := by
-    have hden : 1 < (k : ℝ) + 2 := by exact_mod_cast (show 1 < k + 2 by omega)
-    have hstep : min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2) <
-        min δ (r / (8 * (1 + ‖v‖))) := by
-      apply (div_lt_iff₀ (by positivity)).2
-      nlinarith [hη]
-    have hmin : min δ (r / (8 * (1 + ‖v‖))) ≤ r / (8 * (1 + ‖v‖)) := min_le_right _ _
-    have hratio : ‖v‖ / (1 + ‖v‖) ≤ 1 := by
-      apply (div_le_iff₀ (by positivity)).2
-      nlinarith [norm_nonneg v]
-    calc
-      min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2) * ‖v‖ ≤
-          min δ (r / (8 * (1 + ‖v‖))) * ‖v‖ :=
-        mul_le_mul_of_nonneg_right (le_of_lt hstep) (norm_nonneg v)
-      _ ≤ (r / (8 * (1 + ‖v‖))) * ‖v‖ :=
-        mul_le_mul_of_nonneg_right hmin (norm_nonneg v)
-      _ = (r / 8) * (‖v‖ / (1 + ‖v‖)) := by
-        field_simp [ne_of_gt (by positivity : (0 : ℝ) < 8 * (1 + ‖v‖))]
-      _ ≤ r / 8 := by exact mul_le_of_le_one_right (by positivity) hratio
-  have hz' : dist z z₀ ≤ r / 4 := Metric.mem_closedBall.mp hz
-  have hright : z + (min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) • v ∈
-      Metric.closedBall z₀ (r / 2) := by
-    rw [Metric.mem_closedBall, dist_eq_norm]
-    have hsplit : z + (min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) • v - z₀ =
-        (z - z₀) + (min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) • v := by abel
-    rw [hsplit]
-    calc
-      ‖z - z₀ + (min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) • v‖ ≤
-          ‖z - z₀‖ + ‖(min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) • v‖ := norm_add_le _ _
-      _ ≤ r / 4 + (min δ (r / (8 * (1 + ‖v‖))) / ((k : ℝ) + 2)) * ‖v‖ := by
-        gcongr
-        · simpa [dist_eq_norm] using hz'
-        · rw [norm_smul, Real.norm_eq_abs, abs_of_pos hseq]
-      _ ≤ r / 4 + r / 8 := by nlinarith [hdisp]
-      _ ≤ r / 2 := by nlinarith [hr]
-  have hzleft : z ∈ Metric.closedBall z₀ (r / 2) := by
-    rw [Metric.mem_closedBall]
-    exact le_trans hz' (by linarith)
-  exact (convex_closedBall z₀ (r / 2)).segment_subset hzleft hright
 
 private theorem signed_translation_segment_subset_compact_ball
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1075,7 +1014,12 @@ private theorem contDiffOn_two_of_quotient_jet_limits
     fun_prop
   exact local_limit_C2_of_two_uniform_jets hW hfirst hsecond hHcont
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
+end
+
+section
+
+variable [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+
 private theorem local_directional_derivative_contDiffOn_two
     (hSch : InteriorSchauderEstimate n)
     (ω₀ : KahlerForm n M) (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
@@ -1263,21 +1207,16 @@ private theorem local_directional_derivative_contDiffOn_two
   exact contDiffOn_two_of_quotient_jet_limits hU hV hVconvex hVU' hW hWV
     hα₀ q hq hqHolder (f := fun z ↦ fderiv ℝ f z v) hpoint
 
-omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [CompactSpace M] [ConnectedSpace M] in
 theorem solvesMongeAmpereC2_contMDiff_three_of_differenceQuotientSchauderData
     (hSch : InteriorSchauderEstimate n)
     (ω₀ : KahlerForm n M) (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
     {G φ : M → ℝ}
-    (hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ G)
     (hφ : ω₀.SolvesMongeAmpereC2 G φ)
     (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (hφGauge : HasFiniteChartHolderGauge cover 2 α φ)
-    (hEquation : HasChartLogDetEquation ω₀ G φ)
     (hDifferenceQuotients : HasDifferenceQuotientSchauderData ω₀ G φ α) :
     ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) 3 φ := by
   classical
-  have := hG
-  have := hEquation
   have hlocalChart (i : cover.ι) (z₀ : EuclideanSpace ℂ (Fin n))
       (hz₀ : z₀ ∈ interior (cover.piece i)) :
       ∃ W : Set (EuclideanSpace ℂ (Fin n)), IsOpen W ∧ z₀ ∈ W ∧
@@ -1411,7 +1350,6 @@ theorem solvesMongeAmpereC2_contMDiff_three_of_differenceQuotientSchauderData
   apply contMDiff_of_locally_contMDiffOn
   exact hlocal
 
-attribute [deprecated "unused hypotheses `hG` and `hEquation`; will be removed" (since := "2026-10-02")]
-  KahlerForm.solvesMongeAmpereC2_contMDiff_three_of_differenceQuotientSchauderData
+end
 
 end KahlerForm

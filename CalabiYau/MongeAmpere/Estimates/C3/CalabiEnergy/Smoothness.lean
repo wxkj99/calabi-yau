@@ -21,6 +21,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+omit [T2Space M] [CompactSpace M] in
 /-- The Calabi connection-difference energy is smooth for every Kähler potential. -/
 theorem calabiEnergy_contMDiff (ω₀ : KahlerForm n M) {φ : M → ℝ}
     (hφ : ω₀.IsPotential φ) :
@@ -110,7 +111,7 @@ theorem calabiEnergy_contMDiff (ω₀ : KahlerForm n M) {φ : M → ℝ}
       {G : EuclideanSpace ℂ (Fin n) → Matrix (Fin n) (Fin n) ℂ}
       (hG : ∀ k l, ContDiffOn ℝ ∞ (fun z ↦ G z k l) U)
       (j k l : Fin n) :
-      ContDiffOn ℝ ∞ (fun z ↦ c3PartialZ (fun w ↦ G w k l) z j) U := by
+      ContDiffOn ℝ ∞ (fun z ↦ wirtingerDerivInChart (fun w ↦ G w k l) z j) U := by
     let f : EuclideanSpace ℂ (Fin n) → ℂ := fun w ↦ G w k l
     have hD : ContDiffOn ℝ ∞ (fderiv ℝ f) U :=
       (hG k l).fderiv_of_isOpen hU (by rw [ENat.coe_top_add_one])
@@ -131,17 +132,17 @@ theorem calabiEnergy_contMDiff (ω₀ : KahlerForm n M) {φ : M → ℝ}
       (hG : ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ G z i j) U)
       (hGinv : ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ (G z)⁻¹ i j) U)
       (i j k : Fin n) :
-      ContDiffOn ℝ ∞ (fun z ↦ c3ChristoffelInChart G z i j k) U := by
+      ContDiffOn ℝ ∞ (fun z ↦ christoffelInChart G z i j k) U := by
     have hterm (l : Fin n) : ContDiffOn ℝ ∞
-        (fun z ↦ (G z)⁻¹ l i * c3PartialZ (fun w ↦ G w k l) z j) U := by
+        (fun z ↦ (G z)⁻¹ l i * wirtingerDerivInChart (fun w ↦ G w k l) z j) U := by
       exact (hGinv l i).mul (contDiffOn_c3PartialZ hU hG j k l)
     have hsum : ContDiffOn ℝ ∞
-        (fun z ↦ ∑ l ∈ Finset.univ, (G z)⁻¹ l i * c3PartialZ (fun w ↦ G w k l) z j) U := by
+        (fun z ↦ ∑ l ∈ Finset.univ, (G z)⁻¹ l i * wirtingerDerivInChart (fun w ↦ G w k l) z j) U := by
       apply ContDiffOn.sum
       intro l hl
       exact hterm l
     change ContDiffOn ℝ ∞
-      (fun z ↦ ∑ l ∈ Finset.univ, (G z)⁻¹ l i * c3PartialZ (fun w ↦ G w k l) z j) U
+      (fun z ↦ ∑ l ∈ Finset.univ, (G z)⁻¹ l i * wirtingerDerivInChart (fun w ↦ G w k l) z j) U
     exact hsum
 
   have contDiffOn_univ_sum
@@ -196,27 +197,27 @@ theorem calabiEnergy_contMDiff (ω₀ : KahlerForm n M) {φ : M → ℝ}
     have hG₀inv := contDiffOn_matrixInverse_entries_of_contDiffOn hG₀ hG₀det
     have hGinv := contDiffOn_matrixInverse_entries_of_contDiffOn hG hGdet
     have hΓ₀ : ∀ i j k, ContDiffOn ℝ ∞
-        (fun z ↦ c3ChristoffelInChart g₀ z i j k) e.target := by
+        (fun z ↦ christoffelInChart g₀ z i j k) e.target := by
       intro i j k
       exact contDiffOn_c3Christoffel (isOpen_extChartAt_target x₀) hG₀ hG₀inv i j k
     have hΓ : ∀ i j k, ContDiffOn ℝ ∞
-        (fun z ↦ c3ChristoffelInChart g z i j k) e.target := by
+        (fun z ↦ christoffelInChart g z i j k) e.target := by
       intro i j k
       exact contDiffOn_c3Christoffel (isOpen_extChartAt_target x₀) hG hGinv i j k
     have hT : ∀ i j k, ContDiffOn ℝ ∞
-        (fun z ↦ c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k) e.target := by
+        (fun z ↦ connectionDifferenceInChart ω₀ φ x₀ z i j k) e.target := by
       intro i j k
       change ContDiffOn ℝ ∞
-        (fun z ↦ c3ChristoffelInChart g z i j k - c3ChristoffelInChart g₀ z i j k) e.target
+        (fun z ↦ christoffelInChart g z i j k - christoffelInChart g₀ z i j k) e.target
       exact (hΓ i j k).sub (hΓ₀ i j k)
     let F : Fin n → Fin n → Fin n → Fin n → Fin n → Fin n →
         EuclideanSpace ℂ (Fin n) → ℂ := fun i j k a b c z ↦
       g z i a * (g z)⁻¹ b j * (g z)⁻¹ c k *
-        c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k *
-        star (c3ConnectionDifferenceInChart ω₀ φ x₀ z a b c)
+        connectionDifferenceInChart ω₀ φ x₀ z i j k *
+        star (connectionDifferenceInChart ω₀ φ x₀ z a b c)
     have hF (i j k a b c : Fin n) : ContDiffOn ℝ ∞ (F i j k a b c) e.target := by
       have hstar : ContDiffOn ℝ ∞
-          (fun z ↦ star (c3ConnectionDifferenceInChart ω₀ φ x₀ z a b c)) e.target := by
+          (fun z ↦ star (connectionDifferenceInChart ω₀ φ x₀ z a b c)) e.target := by
         convert Complex.conjCLE.contDiff.comp_contDiffOn (hT a b c) using 1
         ext z
         simp
@@ -241,13 +242,13 @@ theorem calabiEnergy_contMDiff (ω₀ : KahlerForm n M) {φ : M → ℝ}
       contDiffOn_univ_sum hsumJ
     have hsum : ContDiffOn ℝ ∞ (fun z ↦ ∑ i, ∑ j, ∑ k, ∑ a, ∑ b, ∑ c,
         g z i a * (g z)⁻¹ b j * (g z)⁻¹ c k *
-          c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k *
-          star (c3ConnectionDifferenceInChart ω₀ φ x₀ z a b c)) e.target := by
+          connectionDifferenceInChart ω₀ φ x₀ z i j k *
+          star (connectionDifferenceInChart ω₀ φ x₀ z a b c)) e.target := by
       simpa [F] using hsumI
     change ContDiffOn ℝ ∞ (fun z ↦ Complex.re (∑ i, ∑ j, ∑ k, ∑ a, ∑ b, ∑ c,
       g z i a * (g z)⁻¹ b j * (g z)⁻¹ c k *
-        c3ConnectionDifferenceInChart ω₀ φ x₀ z i j k *
-        star (c3ConnectionDifferenceInChart ω₀ φ x₀ z a b c))) e.target
+        connectionDifferenceInChart ω₀ φ x₀ z i j k *
+        star (connectionDifferenceInChart ω₀ φ x₀ z a b c))) e.target
     convert Complex.reCLM.contDiff.comp_contDiffOn hsum using 1
     ext z
     exact (Complex.reCLM_apply _).symm

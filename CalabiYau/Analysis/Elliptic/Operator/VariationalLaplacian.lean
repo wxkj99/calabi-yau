@@ -1,7 +1,7 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Operator/VariationalLaplacian.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Elliptic.Operator.SmoothBridge
+public import CalabiYau.Analysis.Elliptic.Operator.SmoothResolvent
 public import CalabiYau.Analysis.Elliptic.Operator.SmoothDenseLp
 
 @[expose] public section
@@ -36,23 +36,23 @@ theorem resolvent_injective (g : SmoothRiemannianMetric I M) :
   rw [injective_iff_map_eq_zero]
   intro f hf
   have h_orth : ∀ v : H1Compl g,
-      ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ = 0 := by
+      ⟪h1ComplToLp (I := I) (M := M) g v, f⟫_ℝ = 0 := by
     intro v
     have h := resolvent_inner_eq_lpFunctional (I := I) (M := M) g f v
     rw [hf] at h
     rw [inner_zero_left] at h
     linarith
-  have h_dense : DenseRange (H1ComplToLp (I := I) (M := M) g) :=
+  have h_dense : DenseRange (h1ComplToLp (I := I) (M := M) g) :=
     denseRange_H1ComplToLp (I := I) (M := M) g
   have h_inner_zero : ∀ w : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g),
       (innerSL ℝ f) w = 0 := by
     intro w
     have h_eq_on_range :
         (fun y : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) =>
-            (innerSL ℝ f) y) ∘ (H1ComplToLp (I := I) (M := M) g) =
+            (innerSL ℝ f) y) ∘ (h1ComplToLp (I := I) (M := M) g) =
         (fun _ : H1Compl g => (0 : ℝ)) := by
       funext v
-      change ⟪f, H1ComplToLp (I := I) (M := M) g v⟫_ℝ = 0
+      change ⟪f, h1ComplToLp (I := I) (M := M) g v⟫_ℝ = 0
       rw [real_inner_comm]
       exact h_orth v
     have h_func_eq :
@@ -129,14 +129,14 @@ def laplacianDomain.preimageLin (g : SmoothRiemannianMetric I M) :
 def laplacianOp (g : SmoothRiemannianMetric I M) :
     laplacianDomain (I := I) (M := M) g →ₗ[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
-  ((H1ComplToLp (I := I) (M := M) g).toLinearMap.comp
+  ((h1ComplToLp (I := I) (M := M) g).toLinearMap.comp
     (laplacianDomain (I := I) (M := M) g).subtype) -
   laplacianDomain.preimageLin (I := I) (M := M) g
 
 @[simp] lemma laplacianOp_apply (g : SmoothRiemannianMetric I M)
     (u : laplacianDomain (I := I) (M := M) g) :
     laplacianOp (I := I) (M := M) g u =
-      H1ComplToLp (I := I) (M := M) g (u : H1Compl g) -
+      h1ComplToLp (I := I) (M := M) g (u : H1Compl g) -
         laplacianDomain.preimage (I := I) (M := M) g u := by
   unfold laplacianOp
   rw [LinearMap.sub_apply]
@@ -147,7 +147,7 @@ theorem laplacianOp_resolvent (g : SmoothRiemannianMetric I M)
     laplacianOp (I := I) (M := M) g
         ⟨resolvent (I := I) (M := M) g f,
           (laplacianDomain_mem_iff (I := I) (M := M) g).mpr ⟨f, rfl⟩⟩ =
-      H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) - f := by
+      h1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) - f := by
   rw [laplacianOp_apply]
   have h_preimage_eq :
       laplacianDomain.preimage (I := I) (M := M) g
@@ -184,7 +184,7 @@ theorem laplacianOp_smoothToH1Compl
           (smoothToLp (I := I) (M := M) g u.oneSubLapClassical) =
         smoothToH1Compl (I := I) (M := M) g u :=
       (smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) u).symm
-    rw [h_eq, H1ComplToLp_smoothToH1Compl]
+    rw [h_eq, h1ComplToLp_smoothToH1Compl]
   · apply Subtype.ext
     exact smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) u
 
@@ -201,7 +201,7 @@ private lemma h1Inner_eq_lpInner_with_preimage
     (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
     ⟪(u : H1Compl g), (v : H1Compl g)⟫_ℝ =
-      ⟪H1ComplToLp (I := I) (M := M) g (v : H1Compl g),
+      ⟪h1ComplToLp (I := I) (M := M) g (v : H1Compl g),
         laplacianDomain.preimage (I := I) (M := M) g u⟫_ℝ := by
   have h_u_eq : (u : H1Compl g) = resolvent (I := I) (M := M) g
       (laplacianDomain.preimage (I := I) (M := M) g u) :=
@@ -213,9 +213,9 @@ private lemma h1Inner_eq_lpInner_with_preimage
 private lemma lpInner_preimage_swap
     (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
-    ⟪H1ComplToLp (I := I) (M := M) g (v : H1Compl g),
+    ⟪h1ComplToLp (I := I) (M := M) g (v : H1Compl g),
         laplacianDomain.preimage (I := I) (M := M) g u⟫_ℝ =
-      ⟪H1ComplToLp (I := I) (M := M) g (u : H1Compl g),
+      ⟪h1ComplToLp (I := I) (M := M) g (u : H1Compl g),
         laplacianDomain.preimage (I := I) (M := M) g v⟫_ℝ := by
   rw [← h1Inner_eq_lpInner_with_preimage (I := I) (M := M) g u v]
   rw [← h1Inner_eq_lpInner_with_preimage (I := I) (M := M) g v u]
@@ -223,18 +223,18 @@ private lemma lpInner_preimage_swap
 
 theorem laplacianOp_symmetric (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
-    ⟪H1ComplToLp (I := I) (M := M) g (u : H1Compl g),
+    ⟪h1ComplToLp (I := I) (M := M) g (u : H1Compl g),
         laplacianOp (I := I) (M := M) g v⟫_ℝ =
       ⟪laplacianOp (I := I) (M := M) g u,
-        H1ComplToLp (I := I) (M := M) g (v : H1Compl g)⟫_ℝ := by
+        h1ComplToLp (I := I) (M := M) g (v : H1Compl g)⟫_ℝ := by
   rw [laplacianOp_apply, laplacianOp_apply]
   rw [inner_sub_right, inner_sub_left]
   have h_swap := lpInner_preimage_swap (I := I) (M := M) g v u
   have h_swap_inner :
-      ⟪H1ComplToLp (I := I) (M := M) g (u : H1Compl g),
+      ⟪h1ComplToLp (I := I) (M := M) g (u : H1Compl g),
           laplacianDomain.preimage (I := I) (M := M) g v⟫_ℝ =
         ⟪laplacianDomain.preimage (I := I) (M := M) g u,
-          H1ComplToLp (I := I) (M := M) g (v : H1Compl g)⟫_ℝ := by
+          h1ComplToLp (I := I) (M := M) g (v : H1Compl g)⟫_ℝ := by
     rw [h_swap, real_inner_comm]
   linarith [h_swap_inner]
 

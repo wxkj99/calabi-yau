@@ -19,10 +19,10 @@ open MeasureTheory
 namespace KahlerForm
 
 variable {n : ℕ}
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-  {M : Type*} [TopologicalSpace M] [ChartedSpace E M] [IsManifold 𝓘(ℝ, E) ∞ M]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
 
-omit [FiniteDimensional ℝ E] in
+variable [IsManifold 𝓘(ℝ, E) ∞ M] in
 private theorem holderOnWith_iteratedFDeriv_zero
     {s : Set E} {f : E → ℝ} {K α : ℝ≥0} (hf : HolderOnWith K α f s) :
     HolderOnWith K α (iteratedFDeriv ℝ 0 f) s := by
@@ -33,7 +33,6 @@ private theorem holderOnWith_iteratedFDeriv_zero
   rw [hjet x, hjet y, L.edist_map]
   exact hf x hx y hy
 
-omit [FiniteDimensional ℝ E] [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- Finite ENNReal gauge bound from the scalar sup and Hölder estimates on every chart piece.
 The two constants are added, as required by the actual gauge definition. -/
 private theorem smoothCore_zeroGauge_le_sup_add_holder
@@ -60,7 +59,6 @@ private theorem smoothCore_zeroGauge_le_sup_add_holder
         (HolderWith.restrict_iff.mpr (holderOnWith_iteratedFDeriv_zero (hholder i)))
     _ = (Csup : ℝ≥0∞) + Cholder := by simp
 
-omit [FiniteDimensional ℝ E] [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- The complete order-zero gauge estimate, including both terms and an explicitly finite
 upper bound. All matrix norms used by the functional-calculus wrapper are Frobenius. -/
 theorem smoothCore_residual_finiteGauge_bound_of_chartMatrix_control
@@ -98,7 +96,6 @@ theorem smoothCore_residual_finiteGauge_bound_of_chartMatrix_control
       congr 1
       ring
 
-omit [FiniteDimensional ℝ E] [IsManifold 𝓘(ℝ, E) ∞ M] in
 /-- Input norm Cauchy plus the common tail matrix controls gives Cauchy in the actual output
 gauge. The finite ENNReal bound above is the intended bridge before taking toReal. -/
 theorem smoothCore_residual_finiteGaugeCauchy_of_chartMatrix_control

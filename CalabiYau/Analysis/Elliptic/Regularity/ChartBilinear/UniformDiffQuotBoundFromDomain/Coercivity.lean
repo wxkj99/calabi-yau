@@ -1,7 +1,7 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Regularity/ChartBilinear/UniformDiffQuotBoundFromDomain/Coercivity.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Calculus.Cutoff.Compact
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
 public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearVariationalIdentity
 public import CalabiYau.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 
@@ -168,7 +168,7 @@ theorem weighted_diffQuot_weakPartial_energy_le
   have hG_l2 : ∀ i, MemLp (G i) 2 (volume : Measure EuclN) := fun i =>
     cutoff_uChart_partial_memLp_two_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_tsupp i
-  have hG_isWP : ∀ i, DeGiorgi.HasWeakPartialDeriv
+  have hG_isWP : ∀ i, Sobolev.Euclidean.HasWeakPartialDeriv
       (d := Module.finrank ℝ E) i (G i) u_g Set.univ := fun i =>
     cutoff_uChart_hasWeakPartialDeriv_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_tsupp i

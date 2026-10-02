@@ -33,8 +33,7 @@ namespace KahlerForm
 weak partial derivative. This is the Euclidean distributional-derivative closure step used after
 localizing the Kähler problem to a chart. -/
 private theorem hasWeakPartialDeriv_zero_of_l2_limit
-    {d : ℕ} [NeZero d] {Ω : Set (EuclideanSpace ℝ (Fin d))}
-    (hΩ : IsOpen Ω) {i : Fin d}
+    {d : ℕ} [NeZero d] {Ω : Set (EuclideanSpace ℝ (Fin d))} {i : Fin d}
     {u : EuclideanSpace ℝ (Fin d) → ℝ}
     {f : ℕ → EuclideanSpace ℝ (Fin d) → ℝ}
     {g : ℕ → EuclideanSpace ℝ (Fin d) → ℝ}
@@ -46,19 +45,19 @@ private theorem hasWeakPartialDeriv_zero_of_l2_limit
       (fun k => eLpNorm (fun x => f k x - u x) (ENNReal.ofReal 2)
         ((MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))).restrict Ω))
       atTop (𝓝 0))
-    (hweak : ∀ k, DeGiorgi.HasWeakPartialDeriv i (g k) (f k) Ω)
+    (hweak : ∀ k, Sobolev.Euclidean.HasWeakPartialDeriv i (g k) (f k) Ω)
     (hg : ∀ k, MemLp (g k) (ENNReal.ofReal 2)
       ((MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))).restrict Ω))
     (hgt : Tendsto
       (fun k => eLpNorm (g k) (ENNReal.ofReal 2)
         ((MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))).restrict Ω))
       atTop (𝓝 0)) :
-    DeGiorgi.HasWeakPartialDeriv i (fun _ => 0) u Ω := by
+    Sobolev.Euclidean.HasWeakPartialDeriv i (fun _ => 0) u Ω := by
   have hzero : MemLp (fun _ : EuclideanSpace ℝ (Fin d) => (0 : ℝ))
       (ENNReal.ofReal 2)
       ((MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))).restrict Ω) :=
     MemLp.zero
-  apply DeGiorgi.HasWeakPartialDeriv.of_eLpNormApprox_p hΩ
+  apply Sobolev.Euclidean.HasWeakPartialDeriv.of_eLpNormApprox_p
       (p := 2) (i := i) (f := u) (g := fun _ => 0)
       (ψ := f) (gψ := g) (by norm_num)
   · exact hu

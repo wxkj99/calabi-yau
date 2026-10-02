@@ -63,22 +63,22 @@ theorem c3RefinedTrace_relTrace_laplacian_energy_with_signed_errors
     frame.eigenvalue hB frame.reference_normal frame.perturbed_diagonal
     frame.eigenvalue_pos hbForward hbReverse
   have hPositive := c3RefinedTrace_diagonalEnergy_lower_of_metric_lower frame.eigenvalue
-    (fun p j k ↦ c3PartialZ (fun w ↦ h w j k) frame.center p)
+    (fun p j k ↦ wirtingerDerivInChart (fun w ↦ h w j k) frame.center p)
     (inv_pos.mpr hB) (fun i ↦ (hEigen i).1)
   have hIdentity := c3RefinedTrace_normalTraceHessian_identity g h H frame.center
     frame.eigenvalue hg hh hH frame.reference_normal frame.reference_first
     frame.perturbed_diagonal frame.eigenvalue_pos hLocal hKahler
   have hLocalBound :
       B⁻¹ * (∑ p : Fin n, ∑ j : Fin n, ∑ k : Fin n,
-        ‖c3PartialZ (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
+        ‖wirtingerDerivInChart (fun w ↦ h w j k) frame.center p‖ ^ (2 : ℕ) /
           (frame.eigenvalue p * frame.eigenvalue j * frame.eigenvalue k)) +
       (∑ p : Fin n, RCLike.re
-        (c3PartialZ (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p)) +
+        (wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar H w p) frame.center p)) +
       (∑ p : Fin n, ∑ j : Fin n,
         (frame.eigenvalue j / frame.eigenvalue p - 1) *
           RCLike.re (c3RefinedTraceReferenceCurvatureInChart g frame.center p p j j)) ≤
       RCLike.re (((h frame.center)⁻¹ * Matrix.of (fun p q ↦
-        c3PartialZ (fun w ↦ c3RefinedTracePartialBar
+        wirtingerDerivInChart (fun w ↦ c3RefinedTracePartialBar
           (fun v ↦ c3RefinedTraceRelativeMatrixTrace g h v) w q) frame.center p)).trace) := by
     rw [hIdentity]
     linarith only [hPositive]

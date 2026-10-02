@@ -6,8 +6,6 @@ public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -331,7 +329,7 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
                 else (0 : ℝ)) = 0
         rw [if_neg hz_target]
     exact hK_compact.of_isClosed_subset (isClosed_tsupport _) h_sub_image
-  have hψ_mem_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p ψ
+  have hψ_mem_W1p : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) p ψ
       (Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
     have h := Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
@@ -347,19 +345,17 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
             (I := I) (M := M) α)]
       ψ := (chartSmoothExt_eq_chartPushed_pou_ae (I := I) (M := M) α u).symm
   have h_classical_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (fun y : EuclN_E => fderiv ℝ ψ y (EuclideanSpace.single i 1)) ψ
         (Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) :=
-    DeGiorgi.HasWeakPartialDeriv.of_contDiff
+    Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff
       (Ω := Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α)
       (i := i) (f := ψ)
-      (Sobolev.Chart.chartTargetEuclid_isOpen
-        (I := I) (M := M) α)
       (hψ_smooth.of_le (by norm_cast))
   have h_chosen_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (Sobolev.Euclidean.chosenWeakPartialOrZero
           (d := Module.finrank ℝ E) p i ψ
           (Sobolev.Chart.chartTargetEuclid
@@ -396,14 +392,14 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
           (Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α)]
         (fun y : EuclN_E => fderiv ℝ ψ y (EuclideanSpace.single i (1 : ℝ))) :=
-    DeGiorgi.HasWeakPartialDeriv.ae_eq
+    Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq
       (Ω := Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α)
       (Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α)
       h_chosen_isWeak h_classical_isWeak
       h_chosen_local h_classical_local
-  have h_chartPushed_mem_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p
+  have h_chartPushed_mem_W1p : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) p
       (Sobolev.Chart.chartPushed
         (I := I) (M := M) (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u)
       (Sobolev.Chart.chartTargetEuclid
@@ -425,7 +421,7 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
       (Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α) h_ae_chartPushed).mpr h_psi_mem
   have h_chosen_chartPushed_isWeak :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (Sobolev.Euclidean.chosenWeakPartialOrZero
           (d := Module.finrank ℝ E) p i
           (Sobolev.Chart.chartPushed
@@ -439,7 +435,7 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     Sobolev.Euclidean.chosenWeakPartialOrZero_isWeakPartial_of_mem
       h_chartPushed_mem_W1p i
   have h_chosen_chartPushed_isWeak_psi :
-      DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (Sobolev.Euclidean.chosenWeakPartialOrZero
           (d := Module.finrank ℝ E) p i
           (Sobolev.Chart.chartPushed
@@ -476,7 +472,7 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
           (I := I) (M := M) α)) :=
     (Sobolev.Euclidean.chosenWeakPartialOrZero_memLp_of_mem
       h_chartPushed_mem_W1p i).locallyIntegrable hp_one
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq
     (Ω := Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
     (Sobolev.Chart.chartTargetEuclid_isOpen

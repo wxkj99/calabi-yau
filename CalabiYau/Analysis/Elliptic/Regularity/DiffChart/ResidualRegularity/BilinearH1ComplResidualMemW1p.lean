@@ -1,10 +1,198 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Regularity/DiffChart/ResidualRegularity/BilinearH1ComplResidualMemW1p.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidualChain
-public import CalabiYau.Analysis.Elliptic.Regularity.FChartResidual.LpDecomposition
 public import CalabiYau.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplFromDomainPow
+public import CalabiYau.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
+public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Chart.LocalRegularity
+public import CalabiYau.Analysis.Elliptic.Regularity.LaplacianDomain.Multiplication.H1Completion
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
+public import CalabiYau.Analysis.Elliptic.Regularity.Iterated.Defs
+public import CalabiYau.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
+public import CalabiYau.Analysis.Elliptic.MetricExtension
+public import CalabiYau.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
+public import CalabiYau.Analysis.Sobolev.Euclidean.Density
+public import CalabiYau.Analysis.Sobolev.Chart.Defs
+public import CalabiYau.Analysis.Sobolev.Approximation.Density.Smooth
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.LinearAlgebra.Dual.Defs
+public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
+public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+public import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
+public import Mathlib.Geometry.Manifold.VectorBundle.Hom
+public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+public import Mathlib.Geometry.Manifold.VectorField.LieBracket
+public import Mathlib.Geometry.Manifold.MFDeriv.Basic
+public import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
+public import Mathlib.Topology.FiberBundle.Basic
+public import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
+public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
+public import CalabiYau.Geometry.Riemannian.Metric.Basic
+public import CalabiYau.Geometry.Manifold.Bundle.Section
+public import Mathlib.Analysis.Calculus.FDeriv.Add
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.Basic
+public import CalabiYau.Geometry.Riemannian.Operator.Laplacian.VossWeylFormula
+public import Mathlib.Algebra.Order.Chebyshev
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+public import CalabiYau.Geometry.Riemannian.Volume.Family.Basic
+public import CalabiYau.Geometry.Riemannian.Operator.Gradient.Basic
+public import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
+public import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+public import Mathlib.Geometry.Manifold.MFDeriv.Atlas
+public import Mathlib.Geometry.Manifold.ContMDiff.Atlas
+public import CalabiYau.Geometry.Riemannian.Volume.Chart.Density
+public import Mathlib.RingTheory.Derivation.Basic
+public import Mathlib.Tactic
+public import Mathlib.Data.Real.Basic
+public import Mathlib.Order.Interval.Set.Basic
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Topology.Algebra.Monoid
+public import Mathlib.Topology.Algebra.Ring.Real
+public import Mathlib.Topology.MetricSpace.Basic
+public import Mathlib.Topology.Order.OrderClosed
+public import Mathlib.Topology.Order.Real
+public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Field
+public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Algebra.Contraction
+public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Defs
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Fiber
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Defs
+public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Composition
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Multilinear.Composition
+public import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
+public import CalabiYau.Mathlib.Analysis.Calculus.ContDiff.LinearIsometry
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.Analysis.Normed.Module.Alternating.Basic
+public import Mathlib.RingTheory.Finiteness.Defs
+public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+public import Mathlib.Geometry.Manifold.VectorBundle.Basic
+public import Mathlib.Geometry.Manifold.VectorBundle.ContMDiffSection
+public import Mathlib.Data.Bundle
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Basis
+public import Mathlib.Topology.Algebra.Module.FiniteDimension
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Curry.Basic
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.TensorProduct
+public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Bundle.Section
+public import CalabiYau.Geometry.Manifold.Tensor.Product.Basis
+public import CalabiYau.Geometry.Manifold.Tensor.Product.Bundle
+public import CalabiYau.Geometry.Manifold.Tensor.Product.Pretrivialization
+public import CalabiYau.Geometry.Manifold.Tensor.Product.Defs
+public import CalabiYau.Mathlib.LinearAlgebra.TensorProduct.HomEquiv
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.LinearAlgebra.Contraction
+public import Mathlib.RingTheory.TensorProduct.Finite
+public import Mathlib.Analysis.Normed.Operator.Banach
+public import Mathlib.Topology.Algebra.Module.Equiv
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.Basic
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.Idempotent
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.Quotient
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.Restrict
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.RestrictScalars
+public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Curry
+public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Flip
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Multilinear.Flip
+public import Mathlib.Analysis.Normed.Module.Multilinear.Basic
+public import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
+public import Mathlib.Analysis.Normed.Operator.Mul
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Alternating.DomCongr
+public import Mathlib.LinearAlgebra.Alternating.Basic
+public import CalabiYau.Geometry.Manifold.Tensor.Alternating.Shuffle.Decomposition
+public import CalabiYau.Mathlib.LinearAlgebra.Alternating.ShuffleSplit
+public import Mathlib.GroupTheory.Perm.Option
+public import Mathlib.LinearAlgebra.Alternating.DomCoprod
+public import Mathlib.GroupTheory.Perm.Finite
+public import Mathlib.Logic.Equiv.Fin.Basic
+public import Mathlib.Tactic.Group
+public import Mathlib.Analysis.Normed.Module.Alternating.Curry
+public import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
+public import Mathlib.Tactic.Cases
+public import CalabiYau.Geometry.Manifold.Tensor.Product.Fiber
+public import Mathlib.Topology.VectorBundle.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Basis
+public import CalabiYau.Mathlib.LinearAlgebra.Dual.PredualBasis
+public import Mathlib.LinearAlgebra.Dual.Basis
+public import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
+public import CalabiYau.Geometry.Manifold.LieDerivative.Tensor
+public import Mathlib.Geometry.Manifold.VectorField.Pullback
+public import CalabiYau.Geometry.Manifold.Tensor.RSTensor.Coordinates.BundleBasis
+public import Mathlib.Analysis.Calculus.FDeriv.ContinuousMultilinearMap
+public import CalabiYau.Geometry.Manifold.Connection.TensorNabla.InducedConnection
+public import CalabiYau.Geometry.Manifold.Bundle.TangentSpace
+public import Mathlib.Topology.VectorBundle.Hom
+public import Mathlib.Analysis.Normed.Module.Multilinear.Curry
+public import CalabiYau.Geometry.Manifold.Bundle.PartialMfderiv.Basic
+public import CalabiYau.Geometry.Manifold.Coordinates.Calculus.FixedBaseDerivative
+public import CalabiYau.Geometry.Riemannian.Operator.Scalar.Calculus
+public import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
+public import Mathlib.Geometry.Manifold.MFDeriv.Tangent
+public import Mathlib.Geometry.Manifold.Diffeomorph
+public import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Data.Matrix.Mul
+public import CalabiYau.Geometry.Riemannian.TensorInner.Tangent.Riemannian
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.Analysis.InnerProductSpace.Trace
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
+public import Mathlib.Analysis.InnerProductSpace.Defs
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Mathlib.Analysis.InnerProductSpace.Positive
+public import Mathlib.Analysis.InnerProductSpace.Projection.FiniteDimensional
+public import Mathlib.Analysis.InnerProductSpace.Spectrum
+public import Mathlib.Analysis.Matrix.Spectrum
+public import Mathlib.Analysis.Matrix.PosDef
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+public import Mathlib.Data.Fintype.Basic
+public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Data.Fin.Tuple.Basic
+public import Mathlib.Tactic.Ring
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
+public import Mathlib.Tactic.Abel
+public import Mathlib.Tactic.FinCases
+public import CalabiYau.Geometry.Manifold.Bundle.Frame
+public import Mathlib.Geometry.Manifold.BumpFunction
+public import Mathlib.Analysis.Calculus.DerivativeTest
+public import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
+public import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+public import CalabiYau.Geometry.Manifold.Bundle.Equiv
+public import CalabiYau.Geometry.Manifold.Bundle.Zero
+public import CalabiYau.Geometry.Riemannian.Metric.Coordinates.ChartGram
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Geometry.Manifold.Algebra.Structures
+public import Mathlib.Analysis.Calculus.FDeriv.Congr
+public import Mathlib.Topology.Algebra.Module.FiniteDimensionBilinear
+public import CalabiYau.Geometry.Riemannian.Operator.Gradient.NormSquared
+public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Global.CompactSupport
+public import CalabiYau.Geometry.Riemannian.DivergenceTheorem.Green.Identities
+public import CalabiYau.Geometry.Riemannian.Volume.Properties
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Analysis.Normed.Operator.Extend
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.Analysis.Normed.Group.NullSubmodule
+public import Mathlib.Analysis.Normed.Group.Uniform
+public import CalabiYau.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevBanach
+public import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
+public import Mathlib.Topology.UniformSpace.UniformEmbedding
+public import CalabiYau.Analysis.Sobolev.Chart.RiemannianMeasureComparison
+public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
+public import CalabiYau.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
+public import CalabiYau.Analysis.Sobolev.Euclidean.WeakDerivative.Closedness
+public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Basic
+public import CalabiYau.Analysis.Sobolev.Manifold.RiemannianRellich
+public import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+public import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
+public import CalabiYau.Geometry.Riemannian.Volume.Basic
+public import Mathlib.MeasureTheory.Function.LpSpace.Complete
 public import CalabiYau.Analysis.Sobolev.Manifold.Rellich.Compactness
 
 @[expose] public section
@@ -21,11 +209,12 @@ namespace Analysis
 namespace Laplacian
 namespace DiffChartBilinearH1ComplResidualMemW1p
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+section
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
 open CalabiYau.Laplacian.MetricExtension
@@ -44,49 +233,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-private def smoothExt (α : M) (f : M → ℝ) : EuclN → ℝ := by
-  classical
-  exact fun y =>
-    if y ∈ chartTargetEuclid (I := I) (M := M) α then
-      f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
-    else 0
-
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
-private lemma smoothExt_apply_of_mem
-    (α : M) (f : M → ℝ) {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    smoothExt (I := I) (M := M) α f y =
-      f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
-  classical
-  unfold smoothExt; simp [hy]
-
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
-private lemma smoothExt_apply_of_notMem
-    (α : M) (f : M → ℝ) {y : EuclN}
-    (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
-    smoothExt (I := I) (M := M) α f y = 0 := by
-  classical
-  unfold smoothExt; simp [hy]
-
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
-private lemma smoothExt_eq_chartPushedRaw (α : M) (f : M → ℝ) :
-    smoothExt (I := I) (M := M) α f =
-      chartPushedRaw (I := I) (M := M) α f := by
-  funext y
-  classical
-  by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · rw [smoothExt_apply_of_mem (I := I) (M := M) α f hy]
-    rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α f hy]
-  · rw [smoothExt_apply_of_notMem (I := I) (M := M) α f hy]
-    rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy]
-
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
 private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
     {α : M} {f : M → ℝ}
     {y : EuclN}
@@ -98,8 +244,7 @@ private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
       (I := I) (M := M) (u := f) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy_target
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
+variable [CompactSpace M] in
 private lemma chartPushedRaw_smooth_hasCompactSupport
     {α : M} {f : M → ℝ}
     (hf_support : tsupport f ⊆ (chartAt H α).source) :
@@ -126,7 +271,10 @@ private lemma chartPushedRaw_smooth_hasCompactSupport
   exact chartPushedRaw_smooth_eq_zero_off_image_tsupport
     (I := I) (M := M) (f := f) (α := α) hyK
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
+section
+
+variable [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+
 private lemma chartPushedRaw_smooth_continuous
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -204,7 +352,6 @@ private lemma chartPushedRaw_smooth_continuous
     · exact continuousAt_const
     · filter_upwards [hKc_nhds] with z hz using (h_eq_zero_on_Kc z hz).symm
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_smooth_memLp
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -224,13 +371,12 @@ private lemma chartPushedRaw_smooth_memLp
     hcont.memLp_of_hasCompactSupport (μ := volume) hcompact
   exact hmemLp_full.restrict _
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem memW1p_chartPushedRaw_of_contMDiff_tsupport
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (hf_support : tsupport f ⊆ (chartAt H α).source)
     (p : ℝ≥0∞) :
-    DeGiorgi.MemW1p (d := Module.finrank ℝ E) p
+    Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) p
       (chartPushedRaw (I := I) (M := M) α f)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -310,14 +456,20 @@ theorem memW1p_chartPushedRaw_of_contMDiff_tsupport
         (I := I) (M := M) (f := f) (α := α) hf_support
     have hΛ_smooth_top : ContDiff ℝ (⊤ : ℕ∞) Λ := hΛ_smooth
     have hΛ_smooth_C1 : ContDiff ℝ 1 Λ := hΛ_smooth.of_le (by norm_cast)
-    have hw_univ : DeGiorgi.MemW1pWitness (d := Module.finrank ℝ E) p Λ Set.univ :=
-      DeGiorgi.MemW1pWitness.ofContDiffHasCompactSupport (p := p) hΛ_smooth_top hΛ_compact
-    have hw_chart : DeGiorgi.MemW1pWitness (d := Module.finrank ℝ E) p Λ
+    have hw_univ : Sobolev.Euclidean.MemW1pWitness (d := Module.finrank ℝ E) p Λ Set.univ :=
+      Sobolev.Euclidean.MemW1pWitness.ofContDiffHasCompactSupport (p := p) hΛ_smooth_top hΛ_compact
+    have hw_chart : Sobolev.Euclidean.MemW1pWitness (d := Module.finrank ℝ E) p Λ
         (chartTargetEuclid (I := I) (M := M) α) :=
-      hw_univ.restrict (chartTargetEuclid_isOpen (I := I) (M := M) α)
+      hw_univ.restrict
         (Set.subset_univ _)
     refine ⟨fun x => hw_chart.weakGrad x i,
       hw_chart.weakGrad_component_memLp i, hw_chart.isWeakGrad i⟩
+
+end
+
+section
+
+variable [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 noncomputable def fHLeibnizResidualSmoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) : M → ℝ :=
@@ -327,112 +479,6 @@ noncomputable def fHLeibnizResidualSmoothRep
       (gradFun (I := I) g v.toFun x)) -
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
-omit [NeZero (Module.finrank ℝ E)] in
-lemma fHLeibnizResidualSmoothRep_contMDiff
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    ContMDiff I 𝓘(ℝ, ℝ) ∞ (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by
-  classical
-  unfold fHLeibnizResidualSmoothRep
-  have h_inner : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => g.inner x (gradFun (I := I) g
-          (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x)
-        (gradFun (I := I) g v.toFun x)) := by
-    have hα_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
-        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
-      (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
-    let rhoMap : C^∞⟮I, M; 𝓘(ℝ, ℝ), ℝ⟯ :=
-      ⟨(chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯), hα_smooth⟩
-    let vMap : C^∞⟮I, M; 𝓘(ℝ, ℝ), ℝ⟯ := ⟨v.toFun, v.smooth⟩
-    have h := CalabiYau.Riemannian.contMDiff_g_inner_of_smooth_sections
-      (I := I) (M := M) g
-      (CalabiYau.Riemannian.gradG (I := I) g rhoMap)
-      (CalabiYau.Riemannian.gradG (I := I) g vMap)
-    refine h.congr (fun x => ?_)
-    rw [CalabiYau.Riemannian.grad_g_apply,
-      CalabiYau.Riemannian.grad_g_apply]
-    congr 1
-  have h_piece1 : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => -((2 : ℝ) * g.inner x (gradFun (I := I) g
-          (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x)
-        (gradFun (I := I) g v.toFun x))) := by
-    have h_two : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (2 : ℝ)) := contMDiff_const
-    have h_mul : ContMDiff I 𝓘(ℝ, ℝ) ∞
-        (fun x : M => (2 : ℝ) * g.inner x (gradFun (I := I) g
-            (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x)
-          (gradFun (I := I) g v.toFun x)) := h_two.mul h_inner
-    exact h_mul.neg
-  have h_piece2 : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x) :=
-    (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul v.smooth
-  exact h_piece1.sub h_piece2
-
-omit [NeZero (Module.finrank ℝ E)] in
-lemma fHLeibnizResidualSmoothRep_tsupport_subset
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    tsupport (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆
-      (chartAt H α).source := by
-  classical
-  have h_support_subset : Function.support
-      (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆
-      tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
-    intro x hx_support
-    by_contra hx_off
-    apply hx_support
-    have h_open : IsOpen
-        (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))ᶜ :=
-      (isClosed_tsupport _).isOpen_compl
-    have h_ev : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) =ᶠ[𝓝 x]
-        (fun _ : M => (0 : ℝ)) := by
-      filter_upwards [h_open.mem_nhds hx_off] with y hy
-      by_contra hne
-      exact hy (subset_tsupport _ hne)
-    have h_grad_zero : gradFun (I := I) g
-        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 :=
-      gradFun_eq_zero_of_eventuallyEq_zero (I := I) g h_ev
-    have h_lap_zero : (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x = 0 := by
-      rw [laplacianOfChartPOU_apply]
-      rw [Δ_g_def]
-      have h_grad_ev : ∀ᶠ y in 𝓝 x,
-          (CalabiYau.Riemannian.gradG (I := I) g
-            (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
-              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) y =
-          (0 : TangentSpace I y) := by
-        filter_upwards [h_open.mem_nhds hx_off] with y hy
-        have h_y_ev : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) =ᶠ[𝓝 y]
-            (fun _ : M => (0 : ℝ)) := by
-          filter_upwards [h_open.mem_nhds hy] with z hz
-          by_contra hne
-          exact hz (subset_tsupport _ hne)
-        have h_g := gradFun_eq_zero_of_eventuallyEq_zero (I := I) g h_y_ev
-        rw [CalabiYau.Riemannian.grad_g_apply]
-        exact h_g
-      exact CalabiYau.DivergenceTheorem.divergence_g_zero_of_eventuallyEq_zero
-        (I := I) g _ h_grad_ev
-    change fHLeibnizResidualSmoothRep (I := I) (M := M) g α v x = 0
-    unfold fHLeibnizResidualSmoothRep
-    rw [h_grad_zero, h_lap_zero]
-    simp
-  have h_tsupp_subset : tsupport
-      (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆
-      tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
-    closure_minimal h_support_subset (isClosed_tsupport _)
-  exact h_tsupp_subset.trans
-    (CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M α)
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem memW1p_chartPushedRaw_fHLeibnizResidualSmoothRep
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
-      (chartPushedRaw (I := I) (M := M) α
-        (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v))
-      (chartTargetEuclid (I := I) (M := M) α) := by
-  have h_smooth := fHLeibnizResidualSmoothRep_contMDiff (I := I) (M := M) g α v
-  have h_support := fHLeibnizResidualSmoothRep_tsupport_subset (I := I) (M := M) g α v
-  exact memW1p_chartPushedRaw_of_contMDiff_tsupport
-    (I := I) (M := M) (f := fHLeibnizResidualSmoothRep (I := I) (M := M) g α v)
-    (α := α) h_smooth h_support 2
-
-omit [NeZero (Module.finrank ℝ E)] in
 theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ((CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -450,10 +496,10 @@ theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
         gradInnerSmooth (I := I) (M := M) g ρα v :=
     gradInnerCLM_smoothToH1Compl (I := I) (M := M) g ρα v
   have h_H1ComplToLp_smooth :
-      H1ComplToLp (I := I) (M := M) g
+      h1ComplToLp (I := I) (M := M) g
           (smoothToH1Compl (I := I) (M := M) g v) =
         smoothToLp (I := I) (M := M) g v :=
-    H1ComplToLp_smoothToH1Compl (I := I) (M := M) g v
+    h1ComplToLp_smoothToH1Compl (I := I) (M := M) g v
   have h_lp_eq :
       CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
           (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v) =
@@ -511,85 +557,9 @@ theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
   simp only [Pi.smul_apply, smul_eq_mul, hx_grad]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
-theorem memW1p_fChartResidual_smoothToH1Compl
-    (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
-      (CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
-        (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v))
-      (chartTargetEuclid (I := I) (M := M) α) := by
-  classical
-  have h_lp_ae := fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
-    (I := I) (M := M) g α v
-  have h_fChart_ae := chartPushedRawLpFromLp_coeFn
-    (I := I) (M := M) g α
-    (CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
-      (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v))
-  have h_lp_meas : Measurable
-      ((CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
-          (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v) :
-          Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
-    exact (Lp.stronglyMeasurable _).measurable
-  have h_rep_meas : Measurable
-      (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by
-    have h := fHLeibnizResidualSmoothRep_contMDiff (I := I) (M := M) g α v
-    exact h.continuous.measurable
-  have h_chartPushed_lp_ae :=
-    CalabiYau.Analysis.Laplacian.LaplacianDomainChartData.chartPushedRaw_aeEq_of_aeEq
-      (I := I) (M := M) g α h_lp_meas h_rep_meas h_lp_ae
-  have h_fChart_smooth_ae :
-      CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
-          (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v) =ᵐ[
-          (chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α)]
-        chartPushedRaw (I := I) (M := M) α
-          (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by
-    unfold CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
-    exact h_fChart_ae.trans h_chartPushed_lp_ae
-  have h_vol_abs_weighted : (volume : Measure EuclN).restrict
-        (chartTargetEuclid (I := I) (M := M) α) ≪
-      (chartPulledWeightedMeasure (I := I) g α).restrict
-        (chartTargetEuclid (I := I) (M := M) α) := by
-    intro A hA
-    have h_chartTarget_meas : MeasurableSet
-        (chartTargetEuclid (I := I) (M := M) α) :=
-      (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-    unfold chartPulledWeightedMeasure at hA
-    rw [show ((volume : Measure EuclN).withDensity
-        (fun y => ENNReal.ofReal (densityOnEuclid (I := I) g α y))).restrict
-        (chartTargetEuclid (I := I) (M := M) α) =
-        ((volume : Measure EuclN).restrict
-          (chartTargetEuclid (I := I) (M := M) α)).withDensity
-          (fun y => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
-      from MeasureTheory.restrict_withDensity h_chartTarget_meas _] at hA
-    rw [MeasureTheory.withDensity_apply_eq_zero'
-      (μ := (volume : Measure EuclN).restrict
-        (chartTargetEuclid (I := I) (M := M) α))
-      (f := fun y : EuclN => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
-      (ENNReal.measurable_ofReal.comp_aemeasurable
-        ((densityOnEuclid_continuousOn (I := I) g α).aemeasurable h_chartTarget_meas))]
-      at hA
-    rw [Measure.restrict_apply' h_chartTarget_meas]
-    rw [Measure.restrict_apply' h_chartTarget_meas] at hA
-    refine MeasureTheory.measure_mono_null ?_ hA
-    intro y ⟨hy_A, hy_chart⟩
-    refine ⟨⟨?_, hy_A⟩, hy_chart⟩
-    have h_pos : 0 < densityOnEuclid (I := I) g α y :=
-      densityOnEuclid_pos (I := I) g α hy_chart
-    exact (ENNReal.ofReal_pos.mpr h_pos).ne'
-  have h_fChart_smooth_ae_vol :
-      CalabiYau.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
-          (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v) =ᵐ[
-          (volume : Measure EuclN).restrict
-            (chartTargetEuclid (I := I) (M := M) α)]
-        chartPushedRaw (I := I) (M := M) α
-          (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) :=
-    h_vol_abs_weighted.ae_le h_fChart_smooth_ae
-  have h_smooth_w1p :=
-    memW1p_chartPushedRaw_fHLeibnizResidualSmoothRep (I := I) (M := M) g α v
-  exact (_root_.Sobolev.Euclidean.MemW1p_congr_ae
-    (chartTargetEuclid_isOpen (I := I) (M := M) α)
-    h_fChart_smooth_ae_vol.symm).mp h_smooth_w1p
+end
+
+end
 
 end DiffChartBilinearH1ComplResidualMemW1p
 end Laplacian

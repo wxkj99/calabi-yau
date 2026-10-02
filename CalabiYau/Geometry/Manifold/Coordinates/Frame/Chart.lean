@@ -13,7 +13,6 @@ public import Mathlib.LinearAlgebra.Matrix.ToLin
 
 @[expose] public section
 
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -22,22 +21,23 @@ open scoped Manifold Topology ContDiff
 namespace CalabiYau.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-omit [Module.Finite ℝ E] in
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma trivializationAt_baseSet_eq_chartAt_source (x₀ : M) :
     (trivializationAt E (TangentSpace I) x₀).baseSet =
       (chartAt H x₀).source :=
   rfl
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] in
 lemma extChartAt_source_eq_chartAt_source (x₀ : M) :
     (extChartAt I x₀).source = (chartAt H x₀).source := by
   rw [extChartAt_source]
 
-omit [Module.Finite ℝ E] in
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 lemma extChartAt_symm_mem_trivializationAt_baseSet (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) :
     (extChartAt I x₀).symm y ∈
@@ -47,6 +47,12 @@ lemma extChartAt_symm_mem_trivializationAt_baseSet (x₀ : M) {y : E}
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   exact hsource
 
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [Module.Finite ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 def chartBasisVecFiber (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     TangentSpace I x :=
   (trivializationAt E (TangentSpace I) x₀).symmL ℝ x ((chartModelBasis E) i)
@@ -117,5 +123,7 @@ lemma chartBasisFamily_linearIndependent (x₀ : M) {x : M}
     exact chartBasisFamily_apply (I := I) x₀ hx i
   rw [← hcongr]
   exact h
+
+end
 
 end CalabiYau.Tensor.Coordinates

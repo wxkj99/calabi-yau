@@ -5,8 +5,6 @@ public import CalabiYau.Analysis.Sobolev.Approximation.Density.Smooth
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -19,14 +17,17 @@ namespace Chart
 variable {E H : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+section
+
+variable [IsManifold I ∞ M]
 
 lemma exists_compact_neighborhood_of_tsupport_pou
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
@@ -83,7 +84,8 @@ def chartCutoffEuclidean (α : M) (η_M : M → ℝ) : EuclN → ℝ := by
       η_M ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
-omit [IsManifold I ∞ M] in
+end
+
 lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartCutoffEuclidean (I := I) (M := M) α η_M y =
@@ -92,7 +94,6 @@ lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
   unfold chartCutoffEuclidean
   simp [hy]
 
-omit [IsManifold I ∞ M] in
 lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     chartCutoffEuclidean (I := I) (M := M) α η_M y = 0 := by
@@ -100,7 +101,6 @@ lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
   unfold chartCutoffEuclidean
   simp [hy]
 
-omit [IsManifold I ∞ M] in
 lemma chartImage_isCompact_of_compact_in_source (α : M)
     {S : Set M} (hS_compact : IsCompact S)
     (hS_chart : S ⊆ (chartAt H α).source) :
@@ -127,7 +127,6 @@ lemma chartImage_isCompact_of_compact_in_source (α : M)
       exact ⟨extChartAt I α x, ⟨x, hxS, rfl⟩, hxy⟩
   rw [← hset_eq]; exact h_image
 
-omit [IsManifold I ∞ M] in
 lemma chartImage_tsupport_subset_chartTargetEuclid (α : M) (η_M : M → ℝ)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
@@ -142,7 +141,6 @@ lemma chartImage_tsupport_subset_chartTargetEuclid (α : M) (η_M : M → ℝ)
   rw [← hxy]
   exact ⟨extChartAt I α x, h_target, rfl⟩
 
-omit [IsManifold I ∞ M] in
 lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     {y : EuclN}
     (hy_off : y ∉ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
@@ -167,7 +165,6 @@ lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     exact ⟨z, hz_tsupp, hy_eq⟩
   · exact etaEuclid_apply_of_notMem (I := I) (M := M) α η_M hy_target
 
-omit [IsManifold I ∞ M] in
 lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
     (h_tsupp_compact : IsCompact (tsupport η_M))
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
@@ -192,6 +189,7 @@ lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
   change closure (Function.support (chartCutoffEuclidean (I := I) (M := M) α η_M)) ⊆ _
   exact subset_trans (closure_mono h_support_in) h_image_closed.closure_subset
 
+variable [IsManifold I ∞ M] in
 lemma contDiff_etaEuclid [I.Boundaryless] (α : M) (η_M : M → ℝ)
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
     (hη_compact : HasCompactSupport η_M)
@@ -295,7 +293,6 @@ lemma contDiff_etaEuclid [I.Boundaryless] (α : M) (η_M : M → ℝ)
     exact (contDiffAt_const : ContDiffAt ℝ ∞ (fun _ => (0 : ℝ)) y).congr_of_eventuallyEq
       hf_zero_evt
 
-omit [IsManifold I ∞ M] in
 lemma etaEuclid_range_Icc (α : M) (η_M : M → ℝ)
     (hη_range : Set.range η_M ⊆ Set.Icc (0 : ℝ) 1) :
     Set.range (chartCutoffEuclidean (I := I) (M := M) α η_M) ⊆ Set.Icc (0 : ℝ) 1 := by
@@ -309,6 +306,7 @@ lemma etaEuclid_range_Icc (α : M) (η_M : M → ℝ)
     rw [← hy]
     exact ⟨le_refl _, zero_le_one⟩
 
+variable [IsManifold I ∞ M] in
 lemma etaEuclid_eq_one_of_eta_eq_one
     [T2Space M] [SigmaCompactSpace M] (α : M) (η_M : M → ℝ)
     (hη_one : ∀ x ∈ tsupport ((CalabiYau.RiemannianVolume.chartAtlasPOU
@@ -347,7 +345,6 @@ lemma etaEuclid_eq_one_of_eta_eq_one
   rw [hz_eq_x]
   exact hη_one x hx_support
 
-omit [IsManifold I ∞ M] in
 lemma hasCompactSupport_etaEuclid (α : M) (η_M : M → ℝ)
     (hη_compact : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
@@ -366,6 +363,10 @@ lemma hasCompactSupport_etaEuclid (α : M) (η_M : M → ℝ)
   have : y ∉ tsupport (chartCutoffEuclidean (I := I) (M := M) α η_M) :=
     fun h => hy_off (hf_support_in h)
   exact image_eq_zero_of_notMem_tsupport this
+
+section
+
+variable [IsManifold I ∞ M]
 
 lemma exists_grad_bound_etaEuclid [I.Boundaryless] (α : M) (η_M : M → ℝ)
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
@@ -451,7 +452,7 @@ theorem exists_strict_strong_support_approx
     · rw [norm_iteratedFDeriv_one]; exact hC_grad_on_Ωα y hy
   obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
     Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hηE_smooth
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hΩα_open hηE_smooth
       hC_nonneg hηE_iter_bound
   refine ⟨K_α, hK_compact, hK_chart, h_tsupp_in_int_K, ?_⟩
   intro u hu ε_per hε_per
@@ -561,6 +562,8 @@ theorem exists_strict_strong_support_approx
     refine mul_le_mul_of_nonneg_right ?_ hε_per.le
     linarith
   linarith
+
+end
 
 end Chart
 end Sobolev

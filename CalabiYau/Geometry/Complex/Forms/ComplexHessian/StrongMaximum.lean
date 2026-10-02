@@ -2,7 +2,6 @@ module
 
 public import Mathlib.Analysis.Complex.AbsMax
 public import Mathlib.Analysis.Complex.Harmonic.Analytic
-import CalabiYau.Geometry.Complex.Forms.ComplexHessian.ComplexLineHarmonic
 
 /-!
 # Strong maximum principle for pluriharmonic functions
@@ -20,15 +19,12 @@ variable {n : ℕ}
 
 /-- If every sufficiently short complex-line restriction through `z` is harmonic and `f` has a
 maximum at `z` on a coordinate ball, then `f` is constant on a smaller ball. -/
-@[deprecated "unused hypothesis `hr`; will be removed" (since := "2026-10-02")]
 theorem eqOn_ball_of_harmonicOnNhd_complexLine
     {f : EuclideanSpace ℂ (Fin n) → ℝ} {z : EuclideanSpace ℂ (Fin n)} {r : ℝ}
-    (hr : 0 < r)
     (hmax : IsMaxOn f (Metric.ball z r) z)
     (hline : ∀ v : EuclideanSpace ℂ (Fin n), ‖v‖ < r / 2 →
       InnerProductSpace.HarmonicOnNhd (fun t : ℂ ↦ f (z + t • v)) (Metric.ball (0 : ℂ) 2)) :
     EqOn f (Function.const (EuclideanSpace ℂ (Fin n)) (f z)) (Metric.ball z (r / 2)) := by
-  have _hr := hr
   have hsegment (v : EuclideanSpace ℂ (Fin n)) (hv : ‖v‖ < r / 2) :
       f (z + v) = f z := by
     let g : ℂ → ℝ := fun t ↦ f (z + t • v)

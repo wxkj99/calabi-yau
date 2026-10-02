@@ -8,8 +8,7 @@ public import Mathlib.Topology.MetricSpace.Holder
 public import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
-import CalabiYau.Geometry.Kahler.MatrixInverse
-import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseHolder
+import CalabiYau.Mathlib.Analysis.Matrix.InverseHolder
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseJetNorm
 import CalabiYau.MongeAmpere.Estimates.Higher.SchauderStep.InverseJetHolder
 
@@ -242,7 +241,7 @@ estimate. It is the induction target for the higher product-jet bounds above. -/
 private theorem exists_uniform_positive_inverse_entry_jets
     {P E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {n k : ℕ} {α C B : ℝ≥0} {W K : Set E}
-    (S : Set P) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (S : Set P)
     (hW : IsOpen W) (hKW : K ⊆ W)
     (A : P → E → Matrix (Fin n) (Fin n) ℂ)
     (hASmooth : ∀ p ∈ S, ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ A p z i j) W)
@@ -270,7 +269,7 @@ private theorem exists_uniform_positive_inverse_entry_jets
       exact (hA p hp i j).2.2
     · exact (hA p hp i j).2.1 m (lt_of_le_of_ne hm hmk)
   obtain ⟨H, hH⟩ := exists_holderConstantOn_matrix_inverse_entry_jets
-    S hα₀ hα₁ hW hKW A hASmooth hAJet hAHolder hUnit hN
+    S hW hKW A hASmooth hAHolder hUnit hN
   refine ⟨max N H, ?_⟩
   intro p hp i j
   refine ⟨?_, ?_, ?_⟩
@@ -286,7 +285,7 @@ a per-field existential bound cannot be used for a uniform Schauder continuation
 theorem exists_holderBoundOn_matrix_inverse_entries
     {P E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {n k : ℕ} {α C B : ℝ≥0} {W K : Set E}
-    (S : Set P) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (S : Set P)
     (hW : IsOpen W) (hKW : K ⊆ W)
     (A : P → E → Matrix (Fin n) (Fin n) ℂ)
     (hASmooth : ∀ p ∈ S, ∀ i j, ContDiffOn ℝ ∞ (fun z ↦ A p z i j) W)
@@ -337,7 +336,7 @@ theorem exists_holderBoundOn_matrix_inverse_entries
     let CInv : ℝ≥0 := (n : ℝ≥0) ^ 2 * B ^ 2 * C
     let C0 : ℝ≥0 := max B CInv
     obtain ⟨Cpos, hpos⟩ := exists_uniform_positive_inverse_entry_jets
-      S hα₀ hα₁ hW hKW A hASmooth hA hUnit hInv hkpos
+      S hW hKW A hASmooth hA hUnit hInv hkpos
     let C' : ℝ≥0 := max C0 Cpos
     refine ⟨C', ?_⟩
     intro p hp i j

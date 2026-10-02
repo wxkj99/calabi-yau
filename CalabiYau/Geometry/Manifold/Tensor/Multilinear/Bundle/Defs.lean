@@ -123,11 +123,6 @@ theorem continuousMultilinearMap_apply
     ⟨p.1, p.2.compContinuousLinearMap (fun _ => e.symmL 𝕜 p.1)⟩ :=
   rfl
 
-theorem continuousMultilinearMap_symm_apply (p : B × MLF) :
-    (continuousMultilinearMap 𝕜 s e).toPartialEquiv.symm p =
-    ⟨p.1, p.2.compContinuousLinearMap (fun _ => e.continuousLinearMapAt 𝕜 p.1)⟩ :=
-  rfl
-
 @[simp] theorem baseSet_continuousMultilinearMap :
     (Pretrivialization.continuousMultilinearMap 𝕜 s e).baseSet = e.baseSet :=
   rfl
@@ -175,7 +170,6 @@ def _root_.Bundle.continuousMultilinearMap.vectorPrebundle :
       e' = Pretrivialization.continuousMultilinearMap 𝕜 s e}
   pretrivialization_linear' := by
     rintro _ ⟨e, he, rfl⟩
-    have := he
     exact Pretrivialization.continuousMultilinearMap.isLinear 𝕜 s e
   pretrivializationAt x := Pretrivialization.continuousMultilinearMap 𝕜 s
     (trivializationAt F E x)

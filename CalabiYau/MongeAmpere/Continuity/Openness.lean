@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Continuity.Basic
 public import CalabiYau.Geometry.Kahler.Poisson
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import Mathlib.Analysis.Calculus.Implicit
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderC2Regularity
@@ -176,319 +176,6 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpac
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
   [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
-omit [ConnectedSpace M] in
-private theorem exists_linearized_mongeAmpere_direction [Nonempty M]
-    (hPoisson : ∀ ω₁ : KahlerForm n M, ω₁.PoissonSolvable) (ω₀ : KahlerForm n M)
-    {F : M → ℝ} (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
-    (φ : M → ℝ) (hφ : ω₀.IsPotential φ) :
-    ∃ ψ : M → ℝ, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ ψ ∧
-      ∀ x, HasDerivAt (fun s : ℝ ↦ Real.log (ω₀.mongeAmpere (φ + s • ψ) x))
-        (F x - (∫ y, F y ∂(ω₀.perturb φ hφ).volume) /
-          (ω₀.perturb φ hφ).volume.real univ) 0 := by
-  let ω₁ := ω₀.perturb φ hφ
-  let m := (∫ y, F y ∂ω₁.volume) / ω₁.volume.real univ
-  have hvol : 0 < ω₁.volume.real univ := by
-    have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₁.volume := by
-      simpa using (integrable_const (1 : ℝ) : Integrable (fun _ : M ↦ (1 : ℝ)) ω₁.volume)
-    have h := integral_exp_pos (μ := ω₁.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
-    simpa using h
-  have hFint : Integrable F ω₁.volume :=
-    hF.continuous.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace F)
-  have hmsmooth : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
-      (fun x ↦ F x - m) := by
-    exact hF.sub contMDiff_const
-  have hmzero : ∫ x, (F x - m) ∂ω₁.volume = 0 := by
-    rw [integral_sub hFint (integrable_const m)]
-    simp only [integral_const]
-    dsimp [m]
-    field_simp [ne_of_gt hvol]
-    ring
-  obtain ⟨ψ, hψ, hψlap⟩ := hPoisson ω₁ (fun x ↦ F x - m) hmsmooth hmzero
-  refine ⟨ψ, hψ, ?_⟩
-  intro x
-  have hderiv := ω₀.hasDerivAt_log_mongeAmpere hφ hψ x
-  rw [show (ω₀.perturb φ hφ).laplacian ψ = ω₁.laplacian ψ from rfl, hψlap] at hderiv
-  simpa [m, ω₁] using hderiv
-
-omit [ConnectedSpace M] in
-private theorem hasDerivAt_integral_exp_mul [Nonempty M]
-    (ω₀ : KahlerForm n M) {F : M → ℝ}
-    (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F) (t : ℝ) :
-    HasDerivAt (fun s : ℝ ↦ ∫ x, Real.exp (s * F x) ∂ω₀.volume)
-      (∫ x, F x * Real.exp (t * F x) ∂ω₀.volume) t := by
-  have hFc : Continuous F := hF.continuous
-  have hFcOn : ContinuousOn F (Set.univ : Set M) := hFc.continuousOn
-  obtain ⟨C, hC⟩ :=
-    (isCompact_univ : IsCompact (Set.univ : Set M)).exists_bound_of_continuousOn hFcOn
-  have hCnonneg : 0 ≤ C := by
-    obtain ⟨x₀⟩ := ‹Nonempty M›
-    exact (norm_nonneg (F x₀)).trans (hC x₀ (Set.mem_univ x₀))
-  let K : ℝ := C + 1
-  have hKnonneg : 0 ≤ K := by dsimp [K]; linarith
-  have hFnorm : ∀ x, ‖F x‖ ≤ K := by
-    intro x
-    exact (hC x (Set.mem_univ x)).trans (by dsimp [K]; linarith)
-  have hFabs : ∀ x, |F x| ≤ K := fun x ↦ by
-    simpa [Real.norm_eq_abs] using hFnorm x
-  let B : ℝ := K * Real.exp ((|t| + 1) * K)
-  have hBound : ∀ x s, s ∈ Metric.ball t 1 →
-      ‖F x * Real.exp (s * F x)‖ ≤ B := by
-    intro x s hs
-    have hst : |s - t| < 1 := by
-      simpa [Real.dist_eq] using Metric.mem_ball.mp hs
-    have hsabs : |s| ≤ |t| + 1 := by
-      have hst' := abs_lt.mp hst
-      rw [abs_le]
-      constructor <;> linarith [hst'.1, hst'.2, neg_abs_le t, le_abs_self t]
-    have harg : s * F x ≤ (|t| + 1) * K := by
-      calc
-        s * F x ≤ |s * F x| := le_abs_self _
-        _ = |s| * |F x| := abs_mul _ _
-        _ ≤ (|t| + 1) * K :=
-          mul_le_mul hsabs (hFabs x) (abs_nonneg _) (by positivity)
-    calc
-      ‖F x * Real.exp (s * F x)‖ = ‖F x‖ * Real.exp (s * F x) := by
-        simp only [norm_mul, Real.norm_eq_abs, abs_of_pos (Real.exp_pos (s * F x))]
-      _ ≤ K * Real.exp (s * F x) :=
-        mul_le_mul_of_nonneg_right (hFnorm x) (Real.exp_nonneg _)
-      _ ≤ B := by
-        dsimp [B]
-        exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr harg) hKnonneg
-  have hmeas : ∀ᶠ s in 𝓝 t,
-      AEStronglyMeasurable (fun x : M ↦ Real.exp (s * F x)) ω₀.volume := by
-    filter_upwards [] with s
-    exact (Real.continuous_exp.comp (continuous_const.mul hFc)).aestronglyMeasurable
-  have hint : Integrable (fun x : M ↦ Real.exp (t * F x)) ω₀.volume := by
-    apply (Real.continuous_exp.comp (continuous_const.mul hFc)).integrable_of_hasCompactSupport
-    exact HasCompactSupport.of_compactSpace _
-  have hprime_meas : AEStronglyMeasurable
-      (fun x : M ↦ F x * Real.exp (t * F x)) ω₀.volume := by
-    apply (hFc.mul (Real.continuous_exp.comp (continuous_const.mul hFc))).aestronglyMeasurable
-  have hdiff : ∀ᵐ x ∂ω₀.volume, ∀ s ∈ Metric.ball t 1,
-      HasDerivAt (fun r : ℝ ↦ Real.exp (r * F x))
-        (F x * Real.exp (s * F x)) s := by
-    filter_upwards [] with x s hs
-    simpa [Real.exp_eq_exp_ℝ, smul_eq_mul] using
-      (hasDerivAt_exp_smul_const' (x := F x) s)
-  have hmain := hasDerivAt_integral_of_dominated_loc_of_deriv_le
-    (F := fun (s : ℝ) (x : M) ↦ Real.exp (s * F x)) (x₀ := t) (s := Metric.ball t 1)
-    (hs := Metric.ball_mem_nhds t (by norm_num)) (hF_meas := hmeas) (hF_int := hint)
-    (F' := fun (s : ℝ) (x : M) ↦ F x * Real.exp (s * F x)) (hF'_meas := hprime_meas)
-    (h_bound := Filter.Eventually.of_forall fun x ↦ hBound x)
-    (bound_integrable := integrable_const B) (h_diff := hdiff)
-  simpa using hmain.2
-
-omit [ConnectedSpace M] in
-private theorem hasDerivAt_pathConstant [Nonempty M]
-    (ω₀ : KahlerForm n M) {F : M → ℝ}
-    (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F) (t : ℝ) :
-    letI : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
-    letI : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
-    HasDerivAt (fun s : ℝ ↦ ω₀.pathConstant F s)
-      (-(∫ x, F x * Real.exp (t * F x) ∂ω₀.volume) /
-        (∫ x, Real.exp (t * F x) ∂ω₀.volume)) t := by
-  let : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
-  let : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
-  have hFc : Continuous F := hF.continuous
-  have hvol : 0 < ω₀.volume.real univ := by
-    have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₀.volume := by
-      simpa using (integrable_const (1 : ℝ) : Integrable (fun _ : M ↦ (1 : ℝ)) ω₀.volume)
-    simpa using integral_exp_pos (μ := ω₀.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
-  have hIpos (s : ℝ) : 0 < ∫ x, Real.exp (s * F x) ∂ω₀.volume := by
-    apply integral_exp_pos
-    exact (Real.continuous_exp.comp (continuous_const.mul hFc)).integrable_of_hasCompactSupport
-      (HasCompactSupport.of_compactSpace _)
-  have hfun : (fun s : ℝ ↦ ω₀.pathConstant F s) =
-      fun s ↦ Real.log (ω₀.volume.real univ) -
-        Real.log (∫ x, Real.exp (s * F x) ∂ω₀.volume) := by
-    funext s
-    simp only [pathConstant]
-    exact Real.log_div (ne_of_gt hvol) (ne_of_gt (hIpos s))
-  have hI := hasDerivAt_integral_exp_mul ω₀ hF t
-  have hlogI := hI.log (ne_of_gt (hIpos t))
-  have hconst : HasDerivAt (fun _ : ℝ ↦ Real.log (ω₀.volume.real univ)) 0 t :=
-    hasDerivAt_const t _
-  rw [hfun]
-  have hsub := (hconst.sub hlogI).congr_of_eventuallyEq
-    (Filter.Eventually.of_forall fun s : ℝ ↦ rfl)
-  convert hsub using 1
-  · funext s
-    rfl
-  · rw [div_eq_mul_inv]
-    ring
-
-omit [ConnectedSpace M] in
-private theorem hasDerivAt_pathExponent [Nonempty M]
-    (ω₀ : KahlerForm n M) {F : M → ℝ}
-    (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
-    (t : ℝ) (x : M) :
-    letI : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
-    letI : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
-    HasDerivAt (fun s : ℝ ↦ s * F x + ω₀.pathConstant F s)
-      (F x - (∫ y, F y * Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume) /
-        ω₀.volume.real univ) t := by
-  let : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
-  let : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
-  have hFc : Continuous F := hF.continuous
-  have hIpos : 0 < ∫ y, Real.exp (t * F y) ∂ω₀.volume := by
-    apply integral_exp_pos
-    exact (Real.continuous_exp.comp (continuous_const.mul hFc)).integrable_of_hasCompactSupport
-      (HasCompactSupport.of_compactSpace _)
-  have hlinear : HasDerivAt (fun s : ℝ ↦ s * F x) (F x) t := by
-    simpa using (hasDerivAt_id t).mul_const (F x)
-  have hconstant := hasDerivAt_pathConstant ω₀ hF t
-  have hbare : HasDerivAt (fun s : ℝ ↦ s * F x + ω₀.pathConstant F s)
-      (F x - (∫ y, F y * Real.exp (t * F y) ∂ω₀.volume) /
-        (∫ y, Real.exp (t * F y) ∂ω₀.volume)) t := by
-    convert hlinear.add hconstant using 1
-    · rfl
-    · ring
-  have hmass := ω₀.integral_exp_path hF t
-  have hmassFactor :
-      (∫ y, Real.exp (t * F y) ∂ω₀.volume) * Real.exp (ω₀.pathConstant F t) =
-        ω₀.volume.real univ := by
-    calc
-      _ = ∫ y, Real.exp (t * F y) * Real.exp (ω₀.pathConstant F t) ∂ω₀.volume := by
-        rw [integral_mul_const]
-      _ = ∫ y, Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume := by
-        congr 1
-        funext y
-        rw [← Real.exp_add]
-      _ = ω₀.volume.real univ := hmass
-  have hnum :
-      (∫ y, F y * Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume) =
-        (∫ y, F y * Real.exp (t * F y) ∂ω₀.volume) *
-          Real.exp (ω₀.pathConstant F t) := by
-    have hexp (y : M) : Real.exp (t * F y + ω₀.pathConstant F t) =
-        Real.exp (t * F y) * Real.exp (ω₀.pathConstant F t) := Real.exp_add _ _
-    calc
-      ∫ y, F y * Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume =
-          ∫ y, F y * (Real.exp (t * F y) * Real.exp (ω₀.pathConstant F t)) ∂ω₀.volume := by
-        apply integral_congr_ae
-        filter_upwards [] with y
-        rw [hexp]
-      _ = ∫ y, (F y * Real.exp (t * F y)) * Real.exp (ω₀.pathConstant F t) ∂ω₀.volume := by
-        congr 1
-        funext y
-        ring
-      _ = (∫ y, F y * Real.exp (t * F y) ∂ω₀.volume) *
-          Real.exp (ω₀.pathConstant F t) := by
-        rw [integral_mul_const]
-  have hratio :
-      (∫ y, F y * Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume) /
-          ω₀.volume.real univ =
-        (∫ y, F y * Real.exp (t * F y) ∂ω₀.volume) /
-          (∫ y, Real.exp (t * F y) ∂ω₀.volume) := by
-    calc
-      _ = ((∫ y, F y * Real.exp (t * F y) ∂ω₀.volume) *
-          Real.exp (ω₀.pathConstant F t)) /
-          ((∫ y, Real.exp (t * F y) ∂ω₀.volume) *
-            Real.exp (ω₀.pathConstant F t)) := by
-        rw [hnum, hmassFactor]
-      _ = _ := mul_div_mul_right _ _ (ne_of_gt (Real.exp_pos (ω₀.pathConstant F t)))
-  convert hbare using 1
-  · rw [hratio]
-
-omit [ConnectedSpace M] in
-private theorem integral_eq_integral_exp_mul_of_solvesMongeAmpere
-    (ω₀ : KahlerForm n M) {G φ F : M → ℝ}
-    (hsol : ω₀.SolvesMongeAmpere G φ) (hG : Continuous G) :
-    ∫ x, F x ∂(ω₀.perturb φ hsol.1).volume =
-      ∫ x, F x * Real.exp (G x) ∂ω₀.volume := by
-  have hden : (fun x ↦ ENNReal.ofReal (ω₀.mongeAmpere φ x)) =
-      fun x ↦ ENNReal.ofReal (Real.exp (G x)) := by
-    funext x
-    rw [hsol.2 x]
-  have hmeas : Measurable (fun x ↦ ENNReal.ofReal (Real.exp (G x))) := by
-    exact ENNReal.measurable_ofReal.comp (Real.continuous_exp.comp hG).measurable
-  rw [ω₀.volume_perturb hsol.1, hden,
-    integral_withDensity_eq_integral_toReal_smul hmeas
-      (Filter.Eventually.of_forall fun _ ↦ ENNReal.ofReal_lt_top)]
-  apply integral_congr_ae
-  filter_upwards with x
-  rw [ENNReal.toReal_ofReal (le_of_lt (Real.exp_pos (G x)))]
-  simp [smul_eq_mul, mul_comm]
-
-omit [ConnectedSpace M] in
-private theorem average_F_perturb_eq_weighted_path_average [Nonempty M]
-    (ω₀ : KahlerForm n M) {F : M → ℝ}
-    (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F) (t : ℝ)
-    (φ : M → ℝ)
-    (hsol : ω₀.SolvesMongeAmpere
-      (fun x ↦ t * F x + ω₀.pathConstant F t) φ) :
-    (∫ x, F x ∂(ω₀.perturb φ hsol.1).volume) /
-        (ω₀.perturb φ hsol.1).volume.real univ =
-      (∫ x, F x * Real.exp (t * F x + ω₀.pathConstant F t) ∂ω₀.volume) /
-        ω₀.volume.real univ := by
-  let G : M → ℝ := fun x ↦ t * F x + ω₀.pathConstant F t
-  have hG : Continuous G := by
-    exact (continuous_const.mul hF.continuous).add continuous_const
-  have hnum : ∫ x, F x ∂(ω₀.perturb φ hsol.1).volume =
-      ∫ x, F x * Real.exp (G x) ∂ω₀.volume :=
-    integral_eq_integral_exp_mul_of_solvesMongeAmpere ω₀ hsol hG
-  have hmass : (ω₀.perturb φ hsol.1).volume.real univ =
-      ∫ x, Real.exp (G x) ∂ω₀.volume := by
-    calc
-      (ω₀.perturb φ hsol.1).volume.real univ =
-          ∫ x, (1 : ℝ) ∂(ω₀.perturb φ hsol.1).volume := by simp
-      _ = ∫ x, (1 : ℝ) * Real.exp (G x) ∂ω₀.volume :=
-        integral_eq_integral_exp_mul_of_solvesMongeAmpere ω₀ hsol hG
-      _ = ∫ x, Real.exp (G x) ∂ω₀.volume := by simp
-  change (∫ x, F x ∂(ω₀.perturb φ hsol.1).volume) /
-      (ω₀.perturb φ hsol.1).volume.real univ =
-    (∫ x, F x * Real.exp (G x) ∂ω₀.volume) / ω₀.volume.real univ
-  rw [hnum, hmass]
-  rw [ω₀.integral_exp_path hF t]
-
-omit [ConnectedSpace M] in
-private theorem exists_tangent_direction_for_path_solution [Nonempty M]
-    (hPoisson : ∀ ω₁ : KahlerForm n M, ω₁.PoissonSolvable) (ω₀ : KahlerForm n M)
-    {F : M → ℝ} (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
-    (t : ℝ) (φ : M → ℝ)
-    (hsol : ω₀.SolvesMongeAmpere
-      (fun x ↦ t * F x + ω₀.pathConstant F t) φ) :
-    ∃ ψ : M → ℝ, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ ψ ∧
-      ∀ x, HasDerivAt (fun s : ℝ ↦ Real.log (ω₀.mongeAmpere (φ + s • ψ) x))
-        (F x - (∫ y, F y * Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume) /
-          ω₀.volume.real univ) 0 := by
-  obtain ⟨ψ, hψ, hdir⟩ :=
-    exists_linearized_mongeAmpere_direction hPoisson ω₀ hF φ hsol.1
-  have havg := average_F_perturb_eq_weighted_path_average ω₀ hF t φ hsol
-  refine ⟨ψ, hψ, ?_⟩
-  intro x
-  simpa only [havg] using hdir x
-
-omit [ConnectedSpace M] in
-private theorem exists_path_residual_direction [Nonempty M]
-    (hPoisson : ∀ ω₁ : KahlerForm n M, ω₁.PoissonSolvable) (ω₀ : KahlerForm n M)
-    {F : M → ℝ} (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
-    (t : ℝ) (φ : M → ℝ)
-    (hsol : ω₀.SolvesMongeAmpere
-      (fun x ↦ t * F x + ω₀.pathConstant F t) φ) :
-    letI : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
-    letI : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
-    ∃ ψ : M → ℝ, ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ ψ ∧
-      ∀ x, HasDerivAt (fun s : ℝ ↦
-        Real.log (ω₀.mongeAmpere (φ + (s - t) • ψ) x) -
-          (s * F x + ω₀.pathConstant F s)) 0 t := by
-  let : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
-  let : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
-  obtain ⟨ψ, hψ, hdir⟩ :=
-    exists_tangent_direction_for_path_solution hPoisson ω₀ hF t φ hsol
-  refine ⟨ψ, hψ, ?_⟩
-  intro x
-  have hdirAt : HasDerivAt (fun s : ℝ ↦ Real.log (ω₀.mongeAmpere (φ + s • ψ) x))
-      (F x - (∫ y, F y * Real.exp (t * F y + ω₀.pathConstant F t) ∂ω₀.volume) /
-        ω₀.volume.real univ) (t - t) := by
-    simpa using hdir x
-  have hdirection := hdirAt.comp_sub_const t t
-  have hpath := hasDerivAt_pathExponent ω₀ hF t x
-  have hres := hdirection.sub hpath
-  convert hres using 1
-  · funext s
-    rfl
-  · ring
-
 private theorem exists_path_solution_on_ball [Nonempty M]
     (hSch : InteriorSchauderEstimate n)
     (hPoisson : ∀ ω₁ : KahlerForm n M, ω₁.PoissonSolvable) (ω₀ : KahlerForm n M)
@@ -504,16 +191,16 @@ private theorem exists_path_solution_on_ball [Nonempty M]
   let ω₁ := ω₀.perturb φ hsol.1
   obtain ⟨cover⟩ := exists_compactChartCover
     (E := EuclideanSpace ℂ (Fin n)) (M := M)
-  obtain ⟨N2⟩ := exists_smoothChartHolderNormedData cover 2 α hα₀ hα₁
-  obtain ⟨N0⟩ := exists_smoothChartHolderNormedData cover 0 α hα₀ hα₁
+  obtain ⟨N2⟩ := exists_smoothChartHolderNormedData cover 2 α hα₁
+  obtain ⟨N0⟩ := exists_smoothChartHolderNormedData cover 0 α hα₁
   let P : ContinuityHolderPair ω₁ α := ⟨cover, N2, N0⟩
   let : ContinuityHolderPair ω₁ α := P
   have hvol : 0 < ω₁.volume.real Set.univ := by
     have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₁.volume := by
-      simpa using (integrable_const (1 : ℝ) : Integrable (fun _ : M ↦ (1 : ℝ)) ω₁.volume)
-    simpa using integral_exp_pos (μ := ω₁.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
+      simp
+    simp
   have hSmoothDense := closure_smoothMeanZeroChartHolderCore_coe
-    ω₁ cover 0 α hα₀ hα₁ P.normedDataC0 hvol
+    ω₁ cover 0 α P.normedDataC0 hvol
   obtain ⟨L, hL⟩ := exists_laplacian_equiv ω₁ α hα₀ hα₁ hSch (hPoisson ω₁) hSmoothDense
   obtain ⟨D⟩ := exists_centeredPathResidualData ω₀ F hF t φ hsol α hα₀ hα₁
   obtain ⟨b, _hb, T, hT, hD⟩ :=
@@ -610,9 +297,9 @@ theorem continuitySet_mem_nhdsWithin (hSch : InteriorSchauderEstimate n)
     · obtain ⟨c, hFc⟩ := hFc
       have hvol : 0 < ω₀.volume.real univ := by
         have hint : Integrable (fun x : M ↦ Real.exp ((0 : ℝ) : ℝ)) ω₀.volume := by
-          simpa using (integrable_const (1 : ℝ) : Integrable (fun _ : M ↦ (1 : ℝ)) ω₀.volume)
+          simp
         have h := integral_exp_pos (μ := ω₀.volume) (f := fun _ : M ↦ (0 : ℝ)) hint
-        simpa using h
+        simp
       have hpath : ∀ s : ℝ, ω₀.pathConstant F s = -s * c := by
         intro s
         have hI : ∫ x, Real.exp (s * F x) ∂ω₀.volume =

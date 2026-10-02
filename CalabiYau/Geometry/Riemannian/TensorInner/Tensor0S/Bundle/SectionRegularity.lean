@@ -7,11 +7,6 @@ public import CalabiYau.Geometry.Riemannian.Metric.PointwiseInner.Defs
 public import CalabiYau.Geometry.Riemannian.Metric.PointwiseInner.Algebra
 public import CalabiYau.Geometry.Riemannian.Metric.PointwiseInner.DualMetric
 public import CalabiYau.Geometry.Riemannian.Metric.Coordinates.ChartGram
-public import CalabiYau.Geometry.Riemannian.TensorInner.Tensor0S.Bundle.InnerProduct
-public import CalabiYau.Geometry.Riemannian.TensorInner.Fiber.PositiveDefiniteBilinearBoundedUnitBall
-public import CalabiYau.Geometry.Riemannian.TensorInner.Tensor0S.Chart.Inner
-public import CalabiYau.Geometry.Riemannian.TensorInner.Tensor0S.Chart.ContinuousLinearMap
-public import CalabiYau.Geometry.Riemannian.TensorInner.Tensor0S.Coordinates.InnerBridge
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 public import Mathlib.Geometry.Manifold.VectorBundle.ContMDiffSection
@@ -24,11 +19,12 @@ public import Mathlib.Analysis.Calculus.ContDiff.Operations
 public import Mathlib.Analysis.Normed.Operator.NormedSpace
 public import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+public import CalabiYau.Mathlib.Analysis.InnerProductSpace.Coercivity
+public import CalabiYau.Geometry.Riemannian.TensorInner.Tensor0S.Chart.Inner
+public import CalabiYau.Geometry.Riemannian.TensorInner.Tensor0S.Coordinates.InnerProduct
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 

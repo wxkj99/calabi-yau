@@ -25,6 +25,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace E M]
   [IsManifold 𝓘(ℝ, E) ∞ M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] in
 /-- Every chart-coordinate derivative through order two of the completed evaluation equals its
 canonical completed chart jet at every point of a compact chart piece, including points outside the
 piece's interior. The boundary case uses another member of the cover whose interior contains the

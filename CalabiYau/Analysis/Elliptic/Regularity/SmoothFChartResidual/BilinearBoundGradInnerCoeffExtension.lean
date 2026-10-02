@@ -4,10 +4,10 @@ module
 public import CalabiYau.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 public import CalabiYau.Analysis.Elliptic.Regularity.GradInner.CLM.ChartFormula
 public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushforwardBound
-public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
+public import CalabiYau.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
+public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 public import CalabiYau.Analysis.Sobolev.Manifold.Morrey.HigherOrder
 public import CalabiYau.Analysis.Sobolev.Manifold.Embedding.Iterated
-public import CalabiYau.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 @[expose] public section
 open CalabiYau.Riemannian
@@ -24,7 +24,7 @@ namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -46,7 +46,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
 
 noncomputable def gradInnerCoefIM
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -56,16 +56,6 @@ noncomputable def gradInnerCoefIM
       gradChartCoeff (I := I) g α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-private lemma gradInnerCoefI_M_apply
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i : Fin (Module.finrank ℝ E)) (x : M) :
-    gradInnerCoefIM (I := I) (M := M) g α i x =
-      chartStrictCutoff (I := I) (M := M) α x *
-        gradChartCoeff (I := I) g α
-          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x := rfl
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {x : M}
@@ -74,7 +64,9 @@ private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
   unfold gradInnerCoefIM
   rw [hx]; ring
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma gradInnerCoefI_M_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -166,7 +158,6 @@ lemma gradInnerCoefI_M_smooth
       contMDiffAt_const
     exact h_const.congr_of_eventuallyEq h_ev_zero_coef
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_gradInnerCoefI_M_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -192,7 +183,9 @@ noncomputable def Λgrad
   smoothExtensionScalar (I := I) (M := M) α
     (gradInnerCoefIM (I := I) (M := M) g α i)
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma Λgrad_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

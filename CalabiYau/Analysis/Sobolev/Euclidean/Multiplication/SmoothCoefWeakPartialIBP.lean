@@ -2,8 +2,9 @@
 -- Locally modified.
 module
 public import CalabiYau.Analysis.Sobolev.Euclidean.Density
-public import CalabiYau.Analysis.Calculus.ContDiff.Support
-public import CalabiYau.Analysis.DeGiorgi.SobolevSpace.WeakDerivatives
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Topology.Algebra.Support
+public import CalabiYau.Analysis.Sobolev.Euclidean.W1p.WeakDerivative
 
 @[expose] public section
 
@@ -23,7 +24,7 @@ local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
 theorem integral_smul_weak_partial_eq
-    {Ω : Set E} (hΩ_open : IsOpen Ω)
+    {Ω : Set E}
     {φ : E → ℝ}
     (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
     {v : E → ℝ}
@@ -35,7 +36,7 @@ theorem integral_smul_weak_partial_eq
       MeasureTheory.MemLp (w j) 2
         ((MeasureTheory.volume : MeasureTheory.Measure E).restrict K))
     (hw_isWeakPartial : ∀ j : Fin d,
-      DeGiorgi.HasWeakPartialDeriv (d := d) j (w j) v Ω)
+      Sobolev.Euclidean.HasWeakPartialDeriv (d := d) j (w j) v Ω)
     (j : Fin d)
     {ψ : E → ℝ}
     (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -49,7 +50,6 @@ theorem integral_smul_weak_partial_eq
       + (∫ y in Ω, φ y * w j y * ψ y
         ∂(MeasureTheory.volume : MeasureTheory.Measure E))) := by
   classical
-  let _ := hΩ_open
   set K : Set E := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_meas : MeasurableSet K := (isClosed_tsupport ψ).measurableSet
@@ -265,11 +265,11 @@ end Sobolev
 end Analysis
 end CalabiYau
 
-namespace DeGiorgi
+namespace Sobolev.Euclidean
 
 open Metric
 
 variable {d : ℕ}
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-end DeGiorgi
+end Sobolev.Euclidean

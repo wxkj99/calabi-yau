@@ -8,7 +8,7 @@ Coauthors: Jack McCarthy
 -/
 
 module
-public import CalabiYau.Geometry.Manifold.Tensor.Multilinear.Flip
+public import CalabiYau.Mathlib.Analysis.Normed.Module.Multilinear.Flip
 public import Mathlib.Analysis.Normed.Module.Alternating.Basic
 
 @[expose] public section

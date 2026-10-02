@@ -168,17 +168,17 @@ private lemma isUniformInducing_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothScalar g)
 
-noncomputable def H1ComplToLp (g : SmoothRiemannianMetric I M) :
+noncomputable def h1ComplToLp (g : SmoothRiemannianMetric I M) :
     H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   ContinuousLinearMap.extend (smoothToLp (I := I) (M := M) g)
     (UniformSpace.Completion.toComplL : SmoothScalar g →L[ℝ] H1Compl g)
 
-lemma H1ComplToLp_smoothToH1Compl (g : SmoothRiemannianMetric I M)
+lemma h1ComplToLp_smoothToH1Compl (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) :
-    H1ComplToLp (I := I) (M := M) g
+    h1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g f) =
       smoothToLp (I := I) (M := M) g f := by
-  unfold H1ComplToLp
+  unfold h1ComplToLp
   exact ContinuousLinearMap.extend_eq (smoothToLp (I := I) (M := M) g)
     (e := UniformSpace.Completion.toComplL)
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)

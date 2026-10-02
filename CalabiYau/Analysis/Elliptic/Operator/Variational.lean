@@ -31,13 +31,13 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
-noncomputable def H1ComplBilin (g : SmoothRiemannianMetric I M) :
+noncomputable def h1ComplBilin (g : SmoothRiemannianMetric I M) :
     H1Compl g →L[ℝ] H1Compl g →L[ℝ] ℝ :=
   innerSL ℝ
 
-@[simp] lemma H1ComplBilin_apply (g : SmoothRiemannianMetric I M)
+@[simp] lemma h1ComplBilin_apply (g : SmoothRiemannianMetric I M)
     (u v : H1Compl g) :
-    H1ComplBilin (I := I) (M := M) g u v = ⟪u, v⟫_ℝ := rfl
+    h1ComplBilin (I := I) (M := M) g u v = ⟪u, v⟫_ℝ := rfl
 
 noncomputable def lpFunctionalCLM (g : SmoothRiemannianMetric I M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
@@ -48,7 +48,7 @@ noncomputable def lpFunctionalCLM (g : SmoothRiemannianMetric I M) :
         (H1Compl g →L[ℝ] ℝ) :=
     ContinuousLinearMap.compL ℝ (H1Compl g)
       (Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) ℝ
-  ((applyL.flip) (H1ComplToLp (I := I) (M := M) g)).comp
+  ((applyL.flip) (h1ComplToLp (I := I) (M := M) g)).comp
     (innerSL ℝ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ)
 
@@ -56,13 +56,13 @@ noncomputable def lpFunctionalCLM (g : SmoothRiemannianMetric I M) :
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (v : H1Compl g) :
     lpFunctionalCLM (I := I) (M := M) g f v =
-      ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ := by
-  change (innerSL ℝ f) (H1ComplToLp (I := I) (M := M) g v) =
-    ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ
+      ⟪h1ComplToLp (I := I) (M := M) g v, f⟫_ℝ := by
+  change (innerSL ℝ f) (h1ComplToLp (I := I) (M := M) g v) =
+    ⟪h1ComplToLp (I := I) (M := M) g v, f⟫_ℝ
   rw [innerSL_apply_apply]
-  exact real_inner_comm (H1ComplToLp (I := I) (M := M) g v) f
+  exact real_inner_comm (h1ComplToLp (I := I) (M := M) g v) f
 
-noncomputable def H1ComplRieszRepr (g : SmoothRiemannianMetric I M) :
+noncomputable def h1ComplRieszRepr (g : SmoothRiemannianMetric I M) :
     (H1Compl g →L[ℝ] ℝ) →L[ℝ] H1Compl g :=
   LinearMap.mkContinuous
     { toFun := fun φ => (InnerProductSpace.toDual ℝ (H1Compl g)).symm φ
@@ -79,15 +79,15 @@ noncomputable def H1ComplRieszRepr (g : SmoothRiemannianMetric I M) :
       rw [one_mul]
       exact le_of_eq ((InnerProductSpace.toDual ℝ (H1Compl g)).symm.norm_map φ))
 
-lemma H1ComplRieszRepr_inner (g : SmoothRiemannianMetric I M)
+lemma h1ComplRieszRepr_inner (g : SmoothRiemannianMetric I M)
     (φ : H1Compl g →L[ℝ] ℝ) (w : H1Compl g) :
-    ⟪H1ComplRieszRepr (I := I) (M := M) g φ, w⟫_ℝ = φ w := by
+    ⟪h1ComplRieszRepr (I := I) (M := M) g φ, w⟫_ℝ = φ w := by
   change ⟪(InnerProductSpace.toDual ℝ (H1Compl g)).symm φ, w⟫_ℝ = φ w
   exact InnerProductSpace.toDual_symm_apply (𝕜 := ℝ) (E := H1Compl g) (x := w) (y := φ)
 
 noncomputable def resolvent (g : SmoothRiemannianMetric I M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] H1Compl g :=
-  (H1ComplRieszRepr (I := I) (M := M) g).comp
+  (h1ComplRieszRepr (I := I) (M := M) g).comp
     (lpFunctionalCLM (I := I) (M := M) g)
 
 theorem resolvent_inner_eq_lpFunctional
@@ -95,9 +95,9 @@ theorem resolvent_inner_eq_lpFunctional
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (v : H1Compl g) :
     ⟪resolvent (I := I) (M := M) g f, v⟫_ℝ =
-      ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ := by
+      ⟪h1ComplToLp (I := I) (M := M) g v, f⟫_ℝ := by
   unfold resolvent
-  rw [ContinuousLinearMap.comp_apply, H1ComplRieszRepr_inner,
+  rw [ContinuousLinearMap.comp_apply, h1ComplRieszRepr_inner,
     lpFunctionalCLM_apply]
 
 end Laplacian

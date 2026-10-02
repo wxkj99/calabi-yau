@@ -31,7 +31,7 @@ theorem exists_centeredResidual_logDetRemainder (ω₀ : KahlerForm n M) (F : M 
     (hF : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ F)
     (t : ℝ) (φ : M → ℝ)
     (hsol : ω₀.SolvesMongeAmpere (fun x ↦ t * F x + ω₀.pathConstant F t) φ)
-    (α : ℝ≥0) (hα₀ : 0 < α) (hα₁ : α < 1)
+    (α : ℝ≥0) (hα₁ : α < 1)
     [P : ContinuityHolderPair (ω₀.perturb φ hsol.1) α]
     (D : CenteredPathResidualData ω₀ F hF t φ hsol α)
     (L : P.C2 ≃L[ℝ] P.C0)
@@ -39,8 +39,7 @@ theorem exists_centeredResidual_logDetRemainder (ω₀ : KahlerForm n M) (F : M 
     (b : P.C0)
     (hb : ∀ x, P.evalC0 b x =
       (∫ y, F y ∂(ω₀.perturb φ hsol.1).volume) /
-        (ω₀.perturb φ hsol.1).volume.real Set.univ - F x)
-    (hEval : Function.Injective P.evalC0) :
+        (ω₀.perturb φ hsol.1).volume.real Set.univ - F x) :
     ∃ C : ℝ≥0, ∃ r : ℝ, 0 < r ∧
       ∀ p q : P.C2 × ℝ, ‖p‖ < r → ‖q‖ < r →
         ‖p.1‖ < D.radius → ‖q.1‖ < D.radius →
@@ -48,7 +47,7 @@ theorem exists_centeredResidual_logDetRemainder (ω₀ : KahlerForm n M) (F : M 
           (L (p.1 - q.1) + (p.2 - q.2) • b)‖ ≤
             (C : ℝ) * (‖p‖ + ‖q‖) * ‖p - q‖ := by
   obtain ⟨C, r, hr, hchart⟩ := exists_centeredResidual_chartwiseRemainderBound
-    ω₀ F hF t φ hsol α hα₀ hα₁ D L hL b hb
+    ω₀ F hF t φ hsol α hα₁ D L hL b hb
   refine ⟨C + C, r, hr, ?_⟩
   intro p q hp hq hpD hqD
   let v : P.C0 := D.residual p - D.residual q -
@@ -62,7 +61,7 @@ theorem exists_centeredResidual_logDetRemainder (ω₀ : KahlerForm n M) (F : M 
     simpa [v] using hchart p q hp hq hpD hqD i
   let K : ℝ≥0 := C * (‖p‖₊ + ‖q‖₊) * ‖p - q‖₊
   have hnorm := meanZeroC0_norm_le_of_chartHolderBound
-    (ω₀.perturb φ hsol.1) α v hEval K hHolder
+    (ω₀.perturb φ hsol.1) α v K hHolder
   have hKreal : (K : ℝ) =
       (C : ℝ) * (‖p‖ + ‖q‖) * ‖p - q‖ := by
     simp [K]

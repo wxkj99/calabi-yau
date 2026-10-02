@@ -2,7 +2,7 @@ module
 
 public import CalabiYau.MongeAmpere.Estimates.C2.ChernLuFormula.NormalCoordinates.BilinearJet
 public import CalabiYau.Geometry.Complex.Forms.OneOne
-import CalabiYau.LinearAlgebra.Hermitian.NormalJet
+import CalabiYau.Mathlib.LinearAlgebra.Matrix.SymmetricTensor
 
 /-!
 # Finite quadratic-jet cancellation
@@ -29,10 +29,8 @@ namespace KahlerForm
 
 /-- A symmetric quadratic coordinate jet cancels the first derivative of the normalized reference
 metric after the linear frame `J`. -/
-@[deprecated "unused hypothesis `hG`; will be removed" (since := "2026-10-02")]
 theorem exists_quadratic_pullback_jet_cancellation {n : ℕ}
     (G J : Matrix (Fin n) (Fin n) ℂ) (D : Fin n → Fin n → Fin n → ℂ)
-    (hG : G.IsHermitian)
     (hNorm : J.transpose * G * J.map star = 1)
     (hD : ∀ p a b, D p a b = D a p b) :
     ∃ Q : EuclideanSpace ℂ (Fin n) →L[ℂ]

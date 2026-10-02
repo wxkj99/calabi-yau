@@ -43,8 +43,8 @@ theorem rellichCompactness
           (fun j => eLpNorm (fun x => f (σ j) x - u x) (ENNReal.ofReal 2) ω₀.volume)
           Filter.atTop (𝓝 0) := by
   cases BorelSpace.measurable_eq (α := M)
-  letI : MeasurableSpace M := borel M
-  letI : BorelSpace M := ⟨rfl⟩
+  let : MeasurableSpace M := borel M
+  let : BorelSpace M := ⟨rfl⟩
   let g := ω₀.toRiemannianMetric
   have hvol : ω₀.volume = RiemannianVolume.riemannianMeasure
       (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) g
@@ -58,9 +58,9 @@ theorem rellichCompactness
     intro f₀ hf₀ x
     simpa [g] using ω₀.riemannian_gradFun_energy_eq_two_mul_gradNormSq f₀ hf₀ x
   have hchart := smooth_seq_energy_bound_to_chart_wkp ω₀ g hvol hgrad f hf B hB henergy
-  haveI : NeZero (Module.finrank ℝ (EuclideanSpace ℂ (Fin n))) := by
+  have : NeZero (Module.finrank ℝ (EuclideanSpace ℂ (Fin n))) := by
     have hdim : 0 < Module.finrank ℝ (EuclideanSpace ℂ (Fin n)) := by
-      letI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+      let : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
       exact Module.finrank_pos
     exact ⟨hdim.ne'⟩
   obtain ⟨R, _, hchartBound⟩ := hchart.2.2

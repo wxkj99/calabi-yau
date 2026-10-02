@@ -1,6 +1,6 @@
 module
 
-public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderNorm
+public import CalabiYau.Geometry.Manifold.Holder.ChartNorm
 public import Mathlib.Geometry.Manifold.ContMDiffMap
 public import Mathlib.Geometry.Manifold.Algebra.SmoothFunctions
 public import Mathlib.Analysis.Normed.Module.Completion

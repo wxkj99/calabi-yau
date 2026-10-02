@@ -1,8 +1,8 @@
 module
 
 public import CalabiYau.MongeAmpere.Continuity.Openness.C2MassNormalization
-public import CalabiYau.MongeAmpere.Continuity.Openness.ChartHolderNorm
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Geometry.Manifold.Holder.ChartNorm
+public import CalabiYau.Analysis.Elliptic.Schauder
 public import CalabiYau.MongeAmpere.Continuity.Openness.SmoothBootstrap.ChartLogDetEquation
 public import CalabiYau.MongeAmpere.Continuity.Openness.SmoothBootstrap.DifferenceQuotientEquation
 public import CalabiYau.MongeAmpere.Continuity.Openness.SmoothBootstrap.SchauderInduction
@@ -28,6 +28,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [MeasurableSpace M] [BorelSpace M]
   [T2Space M] [CompactSpace M] [ConnectedSpace M]
 
+omit [MeasurableSpace M] [BorelSpace M] [ConnectedSpace M] in
 /-- A `C²` Monge–Ampère solution is smooth when the right-hand side is smooth and the interior
 Schauder regularity estimate holds. -/
 theorem solvesMongeAmpere_of_c2 (hSch : InteriorSchauderEstimate n)

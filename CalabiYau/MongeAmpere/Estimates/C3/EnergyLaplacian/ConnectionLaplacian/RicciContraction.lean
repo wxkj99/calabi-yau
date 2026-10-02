@@ -3,7 +3,6 @@ module
 public import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian.Basic
 import CalabiYau.MongeAmpere.Estimates.C3.EnergyLaplacian.ConnectionLaplacian.MetricDerivatives
 import CalabiYau.Geometry.Kahler.Curvature.Chart.DerivativeRules
-import CalabiYau.Geometry.Kahler.Curvature.Chart.MixedDerivatives
 
 /-!
 # Ricci trace and the weighted differential Bianchi contraction
@@ -28,8 +27,8 @@ private theorem ricci_covariant_trace_component
     (z : EuclideanSpace ℂ (Fin n))
     (hg : ∀ a b, ContDiffAt ℝ ∞ (fun w => g w a b) z)
     (hunit : IsUnit (g z)) (j k l : Fin n) :
-    c3PartialZ (fun w => c3RicciInChart g w j l) z k -
-        ∑ r, c3ChristoffelInChart g z r k j * c3RicciInChart g z r l =
+    wirtingerDerivInChart (fun w => c3RicciInChart g w j l) z k -
+        ∑ r, christoffelInChart g z r k j * c3RicciInChart g z r l =
       ∑ p, ∑ q, (g z)⁻¹ q p * c3CurvatureCovariantZ g z k p q j l := by
   let hInv (a b : Fin n) : DifferentiableAt ℝ (fun w => (g w)⁻¹ a b) z :=
     chartInv_differentiableAt (fun a b => (hg a b).of_le (by norm_num)) hunit a b
@@ -43,11 +42,11 @@ private theorem ricci_covariant_trace_component
       (fun w => ∑ q, (g w)⁻¹ q p * chartCurvature g w p q j l) z :=
     DifferentiableAt.fun_sum (u := Finset.univ) (fun q _ => hTerm p q)
   have hRicciDeriv :
-      c3PartialZ (fun w => ∑ p, ∑ q,
+      wirtingerDerivInChart (fun w => ∑ p, ∑ q,
         (g w)⁻¹ q p * chartCurvature g w p q j l) z k =
       ∑ p, ∑ q,
-        (c3PartialZ (fun w => (g w)⁻¹ q p) z k * chartCurvature g z p q j l +
-          (g z)⁻¹ q p * c3PartialZ (fun w => chartCurvature g w p q j l) z k) := by
+        (wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k * chartCurvature g z p q j l +
+          (g z)⁻¹ q p * wirtingerDerivInChart (fun w => chartCurvature g w p q j l) z k) := by
     change chartPartialZComplex (fun w => ∑ p, ∑ q,
       (g w)⁻¹ q p * chartCurvature g w p q j l) z k = _
     rw [chartPartialZComplex_sum (fun p w =>
@@ -60,9 +59,9 @@ private theorem ricci_covariant_trace_component
     intro q hq
     exact chartPartialZComplex_mul (hInv q p) (hCurv p q j l) k
   have hInvGamma (q p : Fin n) :
-      c3PartialZ (fun w => (g w)⁻¹ q p) z k =
-        -∑ r, c3ChristoffelInChart g z p k r * (g z)⁻¹ q r := by
-    simpa only [c3PartialZ] using c3PartialZ_inverse_eq_christoffel g z
+      wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k =
+        -∑ r, christoffelInChart g z p k r * (g z)⁻¹ q r := by
+    simpa only [wirtingerDerivInChart] using wirtingerDerivInChart_inverse_eq_christoffel g z
       (fun a b => (hg a b).differentiableAt (by norm_num)) hunit q p k
   have hsum3 (F : Fin n → Fin n → Fin n → ℂ) :
       (∑ r, ∑ q, ∑ p, F r q p) = ∑ p, ∑ q, ∑ r, F r q p := by
@@ -76,22 +75,25 @@ private theorem ricci_covariant_trace_component
     conv_lhs => arg 2; intro q; rw [Finset.sum_comm]
     rw [Finset.sum_comm]
   have htraceInv :
-      (∑ p, ∑ q, c3PartialZ (fun w => (g w)⁻¹ q p) z k *
+      (∑ p, ∑ q, wirtingerDerivInChart (fun w => (g w)⁻¹ q p) z k *
         chartCurvature g z p q j l) =
         -(∑ p, ∑ q, ∑ r, (g z)⁻¹ q p *
-          c3ChristoffelInChart g z r k p * chartCurvature g z r q j l) := by
+          christoffelInChart g z r k p * chartCurvature g z r q j l) := by
     simp_rw [hInvGamma]
     simp only [Finset.sum_mul, neg_mul, Finset.sum_neg_distrib]
-    simp only [mul_comm]
-    rw [hsum3 (fun r q p => (g z)⁻¹ q p *
-      c3ChristoffelInChart g z r k p * chartCurvature g z r q j l)]
+    rw [← hsum3 (fun r q p => (g z)⁻¹ q p *
+      christoffelInChart g z r k p * chartCurvature g z r q j l)]
+    congr 1
+    refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ =>
+      Finset.sum_congr rfl fun r _ => ?_
+    ring
   have htraceMetric :
-      (∑ r, c3ChristoffelInChart g z r k j *
+      (∑ r, christoffelInChart g z r k j *
         ∑ p, ∑ q, (g z)⁻¹ q p * chartCurvature g z p q r l) =
       ∑ p, ∑ q, (g z)⁻¹ q p *
-        ∑ r, c3ChristoffelInChart g z r k j * chartCurvature g z p q r l := by
+        ∑ r, christoffelInChart g z r k j * chartCurvature g z p q r l := by
     simp only [Finset.mul_sum]
-    rw [hsum3' (fun r p q => c3ChristoffelInChart g z r k j *
+    rw [hsum3' (fun r p q => christoffelInChart g z r k j *
       ((g z)⁻¹ q p * chartCurvature g z p q r l))]
     apply Finset.sum_congr rfl
     intro p hp

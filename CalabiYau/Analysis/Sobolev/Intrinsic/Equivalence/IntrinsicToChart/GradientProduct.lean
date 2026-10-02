@@ -6,8 +6,6 @@ public import CalabiYau.Analysis.Sobolev.Manifold.Measure.UniformChartComparison
 
 @[expose] public section
 
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 open CalabiYau.Riemannian
 
 noncomputable section

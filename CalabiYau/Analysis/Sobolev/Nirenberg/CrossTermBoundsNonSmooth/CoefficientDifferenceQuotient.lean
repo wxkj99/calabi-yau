@@ -1,9 +1,12 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Sobolev/Nirenberg/CrossTermBoundsNonSmooth/CoefficientDifferenceQuotient.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBounds
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
+public import CalabiYau.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
 public import CalabiYau.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmooth
-public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.TranslatedCutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Nirenberg.TestFunction.CutoffDiffQuot
+public import CalabiYau.Analysis.Sobolev.Tools.DifferenceQuotient
 
 @[expose] public section
 
@@ -17,9 +20,12 @@ open scoped ENNReal NNReal Convolution Pointwise BigOperators InnerProductSpace
 
 namespace Sobolev.NirenbergCrossBoundsNonSmooth
 
-variable {d : ℕ} [NeZero d]
-
+variable {d : ℕ}
 local notation "E" => EuclideanSpace ℝ (Fin d)
+
+section
+
+variable [NeZero d]
 
 private theorem cross_2_pointwise_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -144,31 +150,6 @@ private theorem cross_2_pointwise_bound_nonsmooth
         ((g i) x)^2 = 0 := by ring
     linarith
 
-private lemma exists_bound_cross_2_coefficient
-    {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_support : HasCompactSupport η)
-    (i j k : Fin d) {h : ℝ} (hh : h ≠ 0) :
-    ∃ M : ℝ, 0 ≤ M ∧ ∀ x : E,
-      |diffQuot k h (fun y => B.a y i j) x * (η x)^2| ≤ M := by
-  classical
-  have h_dq_a : Continuous (Sobolev.diffQuot k h
-      (fun y : E => B.a y i j)) :=
-    continuous_diffQuot_smooth (d := d) (B.contDiff_a i j) k hh
-  have hη_sq_cont : Continuous (fun x : E => (η x)^2) := hη.continuous.pow 2
-  have hη_sq_support : HasCompactSupport (fun y : E => η y ^ 2) := by
-    have heq : (fun y : E => η y ^ 2) = (fun y : E => η y * η y) := by
-      funext y; ring
-    rw [heq]; exact hη_support.mul_right
-  have h_prod_cont : Continuous
-      (fun x : E => Sobolev.diffQuot k h
-          (fun y : E => B.a y i j) x * (η x)^2) :=
-    h_dq_a.mul hη_sq_cont
-  have h_prod_support : HasCompactSupport
-      (fun x : E => Sobolev.diffQuot k h
-          (fun y : E => B.a y i j) x * (η x)^2) :=
-    hη_sq_support.mul_left
-  exact exists_bound_of_continuous_compactSupport h_prod_cont h_prod_support
-
 private lemma integrable_cross_2_summand_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {g : Fin d → E → ℝ}
@@ -219,7 +200,8 @@ private lemma integrable_cross_2_summand_nonsmooth
   rw [h_target_eq]
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₂_gi_l2 h_dq_g_l2
 
-omit [NeZero d] in
+end
+
 private lemma integrable_const_eta_sq_indicator_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -308,7 +290,6 @@ private lemma integrable_const_eta_sq_indicator_g_sq
   · rw [Set.indicator_of_notMem hx, mul_zero, zero_mul, abs_zero]
     refine mul_nonneg (mul_nonneg (abs_nonneg _) hM_nn) h_g_sq_nn
 
-omit [NeZero d] in
 private lemma integrable_const_eta_sq_diffQuot_g_sq_cross2
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -387,7 +368,6 @@ private lemma integrable_const_eta_sq_diffQuot_g_sq_cross2
     mul_le_mul_of_nonneg_left h_eta_sq_le h_ic_nn
   exact mul_le_mul_of_nonneg_right h_ic_eta_sq h_dq_sq_nn
 
-omit [NeZero d] in
 private lemma integrable_eta_sq_diffQuot_g_sq_cross2
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -404,6 +384,7 @@ private lemma integrable_eta_sq_diffQuot_g_sq_cross2
   rw [h_eq]
   exact hint
 
+variable [NeZero d] in
 theorem coefficient_difference_quotient_mixed_term_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {g : Fin d → E → ℝ}

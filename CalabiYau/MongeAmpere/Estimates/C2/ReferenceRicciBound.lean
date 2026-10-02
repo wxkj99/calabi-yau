@@ -20,10 +20,9 @@ open scoped Topology
 namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
-  [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
-  [T2Space M] [CompactSpace M]
-
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [T2Space M] [CompactSpace M] in
 private theorem continuousAt_relTrace_of_isPositive
     {α β : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ}
     (hα : α.IsPositive) :
@@ -81,7 +80,9 @@ private theorem continuousAt_relTrace_of_isPositive
       ContinuousAlternatingMap.coeffMatrix p.2).trace) (α, β)
   exact ContinuousAt.comp' hreal htracePair
 
-omit [T2Space M] [CompactSpace M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 private theorem relTrace_chartRep_eq (ω₀ : KahlerForm n M) (x y : M)
     (hy : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x).source) :
     relTrace (ω₀ y) (ω₀.ricciForm y) =
@@ -154,7 +155,9 @@ private theorem relTrace_chartRep_eq (ω₀ : KahlerForm n M) (x y : M)
   rw [hrep₀, hrep₁]
   simpa only [hAEquiv] using htrace.symm
 
-omit [T2Space M] [CompactSpace M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] in
 private theorem continuousAt_relTrace_ricciForm (ω₀ : KahlerForm n M) (x : M) :
     ContinuousAt (fun y => relTrace (ω₀ y) (ω₀.ricciForm y)) x := by
   let c := extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x
@@ -192,7 +195,10 @@ private theorem continuousAt_relTrace_ricciForm (ω₀ : KahlerForm n M) (x : M)
     exact relTrace_chartRep_eq ω₀ x y (by simpa only [extChartAt_source] using hy)
   exact hcomp.congr_of_eventuallyEq heq
 
-omit [T2Space M] in
+variable {n : ℕ} {M : Type*} [TopologicalSpace M]
+    [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
+    [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+    [CompactSpace M] in
 /-- A uniform absolute bound for the reference Ricci scalar
 `tr_{ω₀} Ric(ω₀)`. -/
 theorem exists_abs_relTrace_ricciForm_le (ω₀ : KahlerForm n M) :

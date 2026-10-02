@@ -41,7 +41,7 @@ theorem signedChartIntegral_smul (C : OrientedLocalChart d M) (c : ℝ)
   rw [hcoeff, integral_const_mul]
   ring
 
-variable [T2Space M] [CompactSpace M]
+variable  [CompactSpace M]
 
 theorem signedChartIntegral_add (C : OrientedLocalChart d M)
     (η ζ : DifferentialForm 𝓘(ℝ, Fin d → ℝ) M d)
@@ -221,10 +221,6 @@ theorem signedChartIntegral_eq_of_compatible
     apply integrable_chartTopCoefficient C.center η
     simpa [extChartAt_source] using
       (hη.trans Set.inter_subset_left).trans C.domain_subset
-  have hIntD : Integrable gD (volume : Measure (Fin d → ℝ)) := by
-    apply integrable_chartTopCoefficient D.center η
-    simpa [extChartAt_source] using
-      (hη.trans Set.inter_subset_right).trans D.domain_subset
   have hIC : (∫ x, gC x ∂(volume : Measure (Fin d → ℝ))) =
       ∫ x in s, gC x ∂(volume : Measure (Fin d → ℝ)) := by
     exact (setIntegral_eq_integral_of_forall_compl_eq_zero hzeroC).symm
@@ -241,7 +237,7 @@ theorem signedChartIntegral_eq_of_compatible
     intro x hx
     simpa [ε, f] using hCD x hx
   have hcv := MeasureTheory.integral_image_eq_integral_signed_det_fderiv
-    s hmeas f hf' hInj ε hε hpos gD hIntD.integrableOn
+    s hmeas f hf' hInj ε hε hpos gD
   have hmul : (∫ y in f '' s, ε * gD y ∂(volume : Measure (Fin d → ℝ))) =
       ε * ∫ y in f '' s, gD y ∂(volume : Measure (Fin d → ℝ)) := by
     simpa only [smul_eq_mul] using

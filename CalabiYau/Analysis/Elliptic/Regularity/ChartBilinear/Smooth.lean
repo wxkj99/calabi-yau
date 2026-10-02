@@ -1,7 +1,7 @@
 -- Extracted from https://github.com/qinz1yang/differential-geometry.git @ 7a48598d35109aa99d1cc678e2724c213cdf4ff3: DifferentialGeometry/Analysis/Elliptic/Regularity/ChartBilinear/Smooth.lean
 -- Locally modified.
 module
-public import CalabiYau.Analysis.Calculus.Cutoff.Compact
+public import CalabiYau.Mathlib.Geometry.Manifold.PartitionOfUnity.CompactSupport
 public import CalabiYau.Analysis.Elliptic.Operator.ChartLocalLaplacian
 public import CalabiYau.Analysis.Elliptic.Operator.ChartMeasureEquiv
 public import CalabiYau.Analysis.Elliptic.MetricExtension
@@ -27,10 +27,12 @@ namespace Analysis
 namespace Laplacian
 namespace ChartBilinearSmooth
 
+section
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 open CalabiYau.RiemannianVolume
 open CalabiYau.DivergenceTheorem
@@ -46,10 +48,28 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+variable [IsManifold I ∞ M] in
 private def manifoldTestSupport (α : M) (ψ : EuclN → ℝ) : Set M :=
   ((extChartAt I α).symm) '' ((toEuclidean (E := E)).symm '' tsupport ψ)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Laplacian.ChartMeasureEquiv
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
 private lemma manifoldTestSupport_isCompact (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -68,7 +88,6 @@ private lemma manifoldTestSupport_isCompact (α : M)
     refine (continuousOn_extChartAt_symm (I := I) α).mono hmaps
   exact h1.image_of_continuousOn hcontOn
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma manifoldTestSupport_subset_source (α : M) (ψ : EuclN → ℝ)
     (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     manifoldTestSupport (I := I) (M := M) α ψ ⊆ (chartAt H α).source := by
@@ -84,14 +103,12 @@ private lemma manifoldTestSupport_subset_source (α : M) (ψ : EuclN → ℝ)
     exact (extChartAt I α).map_target hz_target
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hx_in_source
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma manifoldTestSupport_isClosed [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     IsClosed (manifoldTestSupport (I := I) (M := M) α ψ) :=
   (manifoldTestSupport_isCompact (I := I) (M := M) α hψ_cs hψ_support).isClosed
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_support_subset (α : M) (ψ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α ψ) ⊆
       manifoldTestSupport (I := I) (M := M) α ψ := by
@@ -113,7 +130,6 @@ private lemma chartTestPullback_support_subset (α : M) (ψ : EuclN → ℝ) :
   · rw [chartTestPullback_apply_of_notMem (I := I) α ψ hx_source] at hx
     exact (hx rfl).elim
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_tsupport_subset [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -122,16 +138,6 @@ private lemma chartTestPullback_tsupport_subset [T2Space M] (α : M)
   closure_minimal (chartTestPullback_support_subset (I := I) (M := M) α ψ)
     (manifoldTestSupport_isClosed (I := I) (M := M) α hψ_cs hψ_support)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
-private lemma chartTestPullback_hasCompactSupport [T2Space M] (α : M)
-    {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
-    (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    HasCompactSupport (chartTestPullback (I := I) (M := M) α ψ) :=
-  HasCompactSupport.of_support_subset_isCompact
-    (manifoldTestSupport_isCompact (I := I) (M := M) α hψ_cs hψ_support)
-    (chartTestPullback_support_subset (I := I) (M := M) α ψ)
-
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_tsupport_subset_chart_source [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_support : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -139,7 +145,7 @@ private lemma chartTestPullback_tsupport_subset_chart_source [T2Space M] (α : M
   (chartTestPullback_tsupport_subset (I := I) (M := M) α hψ_cs hψ_support).trans
     (manifoldTestSupport_subset_source (I := I) (M := M) α ψ hψ_support)
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [IsManifold I ∞ M] in
 private lemma compose_psi_contMDiffOn_chart_source (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -167,7 +173,7 @@ private lemma compose_psi_contMDiffOn_chart_source (α : M)
     h_toE_M_univ.comp h_ext hMaps1
   exact h_psi_M_univ.comp h1 (fun _ _ => Set.mem_univ _)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [FiniteDimensional ℝ E] in
 private lemma contMDiff_of_smoothOn_open_zero_outside
     {U : Set M} (hU : IsOpen U) {K : Set M} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : M → ℝ}
@@ -186,7 +192,7 @@ private lemma contMDiff_of_smoothOn_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
-omit [NeZero (Module.finrank ℝ E)] in
+variable [IsManifold I ∞ M] in
 private lemma chartTestPullback_contMDiff [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_cs : HasCompactSupport ψ)
@@ -221,7 +227,6 @@ private lemma chartTestPullback_contMDiff [T2Space M] (α : M)
         exact (extChartAt I α).left_inv hy_source'
     · exact chartTestPullback_apply_of_notMem (I := I) α ψ hy_source
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartPullback_chartTestPullback_eq (α : M) (ψ : EuclN → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPullback (I := I) α (chartTestPullback (I := I) (M := M) α ψ) y = ψ y := by
@@ -246,7 +251,6 @@ private lemma chartPullback_chartTestPullback_eq (α : M) (ψ : EuclN → ℝ)
   change ψ ((toEuclidean (E := E)) ((extChartAt I α) x)) = ψ y
   rw [h_right_inv, h_apply_inv]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
     [I.Boundaryless] (α : M) (f : M → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -282,6 +286,28 @@ private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
     rfl
   rw [h_iso_apply]
   rfl
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Laplacian.ChartMeasureEquiv
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
+section
+
+variable [IsManifold I ∞ M]
 
 private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
     [I.Boundaryless]
@@ -752,7 +778,27 @@ private theorem bilinear_identity_of_support_in_chartTarget
     · rw [MeasureTheory.integral_neg]
     · funext y; ring
 
-omit [NeZero (Module.finrank ℝ E)] in
+end
+
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Laplacian.ChartMeasureEquiv
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
+variable [IsManifold I ∞ M] in
 private lemma negDensityLaplacianPullback_support_subset
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -800,7 +846,26 @@ private lemma negDensityLaplacianPullback_support_subset
   · rw [negDensityLaplacianPullback_apply_of_notMem (I := I) g hf α hy_in] at hy
     exact (hy rfl).elim
 
+end
+
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+open CalabiYau.RiemannianVolume
+open CalabiYau.DivergenceTheorem
+open CalabiYau.Laplacian.MetricExtension
+open CalabiYau.Analysis.Laplacian.ChartLocalLaplacian
+open CalabiYau.Laplacian.ChartMeasureEquiv
+open Sobolev.NirenbergEuclidean
+attribute [local instance] instMeasurableSpace_calabiYau instBorelSpace_calabiYau instMeasurableSpace_calabiYau_1 instBorelSpace_calabiYau_1
+local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
+
 omit [FiniteDimensional ℝ E] in
+variable [IsManifold I ∞ M] in
 private lemma principalIntegrand_cutoff_eq
     (B : SmoothEllipticBilinearForm (Module.finrank ℝ E) (Set.univ : Set EuclN))
     {f : EuclN → ℝ} {ψ ρ : EuclN → ℝ}
@@ -844,6 +909,10 @@ private lemma principalIntegrand_cutoff_eq
       B.a y i j * (0 : EuclN →L[ℝ] ℝ) (EuclideanSpace.single i 1) *
         (fderiv ℝ (fun z : EuclN => ρ z * ψ z) y) (EuclideanSpace.single j 1)
     rw [zero_apply]; ring
+
+section
+
+variable [IsManifold I ∞ M]
 
 private theorem bilinear_identity_of_smooth
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -993,6 +1062,10 @@ theorem chart_pulled_smooth_weak_solution
   intro ψ hψ hψ_cs
   exact bilinear_identity_of_smooth (I := I) (M := M) g α hf hf_cs hf_support B hB_c hB_match
     hψ hψ_cs
+
+end
+
+end
 
 end ChartBilinearSmooth
 end Laplacian

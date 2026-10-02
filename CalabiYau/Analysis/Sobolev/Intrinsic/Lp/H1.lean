@@ -19,7 +19,6 @@ open scoped Manifold Topology ContDiff ENNReal NNReal Matrix
 namespace Sobolev
 namespace IntrinsicH1Lp
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -33,37 +32,31 @@ private local instance : BorelSpace E := ⟨rfl⟩
 local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [Module.Finite ℝ E] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, zero_apply]
 
-omit [Module.Finite ℝ E] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), add_apply]
 
-omit [Module.Finite ℝ E] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x v (w + y) = g.inner x v w + g.inner x v y := by
   rw [map_add (g.inner x v)]
 
-omit [Module.Finite ℝ E] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), smul_apply, smul_eq_mul]
 
-omit [Module.Finite ℝ E] in
 private lemma g_inner_neg_left
     (g : SmoothRiemannianMetric I M) (x : M) (v y : TangentSpace I x) :
     g.inner x (-v) y = - g.inner x v y := by
   rw [map_neg, neg_apply]
 
-omit [Module.Finite ℝ E] in
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =
@@ -74,14 +67,12 @@ private lemma g_norm_const_smul
   rw [Real.sqrt_mul (sq_nonneg c)]
   rw [Real.sqrt_sq_eq_abs]
 
-omit [Module.Finite ℝ E] in
 private lemma g_norm_neg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (-v) (-v)) = Real.sqrt (g.inner x v v) := by
   rw [g_inner_neg_left g x v (-v), map_neg]
   simp
 
-omit [Module.Finite ℝ E] in
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -167,16 +158,15 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 theorem hasWeakRiemannianGradLp_congr_ae
-    [hcompact : CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    [hboundaryless : I.Boundaryless]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u u' : M → ℝ} {G G' : M → E}
     (hu : u =ᵐ[riemannianVolumeMeasure I M g] u')
     (hG : G =ᵐ[riemannianVolumeMeasure I M g] G')
     (h : HasWeakRiemannianGradLp (I := I) (M := M) g u G) :
     HasWeakRiemannianGradLp (I := I) (M := M) g u' G' := by
-  let _ := hcompact
-  let _ := hboundaryless
   have : IsFiniteMeasure (riemannianVolumeMeasure I M g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
@@ -202,6 +192,8 @@ theorem hasWeakRiemannianGradLp_congr_ae
     rw [integral_congr_ae hLHS, integral_congr_ae hRHS]
     exact h.2 X hX
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 theorem memLp_g_norm_congr_ae
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {G G' : M → E} {p : ℝ≥0∞}
@@ -214,6 +206,8 @@ theorem memLp_g_norm_congr_ae
   filter_upwards [hG] with x hx
   rw [hx]
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 def PairAEMeasurable
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (G : M → E) : Prop :=
@@ -223,10 +217,10 @@ def PairAEMeasurable
 
 namespace PairAEMeasurable
 
-variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-omit [CompactSpace M] in
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [SigmaCompactSpace M] in
 theorem zero (g : SmoothRiemannianMetric I M) :
     PairAEMeasurable (I := I) (M := M) g (fun _ : M => (0 : E)) := by
   intro V _
@@ -239,8 +233,9 @@ theorem zero (g : SmoothRiemannianMetric I M) :
   rw [hcongr]
   exact aestronglyMeasurable_const
 
-omit [CompactSpace M] in
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [SigmaCompactSpace M] in
 theorem add {g : SmoothRiemannianMetric I M} {G G' : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G)
     (hG' : PairAEMeasurable (I := I) (M := M) g G') :
@@ -254,8 +249,9 @@ theorem add {g : SmoothRiemannianMetric I M} {G G' : M → E}
   rw [hcongr]
   exact (hG V hV).add (hG' V hV)
 
-omit [CompactSpace M] in
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [SigmaCompactSpace M] in
 theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => c • G x) := by
@@ -268,7 +264,9 @@ theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
   rw [hcongr]
   exact (hG V hV).const_mul c
 
-omit [CompactSpace M] [I.Boundaryless] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [SigmaCompactSpace M] in
 theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => -G x) := by
@@ -278,8 +276,9 @@ theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
   rw [heq] at h
   exact h
 
-omit [CompactSpace M] in
-omit [I.Boundaryless] in
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [T2Space M]
+  [SigmaCompactSpace M] in
 theorem congr_ae {g : SmoothRiemannianMetric I M} {G G' : M → E}
     (hG : G =ᵐ[riemannianVolumeMeasure I M g] G')
     (h : PairAEMeasurable (I := I) (M := M) g G) :
@@ -294,6 +293,8 @@ theorem congr_ae {g : SmoothRiemannianMetric I M} {G G' : M → E}
 
 end PairAEMeasurable
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] in
 def MemH1Lp [T2Space M] [SigmaCompactSpace M] (g : SmoothRiemannianMetric I M) (u : Lp ℝ 2 (riemannianVolumeMeasure I M g)) :
     Prop :=
   ∃ G : Lp E 2 (riemannianVolumeMeasure I M g),
@@ -307,6 +308,9 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem zero (g : SmoothRiemannianMetric I M) :
     MemH1Lp (I := I) (M := M) g (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) := by
   refine ⟨(0 : Lp E 2 (riemannianVolumeMeasure I M g)), ?_, ?_, ?_⟩
@@ -349,6 +353,9 @@ theorem zero (g : SmoothRiemannianMetric I M) :
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h0G.symm
       (PairAEMeasurable.zero (I := I) (M := M) g)
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
@@ -396,6 +403,9 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_smul_G.symm
       (PairAEMeasurable.const_smul (I := I) (M := M) c hG_pair)
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem neg (g : SmoothRiemannianMetric I M)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
@@ -412,6 +422,9 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem add (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)
@@ -541,6 +554,9 @@ theorem add (g : SmoothRiemannianMetric I M)
       PairAEMeasurable.add (I := I) (M := M) (g := g) hG_pair hG'_pair
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_sum_G.symm hsum_pair
 
+variable [Module.Finite ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem sub (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)

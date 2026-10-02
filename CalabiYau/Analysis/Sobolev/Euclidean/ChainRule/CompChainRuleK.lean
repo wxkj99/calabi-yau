@@ -13,8 +13,6 @@ public import Mathlib.Data.Nat.Choose.Bounds
 @[expose] public section
 
 -- Private declarations used in public declarations require the compatibility option below.
-set_option backward.privateInPublic true
-set_option backward.privateInPublic.warn false
 
 noncomputable section
 
@@ -24,11 +22,10 @@ open scoped ENNReal NNReal
 namespace Sobolev
 namespace Euclidean
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 theorem norm_iterClassicalPartial_le_iteratedFDeriv :
     ∀ (j : ℕ) (β : Fin j → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ x : E,
@@ -56,19 +53,18 @@ theorem norm_iterClassicalPartial_le_iteratedFDeriv :
         norm_iteratedFDeriv_partial_le (d := d) (η := f) hf (β 0) j x
       exact h_ih.trans h_step
 
-omit [NeZero d] in
 private theorem chosenWeakPartial_smooth_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    (hψ_W : DeGiorgi.MemW1p p ψ Ω) (i : Fin d) :
+    (hψ_W : Sobolev.Euclidean.MemW1p p ψ Ω) (i : Fin d) :
     chosenWeakPartialOrZero p i ψ Ω
       =ᵐ[volume.restrict Ω]
       (fun x => (fderiv ℝ ψ x) (EuclideanSpace.single i 1)) := by
-  have h_chosen : DeGiorgi.HasWeakPartialDeriv i (chosenWeakPartialOrZero p i ψ Ω) ψ Ω :=
+  have h_chosen : Sobolev.Euclidean.HasWeakPartialDeriv i (chosenWeakPartialOrZero p i ψ Ω) ψ Ω :=
     chosenWeakPartialOrZero_isWeakPartial_of_mem hψ_W i
-  have h_classical : DeGiorgi.HasWeakPartialDeriv i
+  have h_classical : Sobolev.Euclidean.HasWeakPartialDeriv i
       (fun x => (fderiv ℝ ψ x) (EuclideanSpace.single i 1)) ψ Ω :=
-    DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open
+    Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff
       (hψ_smooth.of_le (by norm_cast))
   have h_chosen_local : LocallyIntegrable (chosenWeakPartialOrZero p i ψ Ω)
       (volume.restrict Ω) :=
@@ -78,10 +74,9 @@ private theorem chosenWeakPartial_smooth_ae
     have h_cont : Continuous (fun x => (fderiv ℝ ψ x) (EuclideanSpace.single i 1)) :=
       (hψ_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
     exact h_cont.locallyIntegrable.mono_measure Measure.restrict_le_self
-  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
+  exact Sobolev.Euclidean.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_local h_classical_local
 
-omit [NeZero d] in
 private theorem MemWkp_of_smooth_compactSupport_local
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -96,7 +91,7 @@ private theorem MemWkp_of_smooth_compactSupport_local
         (μ := (volume : Measure E)) hψ_compact).restrict _
   | succ k ih =>
       rw [MemWkp_succ]
-      have hψ_W1p : DeGiorgi.MemW1p p ψ Ω := by
+      have hψ_W1p : Sobolev.Euclidean.MemW1p p ψ Ω := by
         refine ⟨(hψ_smooth.continuous.memLp_of_hasCompactSupport
           (μ := (volume : Measure E)) hψ_compact).restrict _, ?_⟩
         intro i
@@ -109,7 +104,7 @@ private theorem MemWkp_of_smooth_compactSupport_local
             hψ_compact.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)
           exact (h_cont.memLp_of_hasCompactSupport
             (μ := (volume : Measure E)) h_compact).restrict _
-        · exact DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open
+        · exact Sobolev.Euclidean.HasWeakPartialDeriv.of_contDiff
             (hψ_smooth.of_le (by norm_cast))
       refine ⟨hψ_W1p, ?_⟩
       intro i
@@ -129,7 +124,6 @@ private theorem MemWkp_of_smooth_compactSupport_local
       have h_ih_classical := ih h_classical_smooth h_classical_compact h_classical_support
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
-omit [NeZero d] in
 private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
@@ -144,7 +138,7 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
   | succ j ih =>
       intro β ψ hψ_smooth hψ_compact hψ_support
       rw [iterWeakPartial_succ, iterClassicalPartial_succ]
-      have hψ_W1p : DeGiorgi.MemW1p p ψ Ω := by
+      have hψ_W1p : Sobolev.Euclidean.MemW1p p ψ Ω := by
         have hψ_Wk : MemWkp (d := d) 1 p ψ Ω :=
           MemWkp_of_smooth_compactSupport_local (d := d) hΩ_open hψ_smooth hψ_compact
             hψ_support hp 1
@@ -168,7 +162,6 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
-omit [NeZero d] in
 private lemma exists_cutoff_for_comp
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget) (hΩ_open : IsOpen Ωsource)
@@ -210,7 +203,6 @@ private lemma exists_cutoff_for_comp
       image_eq_zero_of_notMem_tsupport h_φx_not_Ktarget
     rw [hψ_zero, mul_zero]
 
-omit [NeZero d] in
 private theorem comp_smooth_compactSupport_memWkp
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget) (hΩ_open : IsOpen Ωsource)
@@ -238,7 +230,6 @@ private theorem comp_smooth_compactSupport_memWkp
     rw [h_eq_on_Ω x hx]
   exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr hg_mem
 
-omit [NeZero d] in
 private lemma norm_iteratedFDeriv_comp_toFun_le_sum
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget)
@@ -263,173 +254,6 @@ private lemma norm_iteratedFDeriv_comp_toFun_le_sum
   rw [h_rearrange] at h
   exact h
 
-omit [NeZero d] in
-private lemma norm_iteratedFDeriv_cutoff_comp_le
-    {Ωsource Ωtarget : Set E}
-    (Φ : SmoothDiffeoBounded d Ωsource Ωtarget)
-    {η ψ : E → ℝ}
-    (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
-    (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
-    {Mη : ℝ} (hMη_nonneg : 0 ≤ Mη)
-    (k : ℕ)
-    (hη_bound : ∀ i, i ≤ k → ∀ y : E, ‖iteratedFDeriv ℝ i η y‖ ≤ Mη)
-    (j : ℕ) (hj : j ≤ k) (x : E) :
-    ‖iteratedFDeriv ℝ j (fun y => η y * ψ (Φ.toFun y)) x‖ ≤
-      ((k + 1 : ℕ) : ℝ) * (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) *
-          Φ.derivBoundMaxOne ^ k *
-        ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖ := by
-  classical
-  set D : ℝ := Φ.derivBoundMaxOne with hD_def
-  have hD_pos : 0 < D := Φ.derivBoundMaxOne_pos
-  have hD_ge_1 : 1 ≤ D := Φ.derivBoundMaxOne_ge_one
-  have hD_nonneg : 0 ≤ D := hD_pos.le
-  set S_x : ℝ := ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖ with hSx_def
-  have hSx_nonneg : 0 ≤ S_x := Finset.sum_nonneg (fun n _ => norm_nonneg _)
-  have h_pt_psi_comp : ∀ m, m ≤ k → ∀ y : E,
-      ‖iteratedFDeriv ℝ m (fun z => ψ (Φ.toFun z)) y‖ ≤
-        (k.factorial : ℝ) * D ^ k *
-          ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ := by
-    intro m hm y
-    have h_base := norm_iteratedFDeriv_comp_toFun_le_sum (d := d) Φ hψ_smooth m y
-    have h_fact_le : (m.factorial : ℝ) ≤ (k.factorial : ℝ) := by
-      exact_mod_cast Nat.factorial_le hm
-    have h_pow_le : D ^ m ≤ D ^ k :=
-      pow_le_pow_right₀ hD_ge_1 hm
-    have h_inner_sum_le :
-        ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ ≤
-        ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ := by
-      apply Finset.sum_le_sum_of_subset_of_nonneg
-      · intro n hn
-        rw [Finset.mem_range] at hn ⊢; omega
-      · intro _ _ _; exact norm_nonneg _
-    have h_fact_nn : (0 : ℝ) ≤ (m.factorial : ℝ) := by exact_mod_cast Nat.zero_le _
-    have h_powm_nn : (0 : ℝ) ≤ D ^ m := pow_nonneg hD_nonneg m
-    have h_sum_inner_nn : (0 : ℝ) ≤
-        ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ :=
-      Finset.sum_nonneg (fun n _ => norm_nonneg _)
-    have h_sum_outer_nn : (0 : ℝ) ≤
-        ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ :=
-      Finset.sum_nonneg (fun n _ => norm_nonneg _)
-    have h_step1 :
-        (m.factorial : ℝ) * D ^ m *
-          ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ ≤
-        (k.factorial : ℝ) * D ^ m *
-          ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ := by
-      have h_left_le : (m.factorial : ℝ) * D ^ m ≤ (k.factorial : ℝ) * D ^ m :=
-        mul_le_mul_of_nonneg_right h_fact_le h_powm_nn
-      exact mul_le_mul_of_nonneg_right h_left_le h_sum_inner_nn
-    have h_step2 :
-        (k.factorial : ℝ) * D ^ m *
-          ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ ≤
-        (k.factorial : ℝ) * D ^ k *
-          ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ := by
-      have h_kfact_nn : (0 : ℝ) ≤ (k.factorial : ℝ) := by exact_mod_cast Nat.zero_le _
-      have h_left_le : (k.factorial : ℝ) * D ^ m ≤ (k.factorial : ℝ) * D ^ k :=
-        mul_le_mul_of_nonneg_left h_pow_le h_kfact_nn
-      exact mul_le_mul_of_nonneg_right h_left_le h_sum_inner_nn
-    have h_step3 :
-        (k.factorial : ℝ) * D ^ k *
-          ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ ≤
-        (k.factorial : ℝ) * D ^ k *
-          ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ := by
-      have h_kfact_pow_nn : (0 : ℝ) ≤ (k.factorial : ℝ) * D ^ k :=
-        mul_nonneg (by exact_mod_cast Nat.zero_le _) (pow_nonneg hD_nonneg k)
-      exact mul_le_mul_of_nonneg_left h_inner_sum_le h_kfact_pow_nn
-    exact h_base.trans (h_step1.trans (h_step2.trans h_step3))
-  have hcomp_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y : E => ψ (Φ.toFun y)) :=
-    Φ.comp_toFun_contDiff hψ_smooth
-  have hN : (j : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) := by
-    exact_mod_cast (le_top : (j : ℕ∞) ≤ ⊤)
-  have h_mul := norm_iteratedFDeriv_mul_le (𝕜 := ℝ)
-    (f := η) (g := fun y : E => ψ (Φ.toFun y))
-    hη_smooth hcomp_smooth (x := x) (n := j) hN
-  have h_term_bound : ∀ i ∈ Finset.range (j + 1),
-      (j.choose i : ℝ) *
-        ‖iteratedFDeriv ℝ i η x‖ *
-        ‖iteratedFDeriv ℝ (j - i) (fun y => ψ (Φ.toFun y)) x‖ ≤
-      (j.choose i : ℝ) * (Mη * (k.factorial : ℝ) * D ^ k * S_x) := by
-    intro i hi
-    have hi_le_j : i ≤ j := by rw [Finset.mem_range] at hi; omega
-    have hi_le_k : i ≤ k := hi_le_j.trans hj
-    have hji_le_k : j - i ≤ k := by omega
-    have hη_x_bound : ‖iteratedFDeriv ℝ i η x‖ ≤ Mη := hη_bound i hi_le_k x
-    have h_psi_phi_bound :=
-      h_pt_psi_comp (j - i) hji_le_k x
-    have h_choose_ge : (0 : ℝ) ≤ (j.choose i : ℝ) := by exact_mod_cast Nat.zero_le _
-    have h_step_a :
-        (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i η x‖ *
-          ‖iteratedFDeriv ℝ (j - i) (fun y => ψ (Φ.toFun y)) x‖ ≤
-        (j.choose i : ℝ) * Mη *
-          ‖iteratedFDeriv ℝ (j - i) (fun y => ψ (Φ.toFun y)) x‖ := by
-      have h_left : (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i η x‖ ≤
-          (j.choose i : ℝ) * Mη :=
-        mul_le_mul_of_nonneg_left hη_x_bound h_choose_ge
-      exact mul_le_mul_of_nonneg_right h_left (norm_nonneg _)
-    have h_step_b :
-        (j.choose i : ℝ) * Mη *
-          ‖iteratedFDeriv ℝ (j - i) (fun y => ψ (Φ.toFun y)) x‖ ≤
-        (j.choose i : ℝ) * Mη *
-          ((k.factorial : ℝ) * D ^ k * S_x) := by
-      have h_left_nn : (0 : ℝ) ≤ (j.choose i : ℝ) * Mη :=
-        mul_nonneg h_choose_ge hMη_nonneg
-      exact mul_le_mul_of_nonneg_left h_psi_phi_bound h_left_nn
-    have h_combined :
-        (j.choose i : ℝ) * Mη *
-          ((k.factorial : ℝ) * D ^ k * S_x) =
-        (j.choose i : ℝ) * (Mη * (k.factorial : ℝ) * D ^ k * S_x) := by ring
-    exact (h_step_a.trans h_step_b).trans h_combined.le
-  have h_sum_le := Finset.sum_le_sum h_term_bound
-  have h_factor :
-      ∑ i ∈ Finset.range (j + 1),
-        (j.choose i : ℝ) * (Mη * (k.factorial : ℝ) * D ^ k * S_x) =
-      (Mη * (k.factorial : ℝ) * D ^ k * S_x) *
-        ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) := by
-    have h_eq : ∀ i ∈ Finset.range (j + 1),
-        (j.choose i : ℝ) * (Mη * (k.factorial : ℝ) * D ^ k * S_x) =
-        (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (j.choose i : ℝ) := fun i _ => by ring
-    rw [Finset.sum_congr rfl h_eq, ← Finset.mul_sum]
-  rw [h_factor] at h_sum_le
-  have h_sum_choose_eq :
-      ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) = (2 ^ j : ℝ) := by
-    have h_nat : ∑ i ∈ Finset.range (j + 1), j.choose i = 2 ^ j :=
-      Nat.sum_range_choose j
-    have h_cast : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ)) =
-        ((∑ i ∈ Finset.range (j + 1), j.choose i : ℕ) : ℝ) := by push_cast; rfl
-    rw [h_cast, h_nat]; push_cast; rfl
-  have h_sum_choose_le : ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) ≤ (2 ^ k : ℝ) := by
-    rw [h_sum_choose_eq]
-    exact pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hj
-  have h_factor_nn : (0 : ℝ) ≤ Mη * (k.factorial : ℝ) * D ^ k * S_x := by
-    have h_kfact_nn : (0 : ℝ) ≤ (k.factorial : ℝ) := by exact_mod_cast Nat.zero_le _
-    have h_pow_nn : (0 : ℝ) ≤ D ^ k := pow_nonneg hD_nonneg k
-    refine mul_nonneg (mul_nonneg (mul_nonneg hMη_nonneg h_kfact_nn) h_pow_nn) hSx_nonneg
-  have h_factor_choose_le :
-      (Mη * (k.factorial : ℝ) * D ^ k * S_x) *
-        ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) ≤
-      (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (2 ^ k : ℝ) :=
-    mul_le_mul_of_nonneg_left h_sum_choose_le h_factor_nn
-  have h_align :
-      (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (2 ^ k : ℝ) ≤
-      ((k + 1 : ℕ) : ℝ) * (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) * D ^ k * S_x := by
-    have h_one_le : (1 : ℝ) ≤ ((k + 1 : ℕ) : ℝ) := by
-      have h := Nat.one_le_iff_ne_zero.mpr (Nat.succ_ne_zero k)
-      exact_mod_cast h
-    have h_eq : (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (2 ^ k : ℝ) =
-        1 * (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) * D ^ k * S_x := by ring
-    have h_eq2 : ((k + 1 : ℕ) : ℝ) * (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) * D ^ k * S_x =
-        ((k + 1 : ℕ) : ℝ) * (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) * D ^ k * S_x := rfl
-    rw [h_eq]
-    have h_two_pow_nn : (0 : ℝ) ≤ (2 ^ k : ℝ) := by positivity
-    have h_left_pos : (0 : ℝ) ≤
-        (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) * D ^ k * S_x := by
-      have h_kfact_nn : (0 : ℝ) ≤ (k.factorial : ℝ) := by exact_mod_cast Nat.zero_le _
-      have h_pow_nn : (0 : ℝ) ≤ D ^ k := pow_nonneg hD_nonneg k
-      refine mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg h_two_pow_nn hMη_nonneg)
-        h_kfact_nn) h_pow_nn) hSx_nonneg
-    nlinarith
-  exact h_mul.trans (h_sum_le.trans (h_factor_choose_le.trans h_align))
-
-omit [NeZero d] in
 private lemma euclidean_coord_le_norm
     (v : EuclideanSpace ℝ (Fin d)) (i : Fin d) :
     |v i| ≤ ‖v‖ := by
@@ -446,7 +270,6 @@ private lemma euclidean_coord_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq hv_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sq
 
-omit [NeZero d] in
 private lemma continuousMultilinearMap_norm_le_sum_basis
     {n : ℕ}
     (f : ContinuousMultilinearMap ℝ
@@ -521,7 +344,6 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
   rw [h_factor]
   exact le_of_eq (mul_comm _ _)
 
-omit [NeZero d] in
 private lemma norm_iteratedFDeriv_le_sum_basis
     (n : ℕ) {ψ : E → ℝ} (y : E) :
     ‖iteratedFDeriv ℝ n ψ y‖ ≤
@@ -530,7 +352,6 @@ private lemma norm_iteratedFDeriv_le_sum_basis
           (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| :=
   continuousMultilinearMap_norm_le_sum_basis (d := d) (iteratedFDeriv ℝ n ψ y)
 
-omit [NeZero d] in
 private lemma iteratedFDeriv_clm_apply_basis
     {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : E → F →L[ℝ] ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -546,7 +367,6 @@ private lemma iteratedFDeriv_clm_apply_basis
     hg (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤))
   exact h.symm
 
-omit [NeZero d] in
 private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
     ∀ (n : ℕ) (β : Fin n → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ y : E,
@@ -590,7 +410,6 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
         rw [Fin.rev_zero]
       rw [h_index_eq, h_first_eq]
 
-omit [NeZero d] in
 private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f) (y : E) :
     ‖iteratedFDeriv ℝ n f y‖ ≤
@@ -636,7 +455,6 @@ private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
   rw [h_equiv] at h1
   exact h1
 
-omit [NeZero d] in
 private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
     {f : E → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -699,7 +517,6 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
   rw [Real.norm_eq_abs, abs_abs]
   exact le_of_eq rfl
 
-omit [NeZero d] in
 lemma eLpNorm_iteratedFDeriv_le_wkpNorm
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -737,11 +554,10 @@ end Sobolev
 namespace Sobolev
 namespace Euclidean
 
-variable {d : ℕ} [NeZero d]
+variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-omit [NeZero d] in
 private lemma jacobian_lower_pointwise_bound
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω') {q : ℝ}
@@ -755,7 +571,6 @@ private lemma jacobian_lower_pointwise_bound
     ENNReal.ofReal_le_ofReal (Φ.jacobian_lower x hx)
   exact mul_le_mul_of_nonneg_right h_le (zero_le)
 
-omit [NeZero d] in
 private lemma lintegral_rpow_enorm_comp_le
     {p : ℝ≥0∞}
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -784,7 +599,6 @@ private lemma lintegral_rpow_enorm_comp_le
   have hchg := Φ.lintegral_image_eq hΩ (fun y => ‖f y‖ₑ ^ q)
   rw [← hchg]
 
-omit [NeZero d] in
 theorem eLpNorm_comp_toFun_le_const
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -845,7 +659,6 @@ theorem eLpNorm_comp_toFun_le_const
         (by positivity : (0 : ℝ) < 1 / Φ.jacobianLowerBound)] at h_pow_le
   exact h_pow_le
 
-omit [NeZero d] in
 private lemma iterClassicalPartial_eqOn_of_eqOn
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {g h : E → ℝ},
@@ -883,7 +696,6 @@ private lemma iterClassicalPartial_eqOn_of_eqOn
       exact ih (fun i : Fin j => β i.succ)
         h_inner_g_smooth h_inner_h_smooth h_partial_eqOn hx
 
-omit [NeZero d] in
 private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -933,7 +745,6 @@ private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
   intro x hx
   exact h_classical_eqOn hx
 
-omit [NeZero d] in
 private lemma norm_iterClassicalPartial_comp_le_uniform
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω')
@@ -986,7 +797,6 @@ private lemma norm_iterClassicalPartial_comp_le_uniform
     exact mul_nonneg h_kf_nn (pow_nonneg hD_nonneg k)
   exact mul_le_mul_of_nonneg_left h_inner_sum_le h_outer_nn
 
-omit [NeZero d] in
 private lemma eLpNorm_iterWeakPartial_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -1061,7 +871,6 @@ private lemma eLpNorm_iterWeakPartial_comp_le
   rw [h_pointwise_eq]
   exact eLpNorm_sum_le h_strong_meas hp_one
 
-omit [NeZero d] in
 private lemma eLpNorm_iteratedFDeriv_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -1074,66 +883,6 @@ private lemma eLpNorm_iteratedFDeriv_comp_le
       eLpNorm (fun y => ‖iteratedFDeriv ℝ n ψ y‖) p (volume.restrict Ω') :=
   eLpNorm_comp_toFun_le_const (d := d) hp_one hp_top hΩ Φ
     (fun y => ‖iteratedFDeriv ℝ n ψ y‖)
-
-noncomputable def wkpCompConst
-    {Ω Ω' : Set E}
-    (Φ : SmoothDiffeoBounded d Ω Ω') (k : ℕ) (p : ℝ≥0∞) : ℝ :=
-  ((Finset.range (k + 1)).sum (fun j => (Fintype.card (Fin j → Fin d) : ℝ))) *
-    ((k.factorial : ℝ) * Φ.derivBoundMaxOne ^ k) *
-    ((1 / Φ.jacobianLowerBound) ^ (1 / p.toReal)) *
-    ((k + 1 : ℕ) : ℝ)
-
-private lemma wkpComp_const_card_sum_pos (k : ℕ) :
-    0 < (Finset.range (k + 1)).sum
-      (fun j => (Fintype.card (Fin j → Fin d) : ℝ)) := by
-  have h_zero_in : (0 : ℕ) ∈ Finset.range (k + 1) :=
-    Finset.mem_range.mpr (Nat.zero_lt_succ _)
-  have h_at_zero : (Fintype.card (Fin 0 → Fin d) : ℝ) = 1 := by
-    have h_card : Fintype.card (Fin 0 → Fin d) = 1 := by
-      rw [Fintype.card_fun]; simp
-    exact_mod_cast h_card
-  have h_le := Finset.single_le_sum (s := Finset.range (k + 1))
-    (f := fun j => (Fintype.card (Fin j → Fin d) : ℝ))
-    (fun j _ => by positivity) h_zero_in
-  rw [h_at_zero] at h_le
-  linarith
-
-private lemma wkpComp_const_card_sum_ge_one (k : ℕ) :
-    1 ≤ (Finset.range (k + 1)).sum
-      (fun j => (Fintype.card (Fin j → Fin d) : ℝ)) := by
-  have h_zero_in : (0 : ℕ) ∈ Finset.range (k + 1) :=
-    Finset.mem_range.mpr (Nat.zero_lt_succ _)
-  have h_at_zero : (Fintype.card (Fin 0 → Fin d) : ℝ) = 1 := by
-    have h_card : Fintype.card (Fin 0 → Fin d) = 1 := by
-      rw [Fintype.card_fun]; simp
-    exact_mod_cast h_card
-  have h_le := Finset.single_le_sum (s := Finset.range (k + 1))
-    (f := fun j => (Fintype.card (Fin j → Fin d) : ℝ))
-    (fun j _ => by positivity) h_zero_in
-  rw [h_at_zero] at h_le
-  exact h_le
-
-private lemma wkpComp_const_pos
-    {Ω Ω' : Set E}
-    (Φ : SmoothDiffeoBounded d Ω Ω') (k : ℕ) (p : ℝ≥0∞)
-    (hp_one : 1 ≤ p) (hp_top : p ≠ ∞) :
-    0 < wkpCompConst (d := d) Φ k p := by
-  have hp_zero : p ≠ 0 := by
-    intro hpz; rw [hpz] at hp_one
-    exact absurd hp_one (by norm_num)
-  have hq_pos : 0 < p.toReal := ENNReal.toReal_pos hp_zero hp_top
-  have hjLB_pos : 0 < Φ.jacobianLowerBound := Φ.jacobian_lower_bound_pos
-  have hjLB_inv_pos : 0 < 1 / Φ.jacobianLowerBound := by positivity
-  have hKchg_pos : 0 < (1 / Φ.jacobianLowerBound) ^ (1 / p.toReal) :=
-    Real.rpow_pos_of_pos hjLB_inv_pos _
-  unfold wkpCompConst
-  have h_card_pos := wkpComp_const_card_sum_pos (d := d) k
-  have h_kfact_D_pos : 0 < (k.factorial : ℝ) * Φ.derivBoundMaxOne ^ k := by
-    refine mul_pos ?_ ?_
-    · exact_mod_cast Nat.factorial_pos k
-    · exact pow_pos Φ.derivBoundMaxOne_pos k
-  have h_k1_pos : (0 : ℝ) < ((k + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.zero_lt_succ k
-  positivity
 
 end Euclidean
 end Sobolev

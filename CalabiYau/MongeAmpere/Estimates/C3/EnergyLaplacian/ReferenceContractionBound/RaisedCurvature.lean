@@ -25,14 +25,14 @@ theorem referenceContraction_raised_frame {n : ℕ}
     (hPQ : P * Q = 1) (hQP : Q * P = 1)
     (hframe : linearPullbackMetric P G₀ = 1) (i j k q : Fin n) :
     referenceAction_tauU P Q (fun a b c e => ∑ l, G₀⁻¹ l a * R b e c l) i j k q =
-      referenceContraction_fourSlotTransform P R j q k i := by
+      referenceContractionFourSlotTransform P R j q k i := by
   classical
   have hraise (l : Fin n) :
       ∑ a, Q i a * G₀⁻¹ l a = star (P l i) := by
     have h := linear_pullback_reference_contraction P Q G₀ hPQ hQP i l
     rw [hframe] at h
     simpa [Matrix.one_apply] using h.symm
-  unfold referenceAction_tauU referenceContraction_fourSlotTransform
+  unfold referenceAction_tauU referenceContractionFourSlotTransform
   calc
     (∑ a, ∑ b, ∑ c, ∑ e,
         Q i a * P b j * P c k * star (P e q) *

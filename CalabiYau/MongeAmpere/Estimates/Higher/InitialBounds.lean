@@ -1,7 +1,7 @@
 module
 
 public import CalabiYau.MongeAmpere.Operator
-public import CalabiYau.Geometry.Complex.Schauder
+public import CalabiYau.Analysis.Elliptic.Schauder
 import CalabiYau.Geometry.Complex.Forms.Positive
 
 /-!
@@ -24,7 +24,11 @@ namespace KahlerForm
 
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
-  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
+  [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
+section
+
+variable [T2Space M] [CompactSpace M]
+
 
 private theorem holderBoundOn_zero_of_lipschitzOnWith
     {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -51,35 +55,7 @@ private theorem holderBoundOn_zero_of_lipschitzOnWith
     have hj0 : j = 0 := Nat.eq_zero_of_le_zero hj
     subst j
     exact (hval z hz).trans (le_max_left _ _)
-  · exact hHolder.mono_const (by simpa [D] using le_max_right _ _)
-
-omit [T2Space M] [CompactSpace M] in
-private theorem laplacian_bounds_of_solvesMongeAmpere
-    (ω₀ : KahlerForm n M) {G φ : M → ℝ}
-    (hsol : ω₀.SolvesMongeAmpere G φ) {Λ : ℝ}
-    (hΛ : ∀ y, relTrace (ω₀ y) (ω₀ y + mddbar n φ y) ≤ Λ) (y : M) :
-    -(n : ℝ) ≤ ω₀.laplacian φ y ∧ ω₀.laplacian φ y ≤ Λ - n := by
-  have hpert : 0 ≤ relTrace (ω₀ y) (ω₀ y + mddbar n φ y) :=
-    ContinuousAlternatingMap.relTrace_nonneg (ω₀.isPositive y) (hsol.1.2 y).isNonneg
-  have htrace : relTrace (ω₀ y) (ω₀ y + mddbar n φ y) =
-      (n : ℝ) + ω₀.laplacian φ y := by
-    rw [ContinuousAlternatingMap.relTrace_add,
-      ContinuousAlternatingMap.relTrace_self (ω₀.isPositive y)]
-    rfl
-  constructor <;> linarith [htrace, hpert, hΛ y]
-
-private theorem re_complexHessian_diag_eq_ddbar
-    (f : EuclideanSpace ℂ (Fin n) → ℝ) (z : EuclideanSpace ℂ (Fin n)) (j : Fin n) :
-    (complexHessian f z j j).re =
-      (ddbar f z ![EuclideanSpace.single j 1, Complex.I • EuclideanSpace.single j 1]) / 2 := by
-  simp [complexHessian, ContinuousAlternatingMap.coeffMatrix, Complex.mul_re]
-
-private theorem re_trace_complexHessian_eq_ddbar_sum
-    (f : EuclideanSpace ℂ (Fin n) → ℝ) (z : EuclideanSpace ℂ (Fin n)) :
-    RCLike.re (complexHessian f z).trace =
-      ∑ j, (ddbar f z ![EuclideanSpace.single j 1,
-        Complex.I • EuclideanSpace.single j 1]) / 2 := by
-  simp [Matrix.trace, re_complexHessian_diag_eq_ddbar]
+  · exact hHolder.mono_const (by simp [D])
 
 private theorem re_coeffMatrix_diag_eq_form_eval
     (α : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ) (j : Fin n) :
@@ -87,36 +63,11 @@ private theorem re_coeffMatrix_diag_eq_form_eval
       (α ![EuclideanSpace.single j 1, Complex.I • EuclideanSpace.single j 1]) / 2 := by
   simp [ContinuousAlternatingMap.coeffMatrix, Complex.mul_re]
 
-private theorem re_trace_coeffMatrix_eq_form_eval_sum
-    (α : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ) :
-    RCLike.re α.coeffMatrix.trace =
-      ∑ j, (α ![EuclideanSpace.single j 1,
-        Complex.I • EuclideanSpace.single j 1]) / 2 := by
-  simp [Matrix.trace, re_coeffMatrix_diag_eq_form_eval]
-
 private theorem coeffMatrix_diag_re_nonneg_of_isNonneg
     (α : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ)
     (hα : α.IsNonneg) (j : Fin n) : 0 ≤ (α.coeffMatrix j j).re := by
   rw [re_coeffMatrix_diag_eq_form_eval]
   exact div_nonneg (hα.2 (EuclideanSpace.single j 1)) (by norm_num)
-
-private theorem fderiv_ddbar_eval_norm_le
-    (f : EuclideanSpace ℂ (Fin n) → ℝ) (z : EuclideanSpace ℂ (Fin n))
-    (a b : EuclideanSpace ℂ (Fin n))
-    (hDiff : DifferentiableAt ℝ (ddbar f) z) {C : ℝ}
-    (hC : ‖fderiv ℝ (ddbar f) z‖ ≤ C) :
-    ‖fderiv ℝ (fun w ↦ (ddbar f w) ![a, b]) z‖ ≤
-      ‖ContinuousAlternatingMap.apply ℝ (EuclideanSpace ℂ (Fin n)) ℝ ![a, b]‖ * C := by
-  let E := ContinuousAlternatingMap.apply ℝ (EuclideanSpace ℂ (Fin n)) ℝ ![a, b]
-  have hEq : (fun w ↦ (ddbar f w) ![a, b]) = E ∘ ddbar f := by
-    rfl
-  change ‖fderiv ℝ (E ∘ ddbar f) z‖ ≤ _
-  rw [fderiv_comp (f := ddbar f) (g := E) z E.differentiableAt hDiff,
-    ContinuousLinearMap.fderiv]
-  calc
-    ‖E.comp (fderiv ℝ (ddbar f) z)‖ ≤ ‖E‖ * ‖fderiv ℝ (ddbar f) z‖ :=
-      ContinuousLinearMap.opNorm_comp_le _ _
-    _ ≤ ‖E‖ * C := mul_le_mul_of_nonneg_left hC (norm_nonneg _)
 
 private theorem isNonneg_compContinuousLinearMap_of_commutesWithI
     (α : EuclideanSpace ℂ (Fin n) [⋀^Fin 2]→L[ℝ] ℝ) (hα : α.IsNonneg)
@@ -136,7 +87,8 @@ private theorem isNonneg_compContinuousLinearMap_of_commutesWithI
     rw [hmap, hA v]
     exact hα.2 (A v)
 
-omit [T2Space M] [CompactSpace M] in
+end
+
 private theorem chartTransition_commutesWithI
     (x : M) {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
@@ -153,7 +105,6 @@ private theorem chartTransition_commutesWithI
   intro v
   exact tangentCoordChange_I_smul hOverlap v
 
-omit [T2Space M] [CompactSpace M] in
 private theorem chartRep_isNonneg (β : FormField (EuclideanSpace ℂ (Fin n)) M 2)
     (hβ : ∀ y, (β y).IsNonneg) (x : M) {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
@@ -165,7 +116,6 @@ private theorem chartRep_isNonneg (β : FormField (EuclideanSpace ℂ (Fin n)) M
   change ((β y).compContinuousLinearMap A).IsNonneg
   exact isNonneg_compContinuousLinearMap_of_commutesWithI (β y) (hβ y) A hA
 
-omit [T2Space M] [CompactSpace M] in
 
 /-- The `C⁰`, `C²`, and `C³` inputs give a uniform `C^{2,α}` bound on each compact piece of a
 chart. This is the initial estimate for `SchauderStep.exists_uniform_chart_holder_bound_succ`.

@@ -18,8 +18,8 @@ namespace MeasureTheory
 
 /-- Scalar change of variables on a measurable chart overlap. The sign
 `ε` is that of the transition determinant; reversing the orientation of
-the target chart reverses the integral. The integrability assumption rules
-out the convention that a nonintegrable Bochner integral is zero. -/
+the target chart reverses the integral. The formula also holds with the
+Bochner integral convention for nonintegrable functions. -/
 theorem integral_image_eq_integral_signed_det_fderiv
     {n : ℕ} (s : Set (Fin n → ℝ)) (hs : MeasurableSet s)
     (f : (Fin n → ℝ) → (Fin n → ℝ))
@@ -27,12 +27,10 @@ theorem integral_image_eq_integral_signed_det_fderiv
     (hf : InjOn f s)
     (ε : ℝ) (hε : ε = 1 ∨ ε = -1)
     (hpos : ∀ x ∈ s, 0 < ε * (fderiv ℝ f x).det)
-    (g : (Fin n → ℝ) → ℝ)
-    (hg : IntegrableOn g (f '' s) (volume : Measure (Fin n → ℝ))) :
+    (g : (Fin n → ℝ) → ℝ) :
     ∫ y in f '' s, ε * g y ∂(volume : Measure (Fin n → ℝ)) =
       ∫ x in s, (fderiv ℝ f x).det * g (f x)
         ∂(volume : Measure (Fin n → ℝ)) := by
-  have _hgi := hg
   have hcv := integral_image_eq_integral_abs_det_fderiv_smul
     (μ := (volume : Measure (Fin n → ℝ))) hs
     (fun x hx => (hf' x hx).hasFDerivWithinAt) hf g

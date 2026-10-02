@@ -26,23 +26,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-private noncomputable def witnessOrderC0 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] : ℕ :=
-  Module.finrank ℝ E + 1
-
-private lemma witnessOrderC0_pos {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] :
-    1 ≤ witnessOrderC0 E := by
-  unfold witnessOrderC0
-  omega
-
-private lemma witnessOrderC0_two_gt_dim {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] :
-    (Module.finrank ℝ E : ℝ) < (witnessOrderC0 E : ℝ) * 2 := by
-  unfold witnessOrderC0
-  push_cast
-  linarith [show (0 : ℝ) ≤ Module.finrank ℝ E from Nat.cast_nonneg _]
-
 def HasSupercriticalChartSobolevRegularity
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E]
