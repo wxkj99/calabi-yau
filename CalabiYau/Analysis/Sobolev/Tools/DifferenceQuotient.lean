@@ -219,16 +219,7 @@ lemma memLp_translate
     {p : ℝ≥0∞} (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v p volume) :
     MemLp (translate i h v) p volume := by
-  have hMP := measurePreserving_translate (d := d) i h
-  have h_aesm : AEStronglyMeasurable (translate i h v) volume :=
-    hv.aestronglyMeasurable.comp_measurePreserving hMP
-  refine ⟨h_aesm, ?_⟩
-  unfold translate
-  have h_eq :
-      eLpNorm (fun x : E => v (x + h • EuclideanSpace.single i 1)) p volume =
-        eLpNorm v p volume :=
-    eLpNorm_comp_measurePreserving hv.aestronglyMeasurable hMP
-  rw [h_eq]; exact hv.eLpNorm_lt_top
+  exact hv.comp_measurePreserving (measurePreserving_translate (d := d) i h)
 
 theorem memLp_diffQuot
     {p : ℝ≥0∞} (i : Fin d) (h : ℝ) {v : E → ℝ}

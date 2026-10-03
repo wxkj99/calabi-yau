@@ -30,20 +30,30 @@ lemma norm_partial_eta_le_fderiv
 
 lemma eLpNorm_eta_mul_le
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω)
-    {η : E → ℝ}
+    {η : E → ℝ} (hη_meas : AEStronglyMeasurable η (volume.restrict Ω))
     {C : ℝ}
     (hη_bound : ∀ x ∈ Ω, ‖η x‖ ≤ C)
     (v : E → ℝ) :
     eLpNorm (fun x => η x * v x) p (volume.restrict Ω) ≤
       ENNReal.ofReal C * eLpNorm v p (volume.restrict Ω) := by
-  refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := v) (c := C) ?_ p
-  refine (ae_restrict_iff' hΩ.measurableSet).mpr ?_
-  refine Filter.Eventually.of_forall (fun x hx => ?_)
-  calc
-    ‖η x * v x‖ = ‖η x‖ * ‖v x‖ := norm_mul _ _
-    _ ≤ C * ‖v x‖ := by
-          gcongr
-          exact hη_bound x hx
+  have hbound : ∀ᵐ x ∂(volume.restrict Ω), ‖η x * v x‖ ≤ C * ‖v x‖ := by
+    refine (ae_restrict_iff' hΩ.measurableSet).mpr (Filter.Eventually.of_forall fun x hx => ?_)
+    calc
+      ‖η x * v x‖ = ‖η x‖ * ‖v x‖ := norm_mul _ _
+      _ ≤ C * ‖v x‖ := by
+            gcongr
+            exact hη_bound x hx
+  by_cases hv : AEStronglyMeasurable v (volume.restrict Ω)
+  · exact eLpNorm_le_mul_eLpNorm_of_ae_le_mul (hη_meas.mul hv) hbound p
+  rcases le_or_gt C 0 with hC | hC
+  · have h0 : (fun x => η x * v x) =ᵐ[volume.restrict Ω] 0 := by
+      refine (ae_restrict_iff' hΩ.measurableSet).mpr (Filter.Eventually.of_forall fun x hx => ?_)
+      have hη0 : η x = 0 := norm_le_zero_iff.mp ((hη_bound x hx).trans hC)
+      simp [hη0]
+    rw [eLpNorm_congr_ae h0]
+    simp
+  · rw [eLpNorm_of_not_aestronglyMeasurable hv, ENNReal.mul_top (by simpa using hC)]
+    exact le_top
 
 lemma eLpNorm_partial_eta_mul_le
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω)
@@ -54,18 +64,33 @@ lemma eLpNorm_partial_eta_mul_le
     eLpNorm (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * v x)
         p (volume.restrict Ω) ≤
       ENNReal.ofReal C * eLpNorm v p (volume.restrict Ω) := by
-  refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := v) (c := C) ?_ p
-  refine (ae_restrict_iff' hΩ.measurableSet).mpr ?_
-  refine Filter.Eventually.of_forall (fun x hx => ?_)
-  calc
-    ‖(fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * v x‖
-        = ‖(fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ))‖ * ‖v x‖ := norm_mul _ _
-    _ ≤ ‖fderiv ℝ η x‖ * ‖v x‖ := by
-          gcongr
-          exact norm_partial_eta_le_fderiv i x
-    _ ≤ C * ‖v x‖ := by
-          gcongr
-          exact hη_grad_bound x hx
+  have hbound : ∀ᵐ x ∂volume.restrict Ω,
+      ‖(fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * v x‖ ≤ C * ‖v x‖ := by
+    refine (ae_restrict_iff' hΩ.measurableSet).mpr ?_
+    refine Filter.Eventually.of_forall (fun x hx => ?_)
+    calc
+      ‖(fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * v x‖
+          = ‖(fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ))‖ * ‖v x‖ := norm_mul _ _
+      _ ≤ ‖fderiv ℝ η x‖ * ‖v x‖ := by
+            gcongr
+            exact norm_partial_eta_le_fderiv i x
+      _ ≤ C * ‖v x‖ := by
+            gcongr
+            exact hη_grad_bound x hx
+  by_cases hC : C ≤ 0
+  · have hz : (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * v x)
+        =ᵐ[volume.restrict Ω] (0 : E → ℝ) := by
+      filter_upwards [hbound] with x hx
+      exact norm_eq_zero.mp (le_antisymm
+        (hx.trans (mul_nonpos_of_nonpos_of_nonneg hC (norm_nonneg _))) (norm_nonneg _))
+    rw [eLpNorm_congr_ae hz, eLpNorm_zero]
+    exact bot_le
+  by_cases hv : AEStronglyMeasurable v (volume.restrict Ω)
+  · exact eLpNorm_le_mul_eLpNorm_of_ae_le_mul
+      ((measurable_fderiv_apply_const ℝ η (EuclideanSpace.single i (1 : ℝ))).aestronglyMeasurable.mul hv) hbound p
+  · rw [eLpNorm_of_not_aestronglyMeasurable hv,
+      ENNReal.mul_top (ne_of_gt (ENNReal.ofReal_pos.mpr (lt_of_not_ge hC)))]
+    exact le_top
 
 lemma eLpNorm_chosenWeakPartialOrZero_smul_smooth_bounded_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
@@ -83,19 +108,6 @@ lemma eLpNorm_chosenWeakPartialOrZero_smul_smooth_bounded_le
   classical
   have hae := chosenWeakPartialOrZero_smul_smooth_bounded_ae (d := d) hp_one hΩ
     hη_smooth hη_bound hη_grad_bound hu i
-  have hηcwp_meas : AEStronglyMeasurable
-      (fun x => η x * chosenWeakPartialOrZero (d := d) p i u Ω x)
-      (volume.restrict Ω) :=
-    hη_smooth.continuous.aestronglyMeasurable.mul
-      (chosenWeakPartialOrZero_memLp_of_mem hu i).aestronglyMeasurable
-  have hderiv_cont : Continuous
-      (fun x : E => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ))) :=
-    (hη_smooth.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).clm_apply
-      continuous_const
-  have hdηu_meas : AEStronglyMeasurable
-      (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)
-      (volume.restrict Ω) :=
-    hderiv_cont.aestronglyMeasurable.mul hu.1.aestronglyMeasurable
   rw [eLpNorm_congr_ae hae]
   have hSumEq :
       (fun x => η x * chosenWeakPartialOrZero (d := d) p i u Ω x +
@@ -115,14 +127,15 @@ lemma eLpNorm_chosenWeakPartialOrZero_smul_smooth_bounded_le
           eLpNorm
             (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)
             p (volume.restrict Ω) :=
-    eLpNorm_add_le hηcwp_meas hdηu_meas hp_one
+    eLpNorm_add_le hp_one
   refine htriangle.trans ?_
   have hbnd1 :
       eLpNorm (fun x => η x * chosenWeakPartialOrZero (d := d) p i u Ω x)
           p (volume.restrict Ω)
         ≤ ENNReal.ofReal C *
           eLpNorm (chosenWeakPartialOrZero (d := d) p i u Ω) p (volume.restrict Ω) :=
-    eLpNorm_eta_mul_le (d := d) hΩ hη_bound (chosenWeakPartialOrZero p i u Ω)
+    eLpNorm_eta_mul_le (d := d) hΩ hη_smooth.continuous.aestronglyMeasurable hη_bound
+      (chosenWeakPartialOrZero p i u Ω)
   have hbnd2 :
       eLpNorm (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)
           p (volume.restrict Ω)
@@ -172,7 +185,8 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     rw [wkpNorm_zero (d := d) (p := p), wkpNorm_zero (d := d) (p := p)]
     have hb : eLpNorm (fun x => η x * u x) p (volume.restrict Ω) ≤
         ENNReal.ofReal C * eLpNorm u p (volume.restrict Ω) := by
-      refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := u) (c := C) ?_ p
+      refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := u) (c := C)
+        (hη_smooth.continuous.aestronglyMeasurable.mul hu.memLp.aestronglyMeasurable) ?_ p
       refine (ae_restrict_iff' hΩ_open.measurableSet).mpr ?_
       refine Filter.Eventually.of_forall (fun x hx => ?_)
       calc
@@ -210,7 +224,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     set OK : ℝ≥0∞ := ENNReal.ofReal K with hOK_def
     have h_eta_v_bnd :
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) ≤ OC * Au :=
-      eLpNorm_eta_mul_le (d := d) hΩ_open h_eta0 v
+      eLpNorm_eta_mul_le (d := d) hΩ_open hη_smooth.continuous.aestronglyMeasurable h_eta0 v
     have h_chosen_bnd : ∀ i : Fin d,
         eLpNorm (chosenWeakPartialOrZero p i (fun x => η x * v x) Ω) p
             (volume.restrict Ω)

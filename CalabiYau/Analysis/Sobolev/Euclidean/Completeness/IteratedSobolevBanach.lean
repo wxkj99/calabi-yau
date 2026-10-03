@@ -333,7 +333,7 @@ private theorem exists_iter_limits_subseq
   · intro j β hj
     change MemLp (if hj' : j ≤ k then (h_each j β hj').choose else (fun _ : E => (0 : ℝ)))
       p (volume.restrict Ω)
-    rw [dif_pos hj]
+    rw [dite_eq_left hj]
     exact (h_each j β hj).choose_spec.1
   · intro j β hj
     change Tendsto (fun n => eLpNorm
@@ -341,7 +341,7 @@ private theorem exists_iter_limits_subseq
           (if hj' : j ≤ k then (h_each j β hj').choose else (fun _ : E => (0 : ℝ))) x)
         p (volume.restrict Ω))
       atTop (𝓝 0)
-    rw [dif_pos hj]
+    rw [dite_eq_left hj]
     exact (h_each j β hj).choose_spec.2
 
 private theorem subseq_limit_memWkp_and_wkpNorm_tendsto

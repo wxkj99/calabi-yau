@@ -91,7 +91,7 @@ private theorem exists_smooth_zero_extension_of_chart_support
   intro z hz
   have hsymm : c.symm z ∈ c.source := c.map_target hz
   change (if c.symm z ∈ c.source then u (c (c.symm z)) else 0) = u z
-  rw [if_pos hsymm, c.right_inv hz]
+  rw [ite_eq_left hsymm, c.right_inv hz]
 
 /-- The zero extensions of all the local convolutions. On the source chart target,
 the global extension agrees pointwise with its Euclidean convolution; outside

@@ -66,7 +66,7 @@ theorem referenceContraction_drift_frame {n : ℕ}
     referenceAction_contract, referenceAction_tauT, referenceContractionDiagonalDrift,
     referenceContractionFiveSlotTransform, referenceContractionTensorFrameTransform]
   simp only [ite_mul, mul_ite, zero_mul, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
-    if_true, mul_one]
+    ite_true, mul_one]
   rw [← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
   intro p hp

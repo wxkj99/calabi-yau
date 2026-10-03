@@ -90,7 +90,7 @@ theorem l2_limit_has_zero_weak_derivative_in_charts
       ω₀ f hf hEnergy a K hKcompact hK i
   have hUmem : MemLp U (ENNReal.ofReal 2) μ := by
     simpa [U, μ, c] using chartLocal_memLp_of_global_memLp ω₀ u hu a K hKcompact hK
-  have hUmeas : AEStronglyMeasurable U μ := hUmem.1
+  have hUmeas : AEStronglyMeasurable U μ := hUmem.aestronglyMeasurable
   have hF : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (F k) Ω := by
     intro k
     have hcomp : ContMDiffOn 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞

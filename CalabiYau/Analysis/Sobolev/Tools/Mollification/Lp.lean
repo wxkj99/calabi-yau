@@ -203,10 +203,10 @@ theorem eLpNorm_mollifyEps_le
     simp [ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_int]
   have hconv_memLp : MemLp (ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u : E → ℝ)
       2 (volume : Measure E) := by
-    refine ⟨hconv_cont.aestronglyMeasurable, ?_⟩
+    apply memLp_iff.mpr
     rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (μ := (volume : Measure E))
       (f := (ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u : E → ℝ))
-      (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)]
+      (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞) hconv_cont.aestronglyMeasurable]
     have h_2_toReal : ((2 : ℝ≥0∞).toReal) = (2 : ℝ) := by norm_num
     rw [h_2_toReal]
     have h_lint_finite : ∫⁻ x, ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖ₑ

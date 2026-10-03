@@ -116,14 +116,7 @@ theorem eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
         (I := I) (M := M) x
     rw [← Finset.sum_mul, hsum, one_mul]
   rw [h_eLpNorm_eq]
-  have h_aesm : ∀ α ∈ S,
-      AEStronglyMeasurable (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x)
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g ρ) := by
-    intro α _
-    have hcont : Continuous (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x) :=
-      (ρ α).contMDiff.continuous
-    exact (hcont.measurable.mul hu_meas).aestronglyMeasurable
-  refine (eLpNorm_sum_le h_aesm hp_one).trans ?_
+  refine (eLpNorm_sum_le hp_one).trans ?_
   have h_per_α : ∀ α ∈ S,
       eLpNorm (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) p
         (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g ρ) ≤

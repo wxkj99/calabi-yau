@@ -47,7 +47,6 @@ theorem eLpNorm_rescale_to_unitBall
     eLpNorm (fun z => f (x₀ + R • z)) p (volume.restrict (Metric.ball (0 : E) 1)) =
       ENNReal.ofReal (R⁻¹ ^ (d / p.toReal)) *
         eLpNorm f p (volume.restrict (Metric.ball x₀ R)) := by
-  let _ := _hp
   set T := fun z : E => x₀ + R • z with hT_def
   have hR' : R ≠ 0 := hR.ne'
   have hT_emb : MeasurableEmbedding T :=
@@ -75,8 +74,8 @@ theorem eLpNorm_rescale_to_unitBall
     rw [show T = (fun z => x₀ + z) ∘ (fun z => R • z) from rfl]
     rw [← Measure.map_map (measurable_const_add x₀) (measurable_const_smul R)]
     rw [Measure.map_addHaar_smul volume hR']
-    rw [Measure.map_smul, (measurePreserving_add_left volume x₀).map_eq, abs_inv]
-  rw [hmap, Measure.restrict_smul, eLpNorm_smul_measure_of_ne_top hp']
+    rw [Measure.map_smul _ (measurable_const_add x₀).aemeasurable, (measurePreserving_add_left volume x₀).map_eq, abs_inv]
+  rw [hmap, Measure.restrict_smul, eLpNorm_smul_measure_of_ne_zero_of_ne_top _hp hp']
   simp only [smul_eq_mul]
   congr 1
   have hfin : Module.finrank ℝ E = d := by simp

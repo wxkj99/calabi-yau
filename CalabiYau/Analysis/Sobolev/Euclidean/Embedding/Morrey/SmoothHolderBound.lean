@@ -306,7 +306,7 @@ private theorem smooth_pointwise_holder_bound
         rw [hIint_def]
         rw [eLpNorm_eq_lintegral_rpow_enorm_toReal
           (by rw [Ne, ENNReal.ofReal_eq_zero]; exact not_le.mpr hp_pos)
-          ENNReal.ofReal_ne_top]
+          ENNReal.ofReal_ne_top hf_memLp.aestronglyMeasurable]
         rw [ENNReal.toReal_ofReal hp_pos.le]
         have h_eq :
             ∫⁻ y in Metric.ball x₀ R, ‖‖fderiv ℝ u y‖‖ₑ ^ p ∂volume =
@@ -669,7 +669,7 @@ theorem smooth_pointwise_holder_bound_explicit
         rw [hIint_def]
         rw [eLpNorm_eq_lintegral_rpow_enorm_toReal
           (by rw [Ne, ENNReal.ofReal_eq_zero]; exact not_le.mpr hp_pos)
-          ENNReal.ofReal_ne_top]
+          ENNReal.ofReal_ne_top hf_memLp.aestronglyMeasurable]
         rw [ENNReal.toReal_ofReal hp_pos.le]
         have h_eq :
             ∫⁻ y in Metric.ball z r, ‖‖fderiv ℝ u y‖‖ₑ ^ p ∂volume =
@@ -791,7 +791,7 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
     exact h_int_compact.mono_set ball_subset_closedBall
   have h_eLp_one_eq :
       (eLpNorm u 1 μ).toReal = ∫ y in Metric.ball x₀ R, ‖u y‖ ∂volume := by
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm hu_memLp.aestronglyMeasurable]
     have h_lint :
         ∫⁻ y, ‖u y‖ₑ ∂μ = ENNReal.ofReal (∫ y in Metric.ball x₀ R, ‖u y‖ ∂volume) := by
       have h_eq :

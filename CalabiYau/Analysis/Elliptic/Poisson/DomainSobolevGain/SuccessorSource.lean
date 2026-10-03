@@ -401,9 +401,7 @@ private theorem successorNumerator_memLp_compact
     memLp_mul_of_continuousOn_bounded hK hKmeas hweak hdensity
   unfold successorChartForcingNumerator
   have hsum := (((hterm1.add hterm2).sub hterm3).add hterm4).add hterm5
-  convert hsum using 1
-  ext y
-  simp only [Pi.add_apply, Pi.sub_apply]
+  exact hsum
 
 private theorem memLp_indicator_of_memLp_restrict
     {X : Type*} [MeasurableSpace X] {μ : Measure X} {Ω K : Set X}

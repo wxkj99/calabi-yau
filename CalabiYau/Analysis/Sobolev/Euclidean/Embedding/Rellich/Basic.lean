@@ -96,23 +96,12 @@ lemma eLpNorm_fderiv_le_sum_components
       eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume ≤
         eLpNorm
           (fun x => ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume := by
-    refine eLpNorm_mono_ae_real ?_
+    refine eLpNorm_mono_ae_real
+      (hφ.continuous_fderiv (by simp)).aestronglyMeasurable.norm ?_
     filter_upwards with x
     have hnn : 0 ≤ ‖fderiv ℝ φ x‖ := norm_nonneg _
     rw [Real.norm_eq_abs, abs_of_nonneg hnn]
     exact hbound x
-  have hAesm :
-      ∀ i : Fin d,
-        AEStronglyMeasurable
-          (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) volume := by
-    intro i
-    have h := (hcomp_aem i).norm
-    have hEq : (fun x => ‖(fderiv ℝ φ x) (EuclideanSpace.single i 1)‖) =
-        (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) := by
-      funext x
-      rw [Real.norm_eq_abs]
-    rw [hEq] at h
-    exact h
   have h_step_general :
       ∀ (T : Finset (Fin d)),
         eLpNorm
@@ -145,30 +134,11 @@ lemma eLpNorm_fderiv_le_sum_components
                   (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume :=
         Finset.sum_insert hi
       rw [hsum_eq_RHS]
-      have h1 :
-          AEStronglyMeasurable
-            (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single a 1)|) volume :=
-        hAesm a
-      have h2 :
-          AEStronglyMeasurable
-            (fun x => ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) volume := by
-        have hsum := Finset.aestronglyMeasurable_sum (μ := volume) s
-          (f := fun (i : Fin d) (x : E) =>
-            |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|)
-          (fun i _ => hAesm i)
-        have hEq :
-            (fun x => ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) =
-              ∑ i ∈ s, (fun (i : Fin d) (x : E) =>
-                |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) i := by
-          funext x
-          simp [Finset.sum_apply]
-        rw [hEq]
-        exact hsum
       have hadd_le :=
         eLpNorm_add_le (μ := volume) (p := p)
           (f := fun x => |(fderiv ℝ φ x) (EuclideanSpace.single a 1)|)
           (g := fun x => ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|)
-          h1 h2 hp_one
+          hp_one
       refine hadd_le.trans ?_
       gcongr
   have h_step := h_step_general (Finset.univ : Finset (Fin d))
@@ -181,7 +151,7 @@ lemma eLpNorm_fderiv_le_sum_components
         (fun x => ‖(fderiv ℝ φ x) (EuclideanSpace.single i 1)‖) := by
     funext x
     exact (Real.norm_eq_abs _).symm
-  rw [hcongr, eLpNorm_norm]
+  rw [hcongr, eLpNorm_norm _ (hcomp_aem i)]
 
 lemma eLpNorm_translate_sub_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
@@ -298,14 +268,6 @@ theorem eLpNorm_translate_sub_le_of_memW01p
     (aestronglyMeasurable_indicator_iff (μ := volume) hΩ_meas).mpr hu_aesm_restrict
   have hφ_smooth_aesm : ∀ n, AEStronglyMeasurable (φ n) volume :=
     fun n => (hφ_smooth n).continuous.aestronglyMeasurable
-  have hMP_subh : MeasurePreserving (fun x : E => x - h) volume volume := by
-    have hMP_neg : MeasurePreserving (fun x : E => x + (-h)) volume volume :=
-      measurePreserving_add_right volume (-h)
-    have hEq : (fun x : E => x - h) = (fun x : E => x + (-h)) := by
-      funext x
-      exact sub_eq_add_neg x h
-    rw [hEq]
-    exact hMP_neg
   have hφ_to_uExt :
       Tendsto (fun n => eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
         atTop (nhds 0) := by
@@ -334,19 +296,6 @@ theorem eLpNorm_translate_sub_le_of_memW01p
           eLpNorm (fun x => φ n (x - h) - φ n x) p volume +
           eLpNorm (fun x => φ n x - Ω.indicator u x) p volume := by
     intro n
-    have hu_th_aesm : AEStronglyMeasurable (fun x : E => Ω.indicator u (x - h)) volume :=
-      hu_ind_aesm.comp_measurePreserving hMP_subh
-    have hφ_th_aesm : AEStronglyMeasurable (fun x : E => φ n (x - h)) volume :=
-      (hφ_smooth_aesm n).comp_measurePreserving hMP_subh
-    have hT1 : AEStronglyMeasurable
-        (fun x => Ω.indicator u (x - h) - φ n (x - h)) volume :=
-      hu_th_aesm.sub hφ_th_aesm
-    have hT2 : AEStronglyMeasurable
-        (fun x => φ n (x - h) - φ n x) volume :=
-      hφ_th_aesm.sub (hφ_smooth_aesm n)
-    have hT3 : AEStronglyMeasurable
-        (fun x => φ n x - Ω.indicator u x) volume :=
-      (hφ_smooth_aesm n).sub hu_ind_aesm
     have hDecomp :
         (fun x => Ω.indicator u (x - h) - Ω.indicator u x) =
           (fun x => Ω.indicator u (x - h) - φ n (x - h)) +
@@ -373,12 +322,12 @@ theorem eLpNorm_translate_sub_le_of_memW01p
           eLpNorm
             ((fun x => φ n (x - h) - φ n x) +
               (fun x => φ n x - Ω.indicator u x)) p volume :=
-        eLpNorm_add_le hT1 (hT2.add hT3) hp_one
+        eLpNorm_add_le hp_one
       _ ≤ eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
             (eLpNorm (fun x => φ n (x - h) - φ n x) p volume +
               eLpNorm (fun x => φ n x - Ω.indicator u x) p volume) := by
               gcongr
-              exact eLpNorm_add_le hT2 hT3 hp_one
+              exact eLpNorm_add_le hp_one
       _ = _ := by ring
   have hA_to_zero :
       Tendsto
@@ -420,18 +369,6 @@ theorem eLpNorm_translate_sub_le_of_memW01p
             (volume.restrict Ω) := by
     intro n i
     exact eLpNorm_grad_eq_restrict (d := d) hΩ_meas (hφ_sub n) i
-  have hcomp_aesm_restrict : ∀ n i,
-      AEStronglyMeasurable
-        (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
-        (volume.restrict Ω) := by
-    intro n i
-    have hcont : Continuous
-        (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) :=
-      ((hφ_smooth n).continuous_fderiv (by simp)).clm_apply continuous_const
-    exact hcont.aestronglyMeasurable
-  have hwgrad_aesm : ∀ i,
-      AEStronglyMeasurable (fun x => hw.weakGrad x i) (volume.restrict Ω) :=
-    fun i => (hw.weakGrad_component_memLp i).aestronglyMeasurable
   have hgrad_triangle : ∀ n i,
       eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) p
           (volume.restrict Ω) ≤
@@ -448,9 +385,7 @@ theorem eLpNorm_translate_sub_le_of_memW01p
                 hw.weakGrad x i) := by
       funext x; ring
     rw [hEq]
-    exact eLpNorm_add_le
-      ((hcomp_aesm_restrict n i).sub (hwgrad_aesm i))
-      (hwgrad_aesm i) hp_one
+    exact eLpNorm_add_le hp_one
   have hB_bound : ∀ n,
       eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
         ENNReal.ofReal ‖h‖ * (Dseq n + S) := by

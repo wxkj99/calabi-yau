@@ -273,6 +273,7 @@ theorem mongeAmpere_eq_inChart_of_contMDiff_two
       RCLike.re ((ω₀.toFormField.chartRep x z).coeffMatrix).det = _
   rw [hcoeffω, hcoeffα]
 
+open scoped ComplexOrder in
 theorem contMDiff_mongeAmpere (hφ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ φ) :
     ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (ω₀.mongeAmpere φ) := by
   intro y
@@ -395,8 +396,6 @@ theorem hasDerivAt_mongeAmpere (hφ : ω₀.IsPotential φ)
     have htψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (t • ψ) := by
       convert (contMDiff_const : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
         (fun _ : M ↦ t)).smul hψ using 1
-      ext y
-      simp [Pi.smul_apply, smul_eq_mul]
     simp only [mongeAmpere]
     rw [mddbar_add hφ.1 htψ, mddbar_smul hψ t]
     simp [Pi.add_apply, Pi.smul_apply, add_assoc]
@@ -418,8 +417,6 @@ theorem hasDerivAt_log_mongeAmpere (hφ : ω₀.IsPotential φ)
     have htψ : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (t • ψ) := by
       convert (contMDiff_const : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
         (fun _ : M ↦ t)).smul hψ using 1
-      ext y
-      simp [Pi.smul_apply, smul_eq_mul]
     simp only [mongeAmpere]
     rw [mddbar_add hφ.1 htψ, mddbar_smul hψ t]
     simp [Pi.add_apply, Pi.smul_apply, add_assoc]
@@ -500,6 +497,7 @@ private theorem intervalIntegral_ftc_real
     ∫ s in a..b, f' s = f b - f a := by
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint
 
+open scoped ComplexOrder in
 private theorem mongeAmpere_segment_ftc (hφ : ω₀.IsPotential φ) (x : M)
     (hderiv : ∀ s ∈ Set.uIcc (0 : ℝ) 1,
       HasDerivAt (fun t : ℝ ↦ ω₀.mongeAmpere (t • φ) x)

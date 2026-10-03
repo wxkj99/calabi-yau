@@ -86,6 +86,8 @@ theorem chartLocalMeasure_withDensity_le_riemannianMeasure
         (fun x : M => ENNReal.ofReal (ρ α x))
       ≤ riemannianMeasure (I := I) g ρ := by
   rw [riemannianMeasure_def]
-  exact MeasureTheory.Measure.le_sum _ α
+  exact MeasureTheory.Measure.le_sum (fun β : M =>
+    (chartLocalMeasure (I := I) g β).withDensity
+      (fun x : M => ENNReal.ofReal (ρ β x))) α
 
 end CalabiYau.RiemannianVolume

@@ -139,7 +139,7 @@ theorem pow_mul_det_le_det_of_smul_le (hA : A.PosDef) {c : ℝ} (hc : 0 ≤ c) (
   rw [smul_le_iff_forall_le_of_conjTranspose_mul_mul_eq hPA hPB] at h
   rw [re_det_eq_re_det_mul_prod_of_conjTranspose_mul_mul_eq hPA hPB, mul_comm]
   refine mul_le_mul_of_nonneg_left ?_ hApos.le
-  simpa using Finset.prod_le_prod (fun i (_ : i ∈ Finset.univ) ↦ hc) fun i _ ↦ h i
+  simpa using Finset.prod_le_prod₀ (fun i (_ : i ∈ Finset.univ) ↦ hc) fun i _ ↦ h i
 
 /-- A lower Loewner bound `c • A ≤ B` with `c > 0` gives the upper bound `B⁻¹ ≤ c⁻¹ • A⁻¹` for the
 inverse matrices (the inverse metrics `g'^{i j̄} ≤ c⁻¹ g^{i j̄}`). -/

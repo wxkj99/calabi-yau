@@ -196,7 +196,7 @@ theorem holderLeaf_sample_deviation {n : ℕ}
   have hpow : dist y z ^ (α : ℝ) ≤ localKernelRadius η m ^ (α : ℝ) :=
     Real.rpow_le_rpow (dist_nonneg) (by rw [hdist]; exact hw) (NNReal.coe_nonneg α)
   change ‖(if y ∈ U then f y else 0) - f z‖ ≤ _
-  rw [if_pos hyU]
+  rw [ite_eq_left hyU]
   calc
     ‖f y - f z‖ ≤ (K : ℝ) * dist y z ^ (α : ℝ) := hnorm
     _ ≤ (K : ℝ) * localKernelRadius η m ^ (α : ℝ) :=
@@ -243,7 +243,7 @@ theorem holderLeaf_deriv_kernel_sample_deviation {n : ℕ}
   have hzy : z + (y - z) = y := by abel
   rw [hzy] at hinc
   change ‖(if y ∈ U then g y else 0) - g z‖ ≤ M
-  rw [if_pos hsample]
+  rw [ite_eq_left hsample]
   exact hinc
 
 theorem holderLeaf_holder_increment_of_norm_le_radius {n : ℕ}
@@ -333,7 +333,7 @@ theorem holderLeaf_deriv_kernel_holder_deviation {n : ℕ}
   have hzy : z + (y - z) = y := by abel
   rw [hzy] at hinc
   change ‖(if y ∈ U then f y else 0) - f z‖ ≤ _
-  rw [if_pos hyU]
+  rw [ite_eq_left hyU]
   exact hinc
 
 theorem holderLeaf_integrand_integrable {n : ℕ}
@@ -437,7 +437,7 @@ theorem holderLeaf_localFixedMollify_mean_deviation_of_center_increment {n : ℕ
     have hzy : z + (y - z) = y := by abel
     rw [hzy] at hinc
     change ‖(if y ∈ U then g y else 0) - g z‖ ≤ M
-    rw [if_pos hyU]
+    rw [ite_eq_left hyU]
     exact hinc
   have hdiff : Integrable (fun w => G w - g z) μ := hG.sub (integrable_const _)
   have hmean : (∫ w, G w - g z ∂μ) = (∫ w, G w ∂μ) - g z := by

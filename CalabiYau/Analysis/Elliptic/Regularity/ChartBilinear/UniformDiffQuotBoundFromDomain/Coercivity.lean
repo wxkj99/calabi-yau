@@ -310,7 +310,7 @@ theorem weighted_diffQuot_weakPartial_energy_le
       (if h = 0 then 0 else
         (D.weakPartial l (x + h • EuclideanSpace.single k 1) -
           D.weakPartial l x) / h)
-    rw [if_neg hh, if_neg hh, hG_at, hG_shift]
+    rw [ite_eq_right hh, ite_eq_right hh, hG_at, hG_shift]
   have h_diffQuot_u_g_eq_on_tsupport : ∀ x ∈ tsupport η,
       Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h u_g x =
@@ -336,7 +336,7 @@ theorem weighted_diffQuot_weakPartial_energy_le
         (u_g (x + h • EuclideanSpace.single k 1) - u_g x) / h) =
       (if h = 0 then 0 else
         (D.uChart (x + h • EuclideanSpace.single k 1) - D.uChart x) / h)
-    rw [if_neg hh, if_neg hh, hu_at, hu_shift]
+    rw [ite_eq_right hh, ite_eq_right hh, hu_at, hu_shift]
   have h_LHS_pointwise :
       (fun x => (η x)^2 *
         ∑ l : Fin (Module.finrank ℝ E),
@@ -424,7 +424,7 @@ theorem weighted_diffQuot_weakPartial_energy_le
         (weightedInvGramOnEuclid (I := I) g α i j
             (x + h • EuclideanSpace.single k 1) -
           weightedInvGramOnEuclid (I := I) g α i j x) / h)
-    rw [if_neg hh, if_neg hh, hBa_x, hBa_shift]
+    rw [ite_eq_right hh, ite_eq_right hh, hBa_x, hBa_shift]
   have h_RHS_principal_eq :
       ∫ x, ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),

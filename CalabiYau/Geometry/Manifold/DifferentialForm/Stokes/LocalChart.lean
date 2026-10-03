@@ -1,6 +1,6 @@
 module
 public import CalabiYau.Geometry.Manifold.DifferentialForm.Stokes.Integral.OverlapCoefficient
-public import Mathlib.Data.Sign.Basic
+public import Mathlib.Basic.Sign.Basic
 
 /-!
 # Restricted oriented local charts

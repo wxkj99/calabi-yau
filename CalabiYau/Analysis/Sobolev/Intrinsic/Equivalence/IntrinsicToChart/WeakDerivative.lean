@@ -60,7 +60,7 @@ lemma chartSmoothExt_eq_chartPushed_pou_on_target
       : C^∞⟮I, M; ℝ⟯) : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
       u ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
-  rw [if_pos hsymm_target]
+  rw [ite_eq_left hsymm_target]
 
 lemma chartSmoothExt_eq_chartPushed_pou_ae
     [T2Space M] [SigmaCompactSpace M] (α : M) (u : M → ℝ) :
@@ -157,7 +157,7 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
         f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
       else (0 : ℝ)) =
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
-    rw [if_pos htarget_at_z]
+    rw [ite_eq_left htarget_at_z]
   · set K : Set EuclN_E := (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f))
     have hK_compact : IsCompact K := by
       have h_extChart_cont : ContinuousOn (extChartAt I α) (tsupport f) :=
@@ -199,11 +199,11 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
       change (if (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target then
                 f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
               else (0 : ℝ)) = 0
-      rw [if_pos hz_target, hf_zero]
+      rw [ite_eq_left hz_target, hf_zero]
     · change (if (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target then
                 f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
               else (0 : ℝ)) = 0
-      rw [if_neg hz_target]
+      rw [ite_eq_right hz_target]
 
 lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -286,11 +286,11 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
         change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
                   f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
                 else (0 : ℝ)) = 0
-        rw [if_pos hz_target, hf_zero]
+        rw [ite_eq_left hz_target, hf_zero]
       · change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
                   f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
                 else (0 : ℝ)) = 0
-        rw [if_neg hz_target]
+        rw [ite_eq_right hz_target]
     exact h_sub_image.trans hK_subset
   have hψ_compact_support : HasCompactSupport ψ := by
     set K_eucl : Set EuclN_E := (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f))
@@ -323,11 +323,11 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
         change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
                   f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
                 else (0 : ℝ)) = 0
-        rw [if_pos hz_target, hf_zero]
+        rw [ite_eq_left hz_target, hf_zero]
       · change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
                   f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
                 else (0 : ℝ)) = 0
-        rw [if_neg hz_target]
+        rw [ite_eq_right hz_target]
     exact hK_compact.of_isClosed_subset (isClosed_tsupport _) h_sub_image
   have hψ_mem_W1p : Sobolev.Euclidean.MemW1p (d := Module.finrank ℝ E) p ψ
       (Sobolev.Chart.chartTargetEuclid

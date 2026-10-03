@@ -239,7 +239,7 @@ theorem wkpNorm_smul_smooth_bounded_le
         rwa [norm_iteratedFDeriv_zero] at h
       have h_eta_u_eLp_le : eLpNorm (fun x => η x * u x) p (volume.restrict Ω) ≤
           ENNReal.ofReal C * eLpNorm u p (volume.restrict Ω) :=
-        eLpNorm_eta_mul_le (d := d) hΩ_open h0 u
+        eLpNorm_eta_mul_le (d := d) hΩ_open hη_smooth.continuous.aestronglyMeasurable h0 u
       have h_partial_bound : ∀ i : Fin d,
           iteratedWeakSobolevNorm (d := d) k p
             (chosenWeakPartialOrZero (d := d) p i (fun x => η x * u x) Ω) Ω ≤

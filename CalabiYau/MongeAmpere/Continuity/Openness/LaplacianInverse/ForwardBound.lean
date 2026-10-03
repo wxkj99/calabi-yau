@@ -144,6 +144,7 @@ def HasBoundedForwardLaplacian (ω₁ : KahlerForm n M)
       (finiteChartHolderGauge cover 0 α g.smoothMap).toReal ≤
         (C : ℝ) * (finiteChartHolderGauge cover 2 α f.smoothMap).toReal
 
+open scoped ComplexOrder in
 private theorem exists_metricInChartInverseEntryHolderBound
     (ω₁ : KahlerForm n M) (cover : CompactChartCover (EuclideanSpace ℂ (Fin n)) M)
     (α : ℝ≥0) (hα₁ : α < 1) (i : cover.ι) (j k : Fin n) :
@@ -172,7 +173,7 @@ private theorem exists_metricInChartInverseEntryHolderBound
     · subst s
       simp only [Pi.single_apply]
       exact contDiffOn_const
-    · simp only [if_neg hrs]
+    · simp only [ite_eq_right hrs]
       exact hG_entry s t
   have hAdj_entry (a b : Fin n) :
       ContDiffOn ℝ ∞ (fun z => (G z).adjugate a b) U := by
@@ -524,7 +525,7 @@ private theorem holderBoundOn_zero_realPart
     (hf : HolderBoundOn 0 α C K f) :
     HolderBoundOn 0 α (‖Complex.reCLM‖₊ * C) K (fun x ↦ Complex.reCLM (f x)) := by
   let L : ℂ →L[ℝ] ℝ := Complex.reCLM
-  have hLip : LipschitzWith ‖L‖₊ L := L.lipschitz
+  have hLip : LipschitzWith ‖L‖₊ L := L.lipschitzWith
   have hComp : HolderOnWith (‖L‖₊ * C ^ (1 : ℝ)) (1 * α)
       (L ∘ f) K := (hLip.holderWith.holderOnWith Set.univ).comp
         (holderOnWith_of_holderBoundOn_zero hf) (by intro x hx; exact Set.mem_univ _)

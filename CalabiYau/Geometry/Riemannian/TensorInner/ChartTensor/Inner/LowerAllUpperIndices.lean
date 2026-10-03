@@ -165,7 +165,7 @@ private lemma upd_castAdd_first {r s : ℕ} (v : Fin (r + s) → E) (i : Fin r) 
   rw [Function.update_apply, Function.update_apply]
   by_cases hk : k = i
   · subst hk; simp
-  · rw [if_neg hk, if_neg]
+  · rw [ite_eq_right hk, ite_eq_right]
     intro h
     exact hk (Fin.castAdd_injective r s h.symm).symm
 
@@ -176,7 +176,7 @@ private lemma upd_castAdd_first_noop_last
   classical
   funext j
   rw [Function.update_apply]
-  rw [if_neg]
+  rw [ite_eq_right]
   intro h
   have hcoe := Fin.val_eq_of_eq h
   simp [Fin.castAdd, Fin.natAdd] at hcoe
@@ -189,7 +189,7 @@ private lemma upd_natAdd_last_noop_first
   classical
   funext k
   rw [Function.update_apply]
-  rw [if_neg]
+  rw [ite_eq_right]
   intro h
   have hcoe := Fin.val_eq_of_eq h
   simp [Fin.castAdd, Fin.natAdd] at hcoe
@@ -204,7 +204,7 @@ private lemma upd_natAdd_last
   rw [Function.update_apply, Function.update_apply]
   by_cases hk : k = j
   · subst hk; simp
-  · rw [if_neg hk, if_neg]
+  · rw [ite_eq_right hk, ite_eq_right]
     intro h
     exact hk (Fin.natAdd_injective s r h.symm).symm
 
@@ -306,7 +306,7 @@ private lemma chartLowerAllUpperIndices_modelML_norm_bound
       ContinuousMultilinearMap.norm_mkPiAlgebra
     rw [h_mkPi, one_mul] at h₁
     refine h₁.trans ?_
-    refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) ?_
+    refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) ?_
     intro i _
     exact (chartGramBilin (I := I) (M := M) g α b).le_opNorm
       (v (Fin.castAdd s i))

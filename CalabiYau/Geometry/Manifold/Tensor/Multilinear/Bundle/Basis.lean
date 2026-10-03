@@ -75,7 +75,7 @@ theorem continuousMultilinearMap_basisElem_apply {d : ℕ} (b : Module.Basis (Fi
   · subst h; simp
   · simp only [h, ite_false]
     have ⟨j, hj⟩ : ∃ j, σ j ≠ σ' j := by contrapose! h; exact funext h
-    exact Finset.prod_eq_zero (Finset.mem_univ j) (if_neg (Ne.symm hj))
+    exact Finset.prod_eq_zero (Finset.mem_univ j) (ite_eq_right (Ne.symm hj))
 
 theorem continuousMultilinearMap_basisElem_linearIndependent {d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F) (s : ℕ) :

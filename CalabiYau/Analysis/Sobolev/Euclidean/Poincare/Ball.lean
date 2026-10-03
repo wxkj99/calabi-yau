@@ -571,13 +571,13 @@ theorem integral_norm_rpow_neg_ball {R : ℝ} (hR : 0 < R) :
       have hy_pos : 0 < y := hy
       by_cases hlt : y < R
       · simp only [f, smul_eq_mul, Set.indicator, Set.mem_Ioo, hy_pos, hlt, true_and,
-          if_true]
+          ite_true]
         rw [← Real.rpow_natCast y (d - 1),
           Nat.cast_sub (Nat.one_le_iff_ne_zero.mpr (NeZero.ne d)),
           ← Real.rpow_add hy_pos]
         norm_num
       · simp only [f, smul_eq_mul, Set.indicator, Set.mem_Ioo, hy_pos, hlt, true_and,
-          if_false, mul_zero]
+          ite_false, mul_zero]
     rw [setIntegral_congr_fun measurableSet_Ioi hsupp]
     rw [setIntegral_indicator measurableSet_Ioo]
     rw [show Set.Ioi (0 : ℝ) ∩ Set.Ioo 0 R = Set.Ioo 0 R from
@@ -599,7 +599,7 @@ theorem riesz_kernel_integrable
       (g ∘ (‖·‖)) := by
     filter_upwards [ae_restrict_mem measurableSet_ball] with x hx
     simp only [Function.comp_apply, g, Metric.mem_ball, dist_zero_right] at hx ⊢
-    rw [if_pos hx]
+    rw [ite_eq_left hx]
   rw [IntegrableOn, integrable_congr hag]
   suffices h : Integrable (fun x : E => g ‖x‖) volume from h.integrableOn
   have h1d : IntegrableOn (fun y : ℝ => y ^ (Module.finrank ℝ E - 1) • g y) (Set.Ioi 0) := by
@@ -1001,22 +1001,6 @@ theorem representation_formula_smooth
         simp only [C_rep, hvolB_eq, mul_pow]
         field_simp
 
-private theorem lintegral_rpow_norm_eq_eLpNorm_pow'
-    {α F : Type*} [MeasurableSpace α] [NormedAddCommGroup F]
-    {μ : Measure α} {p : ℝ} (hp : 0 < p) {f : α → F} :
-    ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ = eLpNorm f (ENNReal.ofReal p) μ ^ p := by
-  let pnn : ℝ≥0 := Real.toNNReal p
-  have hpnn0 : pnn ≠ 0 := by
-    intro hzero; have := Real.toNNReal_eq_zero.mp hzero; linarith
-  have hpnn_real : (pnn : ℝ) = p := by simp [pnn, Real.toNNReal_of_nonneg (le_of_lt hp)]
-  have hpnn_enn : (pnn : ℝ≥0∞) = ENNReal.ofReal p := rfl
-  calc ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ
-      = ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ (pnn : ℝ) ∂μ := by simp [hpnn_real]
-    _ = eLpNorm f (pnn : ℝ≥0∞) μ ^ (pnn : ℝ) := by
-        simpa using
-          (MeasureTheory.eLpNorm_nnreal_pow_eq_lintegral (μ := μ) (f := f) (p := pnn) hpnn0).symm
-    _ = eLpNorm f (ENNReal.ofReal p) μ ^ p := by simp [hpnn_real, hpnn_enn]
-
 -- Weighted power-mean inequality: (∫ f·w dμ)^p ≤ (∫ w dμ)^{p-1} · ∫ f^p · w dμ
 -- for nonneg f, w and p > 1. Proved via Hölder's inequality at the lintegral level.
 theorem weighted_power_mean_setIntegral
@@ -1179,7 +1163,7 @@ theorem poincare_smooth_unitBall
     exact hpw x hx_mem
   have h_step2 : eLpNorm f (ENNReal.ofReal p) μ ≤
       eLpNorm (fun x => C_rep * h x) (ENNReal.ofReal p) μ :=
-    eLpNorm_mono_ae_real hpw_ae
+    eLpNorm_mono_ae_real (hu.continuous.sub continuous_const).aestronglyMeasurable hpw_ae
   set M := (d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal * (2 * 1)
   -- Young-type bound: ‖h‖_p ≤ M · ‖g‖_p
   -- Proof outline:
@@ -1525,9 +1509,9 @@ theorem poincare_smooth_unitBall
       simpa [μ] using hIntBound
     have h_pow : eLpNorm h (ENNReal.ofReal p) μ ^ p ≤
         (ENNReal.ofReal M * eLpNorm g (ENNReal.ofReal p) μ) ^ p := by
-      rw [← lintegral_rpow_norm_eq_eLpNorm_pow' hp_pos (f := h)]
+      rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp_pos hh_aesm]
       rw [ENNReal.mul_rpow_of_nonneg _ _ (le_of_lt hp_pos)]
-      rw [← lintegral_rpow_norm_eq_eLpNorm_pow' hp_pos (f := g)]
+      rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp_pos hg_cont.aestronglyMeasurable]
       simp_rw [ENNReal.ofReal_rpow_of_nonneg (norm_nonneg _) (le_of_lt hp_pos),
         Real.norm_eq_abs]
       rw [← ofReal_integral_eq_lintegral_ofReal hhpow_int.integrable

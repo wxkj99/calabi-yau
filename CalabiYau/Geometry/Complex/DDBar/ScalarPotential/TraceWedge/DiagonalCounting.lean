@@ -530,9 +530,9 @@ private theorem diagonalWedgeTuple_classification {n : ℕ}
     diagonalWedgeTuple eta n f =
       if Function.Injective f then diagonalWedgeTuple eta n id else 0 := by
   by_cases hf : Function.Injective f
-  · rw [if_pos hf]
+  · rw [ite_eq_left hf]
     exact diagonalWedgeTuple_injective_eq hcomm f hf
-  · rw [if_neg hf]
+  · rw [ite_eq_right hf]
     exact diagonalWedgeTuple_noninjective_zero hsq hcomm f hf
 
 private theorem diagonalWedgeTuple_full_classification {n k : ℕ}

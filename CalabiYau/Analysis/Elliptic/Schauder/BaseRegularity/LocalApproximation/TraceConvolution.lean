@@ -96,7 +96,7 @@ theorem localFixedMollify_trace_covariance {n : ℕ}
           (if e.symm (e z - w) ∈ U then f (e.symm (e z - w)) else 0)) K := by
         apply hc.congr
         intro w hw
-        simp only [if_pos (hsample w hw)]
+        simp only [ite_eq_left (hsample w hw)]
       exact (hc'.integrableOn_compact (isCompact_closedBall _ _)).integrable_of_forall_notMem_eq_zero
         (fun w hw ↦ by simp [hkzero w hw])
     have hprod (i j : Fin n) : Integrable (fun w : E ↦ k w •
@@ -130,7 +130,7 @@ theorem localFixedMollify_trace_covariance {n : ℕ}
           have heq : g =ᶠ[𝓝 y] fun t ↦ b t * u (e.symm t) := by
             filter_upwards [hcond] with t ht
             change e.symm t ∈ U at ht
-            simp only [g, if_pos ht]
+            simp only [g, ite_eq_left ht]
           apply ContDiffAt.congr_of_eventuallyEq _ heq
           exact b.contDiff.contDiffAt.mul
             (((hu _ hyU).contDiffAt (hU.mem_nhds hyU)).comp y (by fun_prop))
@@ -146,7 +146,7 @@ theorem localFixedMollify_trace_covariance {n : ℕ}
         have htU : e.symm t ∈ U := hnearU t (by
           have := Metric.mem_ball.mp ht
           linarith)
-        simp only [g, if_pos htU, b.one_of_mem_closedBall (Metric.ball_subset_closedBall ht), one_mul]
+        simp only [g, ite_eq_left htU, b.one_of_mem_closedBall (Metric.ball_subset_closedBall ht), one_mul]
       have htrans (x w : E) (hx : x ∈ Metric.ball (e z) (η / 8)) (hw : w ∈ K) :
           x - w ∈ Metric.ball (e z) (η / 2) := by
         have hw' : ‖w‖ ≤ localKernelRadius η m := by
@@ -177,7 +177,7 @@ theorem localFixedMollify_trace_covariance {n : ℕ}
             linarith)
           change k w • (if e.symm (e x - w) ∈ U then u (e.symm (e x - w)) else 0) =
             k w • g (e x - w)
-          rw [if_pos htU, (hgnear _ ht).eq_of_nhds]
+          rw [ite_eq_left htU, (hgnear _ ht).eq_of_nhds]
         · change k w • _ = k w • _
           simp [hkzero w hw]
       have conv_hessian (g : E → ℝ) (hg : ContDiff ℝ 2 g)
@@ -261,7 +261,7 @@ theorem localFixedMollify_trace_covariance {n : ℕ}
           · have htU := hsample t ht
             change k t • (if e.symm (e z - t) ∈ U then complexHessian u (e.symm (e z - t)) j i
               else 0) = _
-            rw [if_pos htU, complexHessian_apply ((hu _ htU).contDiffAt (hU.mem_nhds htU)) j i]
+            rw [ite_eq_left htU, complexHessian_apply ((hu _ htU).contDiffAt (hU.mem_nhds htU)) j i]
             dsimp [q, v, w]
             simp only [Complex.ofReal_mul]
             ring

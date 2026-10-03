@@ -97,7 +97,7 @@ example {d : ℕ}
     chartTopCoefficient x η y = η y (fun i : Fin d => Pi.single i (1 : ℝ)) := by
   classical
   unfold chartTopCoefficient
-  simp only [extChartAt_model_space_eq_id, PartialEquiv.refl_target, Set.mem_univ, if_true]
+  simp only [extChartAt_model_space_eq_id, PartialEquiv.refl_target, Set.mem_univ, ite_true]
   rw [continuousAlternatingMap_trivializationAt_apply, TangentBundle.symmL_model_space]
   rfl
 

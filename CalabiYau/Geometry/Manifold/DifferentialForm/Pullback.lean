@@ -112,7 +112,7 @@ noncomputable def pullback (f : M → N) (hf : ContMDiff IM IN ∞ f)
           tangentSpaceModelContinuousLinearEquiv_apply,
           tangentSpaceModelContinuousLinearEquiv_symm_apply]
         rfl
-      simpa only [hmap] using
+      simpa only [hmap] using!
         (ContMDiffAt.mfderiv_const (I := IM) (I' := IN) (f := f) (hf := hf.contMDiffAt)
           (m := ∞) (by simp))
     let g : M → (EN [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (EM [⋀^Fin k]→L[ℝ] ℝ) := fun x =>
@@ -309,6 +309,7 @@ private lemma fderiv_chartLocalMap_eq_inTangentCoordinates (f : M → N)
     (ϕ := fun x : M => tangentLinearMapToModel (mfderiv IM IN f x))
     (by simpa [extChartAt_source] using hz) (by simpa [extChartAt_source] using hfz)]
   simp only [id_eq, tangentBundleCore_coordChange]
+  rfl
 
 private lemma pullback_localRep_fderiv (η : DifferentialForm IN N k) (f : M → N)
     (hf : ContMDiff IM IN ∞ f) [BoundarylessManifold IM M] [BoundarylessManifold IN N]

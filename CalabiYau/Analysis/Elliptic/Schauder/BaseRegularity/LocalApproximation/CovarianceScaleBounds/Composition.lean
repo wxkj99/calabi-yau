@@ -109,7 +109,7 @@ private theorem compactLocal_mollify_eq_cutoff_convolution_near {n : ℕ}
   filter_upwards [] with w
   by_cases hw : localFixedKernel hη m w = 0
   · simp [hw]
-  · rw [if_pos (hsampleU w hw), Set.indicator_of_mem (hsampleKr w hw)]
+  · rw [ite_eq_left (hsampleU w hw), Set.indicator_of_mem (hsampleKr w hw)]
     exact Complex.real_smul
 
 /-- For the compactly supported kernel, the convolution derivative theorem applies. The

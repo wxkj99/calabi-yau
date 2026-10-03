@@ -225,7 +225,7 @@ theorem nativeToPi_chartTopCoefficient_eq_nativeChartRep
   let : IsManifold 𝓘(ℝ, Fin (2 * n) → ℝ) ∞ M := nativePiIsManifold
   classical
   unfold CalabiYau.DifferentialForm.chartTopCoefficient
-  rw [if_pos hz]
+  rw [ite_eq_left hz]
   rw [← CalabiYau.DifferentialForm.toFormField_chartRep
     (nativeToPiForms (2 * n) η) c hz]
   rw [nativeToPi_toFormField_chartRep η c hz]

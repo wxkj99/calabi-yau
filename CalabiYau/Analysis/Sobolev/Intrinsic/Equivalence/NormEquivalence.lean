@@ -227,7 +227,7 @@ private lemma sq_norm_gradFun_le_chartInvGramMatrix_l1Sum_mul
       rw [Finset.sum_eq_single j]
       · simp
       · intro k _ hjk
-        rw [if_neg (Ne.symm hjk), mul_zero]
+        rw [ite_eq_right (Ne.symm hjk), mul_zero]
       · intro hk
         exact absurd (Finset.mem_univ j) hk
     have hstep2 :
@@ -353,7 +353,7 @@ private lemma gramInvL1SumSupOnPouTsupport_nonneg
     ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   by_cases hKα_ne : Kα.Nonempty
-  · rw [dif_pos hKα_ne]
+  · rw [dite_eq_left hKα_ne]
     have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
     have hKα_sub : Kα ⊆ (chartAt H α).source :=
       CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M α
@@ -372,7 +372,7 @@ private lemma gramInvL1SumSupOnPouTsupport_nonneg
         (0 : ℝ) ≤ chartInvGramMatrixL1Sum (I := I) (M := M) g α x₀ :=
       chartInvGramMatrix_l1Sum_nonneg (I := I) (M := M) g α x₀
     exact le_trans h_val_nn h_le
-  · rw [dif_neg hKα_ne]
+  · rw [dite_eq_right hKα_ne]
 
 private lemma chartInvGramMatrix_l1Sum_le_sup
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -389,7 +389,7 @@ private lemma chartInvGramMatrix_l1Sum_le_sup
     ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   have hKα_ne : Kα.Nonempty := ⟨x, hx⟩
-  rw [dif_pos hKα_ne]
+  rw [dite_eq_left hKα_ne]
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M α
@@ -464,7 +464,7 @@ private lemma contDiff_chartSmoothExt_local
         f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
       else (0 : ℝ)) =
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
-    rw [if_pos htarget_at_z]
+    rw [ite_eq_left htarget_at_z]
   · set K : Set EuclN_E := (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f))
       with hK_def
     have hK_compact : IsCompact K := by
@@ -692,7 +692,32 @@ private lemma eLpNorm_gNormGrad_pou_mul_le_const_mul_wkpNormChart_smooth
         ((volume : Measure EuclN_E).restrict
           (Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α)) := by
-    apply eLpNorm_mono_real
+    have h_meas : AEStronglyMeasurable
+        (Sobolev.Chart.chartPushedRaw I α (gNormGrad (I := I) (M := M) g f))
+        ((volume : Measure EuclN_E).restrict
+          (Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) := by
+      let chartInv : E → M := (extChartAt I α).target.piecewise
+        (fun z => (extChartAt I α).symm z) (fun _ => α)
+      have h_inv : Measurable chartInv :=
+        ContinuousOn.measurable_piecewise
+          (continuousOn_extChartAt_symm (I := I) α) continuousOn_const
+          (CalabiYau.RiemannianVolume.measurableSet_extChartAt_target
+            (I := I) (M := M) α)
+      have h_comp : Measurable (fun y : EuclN_E =>
+          gNormGrad (I := I) (M := M) g f
+            (chartInv ((toEuclidean (E := E)).symm y))) :=
+        (continuous_g_norm_gradFun (I := I) (M := M) g hf_smooth).measurable.comp
+          (h_inv.comp (toEuclidean (E := E)).symm.continuous.measurable)
+      refine h_comp.aestronglyMeasurable.restrict.congr ?_
+      filter_upwards [ae_restrict_mem
+        (Sobolev.Chart.chartTargetEuclid_measurableSet (I := I) (M := M) α)] with y hy
+      rw [Sobolev.Chart.chartPushedRaw_apply_of_mem (I := I) α
+        (gNormGrad (I := I) (M := M) g f) hy]
+      have h_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+        rcases hy with ⟨z, hz, rfl⟩
+        simpa using hz
+      simp only [chartInv, Set.piecewise_eq_of_mem _ _ _ h_target]
+    apply eLpNorm_mono_real h_meas
     intro y
     have h := h_pt_bound y
     have h_norm : ‖Sobolev.Chart.chartPushedRaw I α
@@ -948,33 +973,22 @@ theorem eLpNorm_g_norm_gradFun_le_const_mul_wkpNormChart_smooth_uniform
       (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
         (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) := by
     apply eLpNorm_mono_real
+      (continuous_g_norm_gradFun (I := I) (M := M) g hu_smooth).aestronglyMeasurable
     intro x
     have h := h_pointwise x
     have h_norm : ‖gNormGrad (I := I) (M := M) g u x‖ =
         gNormGrad (I := I) (M := M) g u x := by
       rw [Real.norm_eq_abs]
       exact abs_of_nonneg (gNormGrad_nonneg _ _ _)
-    rw [h_norm]
-    exact h
+    exact h_norm.le.trans h
   refine h_eLp_step1.trans ?_
-  have h_aesm : ∀ α ∈ S,
-      AEStronglyMeasurable (gNormGrad (I := I) (M := M) g
-        (fun y : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-          : C^∞⟮I, M; ℝ⟯) y * u y))
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) := by
-    intro α _
-    have hcont := continuous_g_norm_gradFun (I := I) (M := M) g
-      ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-        : C^∞⟮I, M; ℝ⟯).contMDiff.mul hu_smooth)
-    exact hcont.aestronglyMeasurable
   have h_eLp_sum_le := eLpNorm_sum_le (μ :=
     CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
       (CalabiYau.RiemannianVolume.chartAtlasPOU I M))
     (p := p) (s := S)
     (f := fun α => gNormGrad (I := I) (M := M) g
       (fun y : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-        : C^∞⟮I, M; ℝ⟯) y * u y)) h_aesm hp_one
+        : C^∞⟮I, M; ℝ⟯) y * u y)) hp_one
   have h_fun_eq : (fun x : M => ∑ α ∈ S, gNormGrad (I := I) (M := M) g
         (fun y : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) y * u y) x) =

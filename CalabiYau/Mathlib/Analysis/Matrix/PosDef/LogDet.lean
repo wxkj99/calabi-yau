@@ -186,7 +186,7 @@ private theorem jacobi_leibniz_coeff {K : Type*} [NontriviallyNormedField K]
         exact this.symm
       exact hi_ne_k (h1.trans hkinv)
     rw [Matrix.updateRow_apply]
-    exact if_neg hτi_ne_v
+    exact ite_eq_right hτi_ne_v
   rw [hrest]
 
 /-- **Jacobi's formula** along a line: `d/ds det (A + s H) = tr (adj (A + s H) H)`. -/

@@ -38,7 +38,7 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero_p
         fun n => MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ := by
       funext n
       simpa using MeasureTheory.toReal_eLpNorm (μ := μ) (p := ENNReal.ofReal p)
-        (f := g n) (hg n).aestronglyMeasurable
+        (f := g n)
     simpa [hEq] using hlim_toReal
   have hbound : ∀ n, |∫ x, f x * g n x ∂μ| ≤
       C * MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ := by
@@ -194,7 +194,9 @@ theorem euclidean_test_integral_eq_zero_of_l2_tendsto
       (hFmem k).add hUmem
     have haes : AEStronglyMeasurable (F k) μ := by
       have h := (hFmem k).aestronglyMeasurable.add hUmeas
-      convert h using 1 <;> ext y <;> simp
+      convert h using 1
+      ext y
+      simp
     apply hsum.congr_norm haes
     filter_upwards [] with y
     congr 1

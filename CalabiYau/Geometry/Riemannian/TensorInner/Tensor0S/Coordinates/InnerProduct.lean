@@ -482,11 +482,11 @@ private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
   rw [Finsupp.single_apply]
   rw [Matrix.one_apply]
   by_cases hac : c = a
-  · rw [if_pos hac]
-    rw [if_pos hac.symm]
-  · rw [if_neg hac]
+  · rw [ite_eq_left hac]
+    rw [ite_eq_left hac.symm]
+  · rw [ite_eq_right hac]
     have : ¬ a = c := fun h => hac h.symm
-    rw [if_neg this]
+    rw [ite_eq_right this]
 
 private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -507,11 +507,11 @@ private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
   rw [Finsupp.single_apply]
   rw [Matrix.one_apply]
   by_cases hac : c = a
-  · rw [if_pos hac]
-    rw [if_pos hac.symm]
-  · rw [if_neg hac]
+  · rw [ite_eq_left hac]
+    rw [ite_eq_left hac.symm]
+  · rw [ite_eq_right hac]
     have : ¬ a = c := fun h => hac h.symm
-    rw [if_neg this]
+    rw [ite_eq_right this]
 
 private lemma chartJinvMatrix_inv (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :

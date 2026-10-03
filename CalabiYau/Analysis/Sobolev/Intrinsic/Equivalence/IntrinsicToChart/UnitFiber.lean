@@ -125,7 +125,7 @@ lemma chartTargetUnitSqSumSupOnPouTsupport_nonneg
     ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   by_cases hKα_ne : Kα.Nonempty
-  · rw [dif_pos hKα_ne]
+  · rw [dite_eq_left hKα_ne]
     have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
     have hKα_sub : Kα ⊆ (chartAt H α).source :=
       CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M α
@@ -170,7 +170,7 @@ lemma chartTargetUnitSqSumSupOnPouTsupport_nonneg
       ⟨x₀, hx₀, rfl⟩
     have h_le := hImage.choose_spec hx₀_val
     exact le_trans h_val_nn h_le
-  · rw [dif_neg hKα_ne]
+  · rw [dite_eq_right hKα_ne]
 
 lemma chartTargetUnitSqSum_le_sup
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -190,7 +190,7 @@ lemma chartTargetUnitSqSum_le_sup
     ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   have hKα_ne : Kα.Nonempty := ⟨x, hx⟩
-  rw [dif_pos hKα_ne]
+  rw [dite_eq_left hKα_ne]
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     CalabiYau.RiemannianVolume.chartAtlasPOU_isSubordinate I M α

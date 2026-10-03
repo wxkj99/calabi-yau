@@ -103,19 +103,20 @@ private theorem euclidean_eLpNorm_le_component_sum
   calc
     eLpNorm F (ENNReal.ofReal p) μ
         ≤ eLpNorm (fun x => ∑ i : Fin d, ‖δ i x‖) (ENNReal.ofReal p) μ := by
-          exact eLpNorm_mono_ae_real hPointwise
+          exact eLpNorm_mono_ae_real
+            (aestronglyMeasurable_euclidean_of_components hF_comp_aesm) hPointwise
     _ ≤ ∑ i : Fin d, eLpNorm (fun x => ‖δ i x‖) (ENNReal.ofReal p) μ := by
         have hp_enn : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
           rwa [← ENNReal.ofReal_one, ENNReal.ofReal_le_ofReal_iff (by linarith)]
         convert eLpNorm_sum_le (s := Finset.univ) (f := fun i => fun x => ‖δ i x‖)
-          (fun i _ => (hF_comp_aesm i).norm) hp_enn using 1
+          hp_enn using 1
         congr 1
         ext x
-        simp [δ, Finset.sum_apply]
+        simp only [Finset.sum_apply]
     _ = ∑ i : Fin d, eLpNorm (δ i) (ENNReal.ofReal p) μ := by
         congr 1
         ext i
-        simpa [δ] using (eLpNorm_norm (f := δ i) (p := ENNReal.ofReal p) (μ := μ))
+        simpa [δ] using (eLpNorm_norm (f := δ i) (p := ENNReal.ofReal p) (μ := μ) (hF_comp_aesm i))
     _ = ∑ i : Fin d, eLpNorm (fun x => F x i) (ENNReal.ofReal p) μ := by
         simp [δ]
 
@@ -123,8 +124,7 @@ private theorem memLp_euclidean_of_components
     {μ : Measure E} {p : ℝ} (hp : 1 ≤ p) {G : E → E}
     (hG_comp : ∀ i : Fin d, MemLp (fun x => G x i) (ENNReal.ofReal p) μ) :
     MemLp G (ENNReal.ofReal p) μ := by
-  refine ⟨aestronglyMeasurable_euclidean_of_components (μ := μ)
-      (fun i => (hG_comp i).aestronglyMeasurable), ?_⟩
+  apply memLp_iff.mpr
   refine lt_of_le_of_lt
     (euclidean_eLpNorm_le_component_sum (d := d) (μ := μ) (p := p) hp
       (fun i => (hG_comp i).aestronglyMeasurable)) ?_
@@ -245,6 +245,9 @@ theorem exists_smooth_global_approx_of_unitBallExtension
           unitBallExtension (d := d) u x) (ENNReal.ofReal p) volume
         ≤ K * eLpNorm (fun x => ψ n x - u x) (ENNReal.ofReal p) μB :=
       fun n => eLpNorm_unitBallExtension_sub_le_local (d := d) hp
+        ((hV_memLp n).aestronglyMeasurable.sub
+          (aestronglyMeasurable_unitBallExtension_of_memLp hw.memLp))
+        ((hψ_smooth n).continuous.aestronglyMeasurable.sub hw.memLp.aestronglyMeasurable)
     have hKψ : Tendsto (fun n => K * eLpNorm (fun x => ψ n x - u x)
         (ENNReal.ofReal p) μB) atTop (nhds 0) := by
       have h := ENNReal.Tendsto.const_mul hψ_fun (Or.inr (show K ≠ ⊤ by simp [K]))
@@ -270,13 +273,13 @@ theorem exists_smooth_global_approx_of_unitBallExtension
               unitBallExtension (d := d) (ψ nm.2) x) (ENNReal.ofReal p) volume
           ≤ K * eLpNorm (fun x => ψ nm.1 x - ψ nm.2 x) (ENNReal.ofReal p) μB :=
             eLpNorm_unitBallExtension_sub_le_local (d := d) hp
+              ((hV_memLp nm.1).aestronglyMeasurable.sub (hV_memLp nm.2).aestronglyMeasurable)
+              ((hψ_memLp_restrict nm.1).sub (hψ_memLp_restrict nm.2)).aestronglyMeasurable
         _ ≤ K * (eLpNorm (fun x => ψ nm.1 x - u x) (ENNReal.ofReal p) μB +
               eLpNorm (fun x => ψ nm.2 x - u x) (ENNReal.ofReal p) μB) := by
             gcongr; rw [show (fun x => ψ nm.1 x - ψ nm.2 x) =
               (fun x => (ψ nm.1 x - u x) - (ψ nm.2 x - u x)) from by ext x; ring]
-            exact eLpNorm_sub_le ((hψ_memLp_restrict nm.1).sub hw.memLp).aestronglyMeasurable
-              ((hψ_memLp_restrict nm.2).sub hw.memLp).aestronglyMeasurable
-              (by simpa using ENNReal.ofReal_le_ofReal hp.le)
+            exact eLpNorm_sub_le (by simpa using ENNReal.ofReal_le_ofReal hp.le)
         _ = K * eLpNorm (fun x => ψ nm.1 x - u x) (ENNReal.ofReal p) μB +
               K * eLpNorm (fun x => ψ nm.2 x - u x) (ENNReal.ofReal p) μB := by ring
     -- Extract Lp limit with MemLp
@@ -286,12 +289,8 @@ theorem exists_smooth_global_approx_of_unitBallExtension
     -- f_lim =ᵐ unitBallExtension u (both are eLpNorm limits of V_n)
     -- eLpNorm(V_n - f_lim) → 0 and eLpNorm(V_n - uExt) → 0, so eLpNorm(f_lim - uExt) = 0
     have hae : f_lim =ᵐ[volume] unitBallExtension (d := d) u := by
-      have huExt_aesm : AEStronglyMeasurable (unitBallExtension (d := d) u) volume :=
-        aestronglyMeasurable_unitBallExtension_of_memLp hw.memLp
       exact BareFunction.ae_eq_of_tendsto_eLpNorm_sub
         (by simpa using ENNReal.ofReal_le_ofReal hp.le)
-        (fun n => (hV_memLp n).aestronglyMeasurable)
-        hf_lim_memLp.aestronglyMeasurable huExt_aesm
         hf_lim_tendsto
         (by exact hV_fun)
     exact (memLp_congr_ae hae).mp hf_lim_memLp
@@ -340,7 +339,8 @@ theorem exists_smooth_global_approx_of_unitBallExtension
         simpa [ENNReal.toReal_ofReal hp0.le, Real.enorm_eq_ofReal_abs] using
           (MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal
             (μ := volume) (p := ENNReal.ofReal p) hp_enn_ne (by simp)
-            (f := fun x => G nm.1 x i - G nm.2 x i))
+            (f := fun x => G nm.1 x i - G nm.2 x i)
+            ((hG_comp_memLp nm.1 i).sub (hG_comp_memLp nm.2 i)).aestronglyMeasurable)
       rw [show (0 : ℝ≥0∞) = (0 : ℝ≥0∞) ^ (1 / p) from by
         rw [ENNReal.zero_rpow_of_pos (by positivity : (0 : ℝ) < 1 / p)]]
       exact Filter.Tendsto.congr (fun nm => (hconv nm).symm)
@@ -356,14 +356,15 @@ theorem exists_smooth_global_approx_of_unitBallExtension
         refine tendsto_zero_of_le_pair_sum (fun nm => ?_) hψ_fun
         rw [show (fun x => ψ nm.1 x - ψ nm.2 x) =
           (fun x => (ψ nm.1 x - u x) - (ψ nm.2 x - u x)) from by ext x; ring]
-        exact eLpNorm_sub_le ((hψ_memLp_restrict nm.1).sub hw.memLp).aestronglyMeasurable
-          ((hψ_memLp_restrict nm.2).sub hw.memLp).aestronglyMeasurable
-          (by simpa using ENNReal.ofReal_le_ofReal hp.le)
+        exact eLpNorm_sub_le (by simpa using ENNReal.ofReal_le_ofReal hp.le)
       have hconv_fun : ∀ nm : ℕ × ℕ,
           ∫⁻ x in B, (ENNReal.ofReal |ψ nm.1 x - ψ nm.2 x|) ^ p ∂volume =
             eLpNorm (fun x => ψ nm.1 x - ψ nm.2 x) (ENNReal.ofReal p) μB ^ p := by
         intro nm
-        rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp0]; congr 1
+        simpa only [μB, Real.norm_eq_abs] using
+          (lintegral_rpow_norm_eq_eLpNorm_pow hp0
+            (f := fun x => ψ nm.1 x - ψ nm.2 x)
+            ((hψ_memLp_restrict nm.1).sub (hψ_memLp_restrict nm.2)).aestronglyMeasurable)
       simp_rw [hconv_fun]
       rw [show (0 : ℝ≥0∞) = (0 : ℝ≥0∞) ^ p from by rw [ENNReal.zero_rpow_of_pos hp0]]
       exact hpair_eLpNorm.ennrpow_const p
@@ -395,16 +396,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
             (fun x => ((fderiv ℝ (ψ nm.1) x) (EuclideanSpace.single j 1) - hw.weakGrad x j) -
               ((fderiv ℝ (ψ nm.2) x) (EuclideanSpace.single j 1) - hw.weakGrad x j))
             from by ext x; ring]
-          exact eLpNorm_sub_le
-            (((((hψ_smooth nm.1).continuous_fderiv (by simp)).clm_apply
-              continuous_const).memLp_of_hasCompactSupport
-              ((hψ_cpt nm.1).fderiv_apply (𝕜 := ℝ) _)).restrict B |>.sub
-              (hw.weakGrad_component_memLp j)).aestronglyMeasurable
-            (((((hψ_smooth nm.2).continuous_fderiv (by simp)).clm_apply
-              continuous_const).memLp_of_hasCompactSupport
-              ((hψ_cpt nm.2).fderiv_apply (𝕜 := ℝ) _)).restrict B |>.sub
-              (hw.weakGrad_component_memLp j)).aestronglyMeasurable
-            (by simpa using ENNReal.ofReal_le_ofReal hp.le)
+          exact eLpNorm_sub_le (by simpa using ENNReal.ofReal_le_ofReal hp.le)
         refine (Filter.tendsto_congr fun nm => eLpNorm_congr_ae ?_).mpr hpair_comp_eLpNorm
         filter_upwards with x
         exact congrArg (fun L : E →L[ℝ] ℝ => L (EuclideanSpace.single j 1))
@@ -452,7 +444,11 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                   simp [H, norm_fderiv_eq_norm_partials_local (d := d)]
           _ = eLpNorm (H nm) (ENNReal.ofReal p) μB ^ p := by
                 simpa [μB] using
-                  (lintegral_rpow_norm_eq_eLpNorm_pow (μ := μB) hp0 (f := H nm))
+                  (lintegral_rpow_norm_eq_eLpNorm_pow (μ := μB) hp0 (f := H nm)
+                    (aestronglyMeasurable_euclidean_of_components (fun j => by
+                      simpa [H, PiLp.toLp_apply] using
+                        ((((hψ_smooth nm.1).sub (hψ_smooth nm.2)).continuous_fderiv
+                          (by simp)).clm_apply continuous_const).aestronglyMeasurable)))
       simp_rw [hconv]
       rw [show (0 : ℝ≥0∞) = (0 : ℝ≥0∞) ^ p from by
         rw [ENNReal.zero_rpow_of_pos hp0]]
@@ -549,8 +545,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                   simp
             _ ≤ eLpNorm (fun x => G n x - Gext x) (ENNReal.ofReal p) volume +
                   eLpNorm Gext (ENNReal.ofReal p) volume :=
-                eLpNorm_add_le ((hG_aesm n).sub hGext_aesm) hGext_aesm
-                  (by simpa using ENNReal.ofReal_le_ofReal hp.le)
+                eLpNorm_add_le (by simpa using ENNReal.ofReal_le_ofReal hp.le)
         have hge : ∀ n, eLpNorm Gext (ENNReal.ofReal p) volume ≤
             eLpNorm (fun x => G n x - Gext x) (ENNReal.ofReal p) volume +
               eLpNorm (G n) (ENNReal.ofReal p) volume := by
@@ -562,8 +557,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                   simp
             _ ≤ eLpNorm (fun x => Gext x - G n x) (ENNReal.ofReal p) volume +
                   eLpNorm (G n) (ENNReal.ofReal p) volume :=
-                eLpNorm_add_le (hGext_aesm.sub (hG_aesm n)) (hG_aesm n)
-                  (by simpa using ENNReal.ofReal_le_ofReal hp.le)
+                eLpNorm_add_le (by simpa using ENNReal.ofReal_le_ofReal hp.le)
             _ = eLpNorm (fun x => G n x - Gext x) (ENNReal.ofReal p) volume +
                   eLpNorm (G n) (ENNReal.ofReal p) volume := by
                 have hneg_eq :
@@ -612,11 +606,11 @@ theorem exists_smooth_global_approx_of_unitBallExtension
             ∫⁻ x, (ENNReal.ofReal ‖G n x‖) ^ p ∂volume =
               eLpNorm (G n) (ENNReal.ofReal p) volume ^ p := by
           intro n
-          simpa using (lintegral_rpow_norm_eq_eLpNorm_pow (μ := volume) hp0 (f := G n))
+          simpa using (lintegral_rpow_norm_eq_eLpNorm_pow (μ := volume) hp0 (f := G n) (hG_aesm n))
         have hEqLim :
             ∫⁻ x, (ENNReal.ofReal ‖Gext x‖) ^ p ∂volume =
               eLpNorm Gext (ENNReal.ofReal p) volume ^ p := by
-          simpa using (lintegral_rpow_norm_eq_eLpNorm_pow (μ := volume) hp0 (f := Gext))
+          simpa using (lintegral_rpow_norm_eq_eLpNorm_pow (μ := volume) hp0 (f := Gext) hGext_aesm)
         simp_rw [hEq, hEqLim]
         exact hGnorm_tendsto.ennrpow_const p
       rw [hpow_tendsto.liminf_eq]
@@ -657,8 +651,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                 congr 1; ext x; simp
             _ ≤ eLpNorm (fun x => ψ n x - u x) (ENNReal.ofReal p) μB +
                   eLpNorm u (ENNReal.ofReal p) μB :=
-                eLpNorm_add_le ((hψ_memLp_B n).sub hw.memLp).aestronglyMeasurable
-                  hw.memLp.aestronglyMeasurable h1p
+                eLpNorm_add_le h1p
         -- Lower: eLpNorm(u) ≤ eLpNorm(ψ n - u) + eLpNorm(ψ n)
         have hge : ∀ n, eLpNorm u (ENNReal.ofReal p) μB ≤
             eLpNorm (fun x => ψ n x - u x) (ENNReal.ofReal p) μB +
@@ -669,8 +662,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                 congr 1; ext x; simp
             _ ≤ eLpNorm (fun x => u x - ψ n x) (ENNReal.ofReal p) μB +
                   eLpNorm (ψ n) (ENNReal.ofReal p) μB :=
-                eLpNorm_add_le (hw.memLp.sub (hψ_memLp_B n)).aestronglyMeasurable
-                  (hψ_memLp_B n).aestronglyMeasurable h1p
+                eLpNorm_add_le h1p
             _ = eLpNorm (fun x => ψ n x - u x) (ENNReal.ofReal p) μB +
                   eLpNorm (ψ n) (ENNReal.ofReal p) μB := by
                 have hneg_eq :
@@ -717,9 +709,10 @@ theorem exists_smooth_global_approx_of_unitBallExtension
           rwa [zero_add] at hadd
       -- Fn n = eLpNorm(ψ n)^p and F_lim = eLpNorm(u)^p
       have hFn_eq : ∀ n, Fn n = eLpNorm (ψ n) (ENNReal.ofReal p) μB ^ p := by
-        intro n; rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp0]; congr 1
+        intro n; rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp0
+          (hψ_memLp_B n).aestronglyMeasurable]; congr 1
       have hF_lim_eq : F_lim = eLpNorm u (ENNReal.ofReal p) μB ^ p := by
-        rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp0]; congr 1
+        rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp0 hw.memLp.aestronglyMeasurable]; congr 1
       have hFn_tendsto : Tendsto Fn atTop (nhds F_lim) := by
         change Tendsto (fun n => Fn n) atTop (nhds F_lim)
         simp_rw [hFn_eq, hF_lim_eq]
@@ -786,7 +779,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                       simp
               _ ≤ eLpNorm (fun x => gradVec n x - hw.weakGrad x) (ENNReal.ofReal p) μB +
                     eLpNorm hw.weakGrad (ENNReal.ofReal p) μB :=
-                  eLpNorm_add_le ((hgradVec_aesm n).sub hweakGrad_aesm) hweakGrad_aesm h1p
+                  eLpNorm_add_le h1p
           have hge : ∀ n, eLpNorm hw.weakGrad (ENNReal.ofReal p) μB ≤
               eLpNorm (fun x => gradVec n x - hw.weakGrad x) (ENNReal.ofReal p) μB +
                 eLpNorm (gradVec n) (ENNReal.ofReal p) μB := by
@@ -799,7 +792,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                       simp
               _ ≤ eLpNorm (fun x => hw.weakGrad x - gradVec n x) (ENNReal.ofReal p) μB +
                     eLpNorm (gradVec n) (ENNReal.ofReal p) μB :=
-                  eLpNorm_add_le (hweakGrad_aesm.sub (hgradVec_aesm n)) (hgradVec_aesm n) h1p
+                  eLpNorm_add_le h1p
               _ = eLpNorm (fun x => gradVec n x - hw.weakGrad x) (ENNReal.ofReal p) μB +
                     eLpNorm (gradVec n) (ENNReal.ofReal p) μB := by
                   have hneg_eq :
@@ -862,13 +855,13 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                     simp [gradVec, norm_fderiv_eq_norm_partials_local (d := d)]
             _ = eLpNorm (gradVec n) (ENNReal.ofReal p) μB ^ p := by
                   simpa [μB] using
-                    (lintegral_rpow_norm_eq_eLpNorm_pow (μ := μB) hp0 (f := gradVec n))
+                    (lintegral_rpow_norm_eq_eLpNorm_pow (μ := μB) hp0 (f := gradVec n) (hgradVec_aesm n))
         have hA_lim_eq : A_lim = eLpNorm hw.weakGrad (ENNReal.ofReal p) μB ^ p := by
           change
             (∫⁻ x in B, (ENNReal.ofReal ‖hw.weakGrad x‖) ^ p ∂volume) =
               eLpNorm hw.weakGrad (ENNReal.ofReal p) μB ^ p
           simpa [μB] using
-            (lintegral_rpow_norm_eq_eLpNorm_pow (μ := μB) hp0 (f := hw.weakGrad))
+            (lintegral_rpow_norm_eq_eLpNorm_pow (μ := μB) hp0 (f := hw.weakGrad) hweakGrad_aesm)
         rw [hA_lim_eq]
         convert hgradVec_norm_tendsto.ennrpow_const p using 1
         ext n

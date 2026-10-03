@@ -620,6 +620,7 @@ private theorem chartVolume_lintegral_U_eq_of_overlap (x₀ x₁ : M)
   rw [c₁.left_inv hy₁]
   ac_rfl
 
+open scoped ComplexOrder in
 omit [SigmaCompactSpace M] in
 private theorem chartVolume_lt_top_of_isCompact_subset_source (x : M) {K : Set M}
     (hK : IsCompact K) (hKx : K ⊆ (chartAt (EuclideanSpace ℂ (Fin n)) x).source) :
@@ -703,6 +704,7 @@ private theorem chartVolume_lt_top_of_isCompact_subset_source (x : M) {K : Set M
   · have hKempty : K = ∅ := Set.not_nonempty_iff_eq_empty.mp hKne
     simp [chartVolume, hKempty]
 
+open scoped ComplexOrder in
 omit [MeasurableSpace M] [BorelSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem volumeDensityInChart_pos (x : M) {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
@@ -971,7 +973,7 @@ theorem volume_eq_sum_of_isSubordinate
     rw [← withDensity_tsum hdensity_meas]
     congr 1
     funext y
-    exact tsum_apply (Pi.summable.2 fun _ ↦ ENNReal.summable)
+    exact ENNReal.tsum_apply
   have hpointwise : ∀ y, ∑' i : S, ENNReal.ofReal (ρ i.1 y) = 1 := by
     intro y
     have hsupport : Function.support (fun i : M ↦ ENNReal.ofReal (ρ i y)) ⊆ S := by
@@ -1180,7 +1182,8 @@ instance isOpenPosMeasure_volume : ω₀.volume.IsOpenPosMeasure := by
       _ > 0 := ENNReal.mul_pos (ENNReal.ofReal_pos.mpr ha).ne' hchartV.ne'
   have hVle :
       (ω₀.chartVolume i).withDensity (fun y ↦ ENNReal.ofReal (ρ i y)) V ≤ ω₀.volume V :=
-    Measure.le_sum _ i V
+    Measure.le_sum
+      (fun j : M ↦ (ω₀.chartVolume j).withDensity fun y ↦ ENNReal.ofReal (ρ j y)) i V
   have hUV : V ⊆ U := fun _ hy ↦ hy.1.1
   have hpos : 0 < ω₀.volume U := lt_of_lt_of_le hterm (hVle.trans (measure_mono hUV))
   exact hpos.ne'

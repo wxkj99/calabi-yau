@@ -58,9 +58,9 @@ theorem stokesChartRepresentation_exteriorDerivative
         stokesChartRepresentation α x := by
       filter_upwards [(isOpen_extChartAt_target
         (I := 𝓘(ℝ, Fin (n + 1) → ℝ)) x).mem_nhds hy] with q hq
-      rw [stokesChartRepresentation, if_pos hq]
+      rw [stokesChartRepresentation, ite_eq_left hq]
     rw [hcoord, Filter.EventuallyEq.extDeriv_eq hrepEq] at hlocal
-    rw [stokesChartRepresentation, if_pos hy]
+    rw [stokesChartRepresentation, ite_eq_left hy]
     exact hlocal
   · let S : Set M := closure {z : M | α z ≠ 0}
     let e := chartAt (Fin (n + 1) → ℝ) x
@@ -89,7 +89,7 @@ theorem stokesChartRepresentation_exteriorDerivative
           refine ⟨(chartAt (Fin (n + 1) → ℝ) x).symm q,
             subset_closure hn, ?_⟩
           exact (chartAt (Fin (n + 1) → ℝ) x).right_inv hqtChart
-        rw [stokesChartRepresentation, if_pos hqt]
+        rw [stokesChartRepresentation, ite_eq_left hqt]
         let tr := trivializationAt ((Fin (n + 1) → ℝ) [⋀^Fin k]→L[ℝ] ℝ)
           (Bundle.continuousAlternatingMap ℝ (Fin k) (Fin (n + 1) → ℝ)
             (TangentSpace 𝓘(ℝ, Fin (n + 1) → ℝ)) ℝ (Bundle.Trivial M ℝ)) x
@@ -102,7 +102,7 @@ theorem stokesChartRepresentation_exteriorDerivative
         rw [← congrFun (tr.coe_linearMapAt_of_mem (R := ℝ) hbase)
           (α ((chartAt (Fin (n + 1) → ℝ) x).symm q)), hαzero]
         exact map_zero _
-      · rw [stokesChartRepresentation, if_neg hqt]
+      · rw [stokesChartRepresentation, ite_eq_right hqt]
     have hneigh : Kᶜ ∈ 𝓝 y := hKclosed.isOpen_compl.mem_nhds hyK
     have hrepZero : (stokesChartRepresentation α x) =ᶠ[𝓝 y] fun _ => 0 := by
       filter_upwards [hneigh] with q hq
@@ -115,7 +115,7 @@ theorem stokesChartRepresentation_exteriorDerivative
       rw [← ContinuousAlternatingMap.alternatizeUncurryFinCLM_apply]
       exact map_zero _
     have hleftZero : stokesChartRepresentation (exteriorDerivative α) x y = 0 := by
-      rw [stokesChartRepresentation, if_neg hy]
+      rw [stokesChartRepresentation, ite_eq_right hy]
     rw [hleftZero, hderivZero]
 
 end CalabiYau.DifferentialForm

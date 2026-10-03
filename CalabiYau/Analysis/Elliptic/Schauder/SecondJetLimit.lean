@@ -129,7 +129,7 @@ private theorem secondJetLimit_first_derivative_compatibility
     have htarget : (fun y : Metric.closedBall center R => G₁ (y : EuclideanSpace ℂ (Fin n))) =
         (fun y => continuousMultilinearCurryFin1 ℝ (EuclideanSpace ℂ (Fin n)) ℝ (g₁ y)) := by
       funext y
-      simp only [G₁, dif_pos y.property]
+      simp only [G₁, dite_eq_left y.property]
     change TendstoUniformly _ (fun y : Metric.closedBall center R => G₁ (y : EuclideanSpace ℂ (Fin n))) atTop
     rw [htarget]
     exact h₁curry
@@ -161,7 +161,7 @@ private theorem secondJetLimit_first_derivative_compatibility
       simp [continuousMultilinearCurryFin1_apply, iteratedFDeriv_one_apply]
     rw [hEq] at hhas
     exact hhas
-  simpa only [G₁, dif_pos hxR] using
+  simpa only [G₁, dite_eq_left hxR] using
     hasFDerivAt_of_tendstoLocallyUniformlyOn Metric.isOpen_ball h₁loc hder hfg hx
 
 private theorem secondJetLimit_second_derivative_compatibility
@@ -212,7 +212,7 @@ private theorem secondJetLimit_second_derivative_compatibility
     have htarget : (fun y : Metric.closedBall center R => G₂ (y : EuclideanSpace ℂ (Fin n))) =
         (fun y => curry (g₂ y)) := by
       funext y
-      simp only [G₂, dif_pos y.property]
+      simp only [G₂, dite_eq_left y.property]
     change TendstoUniformly _ (fun y : Metric.closedBall center R => G₂ (y : EuclideanSpace ℂ (Fin n))) atTop
     rw [htarget]
     exact h₂curry
@@ -244,7 +244,7 @@ private theorem secondJetLimit_second_derivative_compatibility
     exact hhas
   have hresult := hasFDerivAt_of_tendstoLocallyUniformlyOn
     Metric.isOpen_ball h₂loc hder hfg hx
-  simpa only [G₂, dif_pos (Metric.mem_closedBall.mpr (le_of_lt (Metric.mem_ball.mp hx)))]
+  simpa only [G₂, dite_eq_left (Metric.mem_closedBall.mpr (le_of_lt (Metric.mem_ball.mp hx)))]
     using hresult
 
 private theorem secondJetLimit_derivative_compatibility
@@ -410,7 +410,7 @@ private theorem secondJetLimit_derivative_compatibility
     rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
     have htarget : (fun x : Metric.closedBall center R => H₁ (x : EuclideanSpace ℂ (Fin n))) = g₁ := by
       funext x
-      simp only [H₁, dif_pos x.property]
+      simp only [H₁, dite_eq_left x.property]
     change TendstoUniformly _ (fun x : Metric.closedBall center R => H₁ (x : EuclideanSpace ℂ (Fin n))) atTop
     rw [htarget]
     exact h₁
@@ -421,7 +421,7 @@ private theorem secondJetLimit_derivative_compatibility
       Metric.closedBall_subset_ball hR x.property
     have hxclosed : (x : EuclideanSpace ℂ (Fin n)) ∈ Metric.closedBall center R :=
       Metric.ball_subset_closedBall hxR
-    simp only [H₁, dif_pos hxclosed]
+    simp only [H₁, dite_eq_left hxclosed]
     exact hident₁ (x : EuclideanSpace ℂ (Fin n)) hxR
   have h₁innerOn := h₁on.mono hinner
   have h₁innerU : TendstoUniformly
@@ -452,7 +452,7 @@ private theorem secondJetLimit_derivative_compatibility
     rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
     have htarget : (fun x : Metric.closedBall center R => H₂ (x : EuclideanSpace ℂ (Fin n))) = g₂ := by
       funext x
-      simp only [H₂, dif_pos x.property]
+      simp only [H₂, dite_eq_left x.property]
     change TendstoUniformly _ (fun x : Metric.closedBall center R => H₂ (x : EuclideanSpace ℂ (Fin n))) atTop
     rw [htarget]
     exact h₂
@@ -463,7 +463,7 @@ private theorem secondJetLimit_derivative_compatibility
       Metric.closedBall_subset_ball hR x.property
     have hxclosed : (x : EuclideanSpace ℂ (Fin n)) ∈ Metric.closedBall center R :=
       Metric.ball_subset_closedBall hxR
-    simp only [H₂, dif_pos hxclosed]
+    simp only [H₂, dite_eq_left hxclosed]
     exact hident₂ (x : EuclideanSpace ℂ (Fin n)) hxR
   have h₂innerOn := h₂on.mono hinner
   have h₂innerU : TendstoUniformly

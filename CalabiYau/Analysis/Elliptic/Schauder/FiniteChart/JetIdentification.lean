@@ -66,7 +66,7 @@ private theorem jetIdentification_first_derivative_compatibility
     have htarget : (fun y : Metric.closedBall center R => G₁ y) =
         (fun y => continuousMultilinearCurryFin1 ℝ (EuclideanSpace ℂ (Fin n)) ℝ (g₁ y)) := by
       funext y
-      simp only [G₁, dif_pos y.property]
+      simp only [G₁, dite_eq_left y.property]
     change TendstoUniformly _ (fun y : Metric.closedBall center R => G₁ y) atTop
     rw [htarget]
     exact h₁curry
@@ -96,7 +96,7 @@ private theorem jetIdentification_first_derivative_compatibility
       simp [continuousMultilinearCurryFin1_apply, iteratedFDeriv_one_apply]
     rw [hEq] at hhas
     exact hhas
-  simpa only [G₁, dif_pos hxR] using
+  simpa only [G₁, dite_eq_left hxR] using
     hasFDerivAt_of_tendstoLocallyUniformlyOn Metric.isOpen_ball h₁loc hder hfg hx
 
 private theorem jetIdentification_first_jet_identification
@@ -175,7 +175,7 @@ private theorem jetIdentification_second_derivative_compatibility
     have htarget : (fun y : Metric.closedBall center R => G₂ y) =
         (fun y => curry (g₂ y)) := by
       funext y
-      simp only [G₂, dif_pos y.property]
+      simp only [G₂, dite_eq_left y.property]
     change TendstoUniformly _ (fun y : Metric.closedBall center R => G₂ y) atTop
     rw [htarget]
     exact h₂curry
@@ -205,7 +205,7 @@ private theorem jetIdentification_second_derivative_compatibility
     exact hhas
   have hresult := hasFDerivAt_of_tendstoLocallyUniformlyOn
     Metric.isOpen_ball h₂loc hder hfg hx
-  simpa only [G₂, dif_pos (Metric.mem_closedBall.mpr (le_of_lt (Metric.mem_ball.mp hx)))]
+  simpa only [G₂, dite_eq_left (Metric.mem_closedBall.mpr (le_of_lt (Metric.mem_ball.mp hx)))]
     using hresult
 
 private theorem jetIdentification_second_jet_identification
@@ -408,7 +408,7 @@ theorem identify_uniform_jet_limits_on_nested_balls
       rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
       have heq : (fun z : Metric.closedBall center R => H₁ z) = g₁ := by
         funext z
-        simp only [H₁, dif_pos z.property]
+        simp only [H₁, dite_eq_left z.property]
       change TendstoUniformly _
         (fun z : Metric.closedBall center R => H₁ (z : EuclideanSpace ℂ (Fin n))) atTop
       rw [heq]
@@ -417,7 +417,7 @@ theorem identify_uniform_jet_limits_on_nested_balls
     have h₁target : Set.EqOn H₁ (iteratedFDeriv ℝ 1 f) (Metric.closedBall center r) := by
       intro z hz
       change (if hy : z ∈ Metric.closedBall center R then g₁ ⟨z, hy⟩ else 0) = _
-      rw [dif_pos (hinner hz)]
+      rw [dite_eq_left (hinner hz)]
       exact hident ⟨z, hz⟩
     exact h₁innerOn.congr_right h₁target
   · have hinner : Metric.closedBall center r ⊆ Metric.closedBall center R :=
@@ -434,7 +434,7 @@ theorem identify_uniform_jet_limits_on_nested_balls
       rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
       have heq : (fun z : Metric.closedBall center R => H₂ z) = g₂ := by
         funext z
-        simp only [H₂, dif_pos z.property]
+        simp only [H₂, dite_eq_left z.property]
       change TendstoUniformly _
         (fun z : Metric.closedBall center R => H₂ (z : EuclideanSpace ℂ (Fin n))) atTop
       rw [heq]
@@ -443,7 +443,7 @@ theorem identify_uniform_jet_limits_on_nested_balls
     have h₂target : Set.EqOn H₂ (iteratedFDeriv ℝ 2 f) (Metric.closedBall center r) := by
       intro z hz
       change (if hy : z ∈ Metric.closedBall center R then g₂ ⟨z, hy⟩ else 0) = _
-      rw [dif_pos (hinner hz)]
+      rw [dite_eq_left (hinner hz)]
       exact hident ⟨z, hz⟩
     exact h₂innerOn.congr_right h₂target
 

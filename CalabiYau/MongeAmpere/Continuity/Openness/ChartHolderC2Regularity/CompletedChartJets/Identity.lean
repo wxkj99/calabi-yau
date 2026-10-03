@@ -132,7 +132,7 @@ public theorem smoothChartHolderCompletedHasFDerivAt
     have hAt : ContDiffAt ℝ (∞ : ℕ∞ω) ((f n).smoothMap ∘ e.symm) x :=
       hcf.contDiffAt (hopen.mem_nhds (cover.piece_in_target i hzpiece))
     have hd : d n x = fderiv ℝ ((f n).smoothMap ∘ chart) x := by
-      simp only [d, dif_pos hzpiece]
+      simp only [d, dite_eq_left hzpiece]
       change continuousMultilinearCurryFin1 ℝ E ℝ
           (smoothChartHolderJetCanonicalExtension cover 2 α N 1 (by norm_num)
             (f n : LittleHolder cover 2 α N) i ⟨x, hzpiece⟩) = _
@@ -148,7 +148,7 @@ public theorem smoothChartHolderCompletedHasFDerivAt
     simpa [chart, e] using hderiv
   have hHas : HasFDerivAt g (g' z) z :=
     hasFDerivAt_of_tendstoUniformlyOn isOpen_interior hderivUniform hfderiv hfg hz
-  simpa only [g, g', dif_pos (interior_subset hz), value, jets, chart,
+  simpa only [g, g', dite_eq_left (interior_subset hz), value, jets, chart,
     Function.comp_def] using hHas
 
 omit [FiniteDimensional ℝ E] in
@@ -264,7 +264,7 @@ public theorem smoothChartHolderCompletedFDerivHasFDerivAt
     have hdist : dist (r n x) (rlim x) =
         dist ((jet₂ (f n : LittleHolder cover 2 α N) i ⟨x, hxpiece⟩))
           ((jet₂ u i ⟨x, hxpiece⟩)) := by
-      simp only [r, rlim, dif_pos hxpiece]
+      simp only [r, rlim, dite_eq_left hxpiece]
       change dist
           (continuousMultilinearCurryFin1 ℝ E (E →L[ℝ] ℝ)
             ((jet₂ (f n : LittleHolder cover 2 α N) i ⟨x, hxpiece⟩).curryRight))
@@ -316,7 +316,7 @@ public theorem smoothChartHolderCompletedFDerivHasFDerivAt
     simpa [q, interior_subset hx] using hp'
   have hcore₂ (n : ℕ) (x : E) (hx : x ∈ cover.piece i) :
       r n x = fderiv ℝ (fderiv ℝ ((f n).smoothMap ∘ chart)) x := by
-    simp only [r, dif_pos hx]
+    simp only [r, dite_eq_left hx]
     change continuousMultilinearCurryFin1 ℝ E (E →L[ℝ] ℝ)
         ((smoothChartHolderJetCanonicalExtension cover 2 α N 2 (Nat.le_refl 2)
           (f n : LittleHolder cover 2 α N) i ⟨x, hx⟩).curryRight) = _
@@ -379,7 +379,7 @@ public theorem smoothChartHolderCompletedFDerivHasFDerivAt
     filter_upwards [isOpen_interior.mem_nhds hz] with x hx
     exact (hqeq x hx).symm
   have hFderiv := hHas.congr_of_eventuallyEq hlocal
-  simpa only [F₀, value, chart, jet₂, rlim, dif_pos (interior_subset hz),
+  simpa only [F₀, value, chart, jet₂, rlim, dite_eq_left (interior_subset hz),
     Function.comp_def] using hFderiv
 
 omit [FiniteDimensional ℝ E] in
@@ -493,7 +493,7 @@ public theorem smoothChartHolderCompletedContDiffAt
     (smoothChartHolderCompletedHasFDerivAt cover α N u i y hy).differentiableAt.hasFDerivAt
   have hD (y : E) (hy : y ∈ interior (cover.piece i)) :
       HasFDerivAt (fderiv ℝ F) (R y) y := by
-    simpa only [F, R, jet₂, dif_pos (interior_subset hy)] using
+    simpa only [F, R, jet₂, dite_eq_left (interior_subset hy)] using
       smoothChartHolderCompletedFDerivHasFDerivAt cover α N u i y hy
   have hR : ContinuousOn R (interior (cover.piece i)) := by
     rw [continuousOn_iff_continuous_domRestrict]
@@ -503,9 +503,9 @@ public theorem smoothChartHolderCompletedContDiffAt
     have hjet := (jet₂ u i).continuous.comp hsub
     have hcur := (continuousMultilinearCurryFin1 ℝ E (E →L[ℝ] ℝ)).continuous.comp
       ((continuousMultilinearCurryRightEquiv' ℝ 1 E ℝ).continuous.comp hjet)
-    convert hcur using 1 <;> try rfl
+    convert hcur using 1; try rfl
     funext x
-    simp only [Set.domRestrict, R, dif_pos (interior_subset x.property)]
+    simp only [Set.domRestrict, R, dite_eq_left (interior_subset x.property)]
     rfl
   change ContDiffAt ℝ (1 + 1 : ℕ) F z
   refine contDiffAt_succ_iff_hasFDerivAt.mpr

@@ -47,7 +47,7 @@ theorem eHolderNorm_comp_continuousLinearMap_le
     (hf : MemHolder alpha f) :
     eHolderNorm alpha (fun x ↦ L (f x)) ≤
       (‖L‖₊ : ENNReal) * eHolderNorm alpha f := by
-  have hcomp := L.lipschitz.holderWith.comp hf.holderWith
+  have hcomp := L.lipschitzWith.holderWith.comp hf.holderWith
   calc
     eHolderNorm alpha (fun x ↦ L (f x)) ≤
         ((‖L‖₊ * nnHolderNorm alpha f : NNReal) : ENNReal) := by

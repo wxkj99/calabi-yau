@@ -148,7 +148,7 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of
       · rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α (0 : M → ℝ) hy]
         rfl
       · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α (0 : M → ℝ) hy]
-    rw [hchartPushedRaw_zero, eLpNorm_zero']
+    rw [hchartPushedRaw_zero, eLpNorm_fun_zero]
     exact zero_le
 
 end Chart

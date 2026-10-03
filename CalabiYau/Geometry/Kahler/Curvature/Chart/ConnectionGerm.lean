@@ -392,7 +392,7 @@ private theorem chart_real_smooth_holomorphic_contDiffOn_two
     if hz : z ∈ U then Classical.choose (real_hessian_bundle_complex z hz) else 0
   let Hreal : E → E →L[ℝ] E →L[ℝ] E := fun z => fderiv ℝ A z
   have hHcf (z : E) (hz : z ∈ U) (v w : E) : Hcf z v w = Hreal z v w := by
-    simp only [Hcf, dif_pos hz, Hreal]
+    simp only [Hcf, dite_eq_left hz, Hreal]
     exact Classical.choose_spec (real_hessian_bundle_complex z hz) v w
   have hHreal : ContinuousOn Hreal U := by
     simpa [Hreal, A] using hA.continuousOn_fderiv_of_isOpen hU (by simp)

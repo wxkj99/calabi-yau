@@ -65,9 +65,7 @@ private lemma abs_integral_zero_mass_weighted_oscillation
           mul_le_mul_of_nonneg_left (hx hqx) (abs_nonneg _)
         _ = δ * |q x| := by ring
   have hmajorant : Integrable (fun x => δ * |q x|) μ := by
-    convert hq.norm.const_mul δ using 1
-    funext x
-    simp only [Real.norm_eq_abs]
+    simpa only [Real.norm_eq_abs] using hq.norm.const_mul δ
   have hnorm := norm_integral_le_of_norm_le hmajorant hbound
   rw [hcenter_eq] at hnorm
   simpa only [Real.norm_eq_abs, integral_const_mul] using hnorm
@@ -374,7 +372,7 @@ private theorem localFixedMollify_eq_cutoffConvolution_near {n : ℕ}
   filter_upwards [] with w
   by_cases hw : localFixedKernel hη m w = 0
   · simp [hw]
-  · rw [if_pos (hsampleU w hw), Set.indicator_of_mem (hsampleKr w hw)]
+  · rw [ite_eq_left (hsampleU w hw), Set.indicator_of_mem (hsampleKr w hw)]
     exact Complex.real_smul
 
 private theorem localFixedMollify_cutoff_integrable {n : ℕ}
@@ -810,7 +808,7 @@ private theorem localMollificationCovariance_norm_le_of_sample_deviations {n : �
     have hw' : z - complexToRealCoordinateEquiv.symm w ∈ U := by
       rw [← hs]
       exact hw
-    rw [if_pos hwOriginal]
+    rw [ite_eq_left hwOriginal]
     simp [A, H, hw', hs]
   have hεf : 0 ≤ (K : ℝ) * localKernelRadius η m ^ (α : ℝ) :=
     mul_nonneg (NNReal.coe_nonneg K)
@@ -1048,7 +1046,7 @@ private theorem actualCovariance_common_modulus_data {n : ℕ}
     have hxy : x + (y - x) = y := by abel
     rw [hxy] at hinc
     change ‖(if y ∈ U then g y else 0) - g x‖ ≤ modulus m
-    rw [if_pos hyU]
+    rw [ite_eq_left hyU]
     exact hinc
   have hcov := localMollificationCovariance_norm_le_of_sample_deviations hη hCollar
     hf hg hHolder m x hx (hmodulusnonneg m) hDevG

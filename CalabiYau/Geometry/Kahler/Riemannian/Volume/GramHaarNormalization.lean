@@ -80,7 +80,8 @@ theorem map_toEuclidean_complexVolume_eq_chartBasisVolume_smul_volume (n : ℕ) 
         (MeasureTheory.volume : Measure
           (EuclideanSpace ℝ (Fin (Module.finrank ℝ (EuclideanSpace ℂ (Fin n)))))) := by
   classical
-  rw [complexVolume_eq_chartBasisVolume_smul_addHaar, Measure.map_smul]
+  rw [complexVolume_eq_chartBasisVolume_smul_addHaar,
+    Measure.map_smul _ (toEuclidean (E := EuclideanSpace ℂ (Fin n))).continuous.measurable.aemeasurable]
   congr 1
   have hmap :
       Measure.map (toEuclidean (E := EuclideanSpace ℂ (Fin n)))

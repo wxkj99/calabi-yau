@@ -142,7 +142,7 @@ theorem holderWith_comp_continuousLinearMap_of_norm_le_one
     (L : A →L[Real] B) (hL : ‖L‖ ≤ 1)
     (hf : HolderWith K alpha f) :
     HolderWith K alpha (fun x ↦ L (f x)) := by
-  have hraw := L.lipschitz.holderWith.comp hf
+  have hraw := L.lipschitzWith.holderWith.comp hf
   have hraw' : HolderWith (‖L‖₊ * K) alpha (fun x ↦ L (f x)) := by
     change HolderWith (‖L‖₊ * K) alpha (⇑L ∘ f)
     simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hraw

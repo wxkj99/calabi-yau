@@ -538,7 +538,7 @@ private def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠
     have hcond : (Fin.castSucc i : Fin (m + 1)) < p := by
       simpa [i] using h
     rw [Fin.succAbove]
-    rw [if_pos hcond]
+    rw [ite_eq_left hcond]
     change i.castSucc = x
     apply Fin.ext
     simp [i]
@@ -559,7 +559,7 @@ private def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠
       omega
     have hxsub : x.val - 1 + 1 = x.val := by omega
     rw [Fin.succAbove]
-    rw [if_neg hnot]
+    rw [ite_eq_right hnot]
     change i.succ = x
     apply Fin.ext
     simp [i, hxsub]
@@ -570,11 +570,11 @@ private def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠
   by_cases h : (Fin.castSucc i : Fin (m + 1)) < p
   · have hcast : p.succAbove i = (Fin.castSucc i : Fin (m + 1)) := by
       rw [Fin.succAbove]
-      rw [if_pos h]
+      rw [ite_eq_left h]
     simp [removeHole, hcast, h]
   · have hsucc : p.succAbove i = (i.succ : Fin (m + 1)) := by
       rw [Fin.succAbove]
-      rw [if_neg h]
+      rw [ite_eq_right h]
     have hnot : ¬ (i.succ : Fin (m + 1)) < p := by
       intro hc
       have hcv : (Fin.castSucc i : Fin (m + 1)).val = i.val := rfl
@@ -618,7 +618,7 @@ private theorem inducedPerm_one {m : ℕ} (j : Fin (m + 1)) :
 private theorem succAbove_val_of_lt {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : i.val < j.val) :
     (j.succAbove i).val = i.val := by
   rw [Fin.succAbove]
-  rw [if_pos (by
+  rw [ite_eq_left (by
     change i.val < j.val
     exact h)]
   rfl
@@ -626,7 +626,7 @@ private theorem succAbove_val_of_lt {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h :
 private theorem succAbove_val_of_ge {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : j.val ≤ i.val) :
     (j.succAbove i).val = i.val + 1 := by
   rw [Fin.succAbove]
-  rw [if_neg]
+  rw [ite_eq_right]
   · rfl
   · intro hc
     have hcv : (Fin.castSucc i : Fin (m + 1)).val = i.val := rfl
@@ -1135,7 +1135,7 @@ private theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
           (removeHole j' b (Ne.symm hbj))) = (-1 : ℤˣ) := by
           simp [hne]
         rw [hsig1]
-        simp only [hab, Equiv.Perm.sign_swap', one_mul, neg_mul, if_false]
+        simp only [hab, Equiv.Perm.sign_swap', one_mul, neg_mul, ite_false]
         have hjj : Even (j'.val + j'.val) := by
           rw [Nat.even_iff]
           omega

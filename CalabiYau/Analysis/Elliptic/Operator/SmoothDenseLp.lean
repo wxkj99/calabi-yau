@@ -180,7 +180,7 @@ private lemma eLpNorm_two_le_of_norm_le [CompactSpace M]
   have : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   exact MeasureTheory.eLpNorm_le_of_ae_bound (μ := riemannianVolumeMeasure (I := I) (M := M) g)
-    (f := φ) (C := K) (Filter.Eventually.of_forall hK)
+    (f := φ) (C := K) _hφ.aestronglyMeasurable (Filter.Eventually.of_forall hK)
 
 variable [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

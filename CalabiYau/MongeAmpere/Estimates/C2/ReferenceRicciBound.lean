@@ -19,6 +19,7 @@ open scoped Topology
 
 namespace KahlerForm
 
+open scoped ComplexOrder in
 variable {n : ℕ} {M : Type*} [TopologicalSpace M]
     [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
     [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]

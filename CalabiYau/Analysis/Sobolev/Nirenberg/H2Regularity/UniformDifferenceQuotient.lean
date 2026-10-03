@@ -27,12 +27,13 @@ private lemma sq_le_finset_sum_sq
     (fun _ _ => sq_nonneg _) (Finset.mem_univ i)
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
-    {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
+    {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ)
+    (hf : AEStronglyMeasurable f μ) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
   classical
   have h2_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
   have h2_ne_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞) := by norm_num
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (μ := μ) h2_ne_zero h2_ne_top]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (μ := μ) h2_ne_zero h2_ne_top hf]
   have h2_toReal : ((2 : ℝ≥0∞)).toReal = 2 := by show ENNReal.toReal 2 = 2; rfl
   rw [h2_toReal]
   have h_inner_eq : ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ (2 : ℝ) ∂μ =
@@ -55,7 +56,7 @@ private lemma sq_eLpNorm_two_le_of_integral_sum_sq_le
     {n : ℕ} {α : Type*} [MeasurableSpace α] {μ : Measure α}
     (f : Fin n → α → ℝ)
     (h_sum_int : Integrable (fun x => ∑ l : Fin n, (f l x) ^ 2) μ)
-    (i : Fin n) {S : ℝ}
+    (i : Fin n) (hf : AEStronglyMeasurable (f i) μ) {S : ℝ}
     (h_sum_le : ∫ x, ∑ l : Fin n, (f l x) ^ 2 ∂μ ≤ S) :
     (eLpNorm (f i) 2 μ)^ 2 ≤ ENNReal.ofReal S := by
   classical
@@ -82,7 +83,7 @@ private lemma sq_eLpNorm_two_le_of_integral_sum_sq_le
       ∫⁻ x, ENNReal.ofReal (∑ l : Fin n, (f l x)^2) ∂μ =
         ENNReal.ofReal (∫ x, ∑ l : Fin n, (f l x)^2 ∂μ) :=
     lintegral_ofReal_eq_ofReal_integral h_sum_int h_sum_nn
-  rw [sq_eLpNorm_two_eq_lintegral_enorm_sq μ (f i)]
+  rw [sq_eLpNorm_two_eq_lintegral_enorm_sq μ (f i) hf]
   refine h_lint_le.trans ?_
   rw [h_sum_int_eq]
   exact ENNReal.ofReal_le_ofReal h_sum_le
@@ -317,7 +318,8 @@ theorem uniform_diffQuot_bound_quantitative
       (n := d)
       (μ := (volume : Measure Eucl).restrict Ω'')
       (fun l => Sobolev.diffQuot
-        (d := d) k h (g_g l)) h_sum_int i ?_
+        (d := d) k h (g_g l)) h_sum_int i
+      ((memLp_diffQuot_two (d := d) k h (hg_g_l2 i)).restrict Ω'').aestronglyMeasurable ?_
     exact h_sumInt_le_S
   exact eLpNorm_two_le_ofReal_sqrt hS_nn h_per_i_sq
 

@@ -191,6 +191,7 @@ private theorem metricInChart_det_transition_normSq (x₀ x₁ : M) {y : M}
   change G₀.det.re = Complex.normSq B.det * G₁.det.re
   simpa using hre
 
+open scoped ComplexOrder in
 private theorem logDetInChart_transition (x₀ x₁ : M) {y : M}
     (hy₀ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₀).source)
     (hy₁ : y ∈ (chartAt (EuclideanSpace ℂ (Fin n)) x₁).source) :
@@ -242,6 +243,7 @@ noncomputable def ricciForm : FormField (EuclideanSpace ℂ (Fin n)) M 2 := fun 
 def IsRicciFlat : Prop :=
   ω₀.ricciForm = 0
 
+open scoped ComplexOrder in
 /-- The Ricci form is computed by `-i∂∂̄ log det g` in every chart. -/
 theorem chartRep_ricciForm (x : M) {z : EuclideanSpace ℂ (Fin n)}
     (hz : z ∈ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target) :
@@ -548,6 +550,7 @@ theorem chartRep_ricciForm (x : M) {z : EuclideanSpace ℂ (Fin n)}
     _ = -ddbar (fun w ↦ gᵧ (ψ w)) z := congrArg Neg.neg hddcomp.symm
     _ = -ddbar gₓ z := congrArg Neg.neg hddEq
 
+open scoped ComplexOrder in
 theorem contDiffOn_logDetInChart (x : M) :
     ContDiffOn ℝ ∞ (ω₀.logDetInChart x) (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).target := by
   let g : EuclideanSpace ℂ (Fin n) → ℂ := fun z ↦ (ω₀.metricInChart x z).det
@@ -592,6 +595,7 @@ theorem isOneOne_ricciForm : ω₀.ricciForm.IsOneOne := by
   exact (isOneOne_ddbar (hlog.of_le
     (WithTop.coe_le_coe.mpr (show (2 : ℕ∞) ≤ ⊤ from le_top)))).neg
 
+open scoped ComplexOrder in
 /-- Change of Kähler form: `Ric(ω₁) = Ric(ω₀) - i∂∂̄ log (ω₁ⁿ / ω₀ⁿ)`. -/
 theorem ricciForm_eq_sub_mddbar (ω₁ : KahlerForm n M) :
     ω₁.ricciForm = ω₀.ricciForm - mddbar n (fun x ↦ Real.log (relDet (ω₀ x) (ω₁ x))) := by
@@ -718,6 +722,7 @@ theorem ricciForm_eq_sub_mddbar (ω₁ : KahlerForm n M) :
   rw [hdd, hsub']
   abel
 
+open scoped ComplexOrder in
 theorem contMDiff_log_relDet (ω₁ : KahlerForm n M) :
     ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
       (fun x ↦ Real.log (relDet (ω₀ x) (ω₁ x))) := by

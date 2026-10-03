@@ -246,7 +246,7 @@ theorem exists_completed_poisson_inverse_laws [Nonempty M]
     obtain ⟨y, hy, hdist⟩ := Metric.mem_closure_iff.1 hx ε hε
     rcases hy with ⟨f, rfl⟩
     refine ⟨e f, ⟨f, rfl⟩, ?_⟩
-    convert hdist using 1 ; simp [e, Subtype.dist_eq]
+    convert hdist using 1
   have hBoundE (f : smoothMeanZeroChartHolderCore ω₁ cover 0 α N₀) :
       ‖L f‖ ≤ (C : ℝ) * ‖e f‖ := by
     have heNorm : ‖e f‖ = ‖f‖ := by
@@ -372,7 +372,7 @@ theorem exists_completed_poisson_inverse_laws [Nonempty M]
     obtain ⟨y, hy, hdist⟩ := Metric.mem_closure_iff.1 hx ε hε
     rcases hy with ⟨f, rfl⟩
     refine ⟨e₂ f, ⟨f, rfl⟩, ?_⟩
-    convert hdist using 1 ; simp [e₂, Subtype.dist_eq]
+    convert hdist using 1
   have hpoint₀ (f : smoothMeanZeroChartHolderCore ω₁ cover 0 α N₀) :
       P.evalC0 (e f) = (f : SmoothChartHolderCore cover 0 α).smoothMap := by
     funext x

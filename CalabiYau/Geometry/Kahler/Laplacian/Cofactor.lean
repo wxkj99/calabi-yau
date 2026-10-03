@@ -476,7 +476,7 @@ theorem chartDet_partial_formula
       have hchain := hdetDiff.hasFDerivAt.comp_hasDerivAt_of_eq 0 hline (by simp)
       have hchain' : HasDerivAt (fun t : ℝ ↦ (G z + t • H).det)
           (fderiv ℝ (fun A : Matrix (Fin n) (Fin n) ℂ ↦ A.det) (G z) H) 0 := by
-        convert hchain using 1 <;> rfl
+        convert hchain using 1; rfl
       have hraw := hdetline.unique hchain'
       simpa [M] using hraw.symm
     have hderiv (v : EuclideanSpace ℂ (Fin n)) :

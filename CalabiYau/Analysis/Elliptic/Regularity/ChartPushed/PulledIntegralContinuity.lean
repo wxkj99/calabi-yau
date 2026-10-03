@@ -91,7 +91,7 @@ lemma chartPulledIntegralWeight_apply_of_mem
       θ ((toEuclidean (E := E)) ((extChartAt I α) x)) / chartDensity g α x := by
   classical
   unfold chartPulledIntegralWeight
-  exact dif_pos hx
+  exact dite_eq_left hx
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [CompactSpace M] in
@@ -101,7 +101,7 @@ private lemma chartPulledIntegralWeight_apply_of_notMem
     chartPulledIntegralWeight (I := I) (M := M) g α θ x = 0 := by
   classical
   unfold chartPulledIntegralWeight
-  exact dif_neg hx
+  exact dite_eq_right hx
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [CompactSpace M] in

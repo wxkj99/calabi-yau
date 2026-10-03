@@ -244,8 +244,6 @@ private theorem exists_path_solution_on_ball [Nonempty M]
   have hG : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
       (fun x ↦ s * F x + ω₀.pathConstant F s) := by
     convert (contMDiff_const.mul hF).add contMDiff_const using 1
-    funext x
-    rfl
   let ψ := φ + this.evalC2 u
   have hcover : ∀ i, ∃ C : ℝ≥0,
       HolderBoundOn 2 α C (Q.finiteChartCover.piece i)

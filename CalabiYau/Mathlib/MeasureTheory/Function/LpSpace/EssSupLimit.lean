@@ -16,7 +16,6 @@ bound the essential supremum seminorm. -/
 theorem eLpNormEssSup_le_of_eLpNorm_le_of_tendsto
     {α : Type*} [MeasurableSpace α] {μ : Measure α} {f : α → ℝ}
     {p : ℕ → ℝ≥0∞} {C : ℝ≥0∞}
-    (hf : AEStronglyMeasurable f μ)
     (hp0 : ∀ k, p k ≠ 0)
     (hpTop : ∀ k, p k ≠ ∞)
     (hp_tendsto : Tendsto (fun k => (p k).toReal) atTop atTop)
@@ -43,7 +42,7 @@ theorem eLpNormEssSup_le_of_eLpNorm_le_of_tendsto
     refine bot_unique <| ge_of_tendsto' hpow_tendsto fun k => ?_
     calc
       μ {x | c ≤ ‖f x‖ₑ} ≤ c⁻¹ ^ (p k).toReal * eLpNorm f (p k) μ ^ (p k).toReal :=
-        meas_ge_le_mul_pow_eLpNorm_enorm μ (hp0 k) (hpTop k) hf (ne_of_gt hcPos)
+        meas_ge_le_mul_pow_eLpNorm_enorm μ (hp0 k) (hpTop k) (ne_of_gt hcPos)
           (by intro h; exact (hcTop h).elim)
       _ = (c⁻¹ * eLpNorm f (p k) μ) ^ (p k).toReal := by
         rw [← ENNReal.mul_rpow_of_nonneg _ _ (ENNReal.toReal_nonneg)]

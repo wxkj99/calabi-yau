@@ -42,7 +42,7 @@ theorem c0_eLpNormEssSup_bound_of_recurrence
     eLpNormEssSup f ω₀.volume ≤ B * eLpNorm f (p 0) ω₀.volume ∧
       eLpNorm f (p 0) ω₀.volume < ⊤ := by
   have hess := MeasureTheory.eLpNormEssSup_le_of_eLpNorm_recurrence
-    hf hp0 hpTop hpTendsto hrec hprod
+    hp0 hpTop hpTendsto hrec hprod
   obtain ⟨C, hC⟩ := (isCompact_range hcont).bddAbove
   have hbound : ∀ x, ‖f x‖ ≤ max C 0 := by
     intro x

@@ -233,7 +233,7 @@ def boundedContinuousFunctionConstSMul
     (c : Real) (f : BoundedContinuousFunction X F) :
     BoundedContinuousFunction X F :=
   f.comp (fun y ↦ c • y)
-    ((c • ContinuousLinearMap.id Real F).lipschitz)
+    ((c • ContinuousLinearMap.id Real F).lipschitzWith)
 
 @[simp]
 private theorem boundedContinuousFunctionConstSMul_apply
@@ -623,7 +623,7 @@ theorem eContDiffHolderGaugeOn_linearEquiv_le
     have hdomain : HolderWith (C * R ^ (alpha : Real)) alpha
         ((Set.univ : Set V).domRestrict
           (iteratedFDeriv Real 2 v ∘ L.symm)) := by
-      have hraw := hadaptGlobal.comp L.symm.lipschitz.holderWith
+      have hraw := hadaptGlobal.comp L.symm.lipschitzWith.holderWith
       have hraw' : HolderWith
           (C * ‖(L.symm : V →L[Real] V)‖₊ ^ (alpha : Real)) alpha
           (iteratedFDeriv Real 2 v ∘ L.symm) := by

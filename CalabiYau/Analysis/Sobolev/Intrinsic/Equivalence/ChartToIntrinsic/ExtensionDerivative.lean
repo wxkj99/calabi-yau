@@ -76,7 +76,7 @@ private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
   have hsymm : (toEuclidean (E := E)).symm
       ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y) = y :=
     (toEuclidean (E := E)).symm_apply_apply y
-  simp only [hsymm, hy, if_true]
+  simp only [hsymm, hy, ite_true]
   rfl
 
 lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
@@ -259,11 +259,11 @@ lemma chartSmoothExt_eq_zero_off_image_tsupport_local
     change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
               f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
             else (0 : ℝ)) = 0
-    rw [if_pos hy_target, hf_zero]
+    rw [ite_eq_left hy_target, hf_zero]
   · change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
               f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
             else (0 : ℝ)) = 0
-    rw [if_neg hy_target]
+    rw [ite_eq_right hy_target]
 
 end
 
@@ -340,6 +340,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
         ∑ i : Fin (Module.finrank ℝ E),
           ‖(fderiv ℝ ψ z) (EuclideanSpace.single i 1)‖) q μ := by
     apply eLpNorm_mono_real
+      (h_smooth.continuous_fderiv (by simp)).aestronglyMeasurable.norm
     intro z
     have hh := h_pt z
     have h_norm : ‖‖fderiv ℝ ψ z‖‖ = ‖fderiv ℝ ψ z‖ :=
@@ -351,7 +352,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
     (s := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
     (f := fun i => fun z : EuclN_E =>
       ‖(fderiv ℝ ψ z) (EuclideanSpace.single i 1)‖)
-    (fun i _ => (h_aesm_comp i).norm) hq_one
+    hq_one
   have h_lhs_eq :
       (fun z : EuclN_E =>
         ∑ i : Fin (Module.finrank ℝ E),
@@ -364,7 +365,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
   refine h_sum_le.trans ?_
   apply Finset.sum_le_sum
   intro i _
-  rw [eLpNorm_norm]
+  rw [eLpNorm_norm _ (h_aesm_comp i)]
 
 private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)
@@ -563,7 +564,7 @@ lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
       Sobolev.Chart.chartPushed
         (I := I) (M := M)
         (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u y
-    rw [if_pos hsymm_target]
+    rw [ite_eq_left hsymm_target]
     rfl
   have h_eq :
       Sobolev.Euclidean.iteratedWeakSobolevNorm
@@ -588,7 +589,13 @@ lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
   rw [h_eq]
   let _ := g
   unfold wkpNormChart
-  exact ENNReal.le_tsum α
+  exact ENNReal.le_tsum (f := fun β : M =>
+    Sobolev.Euclidean.iteratedWeakSobolevNorm
+      (d := Module.finrank ℝ E) 1 q
+      (Sobolev.Chart.chartPushed
+        (I := I) (M := M)
+        (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β u)
+      (Sobolev.Chart.chartTargetEuclid (I := I) (M := M) β)) α
 
 end Equivalence
 end Sobolev

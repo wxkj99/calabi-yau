@@ -98,7 +98,7 @@ theorem sum_inv_le_sum_pow_div_prod (hx : ∀ i ∈ s, 0 < x i) :
           have hP : (∏ j ∈ t, x j) ≤ (∑ i ∈ t, x i) ^ #t := by
             calc
               (∏ j ∈ t, x j) ≤ ∏ _j ∈ t, ∑ k ∈ t, x k :=
-                Finset.prod_le_prod (fun j hj => ht j (Finset.mem_insert_of_mem hj))
+                Finset.prod_le_prod₀ (fun j hj => ht j (Finset.mem_insert_of_mem hj))
                   (fun j hj => Finset.single_le_sum
                     (fun k hk => ht k (Finset.mem_insert_of_mem hk)) hj)
               _ = (∑ i ∈ t, x i) ^ #t := by rw [Finset.prod_const, Finset.card_eq_sum_ones]
@@ -153,7 +153,7 @@ theorem prod_div_sum_pow_le (hx : ∀ i ∈ s, 0 < x i) {i : ι} (hi : i ∈ s) 
   have hS : 0 < ∑ j ∈ s, x j := sum_pos hx ⟨i, hi⟩
   have h1 : ∏ j ∈ s.erase i, x j ≤ (∑ j ∈ s, x j) ^ (#s - 1) := by
     calc ∏ j ∈ s.erase i, x j ≤ ∏ _j ∈ s.erase i, ∑ k ∈ s, x k :=
-          prod_le_prod (fun j hj ↦ (hx j (mem_of_mem_erase hj)).le)
+          prod_le_prod₀ (fun j hj ↦ (hx j (mem_of_mem_erase hj)).le)
             (fun j hj ↦ single_le_sum (fun k hk ↦ (hx k hk).le) (mem_of_mem_erase hj))
       _ = (∑ j ∈ s, x j) ^ (#s - 1) := by rw [prod_const, card_erase_of_mem hi]
   rw [← mul_prod_erase s x hi, div_le_iff₀ (pow_pos hS _)]

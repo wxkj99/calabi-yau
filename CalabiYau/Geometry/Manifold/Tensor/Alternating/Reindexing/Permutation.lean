@@ -206,7 +206,7 @@ theorem orderEmb_eq_of_range_eq
     {I J : Fin k ↪o Fin n}
     (h : Set.range (⇑I) = Set.range (⇑J)) : I = J :=
   DFunLike.ext'
-    ((I.strictMono.range_inj J.strictMono).mp h)
+    ((I.strictMono.range_inj_of_wellFoundedLT J.strictMono).mp h)
 
 theorem orderEmb_ne_comp_perm
     {I J : Fin k ↪o Fin n} (hIJ : I ≠ J)
@@ -264,7 +264,7 @@ lemma finRotate_pow_apply {s : ℕ} (hs : s ≠ 0) (k' : ℕ) (j : Fin s) :
         rw [coe_finRotate_of_ne_last hx']
         exact (Nat.mod_eq_of_lt (show x.val + 1 < k + 1 by omega)).symm
       · have hx' : x = Fin.last k := by apply Fin.ext; have hc : (Fin.last k).val = k := rfl; omega
-        rw [hx', coe_finRotate, if_pos rfl]
+        rw [hx', coe_finRotate, ite_eq_left rfl]
         have eq1 : (Fin.last k).val = k := rfl
         rw [eq1]
         have eq2 : k + 1 = 0 + (k + 1) := by omega

@@ -25,6 +25,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]
 
+open scoped ComplexOrder in
 /-- Smoothness of the actual top form implies continuity of its invariant signed
 scalar density. Compactness is not needed until the integration step. -/
 theorem continuous_signedTopFormDensity (ω₀ : KahlerForm n M)

@@ -109,10 +109,10 @@ private theorem chartTopCoefficient_eq_chartImageIndicator (x : M)
     have hztarget : c z ∈ c.target := c.map_source hzsource
     have hcoeff : chartTopCoefficient x η (c z) = rep (c z) := by
       unfold chartTopCoefficient
-      rw [if_pos hztarget]
+      rw [ite_eq_left hztarget]
     rw [hcoeff]
     change rep (c z) = if c z ∈ K then rep (c z) else 0
-    rw [if_pos (show c z ∈ K from ⟨z, hz, rfl⟩)]
+    rw [ite_eq_left (show c z ∈ K from ⟨z, hz, rfl⟩)]
   · have hzero : chartTopCoefficient x η y = 0 := by
       by_cases hy' : y ∈ c.target
       · have hnot : c.symm y ∉ closure {z : M | η z ≠ 0} := by
@@ -125,7 +125,7 @@ private theorem chartTopCoefficient_eq_chartImageIndicator (x : M)
           exact subset_closure (show c.symm y ∈ {z : M | η z ≠ 0} from hn)
         have hcoeff : chartTopCoefficient x η y = 0 := by
           unfold chartTopCoefficient
-          rw [if_pos hy']
+          rw [ite_eq_left hy']
           change (trivializationAt ((Fin n → ℝ) [⋀^Fin n]→L[ℝ] ℝ)
             (Bundle.continuousAlternatingMap ℝ (Fin n) (Fin n → ℝ)
               (TangentSpace (𝓘(ℝ, Fin n → ℝ))) ℝ (Bundle.Trivial M ℝ)) x
@@ -140,7 +140,7 @@ private theorem chartTopCoefficient_eq_chartImageIndicator (x : M)
           simp
         exact hcoeff
       · unfold chartTopCoefficient
-        rw [if_neg hy']
+        rw [ite_eq_right hy']
     simp [hzero, hy]
 
 

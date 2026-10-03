@@ -44,6 +44,7 @@ private lemma pulledBackMetricInChart_det_factor {n : ℕ}
     holomorphicJacobianMatrix_det_eq, Complex.normSq_eq_conj_mul_self]
   ring
 
+open scoped ComplexOrder in
 private lemma pullback_logdet_factor_eventually {n : ℕ}
     {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
     [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M]

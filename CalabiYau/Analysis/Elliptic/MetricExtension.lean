@@ -470,7 +470,7 @@ lemma extendedMatrix_quad_decomp
     · intro j _ hji
       have : kronDelta (E := E) i j = 0 := by
         unfold kronDelta
-        rw [if_neg (Ne.symm hji)]
+        rw [ite_eq_right (Ne.symm hji)]
       rw [this]
       ring
     · intro h_not_mem

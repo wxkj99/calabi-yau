@@ -193,7 +193,7 @@ theorem relTrace_le_relDet_mul_relTrace (hω : ω.IsPositive) (hωα : (α - ω)
     calc
       1 = ∏ _j ∈ (Finset.univ.erase i), (1 : ℝ) := by simp
       _ ≤ ∏ j ∈ (Finset.univ.erase i), d j := by
-        apply Finset.prod_le_prod
+        apply Finset.prod_le_prod₀
         · intro j hj
           exact zero_le_one
         · intro j hj

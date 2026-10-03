@@ -126,11 +126,11 @@ private theorem flatFirstCoordinates_interleaved_left (k : ℕ) (i : Fin (2 * k)
       flatFirstCoordinates k
           (complexInterleavedBasis (k + 1) (pairEvaluationIndex k (Sum.inl i))) =
           flatFirstCoordinates k (EuclideanSpace.single p.1 (1 : ℂ)) := by
-            rw [hidx, interleavedBasis_apply, if_pos ha]
+            rw [hidx, interleavedBasis_apply, ite_eq_left ha]
       _ = EuclideanSpace.single (p.1.castLT hp) (1 : ℂ) :=
         flatFirstCoordinates_single k p.1 hp 1
       _ = complexInterleavedBasis k i := by
-        rw [hlow, interleavedBasis_apply, if_pos ha]
+        rw [hlow, interleavedBasis_apply, ite_eq_left ha]
   · have ha1 : p.2 = 1 := by
       apply Fin.ext
       have hne : p.2.val ≠ 0 := by
@@ -142,7 +142,7 @@ private theorem flatFirstCoordinates_interleaved_left (k : ℕ) (i : Fin (2 * k)
       flatFirstCoordinates k
           (complexInterleavedBasis (k + 1) (pairEvaluationIndex k (Sum.inl i))) =
           flatFirstCoordinates k (Complex.I • EuclideanSpace.single p.1 (1 : ℂ)) := by
-            rw [hidx, interleavedBasis_apply, if_neg ha]
+            rw [hidx, interleavedBasis_apply, ite_eq_right ha]
       _ = Complex.I • flatFirstCoordinates k (EuclideanSpace.single p.1 (1 : ℂ)) := by
         rw [map_smul]
       _ = Complex.I • EuclideanSpace.single (p.1.castLT hp) (1 : ℂ) := by

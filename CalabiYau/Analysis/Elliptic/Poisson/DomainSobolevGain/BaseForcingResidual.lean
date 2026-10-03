@@ -78,7 +78,7 @@ theorem fChartResidual_memWkp_of_memWkpChart
       (u := fun n => smoothFChartResidual (I := I) (M := M) g α (v n))
       (fun n => (hC (v n)).1) h_cauchy
   have h_id := smoothFChartResidual_limit_eq_fChartResidual_of_approx (I := I) (M := M)
-    g α m hu v hv F hF hF_lim
+    g α m hu v hv F hF_lim
   exact (_root_.Sobolev.Euclidean.MemWkp_congr_ae (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_id).mp hF
 

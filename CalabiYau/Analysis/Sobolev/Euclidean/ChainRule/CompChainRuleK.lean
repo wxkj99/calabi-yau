@@ -330,7 +330,7 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
     rw [abs_mul]
     have h_prod_le : |∏ i : Fin n, m i (β i)| ≤ ∏ i : Fin n, ‖m i‖ := by
       rw [Finset.abs_prod]
-      refine Finset.prod_le_prod ?_ ?_
+      refine Finset.prod_le_prod₀ ?_ ?_
       · intro i _; exact abs_nonneg _
       · intro i _; exact euclidean_coord_le_norm (d := d) (m i) (β i)
     exact mul_le_mul_of_nonneg_right h_prod_le (abs_nonneg _)
@@ -470,7 +470,8 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
       eLpNorm (fun y => ‖iteratedFDeriv ℝ n f y‖) p (volume.restrict Ω) ≤
       eLpNorm (fun y => ∑ β : Fin n → Fin d,
         |iterClassicalPartial (d := d) n β f y|) p (volume.restrict Ω) := by
-    refine eLpNorm_mono_ae ?_
+    refine eLpNorm_mono_ae
+      (hf_smooth.continuous_iteratedFDeriv (m := n) (by exact_mod_cast le_top)).norm.aestronglyMeasurable ?_
     refine Filter.Eventually.of_forall ?_
     intro y
     rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _),
@@ -478,20 +479,6 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     · exact h_pt y
     · exact Finset.sum_nonneg (fun β _ => abs_nonneg _)
   refine h_eLp_le.trans ?_
-  have h_strong_meas : ∀ β : Fin n → Fin d,
-      AEStronglyMeasurable
-        (fun y => |iterClassicalPartial (d := d) n β f y|) (volume.restrict Ω) := by
-    intro β
-    have h_smooth : ContDiff ℝ (⊤ : ℕ∞)
-        (iterClassicalPartial (d := d) n β f) :=
-      contDiff_iterClassicalPartial (d := d) n β hf_smooth
-    have h_aem : AEStronglyMeasurable
-        (iterClassicalPartial (d := d) n β f) (volume.restrict Ω) :=
-      h_smooth.continuous.aestronglyMeasurable
-    have h_norm := h_aem.norm
-    refine h_norm.congr (Filter.Eventually.of_forall ?_)
-    intro y
-    exact (Real.norm_eq_abs _).symm
   have h_triangle :
       eLpNorm (fun y => ∑ β : Fin n → Fin d,
         |iterClassicalPartial (d := d) n β f y|) p (volume.restrict Ω) ≤
@@ -501,7 +488,7 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
       (μ := volume.restrict Ω) (p := p)
       (s := (Finset.univ : Finset (Fin n → Fin d)))
       (f := fun β y => |iterClassicalPartial (d := d) n β f y|)
-      (fun β _ => h_strong_meas β) hp
+      hp
     have h_eq : (fun y => ∑ β : Fin n → Fin d,
         |iterClassicalPartial (d := d) n β f y|) =
         ((Finset.univ : Finset (Fin n → Fin d)).sum
@@ -511,11 +498,10 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     exact hsum
   refine h_triangle.trans ?_
   refine Finset.sum_le_sum (fun β _ => ?_)
-  refine eLpNorm_mono_ae ?_
-  refine Filter.Eventually.of_forall ?_
-  intro y
-  rw [Real.norm_eq_abs, abs_abs]
-  exact le_of_eq rfl
+  simpa only [Real.norm_eq_abs] using
+    (eLpNorm_norm (iterClassicalPartial (d := d) n β f) (p := p)
+      (μ := volume.restrict Ω)
+      (contDiff_iterClassicalPartial (d := d) n β hf_smooth).continuous.aestronglyMeasurable).le
 
 lemma eLpNorm_iteratedFDeriv_le_wkpNorm
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -612,52 +598,61 @@ theorem eLpNorm_comp_toFun_le_const
   have hp_zero : p ≠ 0 := by
     intro hpz; rw [hpz] at hp_one
     exact absurd hp_one (by norm_num)
-  set q := p.toReal with hq_def
-  have hq_pos : 0 < q := ENNReal.toReal_pos hp_zero hp_top
-  have hjLB_pos : 0 < Φ.jacobianLowerBound := Φ.jacobian_lower_bound_pos
-  have h_lint :=
-    lintegral_rpow_enorm_comp_le (d := d) (p := p) hΩ Φ f
-  have h_LHS_pow_eq :
-      ∫⁻ x, ‖f (Φ.toFun x)‖ₑ ^ q ∂(volume.restrict Ω) =
-        eLpNorm (fun x => f (Φ.toFun x)) p (volume.restrict Ω) ^ q := by
-    rw [eLpNorm_eq_eLpNorm' hp_zero hp_top, hq_def]
-    exact lintegral_rpow_enorm_eq_rpow_eLpNorm' hq_pos
-  have h_RHS_pow_eq :
-      ∫⁻ y, ‖f y‖ₑ ^ q ∂(volume.restrict Ω') =
-        eLpNorm f p (volume.restrict Ω') ^ q := by
-    rw [eLpNorm_eq_eLpNorm' hp_zero hp_top, hq_def]
-    exact lintegral_rpow_enorm_eq_rpow_eLpNorm' hq_pos
-  rw [h_LHS_pow_eq, h_RHS_pow_eq] at h_lint
-  set A : ℝ≥0∞ := eLpNorm (fun x => f (Φ.toFun x)) p (volume.restrict Ω)
-    with hA_def
-  set B : ℝ≥0∞ := eLpNorm f p (volume.restrict Ω') with hB_def
-  set j : ℝ≥0∞ := ENNReal.ofReal Φ.jacobianLowerBound with hj_def
-  have hj_pos : 0 < j := by rw [hj_def]; exact ENNReal.ofReal_pos.mpr hjLB_pos
-  have hj_ne_zero : j ≠ 0 := hj_pos.ne'
-  have hj_ne_top : j ≠ ⊤ := by rw [hj_def]; exact ENNReal.ofReal_ne_top
-  have h_Aq_le : A ^ q ≤ j⁻¹ * B ^ q := by
-    have h1 : A ^ q = j⁻¹ * (j * A ^ q) := by
-      rw [← mul_assoc, ENNReal.inv_mul_cancel hj_ne_zero hj_ne_top, one_mul]
-    rw [h1]
-    gcongr
-  have h_1q_nonneg : (0 : ℝ) ≤ 1 / q := by positivity
-  have h_pow_le : (A ^ q) ^ (1 / q) ≤ (j⁻¹ * B ^ q) ^ (1 / q) :=
-    ENNReal.rpow_le_rpow h_Aq_le h_1q_nonneg
-  have h_LHS_simp : (A ^ q) ^ (1 / q) = A := by
-    rw [← ENNReal.rpow_mul, mul_one_div, div_self hq_pos.ne', ENNReal.rpow_one]
-  have h_RHS_simp : (j⁻¹ * B ^ q) ^ (1 / q) = j⁻¹ ^ (1 / q) * B := by
-    rw [ENNReal.mul_rpow_of_nonneg _ _ h_1q_nonneg]
-    congr 1
-    rw [← ENNReal.rpow_mul, mul_one_div, div_self hq_pos.ne', ENNReal.rpow_one]
-  rw [h_LHS_simp, h_RHS_simp] at h_pow_le
-  have h_inv_real : j⁻¹ = ENNReal.ofReal (1 / Φ.jacobianLowerBound) := by
-    change (ENNReal.ofReal Φ.jacobianLowerBound)⁻¹ =
-      ENNReal.ofReal (1 / Φ.jacobianLowerBound)
-    rw [← ENNReal.ofReal_inv_of_pos hjLB_pos, one_div]
-  rw [h_inv_real,
-      ENNReal.ofReal_rpow_of_pos
-        (by positivity : (0 : ℝ) < 1 / Φ.jacobianLowerBound)] at h_pow_le
-  exact h_pow_le
+  by_cases hf : AEStronglyMeasurable f (volume.restrict Ω')
+  · have hcomp : AEStronglyMeasurable (fun x => f (Φ.toFun x)) (volume.restrict Ω) :=
+      hf.comp_quasiMeasurePreserving Φ.toFun_quasiMeasurePreserving
+    set q := p.toReal with hq_def
+    have hq_pos : 0 < q := ENNReal.toReal_pos hp_zero hp_top
+    have hjLB_pos : 0 < Φ.jacobianLowerBound := Φ.jacobian_lower_bound_pos
+    have h_lint :=
+      lintegral_rpow_enorm_comp_le (d := d) (p := p) hΩ Φ f
+    have h_LHS_pow_eq :
+        ∫⁻ x, ‖f (Φ.toFun x)‖ₑ ^ q ∂(volume.restrict Ω) =
+          eLpNorm (fun x => f (Φ.toFun x)) p (volume.restrict Ω) ^ q := by
+      rw [eLpNorm_eq_eLpNorm' hp_zero hp_top hcomp, hq_def]
+      exact lintegral_rpow_enorm_eq_rpow_eLpNorm' hq_pos
+    have h_RHS_pow_eq :
+        ∫⁻ y, ‖f y‖ₑ ^ q ∂(volume.restrict Ω') =
+          eLpNorm f p (volume.restrict Ω') ^ q := by
+      rw [eLpNorm_eq_eLpNorm' hp_zero hp_top hf, hq_def]
+      exact lintegral_rpow_enorm_eq_rpow_eLpNorm' hq_pos
+    rw [h_LHS_pow_eq, h_RHS_pow_eq] at h_lint
+    set A : ℝ≥0∞ := eLpNorm (fun x => f (Φ.toFun x)) p (volume.restrict Ω)
+      with hA_def
+    set B : ℝ≥0∞ := eLpNorm f p (volume.restrict Ω') with hB_def
+    set j : ℝ≥0∞ := ENNReal.ofReal Φ.jacobianLowerBound with hj_def
+    have hj_pos : 0 < j := by rw [hj_def]; exact ENNReal.ofReal_pos.mpr hjLB_pos
+    have hj_ne_zero : j ≠ 0 := hj_pos.ne'
+    have hj_ne_top : j ≠ ⊤ := by rw [hj_def]; exact ENNReal.ofReal_ne_top
+    have h_Aq_le : A ^ q ≤ j⁻¹ * B ^ q := by
+      have h1 : A ^ q = j⁻¹ * (j * A ^ q) := by
+        rw [← mul_assoc, ENNReal.inv_mul_cancel hj_ne_zero hj_ne_top, one_mul]
+      rw [h1]
+      gcongr
+    have h_1q_nonneg : (0 : ℝ) ≤ 1 / q := by positivity
+    have h_pow_le : (A ^ q) ^ (1 / q) ≤ (j⁻¹ * B ^ q) ^ (1 / q) :=
+      ENNReal.rpow_le_rpow h_Aq_le h_1q_nonneg
+    have h_LHS_simp : (A ^ q) ^ (1 / q) = A := by
+      rw [← ENNReal.rpow_mul, mul_one_div, div_self hq_pos.ne', ENNReal.rpow_one]
+    have h_RHS_simp : (j⁻¹ * B ^ q) ^ (1 / q) = j⁻¹ ^ (1 / q) * B := by
+      rw [ENNReal.mul_rpow_of_nonneg _ _ h_1q_nonneg]
+      congr 1
+      rw [← ENNReal.rpow_mul, mul_one_div, div_self hq_pos.ne', ENNReal.rpow_one]
+    rw [h_LHS_simp, h_RHS_simp] at h_pow_le
+    have h_inv_real : j⁻¹ = ENNReal.ofReal (1 / Φ.jacobianLowerBound) := by
+      change (ENNReal.ofReal Φ.jacobianLowerBound)⁻¹ =
+        ENNReal.ofReal (1 / Φ.jacobianLowerBound)
+      rw [← ENNReal.ofReal_inv_of_pos hjLB_pos, one_div]
+    rw [h_inv_real,
+        ENNReal.ofReal_rpow_of_pos
+          (by positivity : (0 : ℝ) < 1 / Φ.jacobianLowerBound)] at h_pow_le
+    exact h_pow_le
+  · rw [eLpNorm_of_not_aestronglyMeasurable hf]
+    have hC_pos : 0 < ENNReal.ofReal
+        ((1 / Φ.jacobianLowerBound) ^ (1 / p.toReal)) := by
+      apply ENNReal.ofReal_pos.mpr
+      exact Real.rpow_pos_of_pos (one_div_pos.mpr Φ.jacobian_lower_bound_pos) _
+    simp only [ENNReal.mul_top hC_pos.ne', le_top]
 
 private lemma iterClassicalPartial_eqOn_of_eqOn
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
@@ -832,7 +827,9 @@ private lemma eLpNorm_iterWeakPartial_comp_le
         eLpNorm (fun x => Const *
           ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) p
           (volume.restrict Ω) := by
-    refine eLpNorm_mono_ae ?_
+    refine eLpNorm_mono_ae
+      (contDiff_iterClassicalPartial (d := d) j β
+        (Φ.comp_toFun_contDiff hψ_smooth)).continuous.aestronglyMeasurable ?_
     refine Filter.Eventually.of_forall ?_
     intro x
     have h_rhs_nonneg : 0 ≤ Const *
@@ -853,23 +850,13 @@ private lemma eLpNorm_iterWeakPartial_comp_le
     Real.enorm_of_nonneg hConst_nonneg
   rw [hConst_norm]
   refine mul_le_mul_of_nonneg_left ?_ (zero_le)
-  have h_strong_meas : ∀ n ∈ Finset.range (k + 1),
-      AEStronglyMeasurable
-        (fun x => ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) (volume.restrict Ω) := by
-    intro n _
-    have h_inner :
-        Continuous (fun x => ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) := by
-      have hψ_iter : Continuous (fun y => iteratedFDeriv ℝ n ψ y) :=
-        hψ_smooth.continuous_iteratedFDeriv (m := n) (by exact_mod_cast le_top)
-      exact (hψ_iter.comp Φ.continuous_toFun).norm
-    exact h_inner.aestronglyMeasurable
   have h_pointwise_eq : (fun x => ∑ n ∈ Finset.range (k + 1),
         ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) =
       ∑ n ∈ Finset.range (k + 1),
         (fun x => ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) := by
     funext x; rw [Finset.sum_apply]
   rw [h_pointwise_eq]
-  exact eLpNorm_sum_le h_strong_meas hp_one
+  exact eLpNorm_sum_le hp_one
 
 private lemma eLpNorm_iteratedFDeriv_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)

@@ -73,7 +73,7 @@ private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     exact hint
   have h_lintegral_eq :
       ∫⁻ x, ‖f x * g x‖ₑ ∂μ = eLpNorm (fun x => g x * f x) 1 μ := by
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm (f := fun x => g x * f x) (hg.aestronglyMeasurable.mul hf.aestronglyMeasurable)]
     refine lintegral_congr (fun x => ?_)
     simp [enorm_mul, mul_comm]
   have h_smul_bound :
@@ -84,7 +84,7 @@ private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
       simp [smul_eq_mul]
     rw [h_mul_eq]
     have : ENNReal.HolderTriple q p 1 := ENNReal.HolderTriple.symm
-    exact eLpNorm_smul_le_mul_eLpNorm hf.aestronglyMeasurable hg.aestronglyMeasurable
+    exact eLpNorm_smul_le_mul_eLpNorm hg.aestronglyMeasurable hf.aestronglyMeasurable
   calc
     ENNReal.ofReal |∫ x, f x * g x ∂μ|
         ≤ ∫⁻ x, ‖f x * g x‖ₑ ∂μ := h_abs_le_lintegral

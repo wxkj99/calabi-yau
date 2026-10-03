@@ -38,7 +38,7 @@ private theorem norm_det_le_of_entries {n : ℕ} (A : Matrix (Fin n) (Fin n) ℂ
         rw [norm_prod]
         calc
           ∏ k : Fin n, ‖A (σ k) k‖ ≤ ∏ _k : Fin n, M :=
-            Finset.prod_le_prod (fun _ _ => norm_nonneg _) (fun k _ => hA (σ k) k)
+            Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) (fun k _ => hA (σ k) k)
           _ = M ^ n := by simp [Finset.prod_const]
       rw [hsign]
       simpa using hprod

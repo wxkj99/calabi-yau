@@ -183,7 +183,7 @@ theorem integral_sq_diffQuot_uChart_le
         (u_g (x + h • EuclideanSpace.single k 1) - u_g x) / h) =
       (if h = 0 then 0 else
         (D.uChart (x + h • EuclideanSpace.single k 1) - D.uChart x) / h)
-    rw [if_neg hh, if_neg hh, hu_g_def]
+    rw [ite_eq_right hh, ite_eq_right hh, hu_g_def]
     simp only [hχ_shift, hχx, one_mul]
   have h_LHS_eq :
       ∫ x in tsupport η,

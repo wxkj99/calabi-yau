@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.Topology.Defs.Basic
 public import Mathlib.Topology.Order.Compact
 public import Mathlib.Topology.MetricSpace.Pseudo.Lemmas

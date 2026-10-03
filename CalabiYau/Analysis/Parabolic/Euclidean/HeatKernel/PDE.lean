@@ -35,7 +35,7 @@ theorem sum_baseD2 (x : V) :
   change (∑ i : Fin (Module.finrank ℝ V), baseD2 (b i) (b i) x) = _
   unfold baseD2
   rw [← Finset.sum_mul]
-  simp_rw [b.inner_eq_ite, if_pos]
+  simp_rw [b.inner_eq_ite, ite_eq_left]
   rw [Finset.sum_sub_distrib]
   simp_rw [mul_assoc, ← pow_two]
   rw [← Finset.mul_sum, b.sum_sq_inner_left]

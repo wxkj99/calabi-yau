@@ -243,14 +243,7 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
     refine h_chg.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (zero_le)
     exact h_eLp_le_wkp.trans (hψ_close n)
-  have h_uΦ_aestrong :
-      AEStronglyMeasurable (fun x => u (Φ.toFun x)) (volume.restrict Ω) := by
-    have hu_aestrong : AEStronglyMeasurable u (volume.restrict Ω') :=
-      hu.memLp.aestronglyMeasurable
-    exact hu_aestrong.comp_quasiMeasurePreserving Φ.toFun_quasiMeasurePreserving
   have h_vΦ_eq_uΦ : vΦ =ᵐ[volume.restrict Ω] (fun x => u (Φ.toFun x)) := by
-    have h_v_aestrong : AEStronglyMeasurable vΦ (volume.restrict Ω) :=
-      hvΦ_mem.memLp.aestronglyMeasurable
     have hp_zero_ne : p ≠ 0 := by
       intro hpz; rw [hpz] at hp_one
       exact absurd hp_one (by norm_num)
@@ -263,18 +256,14 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
                 ((1 / Φ.jacobianLowerBound) ^ (1 / p.toReal)) *
               ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ)) := by
         intro n
-        have h_ψn_comp_aestrong : AEStronglyMeasurable
-            (fun x => ψ n (Φ.toFun x)) (volume.restrict Ω) :=
-          (hψ_smooth n).continuous.aestronglyMeasurable.comp_quasiMeasurePreserving
-            Φ.toFun_quasiMeasurePreserving
         have h_decomp :
             (fun x => vΦ x - u (Φ.toFun x)) = (fun x =>
               (vΦ x - ψ n (Φ.toFun x)) + (ψ n (Φ.toFun x) - u (Φ.toFun x))) := by
           funext x; ring
         rw [h_decomp]
         have h_tri := eLpNorm_add_le (μ := volume.restrict Ω)
-          (h_v_aestrong.sub h_ψn_comp_aestrong)
-          (h_ψn_comp_aestrong.sub h_uΦ_aestrong) hp_one
+          (f := fun x => vΦ x - ψ n (Φ.toFun x))
+          (g := fun x => ψ n (Φ.toFun x) - u (Φ.toFun x)) hp_one
         refine h_tri.trans ?_
         have h_first :
             eLpNorm (fun x => vΦ x - ψ n (Φ.toFun x)) p (volume.restrict Ω) ≤
@@ -373,8 +362,7 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
       exact ge_of_tendsto h_tendsto_sum (Filter.Eventually.of_forall h_bound)
     have h_diff_zero : (fun x => vΦ x - u (Φ.toFun x)) =ᵐ[volume.restrict Ω]
         0 := by
-      have h_aestrong := h_v_aestrong.sub h_uΦ_aestrong
-      exact (eLpNorm_eq_zero_iff h_aestrong hp_zero_ne).mp h_zero
+      exact (eLpNorm_eq_zero_iff hp_zero_ne).mp h_zero
     filter_upwards [h_diff_zero] with x hx
     have : vΦ x - u (Φ.toFun x) = 0 := hx
     linarith

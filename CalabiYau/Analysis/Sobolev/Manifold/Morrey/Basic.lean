@@ -66,7 +66,7 @@ private lemma chartSmoothExt_apply_of_mem_target
   change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0) = f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
-  rw [if_pos hy]
+  rw [ite_eq_left hy]
 
 private lemma chartSmoothExt_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclN}
@@ -76,7 +76,7 @@ private lemma chartSmoothExt_apply_of_notMem_target
   change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0) = 0
-  rw [if_neg hy]
+  rw [ite_eq_right hy]
 
 private lemma chartSmoothExt_apply_of_mem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
@@ -796,7 +796,8 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
       eLpNorm (fun z : EuclN =>
         ∑ i : Fin (Module.finrank ℝ E),
           ‖(fderiv ℝ f z) (EuclideanSpace.single i 1)‖) q μ := by
-    apply eLpNorm_mono_real
+    refine eLpNorm_mono_real
+      (hf_smooth.continuous_fderiv (by simp)).aestronglyMeasurable.norm ?_
     intro z
     have hh := h_pt z
     have h_norm : ‖‖fderiv ℝ f z‖‖ = ‖fderiv ℝ f z‖ :=
@@ -807,7 +808,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
   have h_sum_le := eLpNorm_sum_le (μ := μ) (p := q)
     (s := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
     (f := fun i => fun z : EuclN => ‖(fderiv ℝ f z) (EuclideanSpace.single i 1)‖)
-    (fun i _ => (h_aesm_comp i).norm) hq_one
+    hq_one
   have h_lhs_eq :
       (fun z : EuclN =>
         ∑ i : Fin (Module.finrank ℝ E),
@@ -820,7 +821,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
   refine h_sum_le.trans ?_
   apply Finset.sum_le_sum
   intro i _
-  rw [eLpNorm_norm]
+  rw [eLpNorm_norm _ (h_aesm_comp i)]
 
 private lemma classical_partial_ae_eq_chosenWeakPartial_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
@@ -1057,7 +1058,12 @@ private lemma wkpNorm_chartPushed_target_le_wkpNormChart
   classical
   let _ := g
   unfold wkpNormChart
-  exact ENNReal.le_tsum α
+  exact ENNReal.le_tsum (f := fun β : M =>
+    Sobolev.Euclidean.iteratedWeakSobolevNorm
+      (d := Module.finrank ℝ E) 1 q
+      (chartPushed (I := I) (M := M)
+        (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β u)
+      (chartTargetEuclid (I := I) (M := M) β)) α
 
 section
 
@@ -1357,14 +1363,7 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
         (I := I) (M := M) x
     rw [← Finset.sum_mul, hsum, one_mul]
   rw [h_eLpNorm_eq]
-  have h_aesm : ∀ α ∈ S,
-      AEStronglyMeasurable (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x)
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g ρ) := by
-    intro α _
-    have hcont : Continuous (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x) :=
-      (ρ α).contMDiff.continuous
-    exact (hcont.measurable.mul hu_meas).aestronglyMeasurable
-  refine (eLpNorm_sum_le h_aesm hp_one).trans ?_
+  refine (eLpNorm_sum_le hp_one).trans ?_
   have h_per_α : ∀ α ∈ S,
       eLpNorm (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) p
         (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g ρ) ≤
@@ -1620,11 +1619,8 @@ theorem morrey_C0_embedding_of_compact
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_C_decay
       (Filter.Eventually.of_forall (fun _ => zero_le))
       (Filter.Eventually.of_forall h_total_le)
-  have hu_aesm : AEStronglyMeasurable u μ_g := hu_meas.aestronglyMeasurable
-  have hv_aesm : ∀ n, AEStronglyMeasurable (v n) μ_g :=
-    fun n => (hv_smooth n).continuous.aestronglyMeasurable
   have h_tim : TendstoInMeasure μ_g v atTop u := by
-    refine tendstoInMeasure_of_tendsto_eLpNorm hp_enn_ne_zero hv_aesm hu_aesm ?_
+    refine tendstoInMeasure_of_tendsto_eLpNorm hp_enn_ne_zero ?_
     have h_neg_eq : ∀ n,
         eLpNorm (fun x : M => v n x - u x) (ENNReal.ofReal p) μ_g =
           eLpNorm (fun x : M => u x - v n x) (ENNReal.ofReal p) μ_g := by

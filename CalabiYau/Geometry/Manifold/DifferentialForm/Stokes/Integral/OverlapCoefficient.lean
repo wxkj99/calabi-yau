@@ -46,8 +46,8 @@ theorem chartTopCoefficient_transition
           ((extChartAt 𝓘(ℝ, Fin n → ℝ) b) z) := by
   classical
   unfold chartTopCoefficient
-  rw [if_pos ((extChartAt 𝓘(ℝ, Fin n → ℝ) a).map_source ha),
-    if_pos ((extChartAt 𝓘(ℝ, Fin n → ℝ) b).map_source hb),
+  rw [ite_eq_left ((extChartAt 𝓘(ℝ, Fin n → ℝ) a).map_source ha),
+    ite_eq_left ((extChartAt 𝓘(ℝ, Fin n → ℝ) b).map_source hb),
     (extChartAt 𝓘(ℝ, Fin n → ℝ) a).left_inv ha,
     (extChartAt 𝓘(ℝ, Fin n → ℝ) b).left_inv hb]
   rw [continuousAlternatingMap_trivializationAt_apply,

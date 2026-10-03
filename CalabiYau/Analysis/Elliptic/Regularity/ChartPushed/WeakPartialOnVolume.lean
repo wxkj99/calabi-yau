@@ -171,7 +171,8 @@ theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
     have h_toReal : ((1 / 2 : ℝ≥0∞).toReal : ℝ) = (1 : ℝ) / 2 := by
       rw [show (1 / 2 : ℝ≥0∞) = (1 : ℝ≥0∞) / 2 from rfl]
       simp
-    rw [eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+    rw [eLpNorm_smul_measure_of_ne_zero_of_ne_top
+      (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
     rw [h_toReal]
   rw [h_smul_eq] at h_step1
   have hK_in_open :
@@ -200,8 +201,6 @@ private lemma memLp_of_chartPulledWeighted_on_compact
     {K : Set EuclN} (hK_compact : IsCompact K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {f : EuclN → ℝ}
-    (hf_aestrong : AEStronglyMeasurable f
-      ((volume : Measure EuclN).restrict K))
     (hf_memLp : MemLp f 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))) :
@@ -209,9 +208,9 @@ private lemma memLp_of_chartPulledWeighted_on_compact
   obtain ⟨C, _hC_pos, hC_bd⟩ :=
     eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
       (I := I) (M := M) g α hK_compact hK_in
-  refine ⟨hf_aestrong, ?_⟩
+  refine memLp_iff.mpr ?_
   refine lt_of_le_of_lt (hC_bd f) ?_
-  exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hf_memLp.2
+  exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hf_memLp.eLpNorm_lt_top
 
 variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
@@ -230,13 +229,8 @@ theorem chartPushedWeakPartialLp_locally_memLp
   have hf_memLp_weighted := MeasureTheory.Lp.memLp
     (chartPushedWeakPartialLp (I := I) (M := M) g α j
       (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α j) u_h)
-  have hf_strong : StronglyMeasurable
-      (((chartPushedWeakPartialLp (I := I) (M := M) g α j
-        (chartPushedPartialLipschitzCanonical (I := I) (M := M) g α j) u_h
-       ) : EuclN → ℝ)) :=
-    Lp.stronglyMeasurable _
   exact memLp_of_chartPulledWeighted_on_compact (I := I) (M := M) g α
-    hK_compact hK_in hf_strong.aestronglyMeasurable hf_memLp_weighted
+    hK_compact hK_in hf_memLp_weighted
 
 variable [FiniteDimensional ℝ E] {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] [I.Boundaryless]
@@ -791,14 +785,14 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     intro n
     refine (chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
       (I := I) (M := M) g α (v n).smooth.continuous.measurable
-      (v n).memLp_two).1
+      (v n).memLp_two).aestronglyMeasurable
   have hu_lim_aestrong_w :
       AEStronglyMeasurable u_lim_chart
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) := by
     refine (chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
       (I := I) (M := M) g α ((Lp.stronglyMeasurable _).measurable)
-      (Lp.memLp _)).1
+      (Lp.memLp _)).aestronglyMeasurable
   have hu_n_memLp_w : ∀ n,
       MemLp (u_n_chart n) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -827,7 +821,7 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     intro n
     have h_w : AEStronglyMeasurable (u_n_chart n)
         ((chartPulledWeightedMeasure (I := I) g α).restrict
-          (chartTargetEuclid (I := I) (M := M) α)) := (hu_n_memLp_w n).1
+          (chartTargetEuclid (I := I) (M := M) α)) := (hu_n_memLp_w n).aestronglyMeasurable
     set ψ : EuclN → ℝ := fun y =>
         ((chartAtlasPOU I M α : M → ℝ)
           (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) *
@@ -916,22 +910,22 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     (Lp.stronglyMeasurable _).aestronglyMeasurable
   have hu_n_memLp : ∀ n, MemLp (u_n_chart n) 2 ((volume : Measure EuclN).restrict Ω) := by
     intro n
-    refine ⟨hu_n_aestrong n, ?_⟩
+    refine memLp_iff.mpr ?_
     refine lt_of_le_of_lt (hC_vol_Ω _) ?_
-    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top (hu_n_memLp_w n).2
+    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top (hu_n_memLp_w n).eLpNorm_lt_top
   have hu_lim_memLp : MemLp u_lim_chart 2 ((volume : Measure EuclN).restrict Ω) := by
-    refine ⟨hu_lim_aestrong, ?_⟩
+    refine memLp_iff.mpr ?_
     refine lt_of_le_of_lt (hC_vol_Ω _) ?_
-    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hu_lim_memLp_w.2
+    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hu_lim_memLp_w.eLpNorm_lt_top
   have hg_n_memLp : ∀ n, MemLp (g_n_chart n) 2 ((volume : Measure EuclN).restrict Ω) := by
     intro n
-    refine ⟨hg_n_aestrong n, ?_⟩
+    refine memLp_iff.mpr ?_
     refine lt_of_le_of_lt (hC_vol_Ω _) ?_
-    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top (hg_n_memLp_w n).2
+    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top (hg_n_memLp_w n).eLpNorm_lt_top
   have hg_lim_memLp : MemLp g_lim_chart 2 ((volume : Measure EuclN).restrict Ω) := by
-    refine ⟨hg_lim_aestrong, ?_⟩
+    refine memLp_iff.mpr ?_
     refine lt_of_le_of_lt (hC_vol_Ω _) ?_
-    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hg_lim_memLp_w.2
+    exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hg_lim_memLp_w.eLpNorm_lt_top
   have h_weak_n : ∀ n,
       Sobolev.Euclidean.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
         (g_n_chart n) (u_n_chart n) Ω := by

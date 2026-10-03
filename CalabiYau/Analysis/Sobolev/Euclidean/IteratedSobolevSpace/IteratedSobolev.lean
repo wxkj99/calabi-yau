@@ -34,7 +34,7 @@ theorem chosenWeakPartialOrZero_memLp_of_mem
     MemLp (chosenWeakPartialOrZero p i u Ω) p (volume.restrict Ω) := by
   classical
   unfold chosenWeakPartialOrZero
-  simp only [dif_pos h]
+  simp only [dite_eq_left h]
   exact (Sobolev.Euclidean.MemW1p.someWitness h).weakGrad_component_memLp i
 
 theorem chosenWeakPartialOrZero_isWeakPartial_of_mem
@@ -43,7 +43,7 @@ theorem chosenWeakPartialOrZero_isWeakPartial_of_mem
     Sobolev.Euclidean.HasWeakPartialDeriv i (chosenWeakPartialOrZero p i u Ω) u Ω := by
   classical
   unfold chosenWeakPartialOrZero
-  simp only [dif_pos h]
+  simp only [dite_eq_left h]
   exact (Sobolev.Euclidean.MemW1p.someWitness h).isWeakGrad i
 
 theorem chosenWeakPartialOrZero_of_not_mem
@@ -52,7 +52,7 @@ theorem chosenWeakPartialOrZero_of_not_mem
     chosenWeakPartialOrZero p i u Ω = 0 := by
   classical
   unfold chosenWeakPartialOrZero
-  simp only [dif_neg h]
+  simp only [dite_eq_right h]
 
 def MemWkp : ℕ → ℝ≥0∞ → (E → ℝ) → Set E → Prop
   | 0,     p, u, Ω => MemLp u p (volume.restrict Ω)
@@ -791,8 +791,6 @@ theorem wkpNorm_add_le
   have h_iter_add_ae :=
     iterWeakPartial_add_ae (d := d) hp hΩ α h_uWj h_vWj
   rw [eLpNorm_congr_ae h_iter_add_ae]
-  have h_iter_u := iterWeakPartial_memLp_of_memWkp (d := d) (p := p) h_uWj α
-  have h_iter_v := iterWeakPartial_memLp_of_memWkp (d := d) (p := p) h_vWj α
   have htriangle :
       eLpNorm (fun x => iterWeakPartial (d := d) p j α u Ω x +
         iterWeakPartial (d := d) p j α v Ω x)
@@ -800,7 +798,8 @@ theorem wkpNorm_add_le
       ≤ eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω) +
           eLpNorm (iterWeakPartial (d := d) p j α v Ω) p (volume.restrict Ω) := by
     have h := eLpNorm_add_le (μ := volume.restrict Ω) (p := p)
-      h_iter_u.aestronglyMeasurable h_iter_v.aestronglyMeasurable hp
+      (f := iterWeakPartial (d := d) p j α u Ω)
+      (g := iterWeakPartial (d := d) p j α v Ω) hp
     have hEq : (iterWeakPartial (d := d) p j α u Ω +
         iterWeakPartial (d := d) p j α v Ω) =
         fun x => iterWeakPartial (d := d) p j α u Ω x +

@@ -171,7 +171,12 @@ lemma eLpNorm_chartPushed_le_wkpNormChart
           ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
             (chartTargetEuclid (I := I) (M := M) α)))]
     rw [Sobolev.Euclidean.iterWeakPartial_zero]
-  exact hbound1.trans (ENNReal.le_tsum α)
+  exact hbound1.trans (ENNReal.le_tsum (f := fun β : M =>
+    Sobolev.Euclidean.iteratedWeakSobolevNorm
+      (d := Module.finrank ℝ E) 1 p
+      (chartPushed (I := I) (M := M)
+        (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β u)
+      (chartTargetEuclid (I := I) (M := M) β)) α)
 
 end Chart
 end Sobolev

@@ -163,7 +163,7 @@ private lemma Λgrad_apply_of_mem
       gradInnerCoefIM (I := I) (M := M) g α i
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0) = _
-  rw [if_pos h_target]
+  rw [ite_eq_left h_target]
 
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

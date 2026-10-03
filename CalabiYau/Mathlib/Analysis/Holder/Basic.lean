@@ -304,7 +304,7 @@ theorem continuousMultilinearMap_norm_le_sum_stdOrthonormalBasis
           (∏ i : Fin j, ‖m i‖) * ‖A (fun i => b (β i))‖ := by
       gcongr with β
       rw [Finset.abs_prod]
-      exact Finset.prod_le_prod (fun i _ => abs_nonneg _)
+      exact Finset.prod_le_prod₀ (fun i _ => abs_nonneg _)
         (fun i _ => orthonormal_repr_abs_le_norm b (m i) (β i))
     _ = C * ∏ i : Fin j, ‖m i‖ := by
       unfold C

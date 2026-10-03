@@ -520,10 +520,10 @@ private theorem heatLapTriangleIntegrand_aestronglyMeasurable
   by_cases hsr : z.1.2 < z.1.1
   · have hzD : z ∈ D := ⟨hzs, hsr⟩
     rw [Set.indicator_of_mem hzD]
-    simp only [heatLapTriangleIntegrand, if_pos hsr, g]
+    simp only [heatLapTriangleIntegrand, ite_eq_left hsr, g]
   · have hzD : z ∉ D := fun h => hsr h.2
     rw [Set.indicator_of_notMem hzD]
-    simp only [heatLapTriangleIntegrand, if_neg hsr]
+    simp only [heatLapTriangleIntegrand, ite_eq_right hsr]
 
 private theorem heatLapTriangle_aestronglyMeasurable_of_holder
     {alpha Csource : NNReal} (halpha0 : 0 < alpha)
@@ -548,9 +548,9 @@ private theorem heatLapTriangle_aestronglyMeasurable_of_holder
     apply hraw.congr
     filter_upwards with z
     by_cases hsr : z.2 < z.1
-    · simp only [heatLapTriangleIntegrand, if_pos hsr]
+    · simp only [heatLapTriangleIntegrand, ite_eq_left hsr]
       rfl
-    · simp only [heatLapTriangleIntegrand, if_neg hsr, integral_zero]
+    · simp only [heatLapTriangleIntegrand, ite_eq_right hsr, integral_zero]
   have hsum : AEStronglyMeasurable
       (fun z : Real × Real =>
         ∑ i : Fin (Module.finrank Real V), if z.2 < z.1 then
@@ -560,8 +560,8 @@ private theorem heatLapTriangle_aestronglyMeasurable_of_holder
   apply hsum.congr
   filter_upwards with z
   by_cases hsr : z.2 < z.1
-  · simp only [heatLapTriangle, heatLapSup, if_pos hsr]
-  · simp only [heatLapTriangle, if_neg hsr, Finset.sum_const_zero]
+  · simp only [heatLapTriangle, heatLapSup, ite_eq_left hsr]
+  · simp only [heatLapTriangle, ite_eq_right hsr, Finset.sum_const_zero]
 
 end
 
@@ -582,13 +582,13 @@ private theorem heatLapTriangleMajor_nonneg
     {alpha K : NNReal} (z : Real × Real) :
     0 ≤ heatLapTriangleMajor (V := V) alpha K z := by
   by_cases h : z.2 < z.1
-  · simp only [heatLapTriangleMajor, if_pos h]
+  · simp only [heatLapTriangleMajor, ite_eq_left h]
     exact mul_nonneg
       (mul_nonneg (Nat.cast_nonneg _)
         (mul_nonneg (NNReal.coe_nonneg K)
           (heatC2Holder_nonneg (V := V) alpha)))
       (Real.rpow_nonneg (sub_pos.mpr h).le _)
-  · simp only [heatLapTriangleMajor, if_neg h, le_refl]
+  · simp only [heatLapTriangleMajor, ite_eq_right h, le_refl]
 
 private theorem heatLapTriangleMajor_aestronglyMeasurable
     {alpha K : NNReal} {t : Real} :
@@ -619,10 +619,10 @@ private theorem heatLapTriangleMajor_aestronglyMeasurable
   by_cases hz : z ∈ A
   · have hz' : z.2 < z.1 := by simpa only [A, Set.mem_ofPred_eq] using hz
     rw [Set.indicator_of_mem hz]
-    simp only [heatLapTriangleMajor, if_pos hz', g]
+    simp only [heatLapTriangleMajor, ite_eq_left hz', g]
   · have hz' : ¬ z.2 < z.1 := by simpa only [A, Set.mem_ofPred_eq] using hz
     rw [Set.indicator_of_notMem hz]
-    simp only [heatLapTriangleMajor, if_neg hz']
+    simp only [heatLapTriangleMajor, ite_eq_right hz']
 
 private theorem integral_heatLapTriangleMajor_right
     {alpha K : NNReal} (halpha : 0 < alpha)
@@ -750,7 +750,7 @@ private theorem heatLapTriangle_integrable_of_aestronglyMeasurable
   by_cases hsr : z.2 < z.1
   · have hraw := heatLapSup_norm_le_of_holder halpha0 halpha1
       (sub_pos.mpr hsr) (hf z.2 ⟨hz.2.1.le, hz.2.2⟩) x
-    simpa only [heatLapTriangle, heatLapTriangleMajor, if_pos hsr] using
+    simpa only [heatLapTriangle, heatLapTriangleMajor, ite_eq_left hsr] using
       hraw.trans_eq (by ring)
   · simp [heatLapTriangle, heatLapTriangleMajor, hsr]
 

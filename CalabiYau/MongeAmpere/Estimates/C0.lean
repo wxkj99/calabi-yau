@@ -188,7 +188,7 @@ private theorem c0_centered_softplus_product_bound
     calc
       (∏ k ∈ Finset.range N, f k) ≤
           ∏ k ∈ Finset.range N, Real.exp (c0MomentLogMajorant (n := n) κ C_S k) := by
-        apply Finset.prod_le_prod
+        apply Finset.prod_le_prod₀
         · intro k hk
           dsimp [f]
           positivity

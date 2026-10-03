@@ -150,6 +150,7 @@ private theorem exists_fderiv_ddbar_bound_on_compact (φ : M → ℝ) (x₀ : M)
       (isOpen_extChartAt_target (I := 𝓘(ℝ, EuclideanSpace ℂ (Fin n))) x₀) (by simp)
   exact hK.exists_bound_of_continuousOn (hderiv.mono hKt)
 
+open scoped ComplexOrder in
 omit [T2Space M] [CompactSpace M] in
 private theorem exists_metricInvChart_entry_bound_on_compact
     (ω₀ : KahlerForm n M) (x₀ : M)
@@ -487,7 +488,7 @@ theorem exists_fderiv_ddbar_le_of_solvesMongeAmpere (ω₀ : KahlerForm n M)
                     (p.2 ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm)) z‖ ≤ c p := by
                 intro p hp z hz
                 dsimp [c]
-                rw [dif_pos hp]
+                rw [dite_eq_left hp]
                 exact (Classical.choose_spec (hEach p hp)) z hz
               have hc_finite : (c '' S).Finite := hS_finite.image c
               obtain ⟨C, hC⟩ := hc_finite.bddAbove
@@ -530,7 +531,7 @@ theorem exists_fderiv_ddbar_le_of_solvesMongeAmpere (ω₀ : KahlerForm n M)
                         (r.2 ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x₀).symm)) z‖ ≤ c r := by
                     intro r hr z hz
                     dsimp [c]
-                    rw [dif_pos hr]
+                    rw [dite_eq_left hr]
                     exact (Classical.choose_spec (hEach r hr)) z hz
                   have hc_finite : (c '' R).Finite := hR_finite.image c
                   obtain ⟨C, hC⟩ := hc_finite.bddAbove

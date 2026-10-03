@@ -157,6 +157,7 @@ private theorem smooth_finiteChartHolderGauge
     ENNReal.add_ne_top.mpr ⟨hsum, ENNReal.coe_ne_top⟩
   exact ne_top_of_le_ne_top htotal hle
 
+open scoped ComplexOrder in
 private theorem exists_metricInChartInverseEntryHolderBound
     {n : ℕ} {M : Type*} [TopologicalSpace M]
     [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
@@ -189,7 +190,7 @@ private theorem exists_metricInChartInverseEntryHolderBound
     · subst s
       simp only [Pi.single_apply]
       exact contDiffOn_const
-    · simp only [if_neg hrs]
+    · simp only [ite_eq_right hrs]
       exact hG_entry s t
   have hAdj_entry (a b : Fin n) :
       ContDiffOn ℝ ∞ (fun z => (G z).adjugate a b) U := by

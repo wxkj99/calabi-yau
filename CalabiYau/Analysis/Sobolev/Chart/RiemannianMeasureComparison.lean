@@ -665,6 +665,30 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_unifor
           rw [ENNReal.ofReal_coe_nnreal]
         · exact NNReal.coe_nonneg _
 
+omit [IsManifold I ∞ M] in
+private lemma aestronglyMeasurable_chartPushedRaw_restrict
+    (α : M) {u : M → ℝ} (hu : Measurable u) :
+    AEStronglyMeasurable (chartPushedRaw I α u)
+      ((volume : Measure (EuclN E)).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  let g : E → M := (extChartAt I α).target.piecewise
+    (fun y => (extChartAt I α).symm y) (fun _ => α)
+  have hg : Measurable g :=
+    ContinuousOn.measurable_piecewise
+      (continuousOn_extChartAt_symm (I := I) α) continuousOn_const
+      (extChartAt_target_measurableSet (I := I) (M := M) α)
+  have hcomp : Measurable (fun y : EuclN E => u (g ((toEuclidean (E := E)).symm y))) :=
+    hu.comp (hg.comp (toEuclidean (E := E)).symm.continuous.measurable)
+  refine hcomp.aestronglyMeasurable.restrict.congr ?_
+  filter_upwards [ae_restrict_mem
+    (chartTargetEuclid_measurableSet (I := I) (M := M) α)] with y hy
+  rw [chartPushedRaw_apply_of_mem (I := I) α u hy]
+  have htarget : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+    rcases hy with ⟨z, hz, rfl⟩
+    simpa using hz
+  simp only [g, Set.piecewise_eq_of_mem _ _ _ htarget]
+
 theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
     [T2Space M] [CompactSpace M]
     (g : CalabiYau.SmoothRiemannianMetric I M) (α : M)
@@ -690,6 +714,10 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
       (I := I) (M := M) g α hK_compact hK_ne hK_sub
   refine ⟨C ^ (1 / p.toReal), Real.rpow_pos_of_pos hC_pos _, ?_⟩
   intro u hu_meas hu_support hu_K
+  have hu_aem := hu_meas.aestronglyMeasurable (μ :=
+    CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
+      (CalabiYau.RiemannianVolume.chartAtlasPOU I M))
+  have hchart_aem := aestronglyMeasurable_chartPushedRaw_restrict (I := I) α hu_meas
   have h_lint := hC_bnd hu_meas hu_support hu_K hp_toReal_pos
   have h_lint' :
       ∫⁻ x, ‖u x‖ₑ ^ p.toReal
@@ -699,7 +727,7 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
             ∫⁻ y, ‖chartPushedRaw I α u y‖ₑ ^ p.toReal
               ∂((volume : Measure (EuclN E)).restrict
                 (chartTargetEuclid (I := I) (M := M) α)) := h_lint
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top hu_aem]
   have h_pow_le :
       (∫⁻ x, ‖u x‖ₑ ^ p.toReal
           ∂(CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
@@ -714,7 +742,7 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
     positivity
   refine h_pow_le.trans ?_
   rw [ENNReal.mul_rpow_of_nonneg _ _ (by positivity : (0 : ℝ) ≤ 1 / p.toReal)]
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top hchart_aem]
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
@@ -891,8 +919,12 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
       (I := I) (M := M) g α hK_compact hK_ne hK_sub
   refine ⟨C ^ (1 / p.toReal), Real.rpow_pos_of_pos hC_pos _, ?_⟩
   intro u hu_meas hu_support hu_K
+  have hu_aem := hu_meas.aestronglyMeasurable (μ :=
+    CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
+      (CalabiYau.RiemannianVolume.chartAtlasPOU I M))
+  have hchart_aem := aestronglyMeasurable_chartPushedRaw_restrict (I := I) α hu_meas
   have h_lint := hC_bnd hu_meas hu_support hu_K hp_toReal_pos
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top hchart_aem]
   have h_LHS_eq :
       (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
         ‖chartPushedRaw I α u y‖ₑ ^ p.toReal
@@ -915,7 +947,7 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
     positivity
   refine h_pow_le.trans ?_
   rw [ENNReal.mul_rpow_of_nonneg _ _ (by positivity : (0 : ℝ) ≤ 1 / p.toReal)]
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top hu_aem]
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 

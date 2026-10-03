@@ -76,7 +76,7 @@ lemma memLp_phi_mul_lp
   have hprod_aesm : AEStronglyMeasurable
       (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x)
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
-    hφ_aesm.mul hf_memLp.1
+    hφ_aesm.mul hf_memLp.aestronglyMeasurable
   have hpt : ∀ x : M, ‖(φ : M → ℝ) x * (f : M → ℝ) x‖ ≤
       C * ‖(f : M → ℝ) x‖ := by
     intro x
@@ -179,7 +179,7 @@ private lemma eLpNorm_smoothMulLp_le
         eLpNorm (f : M → ℝ) 2
           (riemannianVolumeMeasure (I := I) (M := M) g) := by
   refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (c := phiSupBound (I := I) (M := M) g φ)
-    (Filter.Eventually.of_forall ?_) 2
+    (memLp_phi_mul_lp g φ f).aestronglyMeasurable (Filter.Eventually.of_forall ?_) 2
   intro x
   have h1 : ‖(φ : M → ℝ) x * (f : M → ℝ) x‖ =
       |((φ : M → ℝ) x)| * ‖(f : M → ℝ) x‖ := by
@@ -208,7 +208,7 @@ theorem norm_smoothMulLpFun_le
   have h_le := eLpNorm_smoothMulLp_le (I := I) (M := M) g φ f
   have h_f_lt : eLpNorm (f : M → ℝ) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) < ⊤ :=
-    (Lp.memLp f).2
+    (Lp.memLp f).eLpNorm_lt_top
   have h_C_nn : 0 ≤ phiSupBound (I := I) (M := M) g φ :=
     phiSupBound_nonneg (I := I) (M := M) g φ
   have h_finite_ofReal : (ENNReal.ofReal (phiSupBound (I := I) (M := M) g φ)).toReal =

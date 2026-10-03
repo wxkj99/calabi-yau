@@ -181,13 +181,16 @@ private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
   have h_pt : ∀ x : EuN,
       ‖fderiv ℝ f x‖ ≤ ∑ i : Fin d, ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖ :=
     fun x => norm_fderiv_le_sum_norm_partials (d := d) f x
+  have h_aesm_fderiv : AEStronglyMeasurable (fderiv ℝ f) μ :=
+    (hf_smooth.continuous_fderiv (by simp)).aestronglyMeasurable
   have h_step1 : eLpNorm (fderiv ℝ f) p μ
-      = eLpNorm (fun x => ‖fderiv ℝ f x‖) p μ := (eLpNorm_norm _).symm
+      = eLpNorm (fun x => ‖fderiv ℝ f x‖) p μ :=
+    (eLpNorm_norm _ h_aesm_fderiv).symm
   rw [h_step1]
   have h_step2 : eLpNorm (fun x : EuN => ‖fderiv ℝ f x‖) p μ ≤
       eLpNorm
         (fun x : EuN => ∑ i : Fin d, ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖) p μ := by
-    apply eLpNorm_mono_real
+    apply eLpNorm_mono_real h_aesm_fderiv.norm
     intro x
     have h := h_pt x
     have h_norm : ‖‖fderiv ℝ f x‖‖ = ‖fderiv ℝ f x‖ :=
@@ -198,7 +201,7 @@ private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
   have h_sum_le := eLpNorm_sum_le (μ := μ) (p := p)
     (s := (Finset.univ : Finset (Fin d)))
     (f := fun i => fun x : EuN => ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖)
-    (fun i _ => (h_aesm_comp i).norm) hp_one
+    hp_one
   have h_lhs_eq :
       (fun x : EuN => ∑ i : Fin d, ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖) =
         ∑ i : Fin d, fun x : EuN => ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖ := by
@@ -208,7 +211,7 @@ private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
   refine h_sum_le.trans ?_
   apply Finset.sum_le_sum
   intro i _
-  rw [eLpNorm_norm]
+  rw [eLpNorm_norm _ (h_aesm_comp i)]
 
 private lemma eLpNorm_classical_partial_eq_chosen
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
@@ -485,7 +488,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
   have hφ_aesm : ∀ n, AEStronglyMeasurable (φ n) (volume.restrict Ω) :=
     fun n => (hφ_smooth n).continuous.aestronglyMeasurable
   have h_tim : TendstoInMeasure (volume.restrict Ω) φ atTop f := by
-    refine tendstoInMeasure_of_tendsto_eLpNorm hp_enn_ne_zero hφ_aesm hf_aesm ?_
+    refine tendstoInMeasure_of_tendsto_eLpNorm hp_enn_ne_zero ?_
     have h_neg_eq : ∀ n,
         eLpNorm (fun x => φ n x - f x) p_enn (volume.restrict Ω) =
           eLpNorm (fun x => f x - φ n x) p_enn (volume.restrict Ω) := by
@@ -502,7 +505,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     fun n => hφ_aesm (σ n)
   have h_fatou : eLpNorm f p_star (volume.restrict Ω) ≤
       atTop.liminf (fun n => eLpNorm (φ (σ n)) p_star (volume.restrict Ω)) :=
-    MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm h_aesm_subseq f hσ_ae
+    MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm h_aesm_subseq f hf_aesm hσ_ae
   set C : ℝ≥0∞ := ENNReal.ofReal (Sobolev.Euclidean.gagliardoNirenbergSobolevConstant d p) * (d : ℝ≥0∞) with hC_def
   set N : ℝ≥0∞ := Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := d) 1 p_enn f Ω with hN_def
@@ -875,7 +878,11 @@ private theorem perChart_eLpNorm_pStar_le
           (chartTargetEuclid (I := I) (M := M) α) ≤
         wkpNormChart (I := I) (M := M) 1 p_enn u := by
     unfold wkpNormChart
-    exact ENNReal.le_tsum α
+    exact ENNReal.le_tsum (f := fun β : M =>
+      Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) 1 p_enn
+        (chartPushed (I := I) (M := M)
+          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β u)
+        (chartTargetEuclid (I := I) (M := M) β)) α
   calc eLpNorm (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) p_star
           (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
             (CalabiYau.RiemannianVolume.chartAtlasPOU I M))
@@ -1002,20 +1009,6 @@ theorem sobolev_closed
       (CalabiYau.RiemannianVolume.chartAtlasPOU I M α : M → ℝ) x * u x
     exact chartAtlasPOU_pou_decomp_subcritical (I := I) (M := M) u x
   rw [h_eLpNorm_eq]
-  have h_aesm : ∀ α ∈ S,
-      AEStronglyMeasurable
-        (fun x : M =>
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-            : C^∞⟮I, M; ℝ⟯) x * u x)
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) := by
-    intro α _
-    have h_meas : Measurable (fun x : M =>
-        (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-          : C^∞⟮I, M; ℝ⟯) x * u x) :=
-      measurable_pou_mul_subcrit (I := I) (M := M)
-        (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α hu_meas
-    exact h_meas.aestronglyMeasurable
   have h_minkowski :
       eLpNorm (∑ α ∈ S, fun x : M =>
           (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
@@ -1028,7 +1021,7 @@ theorem sobolev_closed
               : C^∞⟮I, M; ℝ⟯) x * u x) p_star
           (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
             (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) :=
-    eLpNorm_sum_le h_aesm hp_star_one
+    eLpNorm_sum_le hp_star_one
   refine h_minkowski.trans ?_
   have h_each : ∀ α ∈ S,
       eLpNorm

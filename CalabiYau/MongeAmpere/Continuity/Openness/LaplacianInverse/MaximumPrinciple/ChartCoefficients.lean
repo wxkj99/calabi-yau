@@ -46,7 +46,7 @@ private theorem inverse_metric_entry_continuous
     · subst s
       simp only [Pi.single_apply]
       exact contDiffOn_const
-    · simp only [if_neg hrs]
+    · simp only [ite_eq_right hrs]
       exact hG s t
   have hAdj (a b : Fin n) : ContDiffOn ℝ ∞ (fun z ↦ (G z).adjugate a b) U := by
     simp_rw [Matrix.adjugate_apply, Matrix.det_apply']

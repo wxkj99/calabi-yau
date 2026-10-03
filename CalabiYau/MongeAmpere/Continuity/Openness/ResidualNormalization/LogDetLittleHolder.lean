@@ -986,7 +986,7 @@ theorem exists_littleHolderUncenteredResidual (ω₀ : KahlerForm n M) (F : M �
     by_cases hb : u = 0 ∧ δ = 0
     · rcases hb with ⟨rfl, rfl⟩
       simp [q, uncenteredContinuityPathResidual]
-    · simp only [q, dif_pos hu, dif_neg hb]
+    · simp only [q, dite_eq_left hu, dite_eq_right hb]
       exact Classical.choose_spec (exists_littleHolder_uncenteredValue ω₀ F hF t φ hsol α
         hα₀ hα₁ u δ (hpositive u hu)) x
   · simp [q, hradius]

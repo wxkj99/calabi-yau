@@ -180,7 +180,7 @@ private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
     change (if (toEuclidean (E := E)).symm z' ∈ (extChartAt I α).target then
           f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z'))
         else (0 : ℝ)) = _
-    rw [if_pos hz'_target]
+    rw [ite_eq_left hz'_target]
     rfl
   have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [Sobolev.Chart.chartTargetEuclid_eq_preimage_symm
@@ -344,7 +344,7 @@ private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
   rw [eLpNorm_congr_ae h_ae]
   refine h_step1.trans ?_
   gcongr
-  apply eLpNorm_mono
+  apply eLpNorm_mono hf_meas.aestronglyMeasurable
   intro x
   have h_abs_f : ‖f x‖ = |((ρ : M → ℝ) x) * u x| := Real.norm_eq_abs _
   have h_abs_u : ‖u x‖ = |u x| := Real.norm_eq_abs _
@@ -652,7 +652,8 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
           filter_upwards [h_nhds] with y hy
           exact image_eq_zero_of_notMem_tsupport hy
         have h_mfd_eq : mfderiv I 𝓘(ℝ, ℝ) f x = 0 := by
-          rw [heqz.mfderiv_eq]; exact mfderiv_const
+          rw [heqz.mfderiv_eq]
+          exact mfderiv_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ)) (x := x)
         exact CalabiYau.Riemannian.gradFun_eq_zero_of_mfderiv_eq_zero
           g f h_mfd_eq
       have h_grad_f_inner_zero : g.inner x
@@ -719,11 +720,11 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
         change (if (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target then
                   f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
                 else (0 : ℝ)) = 0
-        rw [if_pos hz_target, hf_zero]
+        rw [ite_eq_left hz_target, hf_zero]
       · change (if (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target then
                   f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
                 else (0 : ℝ)) = 0
-        rw [if_neg hz_target]
+        rw [ite_eq_right hz_target]
     have h_fderiv_zero : fderiv ℝ
         (Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α f) y = 0 := by
@@ -812,7 +813,8 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
         have heqz : f =ᶠ[𝓝 x] (fun _ : M => (0 : ℝ)) := by
           filter_upwards [h_nhds] with y' hy' using image_eq_zero_of_notMem_tsupport hy'
         have h_mfd_eq : mfderiv I 𝓘(ℝ, ℝ) f x = 0 := by
-          rw [heqz.mfderiv_eq]; exact mfderiv_const
+          rw [heqz.mfderiv_eq]
+          exact mfderiv_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ)) (x := x)
         exact CalabiYau.Riemannian.gradFun_eq_zero_of_mfderiv_eq_zero
           g f h_mfd_eq
       have h_sq := sq_fderiv_chartSmoothExt_apply_le_g_inner_mul (I := I) (M := M) g
@@ -926,7 +928,10 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
         Sobolev.Chart.chartPushedRaw I α v_α y) p
         ((volume : Measure EuclN_E).restrict
           (Sobolev.Chart.chartTargetEuclid
-            (I := I) (M := M) α)) := eLpNorm_mono_real h_pt
+            (I := I) (M := M) α)) := eLpNorm_mono_real
+              (((contDiff_chartSmoothExt_pou_mul_local_reverse
+                (I := I) (M := M) α hu).continuous_fderiv (by simp)).clm_apply
+                  continuous_const).aestronglyMeasurable h_pt
   refine h_eLp_le.trans ?_
   have h_pull_K : eLpNorm (fun y : EuclN_E => K *
       Sobolev.Chart.chartPushedRaw I α v_α y) p
@@ -976,17 +981,8 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
             (CalabiYau.Riemannian.gradFun (I := I) g u x)
             (CalabiYau.Riemannian.gradFun (I := I) g u x))) p
         (CalabiYau.RiemannianVolume.riemannianVolumeMeasure I M g) := by
-    refine (eLpNorm_mono_real h_v_α_le).trans ?_
-    have h_aesm_u : AEStronglyMeasurable (fun x : M => |u x|)
-        (CalabiYau.RiemannianVolume.riemannianVolumeMeasure I M g) :=
-      hu.continuous.measurable.abs.aestronglyMeasurable
-    have h_aesm_grad : AEStronglyMeasurable (fun x : M => Real.sqrt
-        (g.inner x
-          (CalabiYau.Riemannian.gradFun (I := I) g u x)
-          (CalabiYau.Riemannian.gradFun (I := I) g u x)))
-        (CalabiYau.RiemannianVolume.riemannianVolumeMeasure I M g) :=
-      (continuous_sqrt_g_inner_gradFun_self (I := I) (M := M) g hu).aestronglyMeasurable
-    refine (eLpNorm_add_le h_aesm_u h_aesm_grad hp_one).trans ?_
+    refine (eLpNorm_mono_real hv_α_meas.aestronglyMeasurable h_v_α_le).trans ?_
+    refine (eLpNorm_add_le hp_one).trans ?_
     have h_eLp_u_eq : eLpNorm (fun x : M => |u x|) p
         (CalabiYau.RiemannianVolume.riemannianVolumeMeasure I M g) =
         eLpNorm u p
@@ -994,7 +990,7 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
       have h_eq : (fun x : M => |u x|) = fun x : M => ‖u x‖ := by
         funext x; rw [Real.norm_eq_abs]
       rw [h_eq]
-      exact eLpNorm_norm u
+      exact eLpNorm_norm u hu.continuous.aestronglyMeasurable
     rw [h_eLp_u_eq]
   calc ENNReal.ofReal K *
         eLpNorm (Sobolev.Chart.chartPushedRaw I α v_α) p

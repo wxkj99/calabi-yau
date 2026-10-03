@@ -164,7 +164,7 @@ private theorem exists_metricInChartInverseEntryHolderBound
     · subst s
       simp only [Pi.single_apply]
       exact contDiffOn_const
-    · simp only [if_neg hrs]
+    · simp only [ite_eq_right hrs]
       exact hG_entry s t
   have hAdj_entry (a b : Fin n) :
       ContDiffOn ℝ ∞ (fun z => (G z).adjugate a b) U := by

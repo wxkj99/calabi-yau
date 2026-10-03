@@ -68,12 +68,12 @@ theorem summable_norm_sq_coeff_div_laplacianEigenvalueOf
     (hsum_w.mul_left ((c₀⁻¹) ^ 2))
   by_cases h0 : laplacianEigenvalueOf i.1.val = 0
   · have hzero : (if laplacianEigenvalueOf i.1.val = 0 then 0
-        else -(⟪b i, w⟫_ℝ) / laplacianEigenvalueOf i.1.val) = 0 := if_pos h0
+        else -(⟪b i, w⟫_ℝ) / laplacianEigenvalueOf i.1.val) = 0 := ite_eq_left h0
     rw [hzero, norm_zero]
     simpa using mul_nonneg (sq_nonneg (c₀⁻¹)) (sq_nonneg (⟪b i, w⟫_ℝ))
   · have hne : (if laplacianEigenvalueOf i.1.val = 0 then 0
         else -(⟪b i, w⟫_ℝ) / laplacianEigenvalueOf i.1.val) =
-        -(⟪b i, w⟫_ℝ) / laplacianEigenvalueOf i.1.val := if_neg h0
+        -(⟪b i, w⟫_ℝ) / laplacianEigenvalueOf i.1.val := ite_eq_right h0
     rw [hne]
     have hpos := laplacianEigenvalueOf_pos_of_ne_zero (I := I) (M := M) i.1 h0
     have hgap_i := hgap _ (mem_nonzeroLaplacianEigenvalueSet_of_laplacianEigenvalueOf_ne_zero
@@ -119,11 +119,11 @@ theorem exists_laplacianDomain_laplacianOp_eq_of_inner_eigenbasis_eq_zero
     intro i
     rw [hu_coeff i]
     by_cases h0 : laplacianEigenvalueOf i.1.val = 0
-    · have hci : c i = 0 := by simp only [hc]; rw [if_pos h0]
+    · have hci : c i = 0 := by simp only [hc]; rw [ite_eq_left h0]
       rw [hci, hw i h0, h0]
       ring
     · have hci : c i = -(⟪b i, w⟫_ℝ) / laplacianEigenvalueOf i.1.val := by
-        simp only [hc]; rw [if_neg h0]
+        simp only [hc]; rw [ite_eq_right h0]
       rw [hci]
       field_simp
   obtain ⟨u_h, -, hlap⟩ :=

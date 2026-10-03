@@ -123,7 +123,8 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     have h_lintegral_eq :
         ∫⁻ x, ‖Y x * (ψ_n n x - ψ x)‖ₑ ∂μ =
           eLpNorm (fun x => (ψ_n n x - ψ x) * Y x) 1 μ := by
-      rw [eLpNorm_one_eq_lintegral_enorm]
+      rw [eLpNorm_one_eq_lintegral_enorm (f := fun x => (ψ_n n x - ψ x) * Y x)
+        ((h_diff_lp n).aestronglyMeasurable.mul hY.aestronglyMeasurable)]
       refine lintegral_congr (fun x => ?_)
       simp [enorm_mul, mul_comm]
     have h_smul_bound :
@@ -135,8 +136,8 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
         funext x
         simp [smul_eq_mul]
       rw [h_mul_eq]
-      exact eLpNorm_smul_le_mul_eLpNorm hY.aestronglyMeasurable
-        (h_diff_lp n).aestronglyMeasurable
+      exact eLpNorm_smul_le_mul_eLpNorm (h_diff_lp n).aestronglyMeasurable
+        hY.aestronglyMeasurable
     calc
       ENNReal.ofReal |∫ x, Y x * (ψ_n n x - ψ x) ∂μ|
           ≤ ∫⁻ x, ‖Y x * (ψ_n n x - ψ x)‖ₑ ∂μ := h_abs_le_lintegral

@@ -150,11 +150,10 @@ theorem sobolev_lpNorm
       (ENNReal.add_ne_top.2
         ⟨hu_mem.eLpNorm_ne_top, hgrad_mem.eLpNorm_ne_top⟩)
   have hreal := ENNReal.toReal_mono hright_ne (hSob hu)
-  simpa only [q, μ, gradNorm, ENNReal.toReal_mul, ENNReal.toReal_add,
+  simpa only [q, μ, gradNorm, ENNReal.toReal_mul,
       ENNReal.toReal_ofReal hC,
       ENNReal.toReal_add hu_mem.eLpNorm_ne_top hgrad_mem.eLpNorm_ne_top,
-      toReal_eLpNorm hu.continuous.aestronglyMeasurable,
-      toReal_eLpNorm hgrad_cont.aestronglyMeasurable] using hreal
+      toReal_eLpNorm] using hreal
 
 theorem sobolev_two_lpNorm
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

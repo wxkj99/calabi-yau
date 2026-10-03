@@ -223,7 +223,7 @@ private lemma update_castAdd_first
   by_cases hk : k = i
   · subst hk
     simp
-  · rw [if_neg hk, if_neg]
+  · rw [ite_eq_right hk, ite_eq_right]
     intro h
     exact hk (Fin.castAdd_injective r s h.symm).symm
 
@@ -235,7 +235,7 @@ private lemma update_castAdd_first_noop_last
   classical
   funext j
   rw [Function.update_apply]
-  rw [if_neg (natAdd_ne_castAdd j i)]
+  rw [ite_eq_right (natAdd_ne_castAdd j i)]
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E] in
 private lemma update_natAdd_last_noop_first
@@ -245,7 +245,7 @@ private lemma update_natAdd_last_noop_first
   classical
   funext k
   rw [Function.update_apply]
-  rw [if_neg (castAdd_ne_natAdd k j)]
+  rw [ite_eq_right (castAdd_ne_natAdd k j)]
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E] in
 private lemma update_natAdd_last
@@ -258,7 +258,7 @@ private lemma update_natAdd_last
   by_cases hk : k = j
   · subst hk
     simp
-  · rw [if_neg hk, if_neg]
+  · rw [ite_eq_right hk, ite_eq_right]
     intro h
     exact hk (Fin.natAdd_injective s r h.symm).symm
 
@@ -417,7 +417,7 @@ private lemma lowerAllUpperIndicesML_norm_bound
     rw [h_mkPi] at h₁
     rw [one_mul] at h₁
     refine h₁.trans ?_
-    refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) ?_
+    refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) ?_
     intro i _
     exact (modelInnerAt (I := I) (M := M) g x).le_opNorm (v (Fin.castAdd s i))
   calc ‖T α (fun j : Fin s => v (Fin.natAdd r j))‖

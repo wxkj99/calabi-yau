@@ -156,11 +156,9 @@ private theorem aestronglyMeasurable_euclidean_of_components
 omit [NeZero d] in
 private theorem tendstoInMeasure_of_eLpNorm_tendsto
     {q : ℝ≥0∞} (hq : q ≠ 0) {f : ℕ → E → ℝ} {g : E → ℝ}
-    (hf : ∀ n, AEStronglyMeasurable (f n) volume)
-    (hg : AEStronglyMeasurable g volume)
     (h : Tendsto (fun n => eLpNorm (fun x => f n x - g x) q volume) atTop (nhds 0)) :
     TendstoInMeasure volume f atTop g :=
-  tendstoInMeasure_of_tendsto_eLpNorm hq hf hg h
+  tendstoInMeasure_of_tendsto_eLpNorm hq h
 
 omit [NeZero d] in
 private theorem partialDiff_aestronglyMeasurable
@@ -236,7 +234,7 @@ private theorem gradVec_eLpNorm_le_sum
         eLpNorm (fun x => ‖δ i x‖) (ENNReal.ofReal p) volume =
           eLpNorm (δ i) (ENNReal.ofReal p) volume := by
     intro i
-    simpa using (eLpNorm_norm (f := δ i) (p := ENNReal.ofReal p) (μ := volume))
+    simpa using (eLpNorm_norm (f := δ i) (p := ENNReal.ofReal p) (μ := volume) (hδ_aesm i))
   have hPointwise :
       ∀ᵐ x ∂volume,
         ‖WithLp.toLp 2 (fun i => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) - G x‖ ≤
@@ -267,16 +265,17 @@ private theorem gradVec_eLpNorm_le_sum
       eLpNorm
         (fun x => ∑ i : Fin d, ‖δ i x‖)
         (ENNReal.ofReal p) volume := by
-          exact eLpNorm_mono_ae_real hPointwise
+          refine eLpNorm_mono_ae_real ?_ hPointwise
+          apply aestronglyMeasurable_euclidean_of_components
+          intro i
+          simpa [δ] using hδ_aesm i
     _ ≤ ∑ i : Fin d,
           eLpNorm (fun x => ‖δ i x‖) (ENNReal.ofReal p) volume := by
         have hp_enn : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
           rwa [← ENNReal.ofReal_one, ENNReal.ofReal_le_ofReal_iff (by linarith)]
-        convert eLpNorm_sum_le (s := Finset.univ) (f := fun i => fun x => ‖δ i x‖)
-          (fun i _ => (hδ_aesm i).norm) hp_enn using 1
-        congr 1
-        ext x
-        simp [Finset.sum_apply]
+        simpa only [Finset.sum_fn] using
+          eLpNorm_sum_le (μ := volume) (s := Finset.univ)
+            (f := fun i => fun x => ‖δ i x‖) hp_enn
     _ = ∑ i : Fin d,
           eLpNorm (δ i) (ENNReal.ofReal p) volume := by
         congr 1
@@ -317,11 +316,11 @@ theorem sobolev_of_approx {p : ℝ} (hp : 1 ≤ p) (hpd : p < (d : ℝ))
     rw [hp_enn_def, ← ENNReal.ofReal_one]
     exact ENNReal.ofReal_le_ofReal hp
   have hTIM : TendstoInMeasure volume φ atTop u :=
-    tendstoInMeasure_of_eLpNorm_tendsto hp_ne hφ_aesm hu_aesm hφ_fun
+    tendstoInMeasure_of_eLpNorm_tendsto hp_ne hφ_fun
   obtain ⟨σ, hσ_mono, hσ_ae⟩ := hTIM.exists_seq_tendsto_ae
   have hFatou : eLpNorm u p_star volume ≤
       atTop.liminf (fun n => eLpNorm (φ (σ n)) p_star volume) :=
-    Lp.eLpNorm_lim_le_liminf_eLpNorm (fun n => hφ_aesm (σ n)) u hσ_ae
+    Lp.eLpNorm_lim_le_liminf_eLpNorm (fun n => hφ_aesm (σ n)) u hu_aesm hσ_ae
   let gradVec : ℕ → E → E := fun n x =>
     WithLp.toLp 2 (fun i => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
   have hBridge : ∀ n, (fun x => ‖fderiv ℝ (φ n) x‖) =ᵐ[volume]
@@ -338,7 +337,8 @@ theorem sobolev_of_approx {p : ℝ} (hp : 1 ≤ p) (hpd : p < (d : ℝ))
         ≤ C * eLpNorm (fderiv ℝ (φ n)) p_enn volume := hGNS n
       _ = C * eLpNorm (fun x => ‖gradVec n x‖) p_enn volume := by
           congr 1
-          rw [← eLpNorm_norm (fderiv ℝ (φ n))]
+          rw [← eLpNorm_norm (fderiv ℝ (φ n))
+            ((hφ_smooth n).continuous_fderiv (by simp)).aestronglyMeasurable]
           exact eLpNorm_congr_ae (hBridge n)
   have hGradDiffTendstoZero : Tendsto
       (fun n => eLpNorm (fun x => gradVec n x - G x) p_enn volume) atTop (nhds 0) := by
@@ -390,18 +390,10 @@ theorem sobolev_of_approx {p : ℝ} (hp : 1 ≤ p) (hpd : p < (d : ℝ))
       have hNormDiff :
           eLpNorm (fun x => ‖gradVec (σ n) x‖ - ‖G x‖) p_enn volume ≤
             eLpNorm (fun x => gradVec (σ n) x - G x) p_enn volume := by
-        calc
-          eLpNorm (fun x => ‖gradVec (σ n) x‖ - ‖G x‖) p_enn volume
-              = eLpNorm (fun x => |‖gradVec (σ n) x‖ - ‖G x‖|) p_enn volume := by
-                  simpa [Real.norm_eq_abs] using
-                    (eLpNorm_norm
-                      (f := fun x => ‖gradVec (σ n) x‖ - ‖G x‖)
-                      (p := p_enn) (μ := volume)).symm
-          _ ≤ eLpNorm (fun x => gradVec (σ n) x - G x) p_enn volume := by
-                refine eLpNorm_mono_ae ?_
-                filter_upwards with x
-                simpa [Real.norm_eq_abs] using
-                  (abs_norm_sub_norm_le (gradVec (σ n) x) (G x))
+        apply eLpNorm_mono_ae hGradNormAesm
+        filter_upwards with x
+        simpa [Real.norm_eq_abs] using
+          (abs_norm_sub_norm_le (gradVec (σ n) x) (G x))
       calc
         eLpNorm (fun x => ‖gradVec (σ n) x‖) p_enn volume
             = eLpNorm (fun x => (‖gradVec (σ n) x‖ - ‖G x‖) + ‖G x‖) p_enn volume := by
@@ -410,7 +402,7 @@ theorem sobolev_of_approx {p : ℝ} (hp : 1 ≤ p) (hpd : p < (d : ℝ))
                 ring
         _ ≤ eLpNorm (fun x => ‖gradVec (σ n) x‖ - ‖G x‖) p_enn volume +
               eLpNorm (fun x => ‖G x‖) p_enn volume := by
-                exact eLpNorm_add_le hGradNormAesm hGnorm_aesm hp_one_enn
+                exact eLpNorm_add_le hp_one_enn
         _ ≤ eLpNorm (fun x => gradVec (σ n) x - G x) p_enn volume +
               eLpNorm (fun x => ‖G x‖) p_enn volume := by
                 exact add_le_add hNormDiff le_rfl
@@ -474,5 +466,28 @@ theorem sobolev_of_approx {p : ℝ} (hp : 1 ≤ p) (hpd : p < (d : ℝ))
               hu_phi hv_grad
       _ ≤ C * eLpNorm (fun x => ‖G x‖) p_enn volume := hGradBound
   exact le_trans hFatou hBound
+
+/-- The `p`-th power of the `L^p` seminorm as a lower Lebesgue integral of `‖f‖ ^ p`. -/
+theorem lintegral_rpow_norm_eq_eLpNorm_pow
+    {α F : Type*} [MeasurableSpace α] [NormedAddCommGroup F]
+    {μ : Measure α} {p : ℝ} (hp : 0 < p) {f : α → F} (hf : AEStronglyMeasurable f μ) :
+    ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ = eLpNorm f (ENNReal.ofReal p) μ ^ p := by
+  let pnn : ℝ≥0 := Real.toNNReal p
+  have hpnn0 : pnn ≠ 0 := by
+    intro hzero
+    have hp_nonpos : p ≤ 0 := Real.toNNReal_eq_zero.mp hzero
+    linarith
+  have hpnn_real : (pnn : ℝ) = p := by
+    simp [pnn, Real.toNNReal_of_nonneg (le_of_lt hp)]
+  have hpnn_enn : (pnn : ℝ≥0∞) = ENNReal.ofReal p := by
+    change (Real.toNNReal p : ℝ≥0∞) = ENNReal.ofReal p
+    rfl
+  calc
+    ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ
+      = ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ (pnn : ℝ) ∂μ := by simp [hpnn_real]
+    _ = eLpNorm f (pnn : ℝ≥0∞) μ ^ (pnn : ℝ) := by
+      simpa using
+        (MeasureTheory.eLpNorm_nnreal_pow_eq_lintegral (μ := μ) (f := f) (p := pnn) hpnn0 hf).symm
+    _ = eLpNorm f (ENNReal.ofReal p) μ ^ p := by simp [hpnn_real, hpnn_enn]
 
 end Sobolev.Euclidean

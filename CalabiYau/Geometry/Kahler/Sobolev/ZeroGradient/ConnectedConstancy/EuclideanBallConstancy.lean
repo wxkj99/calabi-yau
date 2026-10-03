@@ -80,17 +80,8 @@ private theorem ae_eq_average_on_unit_ball_of_zero_distributional_derivative
               (MeasureTheory.volume.restrict (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) := hpoincare
         _ = 0 := by rw [hgrad_norm]; simp
     · exact bot_le
-  have hdist_mem : MemLp
-      (fun x => u x - ⨍ y in Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1,
-        u y ∂MeasureTheory.volume)
-      (ENNReal.ofReal 2)
-      (MeasureTheory.volume.restrict (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) := by
-    let : IsFiniteMeasure (MeasureTheory.volume.restrict
-        (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) :=
-      ⟨by rw [Measure.restrict_apply_univ]; exact measure_ball_lt_top.lt_top⟩
-    exact hu.sub (memLp_const _)
   have hp_ne_zero : ENNReal.ofReal (2 : ℝ) ≠ 0 := by norm_num
-  have haezero := (eLpNorm_eq_zero_iff hdist_mem.aestronglyMeasurable hp_ne_zero).mp hdist_norm
+  have haezero := (eLpNorm_eq_zero_iff hp_ne_zero).mp hdist_norm
   exact haezero.mono fun x hx => by simpa [sub_eq_zero] using hx
 
 /-- Positive affine scaling carries the unit ball onto the ball centered at `q`. -/
@@ -180,7 +171,7 @@ private theorem measure_map_affine_smul
         (MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d)))) := by rw [hscale]
     _ = ENNReal.ofReal ((r ^ d)⁻¹) •
         (MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))) := by
-      rw [Measure.map_smul, htrans.map_eq]
+      rw [Measure.map_smul _ htrans.measurable.aemeasurable, htrans.map_eq]
 
 /-- Pull a compactly supported smooth unit-ball test function back to the translated ball. -/
 private theorem affine_pullback_test_is_admissible

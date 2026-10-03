@@ -368,7 +368,7 @@ theorem MemW1pIntrinsic.eLpNorm_lt_top
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsic (I := I) (M := M) g p u) :
     eLpNorm u p (riemannianVolumeMeasure I M g) < ⊤ :=
-  h.memLp_self.2
+  h.memLp_self.eLpNorm_lt_top
 
 end Intrinsic
 end Sobolev

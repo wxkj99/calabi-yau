@@ -42,10 +42,8 @@ theorem exists_uniform_holderBoundOn_complexHessian_family_of_succ_succ
         iteratedFDeriv ℝ j (fun z ↦ fderiv ℝ f z v) z =
           T.compContinuousMultilinearMap (iteratedFDeriv ℝ j (fderiv ℝ f) z) := by
       have hfz : ContDiffAt ℝ ∞ f z := hf.contDiffAt (hU.mem_nhds (hKU hz))
-      have hkTop : (↑(k + 1) : ℕ∞ω) ≤ ∞ := by
-        exact_mod_cast (show ((k + 1 : ℕ) : ℕ∞) ≤ ⊤ from le_top)
       have hfd : ContDiffAt ℝ k (fderiv ℝ f) z :=
-        hfz.fderiv_right (by simpa using hkTop)
+        hfz.fderiv_right (by simp)
       change iteratedFDeriv ℝ j (T ∘ fderiv ℝ f) z = _
       simpa [T, Function.comp_apply, ContinuousLinearMap.apply_apply] using
         T.iteratedFDeriv_comp_left hfd (i := j) (by exact_mod_cast hj)

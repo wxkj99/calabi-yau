@@ -93,7 +93,6 @@ private theorem directionalQuotient_lipschitzWith
       ((hf _).hasFDerivAt.comp_hasDerivAt t hpy) using 1
     · funext r
       rfl
-    · rfl
   have hgB (t : ℝ) :
       ‖(fderiv ℝ f (x + t • v) - fderiv ℝ f (y + t • v)) v‖ ≤
         ((B : ℝ) * ‖x - y‖) * ‖v‖ := by

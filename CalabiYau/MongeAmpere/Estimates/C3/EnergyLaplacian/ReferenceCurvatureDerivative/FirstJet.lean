@@ -318,8 +318,7 @@ private theorem auxiliaryWirtinger_comm_at {n : ℕ} (s t : ℂ)
   let eq : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single q 1
   have hs : IsSymmSndFDerivAt ℝ F z :=
     hF.isSymmSndFDerivAt
-      (by simpa [minSmoothness_of_isRCLikeNormedField] using
-        (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2))
+      (by simp [minSmoothness_of_isRCLikeNormedField])
   change (fderiv ℝ (fun w => auxiliaryWirtinger t F w q) z ep +
     s * fderiv ℝ (fun w => auxiliaryWirtinger t F w q) z (Complex.I • ep)) / 2 =
     (fderiv ℝ (fun w => auxiliaryWirtinger s F w p) z eq +

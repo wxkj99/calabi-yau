@@ -1047,44 +1047,14 @@ theorem tendsto_eLpNorm_translate_sub_of_memLp
   have hG_eq : G = fun x => A x + B x + C x := by
     funext x; simp only [G, A, B, C]; ring
   have hf_aem : AEStronglyMeasurable f volume := hf.aestronglyMeasurable
-  have hf_aem_h : AEStronglyMeasurable (fun x => f (x - h)) volume := by
-    have hMP : MeasurePreserving (fun x : E => x - h) volume volume := by
-      have h_neg : MeasurePreserving (fun x : E => x + (-h)) volume volume :=
-        measurePreserving_add_right volume (-h)
-      have heq : (fun x : E => x - h) = (fun x : E => x + (-h)) := by
-        funext t; rw [sub_eq_add_neg]
-      rw [heq]
-      exact h_neg
-    exact hf_aem.comp_measurePreserving hMP
   have hg_aem : AEStronglyMeasurable g volume :=
     hg_smooth.continuous.aestronglyMeasurable
-  have hg_aem_h : AEStronglyMeasurable (fun x => g (x - h)) volume := by
-    have hMP : MeasurePreserving (fun x : E => x - h) volume volume := by
-      have h_neg : MeasurePreserving (fun x : E => x + (-h)) volume volume :=
-        measurePreserving_add_right volume (-h)
-      have heq : (fun x : E => x - h) = (fun x : E => x + (-h)) := by
-        funext t; rw [sub_eq_add_neg]
-      rw [heq]
-      exact h_neg
-    exact hg_aem.comp_measurePreserving hMP
-  have hA_aem : AEStronglyMeasurable A volume := hf_aem_h.sub hg_aem_h
-  have hB_aem : AEStronglyMeasurable B volume := hg_aem_h.sub hg_aem
-  have hC_aem : AEStronglyMeasurable C volume := hg_aem.sub hf_aem
-  have hAB_aem : AEStronglyMeasurable (fun x => A x + B x) volume := hA_aem.add hB_aem
   have h_triangle1 : eLpNorm (fun x => A x + B x + C x) p volume
       ≤ eLpNorm (fun x => A x + B x) p volume + eLpNorm C p volume := by
-    have := eLpNorm_add_le (μ := (volume : Measure E)) (p := p) hAB_aem hC_aem hp_one
-    have heq : ((fun x => A x + B x) + (fun x : E => C x)) =
-        fun x => A x + B x + C x := by funext x; rfl
-    rw [heq] at this
-    exact this
+    exact eLpNorm_add_le hp_one
   have h_triangle2 : eLpNorm (fun x => A x + B x) p volume
       ≤ eLpNorm A p volume + eLpNorm B p volume := by
-    have := eLpNorm_add_le (μ := (volume : Measure E)) (p := p) hA_aem hB_aem hp_one
-    have heq : ((fun x : E => A x) + (fun x => B x)) =
-        fun x => A x + B x := by funext x; rfl
-    rw [heq] at this
-    exact this
+    exact eLpNorm_add_le hp_one
   have hA_norm : eLpNorm A p volume = eLpNorm (fun x => f x - g x) p volume := by
     have hMP : MeasurePreserving (fun x : E => x - h) volume volume := by
       have h_neg : MeasurePreserving (fun x : E => x + (-h)) volume volume :=

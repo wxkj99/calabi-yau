@@ -702,8 +702,6 @@ private theorem limit_identification_of_h1_tendsto
     (hH1 : Tendsto (fun n => smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h))
     (F_lim : EuclN → ℝ)
-    (hF : MemWkp (d := Module.finrank ℝ E) m 2 F_lim
-      (chartTargetEuclid (I := I) (M := M) α))
     (hF_lim : Tendsto (fun n =>
       _root_.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
@@ -723,44 +721,27 @@ private theorem limit_identification_of_h1_tendsto
       ((volume : Measure EuclN).restrict Ω)) atTop (𝓝 0) :=
     eLpNorm_tendsto_zero_of_wkpNorm_tendsto_zero (m := m) (u := F)
       (F_lim := F_lim) (Ω := Ω) (by simpa [F, Ω] using hF_lim)
-  have hF_lim_aesm : AEStronglyMeasurable F_lim
-      ((volume : Measure EuclN).restrict Ω) := hF.memLp.aestronglyMeasurable
-  have hF_seq_aesm : ∀ n, AEStronglyMeasurable (F n)
-      ((volume : Measure EuclN).restrict Ω) := by
-    intro n
-    exact residual_aestronglyMeasurable_volume (I := I) (M := M) g α (v n) _
   have h_vol_measure : TendstoInMeasure ((volume : Measure EuclN).restrict Ω)
       F atTop F_lim :=
     MeasureTheory.tendstoInMeasure_of_tendsto_eLpNorm
       (μ := (volume : Measure EuclN).restrict Ω) (p := 2)
-      (by norm_num : (2 : ℝ≥0∞) ≠ 0) hF_seq_aesm hF_lim_aesm h_eLp_volume
+      (by norm_num : (2 : ℝ≥0∞) ≠ 0) h_eLp_volume
   obtain ⟨σ, hσ_strict, hσ_ae⟩ := h_vol_measure.exists_seq_tendsto_ae
   have h_weighted : Tendsto (fun n => eLpNorm
       (fun y => F n y - fChartResidual (I := I) (M := M) g α u_h y) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict Ω)) atTop (𝓝 0) :=
     CalabiYau.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual_tendsto_fChartResidual_lp_weighted
       (I := I) (M := M) g α v hH1
-  have h_f_ae : AEStronglyMeasurable
-      (fChartResidual (I := I) (M := M) g α u_h)
-      ((chartPulledWeightedMeasure (I := I) g α).restrict Ω) :=
-    fChartResidual_aestronglyMeasurable_weighted (I := I) (M := M) g α u_h _
-  have hF_weighted_aesm : ∀ n, AEStronglyMeasurable (F n)
-      ((chartPulledWeightedMeasure (I := I) g α).restrict Ω) := by
-    intro n
-    exact residual_aestronglyMeasurable_volume (I := I) (M := M) g α (v n) _
   have h_weighted_sigma : Tendsto (fun n => eLpNorm
       (fun y => F (σ n) y - fChartResidual (I := I) (M := M) g α u_h y) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict Ω)) atTop (𝓝 0) :=
     h_weighted.comp hσ_strict.tendsto_atTop
-  have hF_weighted_sigma_aesm : ∀ n, AEStronglyMeasurable (F (σ n))
-      ((chartPulledWeightedMeasure (I := I) g α).restrict Ω) :=
-    fun n => hF_weighted_aesm (σ n)
   have h_weighted_measure : TendstoInMeasure
       ((chartPulledWeightedMeasure (I := I) g α).restrict Ω)
       (fun n => F (σ n)) atTop (fChartResidual (I := I) (M := M) g α u_h) :=
     MeasureTheory.tendstoInMeasure_of_tendsto_eLpNorm
       (μ := (chartPulledWeightedMeasure (I := I) g α).restrict Ω) (p := 2)
-      (by norm_num : (2 : ℝ≥0∞) ≠ 0) hF_weighted_sigma_aesm h_f_ae h_weighted_sigma
+      (by norm_num : (2 : ℝ≥0∞) ≠ 0) h_weighted_sigma
   obtain ⟨τ, hτ_strict, hτ_ae⟩ := h_weighted_measure.exists_seq_tendsto_ae
   have h_vol_ac : (volume : Measure EuclN).restrict Ω ≪
       (chartPulledWeightedMeasure (I := I) g α).restrict Ω :=
@@ -788,7 +769,6 @@ theorem smoothFChartResidual_limit_eq_fChartResidual_of_approx
       (fun x => ((h1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x - (v n).toFun x) ≤
         ENNReal.ofReal (1 / ((n : ℝ) + 1)))
     (F_lim : EuclN → ℝ)
-    (hF : MemWkp (d := Module.finrank ℝ E) m 2 F_lim (chartTargetEuclid (I := I) (M := M) α))
     (hF_lim : Tendsto (fun n =>
       iteratedWeakSobolevNorm (d := Module.finrank ℝ E) m 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
@@ -799,6 +779,6 @@ theorem smoothFChartResidual_limit_eq_fChartResidual_of_approx
       atTop (𝓝 u_h) :=
     bridge (I := I) (M := M) g m hu v hv
   exact limit_identification_of_h1_tendsto (I := I) (M := M) g α m v hH1
-    F_lim hF hF_lim
+    F_lim hF_lim
 
 end CalabiYau.PoissonDomainRegularity

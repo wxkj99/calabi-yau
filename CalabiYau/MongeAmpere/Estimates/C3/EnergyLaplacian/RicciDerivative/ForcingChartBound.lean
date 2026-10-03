@@ -101,7 +101,7 @@ private theorem forcing_adjugate_entry_contDiffAt
       · subst a
         simp only [Matrix.updateRow_apply]
         exact contDiffAt_const
-      · simp only [Matrix.updateRow_apply, if_neg ha]
+      · simp only [Matrix.updateRow_apply, ite_eq_right ha]
         exact hentry a b
     have hmatrix : ContDiffAt ℝ ∞
         (fun w => (A w).updateRow j (Pi.single i 1)) z := by
@@ -602,10 +602,8 @@ theorem exists_local_c3ForcingFrameBound (ω₀ : KahlerForm n M)
       have h := (contMDiff_iff.mp (hF G hG)).2 x 0
       simpa [u, c, extChartAt, chartAt_self_eq] using h
     have htargetOpen : IsOpen c.target := isOpen_extChartAt_target x
-    have htop (j : ℕ) : (↑j : ℕ∞ω) ≤ ∞ := by
-      exact_mod_cast (show (j : ℕ∞) ≤ ⊤ from le_top)
-    have h3top : (3 : ℕ∞ω) ≤ ∞ := by simpa using htop 3
-    have h2top : (2 : ℕ∞ω) ≤ ∞ := by simpa using htop 2
+    have h3top : (3 : ℕ∞ω) ≤ ∞ := by simp
+    have h2top : (2 : ℕ∞ω) ≤ ∞ := by simp
     have huCont3 : ContDiffOn ℝ 3 u c.target := huCont.of_le h3top
     have hAt (z : EuclideanSpace ℂ (Fin n)) (hz : z ∈ K) :
         ContDiffAt ℝ 2 u z :=

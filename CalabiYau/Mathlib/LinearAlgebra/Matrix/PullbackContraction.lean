@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-public import Mathlib.Data.Complex.Basic
+public import Mathlib.Basic.Complex.Basic
 public import CalabiYau.Mathlib.LinearAlgebra.Matrix.PullbackInverse
 
 /-!

@@ -288,7 +288,7 @@ lemma trivializationCoord_apply
       ((trivializationAt F₂ E₂ (baseMap x))
         (Φ ((trivializationAt F₁ E₁ x).toOpenPartialHomeomorph.symm (q, v)))).2 := by
   simp only [trivializationCoord,
-    dif_pos (show q ∈ _ ∧ baseMap q ∈ _ from ⟨hq₁, hq₂⟩)]
+    dite_eq_left (show q ∈ _ ∧ baseMap q ∈ _ from ⟨hq₁, hq₂⟩)]
   conv_rhs =>
     rw [(trivializationAt F₁ E₁ x).symm_apply_eq_mk_continuousLinearEquivAt_symm
           (R := 𝕜) q hq₁ v,
@@ -308,7 +308,7 @@ lemma trivializationCoord_isInvertible
     (trivializationCoord baseMap φ x q : F₁ →L[𝕜] F₂).IsInvertible := by
   obtain ⟨hq₁, hq₂⟩ := hq
   simp only [trivializationCoord,
-    dif_pos (show q ∈ _ ∧ baseMap q ∈ _ from ⟨hq₁, hq₂⟩)]
+    dite_eq_left (show q ∈ _ ∧ baseMap q ∈ _ from ⟨hq₁, hq₂⟩)]
   have hbij_lm : Function.Bijective
       (((trivializationAt F₂ E₂ (baseMap x)).continuousLinearEquivAt
           𝕜 (baseMap q) hq₂).toLinearMap.comp

@@ -303,12 +303,13 @@ private lemma denseRange_smoothCompactlySupportedInToLp
           (((volume : Measure E).restrict Ω'') (Ω'' \ K)) ^ ((1 : ℝ) / 2) := by
       have hp_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
       have hp_ne_top : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num
-      rw [eLpNorm_indicator_const h_meas_diff hp_ne_zero hp_ne_top]
+      rw [eLpNorm_indicator_const h_meas_diff.nullMeasurableSet hp_ne_zero hp_ne_top]
       have h_two_toReal : ((2 : ℝ≥0∞) : ℝ≥0∞).toReal = 2 := by simp
       rw [h_two_toReal]
       rw [Real.enorm_eq_ofReal hBp_nn]
     refine le_trans ?_ (le_of_eq h_indicator_eLpNorm)
-    refine eLpNorm_mono_ae ?_
+    refine eLpNorm_mono_ae
+      (hg_smooth.continuous.sub hg₀_smooth.continuous).aestronglyMeasurable ?_
     refine h_pt_bd.mono ?_
     intro x hx
     have h_sub_apply : ((g : E → ℝ) - g₀) x = g x - g₀ x := rfl
@@ -359,14 +360,7 @@ private lemma denseRange_smoothCompactlySupportedInToLp
         change g x - (⇑f) x = (g x - g₀ x) + (g₀ x - (⇑f) x)
         ring
       rw [h_split]
-      have h_aesm₁ : AEStronglyMeasurable ((g : E → ℝ) - g₀)
-          ((volume : Measure E).restrict Ω'') :=
-        (hg_smooth.continuous.sub hg₀_smooth.continuous).aestronglyMeasurable
-      have h_aesm₂ : AEStronglyMeasurable ((g₀ : E → ℝ) - ⇑f)
-          ((volume : Measure E).restrict Ω'') := by
-        refine hg₀_smooth.continuous.aestronglyMeasurable.sub ?_
-        exact (Lp.aestronglyMeasurable f)
-      exact eLpNorm_add_le h_aesm₁ h_aesm₂ (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      exact eLpNorm_add_le (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     have h_meas_le :
         (((volume : Measure E).restrict Ω'') (Ω'' \ K)) ^ ((1 : ℝ) / 2) ≤
           (ENNReal.ofReal δ) ^ ((1 : ℝ) / 2) := by
@@ -738,7 +732,8 @@ private lemma abs_integral_mul_le_eLpNorm_two_local
     rw [hofreal]; exact hint
   have h_lintegral_eq :
       ∫⁻ x, ‖f x * g x‖ₑ ∂μ = eLpNorm (fun x => g x * f x) 1 μ := by
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm (f := fun x => g x * f x)
+      (hg.aestronglyMeasurable.mul hf.aestronglyMeasurable)]
     refine lintegral_congr (fun x => ?_)
     simp [enorm_mul, mul_comm]
   have : ENNReal.HolderTriple (2 : ℝ≥0∞) (2 : ℝ≥0∞) 1 := by
@@ -752,7 +747,7 @@ private lemma abs_integral_mul_le_eLpNorm_two_local
       funext x; simp [smul_eq_mul]
     rw [h_mul_eq]
     have : ENNReal.HolderTriple (2 : ℝ≥0∞) (2 : ℝ≥0∞) 1 := inferInstance
-    exact eLpNorm_smul_le_mul_eLpNorm hf.aestronglyMeasurable hg.aestronglyMeasurable
+    exact eLpNorm_smul_le_mul_eLpNorm hg.aestronglyMeasurable hf.aestronglyMeasurable
   calc
     ENNReal.ofReal |∫ x, f x * g x ∂μ|
         ≤ ∫⁻ x, ‖f x * g x‖ₑ ∂μ := h_abs_le_lintegral
@@ -837,11 +832,7 @@ private lemma abs_smoothTestFunctional_local_le
     intro x hx
     simp only [w_ext, Set.indicator_of_notMem hx]
   have hw_ext_memLp : MemLp w_ext 2 (volume : Measure E) := by
-    have h_aesm : AEStronglyMeasurable w_ext (volume : Measure E) := by
-      have h_w_aesm : AEStronglyMeasurable w ((volume : Measure E).restrict Ω) :=
-        hw_l2.aestronglyMeasurable
-      exact (aestronglyMeasurable_indicator_iff hΩ_open.measurableSet).mpr h_w_aesm
-    refine ⟨h_aesm, ?_⟩
+    apply memLp_iff.mpr
     have h_eLpNorm_eq :
         eLpNorm w_ext 2 (volume : Measure E) =
           eLpNorm w 2 ((volume : Measure E).restrict Ω) := by
@@ -1002,7 +993,7 @@ private lemma abs_smoothTestFunctional_local_le
     (h_dq_aesm_restrict n).congr (h_dq_ae_eq_restrict n)
   have h_dq_memLp_restrict_w : ∀ n, MemLp (diffQuot k (hₙ n) w) 2
       ((volume : Measure E).restrict Ω'') := fun n =>
-    ⟨h_dq_aesm_restrict_w n, lt_of_le_of_lt (h_dq_l2_bound n) ENNReal.ofReal_lt_top⟩
+    memLp_iff.mpr (lt_of_le_of_lt (h_dq_l2_bound n) ENNReal.ofReal_lt_top)
   have h_CS_bound : ∀ n,
       |∫ x in Ω'', diffQuot k (hₙ n) w x * φ.1 x ∂(volume : Measure E)| ≤
         M * (eLpNorm φ.1 2 ((volume : Measure E).restrict Ω'')).toReal := by

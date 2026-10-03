@@ -244,7 +244,7 @@ theorem exists_uniform_perturbed_metric_coefficient_jets
         (ω₀.metricInChart x z + complexHessian
           (p.2 ∘ e.symm) z) i j) := by
     dsimp [Ck]
-    rw [dif_pos hk]
+    rw [dite_eq_left hk]
     exact Classical.choose_spec (exists_uniform_perturbed_metric_coefficient_lower_holder_on
       ω₀ S hS hα₁ hr hLcompact hBuffer hLtarget
       (Nat.succ_le_of_lt hk) hCurrentOuter)

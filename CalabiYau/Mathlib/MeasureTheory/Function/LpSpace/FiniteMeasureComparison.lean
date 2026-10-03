@@ -36,8 +36,8 @@ theorem lpNorm_fourThirds_le_measure_univ_rpow_mul_lpNorm_two
       (μ Set.univ) ^ (1 / 4 : ℝ) ≠ ⊤ :=
     ENNReal.mul_ne_top hmem.eLpNorm_ne_top hfactor.ne
   have hreal := ENNReal.toReal_mono hRHS hcmp'
-  rw [ENNReal.toReal_mul, ← ENNReal.toReal_rpow, toReal_eLpNorm hf,
-    toReal_eLpNorm hmem.aestronglyMeasurable] at hreal
+  rw [ENNReal.toReal_mul, ← ENNReal.toReal_rpow, toReal_eLpNorm,
+    toReal_eLpNorm] at hreal
   simpa [mul_comm] using hreal
 
 end MeasureTheory

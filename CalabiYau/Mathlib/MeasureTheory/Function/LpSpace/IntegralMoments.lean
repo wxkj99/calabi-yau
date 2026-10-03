@@ -73,7 +73,7 @@ theorem tendsto_integral_moments_of_eLpNorm
     filter_upwards [] with k
     exact memLp_one_iff_integrable.mp ((hf k).mono_exponent (by norm_num))
   have hmeanlim : Tendsto (fun k => ∫ x, f k x ∂μ) atTop (𝓝 (∫ x, u x ∂μ)) :=
-    tendsto_integral_of_L1' u hu.1 hFkIntegrable hL1
+    tendsto_integral_of_L1' u hFkIntegrable hL1
   have hmean0 : Tendsto (fun k => ∫ x, f k x ∂μ) atTop (𝓝 0) := by
     simpa only [hmean] using (tendsto_const_nhds : Tendsto (fun _ : ℕ => (0 : ℝ)) atTop (𝓝 0))
   have hmeanU : ∫ x, u x ∂μ = 0 := tendsto_nhds_unique hmeanlim hmean0
@@ -82,12 +82,12 @@ theorem tendsto_integral_moments_of_eLpNorm
     have h := (ENNReal.tendsto_toReal ENNReal.zero_ne_top).comp hconv
     convert h using 1
     · funext k
-      exact (toReal_eLpNorm (p := p) ((hf k).sub hu).aestronglyMeasurable).symm
+      exact (toReal_eLpNorm (p := p)).symm
     · simp
   have hFnorm : ∀ k, lpNorm (f k) p μ = 1 := by
     intro k
     have hsquare : lpNorm (f k) p μ ^ 2 = 1 := by
-      have hidentity := lpNorm_two_sq_eq_integral_sq (μ := μ) (g := f k) (hf k).1
+      have hidentity := lpNorm_two_sq_eq_integral_sq (μ := μ) (g := f k) (hf k).aestronglyMeasurable
       simpa [p] using hidentity.trans (hsq k)
     have hnonneg : 0 ≤ lpNorm (f k) p μ := lpNorm_nonneg
     nlinarith
@@ -120,7 +120,7 @@ theorem tendsto_integral_moments_of_eLpNorm
     rw [abs_eq_zero] at habs
     linarith
   refine ⟨hmeanU, ?_⟩
-  have hidentity := lpNorm_two_sq_eq_integral_sq (μ := μ) (g := u) hu.1
+  have hidentity := lpNorm_two_sq_eq_integral_sq (μ := μ) (g := u) hu.aestronglyMeasurable
   calc
     (∫ x, (u x) ^ 2 ∂μ) = lpNorm u p μ ^ 2 := by simpa [p] using hidentity.symm
     _ = 1 := by rw [hUnorm]; norm_num

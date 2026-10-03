@@ -221,7 +221,7 @@ private theorem localFixedMollify_jet_commutation {n : ℕ}
       have heq : g =ᶠ[𝓝 y] fun t => b t * u (e.symm t) := by
         filter_upwards [hcond] with t ht
         change e.symm t ∈ U at ht
-        simp only [g, if_pos ht]
+        simp only [g, ite_eq_left ht]
       apply ContDiffAt.congr_of_eventuallyEq _ heq
       exact b.contDiff.contDiffAt.mul
         (((hu _ hyU).contDiffAt (hU.mem_nhds hyU)).comp y (by fun_prop))
@@ -237,7 +237,7 @@ private theorem localFixedMollify_jet_commutation {n : ℕ}
     have htU : e.symm t ∈ U := hnearU t (by
       have := Metric.mem_ball.mp ht
       linarith)
-    simp only [g, if_pos htU, b.one_of_mem_closedBall (Metric.ball_subset_closedBall ht), one_mul]
+    simp only [g, ite_eq_left htU, b.one_of_mem_closedBall (Metric.ball_subset_closedBall ht), one_mul]
   have htrans (x w : E) (hx : x ∈ Metric.ball (e z) (η / 8)) (hw : w ∈ K) :
       x - w ∈ Metric.ball (e z) (η / 2) := by
     have hw' : ‖w‖ ≤ localKernelRadius η m := by
@@ -1115,13 +1115,13 @@ theorem localFixedMollify_solutionJets {n : ℕ}
       intro w
       rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (localFixedKernel_nonneg hη m w)]
       by_cases hw : q w ∈ U
-      · rw [if_pos hw]
+      · rw [ite_eq_left hw]
         calc
           _ ≤ localFixedKernel hη m w * (K₀ : ℝ) :=
             mul_le_mul_of_nonneg_left (hBound (q w) hw)
               (localFixedKernel_nonneg hη m w)
           _ = (K₀ : ℝ) * localFixedKernel hη m w := mul_comm _ _
-      · rw [if_neg hw]
+      · rw [ite_eq_right hw]
         simpa using mul_nonneg K₀.2 (localFixedKernel_nonneg hη m w)
     have hintBound : MeasureTheory.Integrable (fun w : EuclideanSpace ℝ (Fin n × Fin 2) =>
         (K₀ : ℝ) * localFixedKernel hη m w) MeasureTheory.volume := hkint.const_mul _

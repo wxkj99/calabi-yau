@@ -78,7 +78,7 @@ private lemma eLpNorm_v_toFun_le_norm
     change @inner ℝ _ _ v v = _
     rw [h_inner_self]
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) v.smooth.continuous.aestronglyMeasurable]
   have h_two_toReal : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h_two_toReal]
   rw [lintegral_enorm_v_toFun_sq_eq (I := I) (M := M) v]
@@ -165,8 +165,15 @@ private lemma eLpNorm_sqrt_grad_v_le_norm
     rw [@norm_sq_eq_re_inner ℝ]
     change @inner ℝ _ _ v v = _
     rw [h_inner_self]
+  have h_grad_meas : AEStronglyMeasurable (fun x : M => Real.sqrt (g.inner x
+      (gradFun (I := I) g v.toFun x) (gradFun (I := I) g v.toFun x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    have h_cont : Continuous (fun x : M => Real.sqrt (g.inner x
+        (gradFun (I := I) g v.toFun x) (gradFun (I := I) g v.toFun x))) :=
+      (v.continuous_inner_grad v).sqrt
+    exact h_cont.aestronglyMeasurable
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) h_grad_meas]
   have h_two_toReal : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h_two_toReal]
   rw [lintegral_enorm_sqrt_grad_v_sq_eq (I := I) (M := M) v]

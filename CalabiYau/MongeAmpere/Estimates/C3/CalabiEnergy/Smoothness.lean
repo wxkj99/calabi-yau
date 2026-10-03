@@ -21,6 +21,7 @@ variable {n : ℕ} {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanSpace ℂ (Fin n)) M]
   [IsManifold 𝓘(ℂ, EuclideanSpace ℂ (Fin n)) ω M] [T2Space M] [CompactSpace M]
 
+open scoped ComplexOrder in
 omit [T2Space M] [CompactSpace M] in
 /-- The Calabi connection-difference energy is smooth for every Kähler potential. -/
 theorem calabiEnergy_contMDiff (ω₀ : KahlerForm n M) {φ : M → ℝ}

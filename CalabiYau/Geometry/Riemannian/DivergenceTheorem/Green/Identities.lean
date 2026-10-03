@@ -26,7 +26,7 @@ public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 public import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 public import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 public import CalabiYau.Geometry.Riemannian.Metric.Basic
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.Order.Interval.Set.Basic
 public import Mathlib.Tactic.Linarith
 public import Mathlib.Topology.Algebra.Monoid

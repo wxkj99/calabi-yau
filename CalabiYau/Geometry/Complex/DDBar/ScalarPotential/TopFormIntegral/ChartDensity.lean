@@ -293,6 +293,7 @@ theorem topFormVolume_chartCoeff (ω₀ : KahlerForm n M) (c : M)
     · exact hActualChartDensityOfFlatCount
         (fun k => ContinuousAlternatingMap.omegaFlat_topFormCoeff k)
 
+open scoped ComplexOrder in
 /-- Same-centre target covariance of the signed ratio. Its denominator is evaluated
 at the inverse-chart point, never at the chart centre. No smoothness of `Θ` is needed. -/
 theorem topFormCoeff_chartRep_eq_density_mul (ω₀ : KahlerForm n M)

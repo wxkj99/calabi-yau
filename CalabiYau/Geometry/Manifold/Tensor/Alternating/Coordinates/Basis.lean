@@ -58,7 +58,7 @@ noncomputable def elementaryCovector
                     ∏ i : Fin k, ‖b (ι (σ i)) (v i)‖ := norm_prod _ _
                 have h2 : ∏ i : Fin k, ‖b (ι (σ i)) (v i)‖ ≤
                     ∏ i : Fin k, ‖b (ι (σ i))‖ * ‖v i‖ :=
-                  Finset.prod_le_prod (fun i _ => norm_nonneg _)
+                  Finset.prod_le_prod₀ (fun i _ => norm_nonneg _)
                     (fun i _ => (b (ι (σ i))).le_opNorm _)
                 exact h1.le.trans h2
         _ = ((k.factorial : ℝ) * ∏ i : Fin k, ‖b (ι i)‖) * ∏ i : Fin k, ‖v i‖ := by

@@ -958,13 +958,13 @@ private theorem contDiffOn_two_of_quotient_jet_limits
     have hvalueAt := hvalueUniform.tendsto_at ⟨x, hWV hx⟩
     have hvalueAt' : Tendsto (fun n ↦ q'' n x) atTop
         (𝓝 (valueLimit ⟨x, hWV hx⟩)) := by
-      convert hvalueAt using 1; rfl
+      exact hvalueAt
     exact tendsto_nhds_unique hvalueAt' hpointTotal
   have hpoint' (x : E) (hx : x ∈ W) :
       Tendsto (fun n ↦ q'' n x) atTop (𝓝 (f x)) := by
     have hvalueAt := hvalueUniform.tendsto_at ⟨x, hWV hx⟩
     rw [hvalueLimit_eq x hx] at hvalueAt
-    convert hvalueAt using 1; rfl
+    exact hvalueAt
   have hgrad'' : TendstoUniformly
       (fun n (z : V) ↦ iteratedFDeriv ℝ 1 (q'' n) z.1) gV atTop := by
     simpa [q'', q', Function.comp_def] using

@@ -165,8 +165,6 @@ theorem c3Pair_partialZ_mul
           f z * fderiv ℝ h z v + h z * fderiv ℝ f z v := by
         have h := (hf.hasFDerivAt.mul hh.hasFDerivAt).fderiv
         convert congrArg (fun L : EuclideanSpace ℂ (Fin n) →L[ℝ] ℂ => L v) h using 1
-        · rfl
-        · simp [smul_eq_mul]
       _ = f z * fderiv ℝ h z v + fderiv ℝ f z v * h z := by ring
   unfold wirtingerDerivInChart
   rw [hprod (EuclideanSpace.single p 1),
@@ -250,8 +248,7 @@ private theorem c3PairWirtinger_comm
   let eq : EuclideanSpace ℂ (Fin n) := EuclideanSpace.single q 1
   have hs : IsSymmSndFDerivAt ℝ F z :=
     hF.isSymmSndFDerivAt
-      (by simpa [minSmoothness_of_isRCLikeNormedField] using
-        (ENat.natCast_le_of_coe_top_le_withTop le_rfl 2))
+      (by simp [minSmoothness_of_isRCLikeNormedField])
   change (fderiv ℝ (fun w => c3PairWirtinger t F w q) z ep +
     s * fderiv ℝ (fun w => c3PairWirtinger t F w q) z (Complex.I • ep)) / 2 =
     (fderiv ℝ (fun w => c3PairWirtinger s F w p) z eq +

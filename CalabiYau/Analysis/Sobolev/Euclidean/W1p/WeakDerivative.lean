@@ -238,7 +238,7 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero_p
       funext n
       simpa using
         (MeasureTheory.toReal_eLpNorm
-          (μ := μ) (p := ENNReal.ofReal p) (f := g n) (hg n).aestronglyMeasurable)
+          (μ := μ) (p := ENNReal.ofReal p) (f := g n))
     simpa [hEq] using hlim_toReal
   have hbound :
       ∀ n, |∫ x, f x * g n x ∂μ| ≤ C * MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ := by

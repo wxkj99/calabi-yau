@@ -142,7 +142,7 @@ theorem signedChartIntegral_eq_of_compatible
       unfold gC chartTopCoefficient
       have hext : x ∈ (extChartAt 𝓘(ℝ, Fin d → ℝ) C.center).target := by
         simpa [extChartAt_target, OrientedLocalChart.chart] using hxt
-      rw [if_pos hext]
+      rw [ite_eq_left hext]
       have hsimp : (extChartAt 𝓘(ℝ, Fin d → ℝ) C.center).symm x = C.chart.symm x := by
         rfl
       rw [hsimp, hpη]
@@ -151,7 +151,7 @@ theorem signedChartIntegral_eq_of_compatible
     · unfold gC chartTopCoefficient
       have hext : x ∉ (extChartAt 𝓘(ℝ, Fin d → ℝ) C.center).target := by
         simpa [OrientedLocalChart.chart] using hxt
-      rw [if_neg hext]
+      rw [ite_eq_right hext]
   have hzeroD : ∀ x ∉ D.chart '' U, gD x = 0 := by
     intro x hx
     by_cases hxt : x ∈ D.chart.target
@@ -164,7 +164,7 @@ theorem signedChartIntegral_eq_of_compatible
       unfold gD chartTopCoefficient
       have hext : x ∈ (extChartAt 𝓘(ℝ, Fin d → ℝ) D.center).target := by
         simpa [extChartAt_target, OrientedLocalChart.chart] using hxt
-      rw [if_pos hext]
+      rw [ite_eq_left hext]
       have hsimp : (extChartAt 𝓘(ℝ, Fin d → ℝ) D.center).symm x = D.chart.symm x := by
         rfl
       rw [hsimp, hpη]
@@ -173,7 +173,7 @@ theorem signedChartIntegral_eq_of_compatible
     · unfold gD chartTopCoefficient
       have hext : x ∉ (extChartAt 𝓘(ℝ, Fin d → ℝ) D.center).target := by
         simpa [OrientedLocalChart.chart] using hxt
-      rw [if_neg hext]
+      rw [ite_eq_right hext]
   have hcoef : ∀ x ∈ s,
       gC x = (fderiv ℝ f x).det * gD (f x) := by
     rintro x ⟨p, hp, rfl⟩

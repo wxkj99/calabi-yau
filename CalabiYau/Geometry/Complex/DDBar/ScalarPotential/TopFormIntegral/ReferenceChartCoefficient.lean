@@ -73,7 +73,7 @@ theorem native_chart_weight_coefficient_eq_density
   · have hzE : e z ∉ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) c).target :=
       fun h => hz (htarget.mpr h)
     dsimp only [e] at hzE
-    simp only [chartTopCoefficient, if_neg hz, mul_zero,
+    simp only [chartTopCoefficient, ite_eq_right hz, mul_zero,
       Set.indicator_of_notMem hzE]
 
 end KahlerForm

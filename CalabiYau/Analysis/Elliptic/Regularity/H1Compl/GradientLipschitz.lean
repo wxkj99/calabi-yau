@@ -69,7 +69,7 @@ lemma smoothChartExt_apply_of_mem_target
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
         v.toFun ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0) = _
-  rw [if_pos hy]
+  rw [ite_eq_left hy]
 
 lemma smoothChartExt_apply_of_notMem_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
@@ -81,7 +81,7 @@ lemma smoothChartExt_apply_of_notMem_target
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
         v.toFun ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0) = 0
-  rw [if_neg hy]
+  rw [ite_eq_right hy]
 
 private lemma smoothChartExt_eq_chartPushed_on_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
@@ -512,7 +512,7 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
     rcases h_cont.bounded_above_of_compact_support h_cs with ⟨N, hN⟩
     refine ⟨max N 0, le_max_right _ _, fun y => ?_⟩
     exact (hN y).trans (le_max_left _ _)
-  refine ⟨h_cont.aestronglyMeasurable, ?_⟩
+  refine memLp_iff.mpr ?_
   set K_partial := tsupport (smoothChartExtPartial (I := I) (M := M) g α j v)
   have hK_compact : IsCompact K_partial := h_cs
   have h_zero_off : ∀ y, y ∉ K_partial →
@@ -612,7 +612,7 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
     exact lt_of_le_of_lt h_int_bd
       (ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_vol_K_lt_top)
   rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) h_cont.aestronglyMeasurable]
   have h_two : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h_two]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) ?_

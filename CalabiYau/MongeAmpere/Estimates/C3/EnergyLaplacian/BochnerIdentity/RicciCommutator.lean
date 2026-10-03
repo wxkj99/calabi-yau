@@ -413,7 +413,7 @@ private theorem c3Ricci_adjugate_entry_contDiffAt
       · subst a
         simp only [Matrix.updateRow_apply]
         exact contDiffAt_const
-      · simp only [Matrix.updateRow_apply, if_neg ha]
+      · simp only [Matrix.updateRow_apply, ite_eq_right ha]
         exact hentry a b
     have hmatrix : ContDiffAt ℝ ∞
         (fun w => (A w).updateRow j (Pi.single i 1)) z := by

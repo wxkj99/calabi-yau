@@ -90,7 +90,7 @@ private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
         (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
       else 0) = _
-    rw [if_pos h_eq_z]
+    rw [ite_eq_left h_eq_z]
   rw [h_chartSmoothExt]
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -194,12 +194,18 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) =
         eLpNorm f 2 (chartPulledWeightedMeasure (I := I) g α) from
-        eLpNorm_restrict_eq_of_support_subset h_support_in_ChTE]
+        by
+          rw [← eLpNorm_indicator_eq_eLpNorm_restrict
+            (chartTargetEuclid_measurableSet (I := I) (M := M) α),
+            Set.indicator_eq_self.mpr h_support_in_ChTE]]
     rw [show eLpNorm f 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (kPouCompact (I := I) (M := M) α)) =
         eLpNorm f 2 (chartPulledWeightedMeasure (I := I) g α) from
-        eLpNorm_restrict_eq_of_support_subset hf_support]
+        by
+          rw [← eLpNorm_indicator_eq_eLpNorm_restrict
+            (kPouCompact_isCompact (I := I) (M := M) α).measurableSet,
+            Set.indicator_eq_self.mpr hf_support]]
   have h_RHS_eq : eLpNorm f 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) =
@@ -210,12 +216,18 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
         ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)) =
         eLpNorm f 2 (volume : Measure EuclN) from
-        eLpNorm_restrict_eq_of_support_subset h_support_in_ChTE]
+        by
+          rw [← eLpNorm_indicator_eq_eLpNorm_restrict
+            (chartTargetEuclid_measurableSet (I := I) (M := M) α),
+            Set.indicator_eq_self.mpr h_support_in_ChTE]]
     rw [show eLpNorm f 2
         ((volume : Measure EuclN).restrict
           (kPouCompact (I := I) (M := M) α)) =
         eLpNorm f 2 (volume : Measure EuclN) from
-        eLpNorm_restrict_eq_of_support_subset hf_support]
+        by
+          rw [← eLpNorm_indicator_eq_eLpNorm_restrict
+            (kPouCompact_isCompact (I := I) (M := M) α).measurableSet,
+            Set.indicator_eq_self.mpr hf_support]]
   rw [h_LHS_eq, h_RHS_eq]
   have h_mono : eLpNorm f 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -226,7 +238,8 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
             (kPouCompact (I := I) (M := M) α)) :=
     eLpNorm_mono_measure f hM_d_le
   refine h_mono.trans ?_
-  rw [eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+  rw [eLpNorm_smul_measure_of_ne_zero_of_ne_top
+    (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
   have h_toReal : ((1 / 2 : ℝ≥0∞).toReal : ℝ) = (1 : ℝ) / 2 := by
     rw [show (1 / 2 : ℝ≥0∞) = (1 : ℝ≥0∞) / 2 from rfl]
     simp
@@ -276,7 +289,7 @@ private lemma eLpNorm_v_toFun_le_norm
     change @inner ℝ _ _ v v = _
     rw [h_inner_self]
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) v.smooth.continuous.aestronglyMeasurable]
   have h_two_toReal : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h_two_toReal]
   rw [lintegral_enorm_v_toFun_sq_eq (I := I) (M := M) v]
@@ -363,8 +376,15 @@ private lemma eLpNorm_sqrt_grad_v_le_norm
     rw [@norm_sq_eq_re_inner ℝ]
     change @inner ℝ _ _ v v = _
     rw [h_inner_self]
+  have h_grad_meas : AEStronglyMeasurable (fun x : M => Real.sqrt (g.inner x
+      (gradFun (I := I) g v.toFun x) (gradFun (I := I) g v.toFun x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    have h_cont : Continuous (fun x : M => Real.sqrt (g.inner x
+        (gradFun (I := I) g v.toFun x) (gradFun (I := I) g v.toFun x))) :=
+      (v.continuous_inner_grad v).sqrt
+    exact h_cont.aestronglyMeasurable
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+    (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) h_grad_meas]
   have h_two_toReal : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h_two_toReal]
   rw [lintegral_enorm_sqrt_grad_v_sq_eq (I := I) (M := M) v]
@@ -440,13 +460,13 @@ theorem chartPushedPartial_h1_lipschitz
             (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x)
               ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
           else 0) = _
-        rw [if_pos hz]
+        rw [ite_eq_left hz]
         rw [smoothChartExt_apply_of_mem_target (I := I) (M := M) g α v hz]
       · change (if (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target then
             (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x)
               ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
           else 0) = _
-        rw [if_neg hz]
+        rw [ite_eq_right hz]
         rw [smoothChartExt_apply_of_notMem_target (I := I) (M := M) g α v hz]
     rw [h_funeq] at hy_ne
     change (smoothChartExtPartial (I := I) (M := M) g α j v y) ≠ 0 at hy_ne
@@ -521,7 +541,7 @@ noncomputable def chartPushedPartialLipschitzCanonical
       have h_lhs_finite : eLpNorm (chartPushedPartial (I := I) (M := M) g α j v) 2
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)) ≠ ⊤ :=
-        (chartPushedPartial_memLp (I := I) (M := M) g α j v).2.ne
+        (chartPushedPartial_memLp (I := I) (M := M) g α j v).eLpNorm_lt_top.ne
       have h_rhs_eq : ENNReal.ofReal h.choose * (‖v‖₊ : ℝ≥0∞) =
           ENNReal.ofReal (h.choose * ‖v‖) := by
         rw [show ((‖v‖₊ : ℝ≥0∞) : ℝ≥0∞) = ENNReal.ofReal ‖v‖ from by

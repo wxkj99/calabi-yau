@@ -378,7 +378,7 @@ lemma chartPushedRaw_lapPiece_factor
           (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
       else 0) = b x * (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x
-    rw [if_pos h_target]
+    rw [ite_eq_left h_target]
   have hRHS_etav : chartPushedRaw (I := I) (M := M) α
       (etaTimesV (I := I) (M := M) α v) y =
       etaTimesV (I := I) (M := M) α v x := by

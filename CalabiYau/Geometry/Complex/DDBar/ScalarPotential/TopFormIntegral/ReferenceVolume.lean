@@ -52,6 +52,7 @@ def referenceVolumeForm (ω₀ : KahlerForm n M) :
     CalabiYau.DifferentialForm 𝓘(ℝ, Fin (2 * n) → ℝ) M (2 * n) :=
   nativeToPiForms (2 * n) (bundledTopFormVolume ω₀)
 
+open scoped ComplexOrder in
 /-- The source coefficient positivity and the invertibility of e prove actual
 nonvanishing. This imports the c02-owned ChartDensity determinant hole; it does
 not duplicate or discharge that algebra. -/

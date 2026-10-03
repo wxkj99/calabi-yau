@@ -275,7 +275,7 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero_p
       funext n
       simpa using
         (MeasureTheory.toReal_eLpNorm
-          (μ := μ) (p := ENNReal.ofReal p) (f := g n) (hg n).aestronglyMeasurable)
+          (μ := μ) (p := ENNReal.ofReal p) (f := g n))
     simpa [hEq] using hlim_toReal
   have hbound :
       ∀ n, |∫ x, f x * g n x ∂μ| ≤ C * MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ := by
@@ -545,39 +545,17 @@ theorem aestronglyMeasurable_euclidean_of_components_local
 variable [NeZero d] in
 private theorem eLpNorm_le_of_lintegral_rpow_ofReal_le
     {α F : Type*} [MeasurableSpace α] [NormedAddCommGroup F]
-    {μ : Measure α} {p : ℝ} (hp : 0 < p) {f : α → F} {A : ℝ≥0∞}
+    {μ : Measure α} {p : ℝ} (hp : 0 < p) {f : α → F} (hf : AEStronglyMeasurable f μ) {A : ℝ≥0∞}
     (hA : ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ ≤ A) :
     eLpNorm f (ENNReal.ofReal p) μ ≤ A ^ (1 / p) := by
   have hp0 : (ENNReal.ofReal p) ≠ 0 := by
     exact ne_of_gt (ENNReal.ofReal_pos.mpr hp)
   have hptop : (ENNReal.ofReal p) ≠ ∞ := by
     simp
-  rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hptop]
+  rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hptop hf]
   have hp_nonneg : 0 ≤ 1 / p := by
     positivity
   simpa [ENNReal.toReal_ofReal (le_of_lt hp)] using ENNReal.rpow_le_rpow hA hp_nonneg
-
-theorem lintegral_rpow_norm_eq_eLpNorm_pow
-    {α F : Type*} [MeasurableSpace α] [NormedAddCommGroup F]
-    {μ : Measure α} {p : ℝ} (hp : 0 < p) {f : α → F} :
-    ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ = eLpNorm f (ENNReal.ofReal p) μ ^ p := by
-  let pnn : ℝ≥0 := Real.toNNReal p
-  have hpnn0 : pnn ≠ 0 := by
-    intro hzero
-    have hp_nonpos : p ≤ 0 := Real.toNNReal_eq_zero.mp hzero
-    linarith
-  have hpnn_real : (pnn : ℝ) = p := by
-    simp [pnn, Real.toNNReal_of_nonneg (le_of_lt hp)]
-  have hpnn_enn : (pnn : ℝ≥0∞) = ENNReal.ofReal p := by
-    change (Real.toNNReal p : ℝ≥0∞) = ENNReal.ofReal p
-    rfl
-  calc
-    ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ p ∂μ
-      = ∫⁻ x, (ENNReal.ofReal ‖f x‖) ^ (pnn : ℝ) ∂μ := by simp [hpnn_real]
-    _ = eLpNorm f (pnn : ℝ≥0∞) μ ^ (pnn : ℝ) := by
-      simpa using
-        (MeasureTheory.eLpNorm_nnreal_pow_eq_lintegral (μ := μ) (f := f) (p := pnn) hpnn0).symm
-    _ = eLpNorm f (ENNReal.ofReal p) μ ^ p := by simp [hpnn_real, hpnn_enn]
 
 variable [NeZero d] in
 private lemma lintegral_rpow_abs_unitBallExtension_ball_two_le_local
@@ -681,7 +659,11 @@ theorem tendsto_zero_of_le_pair_sum
 
 variable [NeZero d] in
 theorem eLpNorm_unitBallExtension_sub_le_local
-    {p : ℝ} (hp : 1 < p) {u v : E → ℝ} :
+    {p : ℝ} (hp : 1 < p) {u v : E → ℝ}
+    (hext : AEStronglyMeasurable
+      (fun x => unitBallExtension (d := d) u x - unitBallExtension (d := d) v x) volume)
+    (huv : AEStronglyMeasurable (fun x => u x - v x)
+      (volume.restrict (Metric.ball (0 : E) 1))) :
     eLpNorm (fun x => unitBallExtension (d := d) u x - unitBallExtension (d := d) v x)
       (ENNReal.ofReal p) volume
       ≤
@@ -699,7 +681,7 @@ theorem eLpNorm_unitBallExtension_sub_le_local
             simpa [Real.norm_eq_abs] using
               (eLpNorm_le_of_lintegral_rpow_ofReal_le (α := E) (F := ℝ)
                 (f := fun x => unitBallExtension (d := d) u x - unitBallExtension (d := d) v x)
-                hp0 hInt)
+                hp0 hext hInt)
     _ = (1 + ENNReal.ofReal ((2 : ℝ) ^ (2 * d))) ^ (1 / p) *
           eLpNorm (fun x => u x - v x) (ENNReal.ofReal p)
             (volume.restrict (Metric.ball (0 : E) 1)) := by
@@ -710,7 +692,7 @@ theorem eLpNorm_unitBallExtension_sub_le_local
             simp [Real.norm_eq_abs]
           have hPow :=
             lintegral_rpow_norm_eq_eLpNorm_pow (μ := volume.restrict (Metric.ball (0 : E) 1))
-              (p := p) hp0 (f := fun x => u x - v x)
+              (p := p) hp0 (f := fun x => u x - v x) huv
           rw [hAbs, hPow]
           have hMul :
               ((1 + ENNReal.ofReal ((2 : ℝ) ^ (2 * d))) *

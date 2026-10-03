@@ -109,7 +109,7 @@ theorem stokesChartRepresentation_contDiff_hasCompactSupport
     · apply (hrepSmooth.contDiffAt ((isOpen_extChartAt_target x).mem_nhds hyt)).congr_of_eventuallyEq
       filter_upwards [(isOpen_extChartAt_target x).mem_nhds hyt] with z hz
       change (if z ∈ U then rep z else 0) = rep z
-      exact if_pos hz
+      exact ite_eq_left hz
     · have hyc : y ∉ closure {z | (if z ∈ U then rep z else 0) ≠ 0} := by
         intro hy
         exact hyt (hrepSupport hy)

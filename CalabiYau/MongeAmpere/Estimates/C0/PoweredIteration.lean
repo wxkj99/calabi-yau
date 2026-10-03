@@ -83,7 +83,7 @@ theorem c0_powered_iteration_bound
       calc
         (∏ k ∈ Finset.range N, f k) ≤
             ∏ k ∈ Finset.range N, Real.exp (logMaj k) := by
-          apply Finset.prod_le_prod
+          apply Finset.prod_le_prod₀
           · intro k hk
             dsimp [f]
             positivity
@@ -153,7 +153,8 @@ theorem c0_powered_iteration_bound
             (Filter.Eventually.of_forall fun x => sq_nonneg (u x))).symm
     have hnorm : eLpNorm u 2 ω₀.volume =
         ENNReal.ofReal (Real.sqrt (∫ x, u x ^ 2 ∂ω₀.volume)) := by
-      rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)]
+      rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
+        hu.aestronglyMeasurable]
       change (∫⁻ x, ‖u x‖ₑ ^ (2 : ℝ) ∂ω₀.volume) ^ (1 / (2 : ℝ)) = _
       rw [hlin]
       rw [ENNReal.ofReal_rpow_of_nonneg hnonneg
@@ -191,7 +192,7 @@ theorem c0_powered_iteration_bound
     intro N
     simpa [w] using hprod N
   have hess := MeasureTheory.eLpNormEssSup_le_of_eLpNorm_recurrence
-    hu.continuous.aestronglyMeasurable hp0 hpTop hpTendsto hrec' hprod'
+    hp0 hpTop hpTendsto hrec' hprod'
   have hinit : eLpNorm u (p 0) ω₀.volume ≤ ENNReal.ofReal (Real.sqrt (max L 0)) := by
     simpa [p] using initialNorm hu.continuous hu1 hL
   have htotal : B * ENNReal.ofReal (Real.sqrt (max L 0)) < ⊤ :=

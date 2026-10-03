@@ -204,8 +204,7 @@ private lemma eLpNorm_translate_eq_local
 
 omit [FiniteDimensional ℝ E] in
 private lemma eLpNorm_diffQuot_le_local
-    (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
-    (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
+    (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ} :
     eLpNorm (Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h F) 2 (volume : Measure EuclN) ≤
       (2 / ENNReal.ofReal |h|) * eLpNorm F 2 (volume : Measure EuclN) := by
@@ -228,20 +227,13 @@ private lemma eLpNorm_diffQuot_le_local
     simp [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
   rw [h_eq_pi]
   rw [eLpNorm_const_smul h⁻¹]
-  have hτF_aesm : AEStronglyMeasurable
-      (Sobolev.translate
-        (d := Module.finrank ℝ E) k h F) (volume : Measure EuclN) := by
-    have hMP : MeasurePreserving
-        (fun x : EuclN => x + h • EuclideanSpace.single k 1) volume volume :=
-      measurePreserving_add_right volume _
-    exact hF_aesm.comp_measurePreserving hMP
   have h_minkowski :
       eLpNorm (Sobolev.translate
         (d := Module.finrank ℝ E) k h F - F) 2 (volume : Measure EuclN) ≤
         eLpNorm (Sobolev.translate
           (d := Module.finrank ℝ E) k h F) 2 (volume : Measure EuclN) +
           eLpNorm F 2 (volume : Measure EuclN) :=
-    eLpNorm_sub_le hτF_aesm hF_aesm (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+    eLpNorm_sub_le (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   rw [eLpNorm_translate_eq_local k h F] at h_minkowski
   have h_step : eLpNorm (Sobolev.translate
       (d := Module.finrank ℝ E) k h F - F) 2 (volume : Measure EuclN) ≤
@@ -269,96 +261,14 @@ private lemma eLpNorm_diffQuot_le_local
 omit [FiniteDimensional ℝ E] in
 private lemma eLpNorm_mul_bounded
     (M : ℝ) (hM_nn : 0 ≤ M) {f g : EuclN → ℝ}
-    (hf_bound : ∀ x, |f x| ≤ M) :
+    (hf_bound : ∀ x, |f x| ≤ M)
+    (hfg : AEStronglyMeasurable (fun x => f x * g x) (volume : Measure EuclN)) :
     eLpNorm (fun x => f x * g x) 2 (volume : Measure EuclN) ≤
       ENNReal.ofReal M * eLpNorm g 2 (volume : Measure EuclN) := by
-  classical
-  have h2_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
-  have h2_ne_top : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num
-  have h2_toReal : ((2 : ℝ≥0∞)).toReal = 2 := by show ENNReal.toReal 2 = 2; rfl
-  have h_pow_eq : ∀ a : ℝ≥0∞, a ^ (2 : ℝ) = a ^ (2 : ℕ) := by
-    intro a
-    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.rpow_natCast]
-  have h_pt_enorm : ∀ x : EuclN,
-      (‖f x * g x‖ₑ : ℝ≥0∞)^(2 : ℕ) ≤
-        ENNReal.ofReal (M^2) * (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
-    intro x
-    have h_real : (f x * g x)^2 ≤ M^2 * (g x)^2 := by
-      have h_abs_le : |f x| ≤ M := hf_bound x
-      have h_sq_le : (f x)^2 ≤ M^2 := by
-        rw [show (f x)^2 = |f x|^2 from by rw [sq_abs]]
-        exact pow_le_pow_left₀ (abs_nonneg _) h_abs_le 2
-      have h_g_sq_nn : 0 ≤ (g x)^2 := sq_nonneg _
-      calc (f x * g x)^2
-          = (f x)^2 * (g x)^2 := by ring
-        _ ≤ M^2 * (g x)^2 := mul_le_mul_of_nonneg_right h_sq_le h_g_sq_nn
-    have h_lhs_eq :
-        (‖f x * g x‖ₑ : ℝ≥0∞)^(2 : ℕ) =
-          ENNReal.ofReal ((f x * g x)^2) := by
-      rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
-        sq_abs]
-    have h_rhs_eq :
-        (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) =
-          ENNReal.ofReal ((g x)^2) := by
-      rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
-        sq_abs]
-    rw [h_lhs_eq, h_rhs_eq]
-    have hM2_nn : 0 ≤ M^2 := sq_nonneg _
-    rw [show ENNReal.ofReal (M^2) * ENNReal.ofReal ((g x)^2) =
-      ENNReal.ofReal (M^2 * (g x)^2) from
-      (ENNReal.ofReal_mul hM2_nn).symm]
-    exact ENNReal.ofReal_le_ofReal h_real
-  have h_lint_le :
-      ∫⁻ x : EuclN, (‖f x * g x‖ₑ : ℝ≥0∞)^(2 : ℕ)
-          ∂(volume : Measure EuclN) ≤
-        ENNReal.ofReal (M^2) *
-          ∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) ∂(volume : Measure EuclN) := by
-    calc ∫⁻ x : EuclN, (‖f x * g x‖ₑ : ℝ≥0∞)^(2 : ℕ)
-        ≤ ∫⁻ x : EuclN, ENNReal.ofReal (M^2) *
-            (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
-          refine lintegral_mono_ae ?_
-          filter_upwards with x using h_pt_enorm x
-      _ = ENNReal.ofReal (M^2) *
-            ∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
-          rw [lintegral_const_mul']
-          exact ENNReal.ofReal_ne_top
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top,
-    eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top, h2_toReal]
-  have h_lhs_pow_eq :
-      (∫⁻ x : EuclN, (‖f x * g x‖ₑ : ℝ≥0∞) ^ (2 : ℝ)
-          ∂(volume : Measure EuclN)) =
-        ∫⁻ x : EuclN, (‖f x * g x‖ₑ : ℝ≥0∞) ^ (2 : ℕ)
-          ∂(volume : Measure EuclN) := by
-    refine lintegral_congr_ae ?_
-    filter_upwards with x using h_pow_eq _
-  have h_rhs_pow_eq :
-      (∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞) ^ (2 : ℝ)
-          ∂(volume : Measure EuclN)) =
-        ∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞) ^ (2 : ℕ)
-          ∂(volume : Measure EuclN) := by
-    refine lintegral_congr_ae ?_
-    filter_upwards with x using h_pow_eq _
-  rw [h_lhs_pow_eq, h_rhs_pow_eq]
-  refine le_trans (ENNReal.rpow_le_rpow h_lint_le (by norm_num : (0 : ℝ) ≤ 1/2)) ?_
-  have hM2_nn : 0 ≤ M^2 := sq_nonneg _
-  have h_mul_rpow :
-      (ENNReal.ofReal (M^2) *
-          ∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞) ^ (2 : ℕ)) ^ ((1 : ℝ) / 2) =
-        (ENNReal.ofReal (M^2)) ^ ((1 : ℝ) / 2) *
-          (∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞) ^ (2 : ℕ)) ^ ((1 : ℝ) / 2) := by
-    rw [ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0 : ℝ) ≤ 1/2)]
-  rw [h_mul_rpow]
-  have h_sqrt_M2 :
-      (ENNReal.ofReal (M^2)) ^ ((1 : ℝ) / 2) = ENNReal.ofReal M := by
-    have h_M2_to_pow :
-        ENNReal.ofReal (M^2) = (ENNReal.ofReal M) ^ (2 : ℕ) := by
-      rw [ENNReal.ofReal_pow hM_nn 2]
-    rw [h_M2_to_pow]
-    rw [← ENNReal.rpow_natCast (ENNReal.ofReal M) 2,
-      ← ENNReal.rpow_mul]
-    have h_calc : ((2 : ℕ) : ℝ) * (1 / 2) = 1 := by norm_num
-    rw [h_calc, ENNReal.rpow_one]
-  rw [h_sqrt_M2]
+  refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul hfg ?_ 2
+  filter_upwards with x
+  rw [Real.norm_eq_abs, abs_mul, Real.norm_eq_abs]
+  exact mul_le_mul (hf_bound x) le_rfl (abs_nonneg _) hM_nn
 
 theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -774,6 +684,7 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
             (fun y => uSeq n y - χ y * D.uChart y)) 2
             (volume : Measure EuclN) :=
       eLpNorm_mul_bounded (2 * M_η * M_dη) hM_2ηdη_nn hM_2ηdη_bd
+        (by simpa only [hTerm_A_def] using h_A_aesm n)
     have h_step2 :
         eLpNorm (Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
@@ -782,7 +693,7 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
         (2 / ENNReal.ofReal |h|) *
           eLpNorm (fun y => uSeq n y - χ y * D.uChart y) 2
             (volume : Measure EuclN) :=
-      eLpNorm_diffQuot_le_local k hh (h_diff_uchart_aesm n)
+      eLpNorm_diffQuot_le_local k hh
     calc eLpNorm (fun z =>
         2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
         Sobolev.diffQuot
@@ -826,6 +737,7 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
                 ((fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.uChart y +
                   χ y * D.weakPartial j y))) 2 (volume : Measure EuclN) :=
       eLpNorm_mul_bounded (M_η^2) hM_η_sq_nn hM_η_sq_bd
+        (by simpa only [hTerm_B_def] using h_B_aesm n)
     have h_step2 :
         eLpNorm (Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
@@ -838,7 +750,7 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
             (fderiv ℝ (uSeq n) y) (EuclideanSpace.single j 1) -
               ((fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.uChart y +
                 χ y * D.weakPartial j y)) 2 (volume : Measure EuclN) :=
-      eLpNorm_diffQuot_le_local k hh (h_diff_grad_aesm n)
+      eLpNorm_diffQuot_le_local k hh
     calc eLpNorm (fun z =>
         (η z)^2 *
           Sobolev.diffQuot
@@ -862,12 +774,6 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
                   ((fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.uChart y +
                     χ y * D.weakPartial j y)) 2
                 (volume : Measure EuclN)) := by gcongr
-  have h_F_minus_B_aesm : ∀ n,
-      AEStronglyMeasurable (F_n n - B) (volume : Measure EuclN) := by
-    intro n
-    have h_eq := h_F_minus_B_eq n
-    rw [h_eq]
-    exact (h_A_aesm n).add (h_B_aesm n)
   have h_outer_bound : ∀ n,
       eLpNorm (Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h) (F_n n - B)) 2
@@ -877,7 +783,7 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
     intro n
     have h_neg_h_ne : -h ≠ 0 := neg_ne_zero.mpr hh
     have habs_neg_h : |(-h)| = |h| := by rw [abs_neg]
-    have := eLpNorm_diffQuot_le_local k h_neg_h_ne (h_F_minus_B_aesm n)
+    have := eLpNorm_diffQuot_le_local k h_neg_h_ne (F := F_n n - B)
     rw [habs_neg_h] at this
     exact this
   have h_FB_bound : ∀ n,
@@ -886,8 +792,7 @@ theorem nirenbergTestFunction_seq_grad_tendsto_eLpNorm
       eLpNorm (TERM_B_n n) 2 (volume : Measure EuclN) := by
     intro n
     rw [h_F_minus_B_eq n]
-    exact eLpNorm_add_le (h_A_aesm n) (h_B_aesm n)
-      (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+    exact eLpNorm_add_le (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   have habs_h_pos : 0 < |h| := abs_pos.mpr hh
   have h_const_2η_ne_top : ENNReal.ofReal (2 * M_η * M_dη) *
       (2 / ENNReal.ofReal |h|) ≠ ⊤ := by

@@ -368,13 +368,10 @@ theorem IsPotential.contMDiff (hφ : ω₀.IsPotential φ) :
 
 theorem isPotential_zero : ω₀.IsPotential 0 := by
   constructor
-  · convert (contMDiff_const : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
-      (fun _ : M ↦ (0 : ℝ))) using 1
-    ext x
-    rfl
+  · exact contMDiff_const
   · intro x
     have hzero : mddbar n (0 : M → ℝ) = 0 := by
-      (convert mddbar_const (n := n) (M := M) (0 : ℝ) using 1; rfl)
+      exact mddbar_const (n := n) (M := M) (0 : ℝ)
     rw [hzero]
     simpa using ω₀.isPositive x
 
@@ -383,7 +380,7 @@ theorem perturb_zero : ω₀.perturb 0 isPotential_zero = ω₀ := by
   apply ext
   intro x
   have hzero : mddbar n (0 : M → ℝ) = 0 := by
-    (convert mddbar_const (n := n) (M := M) (0 : ℝ) using 1; rfl)
+    exact mddbar_const (n := n) (M := M) (0 : ℝ)
   simp [perturb, hzero]
 
 theorem IsPotential.add_const (hφ : ω₀.IsPotential φ) (c : ℝ) :
@@ -391,10 +388,7 @@ theorem IsPotential.add_const (hφ : ω₀.IsPotential φ) (c : ℝ) :
   rcases hφ with ⟨hφ, hpos⟩
   constructor
   · have hc : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞ (fun _ : M ↦ c) := contMDiff_const
-    have h := contMDiff_add_functions hφ hc
-    convert h using 1
-    ext x
-    rfl
+    exact contMDiff_add_functions hφ hc
   · simpa [mddbar_add_const] using hpos
 
 theorem perturb_add_const (hφ : ω₀.IsPotential φ) (c : ℝ) :

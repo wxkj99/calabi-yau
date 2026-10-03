@@ -347,8 +347,6 @@ private theorem c2_log_dimension_add_laplacian_smooth [NeZero n]
     have hlap : ContMDiff I 𝓘(ℝ) ∞ (ω₀.laplacian φ) := by
       simpa [I] using ω₀.contMDiff_laplacian hφ.1
     convert hconst.add hlap using 1
-    ext x
-    rfl
   have hf_pos (x : M) : 0 < f x := by
     dsimp [f]
     rw [← c2_relTrace_perturb_eq_dimension_add_laplacian ω₀ hφ x]

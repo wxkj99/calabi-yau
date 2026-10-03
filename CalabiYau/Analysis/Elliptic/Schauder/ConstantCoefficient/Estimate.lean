@@ -229,7 +229,7 @@ theorem spd_laplacian_schauder_estimate
     exact hbound
   have hholder' : HolderWith K' alpha fp := by
     rw [hfp]
-    have hraw := hholder.comp L.lipschitz.holderWith
+    have hraw := hholder.comp L.lipschitzWith.holderWith
     have hraw' : HolderWith K' alpha
         ((spdMatrixLap A hA d2u : Euc n → F) ∘ L) := by
       simpa only [K', NNReal.coe_one, NNReal.rpow_one, one_mul, mul_one] using hraw

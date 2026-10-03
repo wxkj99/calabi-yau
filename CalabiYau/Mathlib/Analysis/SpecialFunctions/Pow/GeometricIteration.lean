@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.Data.ENNReal.BigOperators
+public import Mathlib.Basic.ENNReal.BigOperators
 
 public section
 

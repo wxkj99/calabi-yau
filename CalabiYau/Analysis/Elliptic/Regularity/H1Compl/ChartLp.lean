@@ -304,6 +304,14 @@ private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
             (Sobolev.Chart.chartTargetEuclid (I := I) (M := M)
               α)) := by
   classical
+  by_cases hf : AEStronglyMeasurable f
+      ((volume : Measure EuclN).restrict
+        (Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α))
+  swap
+  · have hC : ENNReal.ofReal (M_sup ^ (1 / p.toReal)) ≠ 0 :=
+      ne_of_gt (ENNReal.ofReal_pos.mpr (Real.rpow_pos_of_pos hM_sup_pos _))
+    rw [eLpNorm_of_not_aestronglyMeasurable hf, ENNReal.mul_top hC]
+    exact le_top
   have hp_ne_zero : p ≠ 0 := by
     intro h; rw [h] at hp_one; exact absurd hp_one (by norm_num)
   have hp_toReal_pos : 0 < p.toReal := ENNReal.toReal_pos hp_ne_zero hp_top
@@ -312,8 +320,16 @@ private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
   have hS_open : IsOpen S := Sobolev.Chart.chartTargetEuclid_isOpen
     (I := I) (M := M) α
   have hS_meas : MeasurableSet S := hS_open.measurableSet
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
+  have hf_weighted : AEStronglyMeasurable f
+      ((chartPulledWeightedMeasure (I := I) g α).restrict S) := by
+    rw [show (chartPulledWeightedMeasure (I := I) g α).restrict S =
+        ((volume : Measure EuclN).restrict S).withDensity
+          (fun y => ENNReal.ofReal (densityOnEuclid (I := I) g α y)) by
+      unfold chartPulledWeightedMeasure
+      exact MeasureTheory.restrict_withDensity hS_meas _]
+    exact hf.mono_ac (withDensity_absolutelyContinuous _ _)
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top hf_weighted]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top hf]
   have h_lint_le :
       ∫⁻ y, ‖f y‖ₑ ^ p.toReal
           ∂((chartPulledWeightedMeasure (I := I) g α).restrict S) ≤
@@ -451,7 +467,7 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     have h_step3 :
         eLpNorm v p (riemannianVolumeMeasure (I := I) (M := M) g) ≤
           eLpNorm u p (riemannianVolumeMeasure (I := I) (M := M) g) := by
-      refine MeasureTheory.eLpNorm_mono_enorm (fun x => ?_)
+      refine MeasureTheory.eLpNorm_mono_enorm hv_meas.aestronglyMeasurable (fun x => ?_)
       exact enorm_pou_mul_le (I := I) (M := M) α u x
     calc eLpNorm (Sobolev.Chart.chartPushedRaw I α v) p
             ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -584,58 +600,9 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
   obtain ⟨C, hC_pos, hC_bnd⟩ :=
     eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le (I := I) (M := M) g α
       (p := 2) hp_one hp_top
-  refine ⟨?_, ?_⟩
-  · set ψ : EuclN → ℝ := fun y =>
-        ((chartAtlasPOU I M α : M → ℝ)
-          (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) *
-        u (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))
-      with hψ_def
-    have h_extSymm_meas : Measurable (extChartAtSymmExt (I := I) (M := M) α) :=
-      extChartAtSymmExt_measurable (I := I) (M := M) α
-    have h_toE_symm_meas : Measurable
-        (fun y : EuclN => (toEuclidean (E := E)).symm y) :=
-      (toEuclidean (E := E)).symm.continuous.measurable
-    have hψ_meas : Measurable ψ := by
-      change Measurable (fun y =>
-        ((chartAtlasPOU I M α : M → ℝ)
-          (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) *
-        u (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y)))
-      refine Measurable.mul ?_ ?_
-      · exact (chartAtlasPOU_measurable (I := I) (M := M) α).comp
-          (h_extSymm_meas.comp h_toE_symm_meas)
-      · exact hu_meas.comp (h_extSymm_meas.comp h_toE_symm_meas)
-    have h_ψ_eq_chartPushed : ∀ y ∈ Sobolev.Chart.chartTargetEuclid
-        (I := I) (M := M) α,
-        ψ y = Sobolev.Chart.chartPushed (I := I) (M := M)
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u y := by
-      intro y hy
-      have h_toE_symm_in : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
-        rcases hy with ⟨z, hz_target, hzy⟩
-        have h_eq : (toEuclidean (E := E)).symm y = z := by
-          rw [← hzy]; exact (toEuclidean (E := E)).symm_apply_apply z
-        rw [h_eq]; exact hz_target
-      change ((chartAtlasPOU I M α : M → ℝ)
-          (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) *
-        u (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y)) =
-        Sobolev.Chart.chartPushed (I := I) (M := M)
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u y
-      rw [extChartAtSymmExt_eq_on_target (I := I) (M := M) α h_toE_symm_in]
-      rfl
-    have h_aeeq :
-        Sobolev.Chart.chartPushed (I := I) (M := M)
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) α u =ᵐ[
-            (chartPulledWeightedMeasure (I := I) g α).restrict
-              (Sobolev.Chart.chartTargetEuclid
-                (I := I) (M := M) α)] ψ := by
-      refine (MeasureTheory.ae_restrict_iff'
-        (Sobolev.Chart.chartTargetEuclid_measurableSet
-        (I := I) (M := M) α)).mpr ?_
-      refine Filter.Eventually.of_forall (fun y hy => ?_)
-      exact (h_ψ_eq_chartPushed y hy).symm
-    exact (hψ_meas.aestronglyMeasurable).congr h_aeeq.symm
-  · refine lt_of_le_of_lt (hC_bnd hu_meas) ?_
-    apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
-    exact hu_memLp.2
+  apply memLp_iff.mpr
+  refine lt_of_le_of_lt (hC_bnd hu_meas) ?_
+  exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hu_memLp.eLpNorm_lt_top
 
 theorem chartPushed_tendsto_chartPulledWeightedMeasure
     (g : SmoothRiemannianMetric I M) (α : M)

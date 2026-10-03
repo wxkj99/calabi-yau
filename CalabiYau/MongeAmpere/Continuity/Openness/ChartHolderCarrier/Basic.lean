@@ -48,7 +48,7 @@ instance (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0) :
 
 instance (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0) :
     Module ℝ (SmoothChartHolderCore cover k α) :=
-  (smoothChartHolderCoreEquivSmoothMap cover k α).module ℝ
+  (smoothChartHolderCoreEquivSmoothMap cover k α).addEquiv.module ℝ
 
 instance (cover : CompactChartCover E M) (k : ℕ) (α : ℝ≥0) :
     CoeFun (SmoothChartHolderCore cover k α) (fun _ ↦ M → ℝ) where

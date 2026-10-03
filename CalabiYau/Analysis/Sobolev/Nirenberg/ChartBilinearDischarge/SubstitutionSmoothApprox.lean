@@ -797,8 +797,7 @@ private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : �
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
 private lemma eLpNorm_diffQuot_le_local
-    (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
-    (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
+    (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ} :
     eLpNorm (Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h F) 2 (volume : Measure EuclN) ≤
       (2 / ENNReal.ofReal |h|) * eLpNorm F 2 (volume : Measure EuclN) := by
@@ -821,20 +820,13 @@ private lemma eLpNorm_diffQuot_le_local
     simp [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
   rw [h_eq_pi]
   rw [eLpNorm_const_smul h⁻¹]
-  have hτF_aesm : AEStronglyMeasurable
-      (Sobolev.translate
-        (d := Module.finrank ℝ E) k h F) (volume : Measure EuclN) := by
-    have hMP : MeasurePreserving
-        (fun x : EuclN => x + h • EuclideanSpace.single k 1) volume volume :=
-      measurePreserving_add_right volume _
-    exact hF_aesm.comp_measurePreserving hMP
   have h_minkowski :
       eLpNorm (Sobolev.translate
         (d := Module.finrank ℝ E) k h F - F) 2 (volume : Measure EuclN) ≤
         eLpNorm (Sobolev.translate
           (d := Module.finrank ℝ E) k h F) 2 (volume : Measure EuclN) +
           eLpNorm F 2 (volume : Measure EuclN) :=
-    eLpNorm_sub_le hτF_aesm hF_aesm (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+    eLpNorm_sub_le (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   rw [eLpNorm_translate_eq_local k h F] at h_minkowski
   have h_step : eLpNorm (Sobolev.translate
       (d := Module.finrank ℝ E) k h F - F) 2 (volume : Measure EuclN) ≤
@@ -1059,7 +1051,7 @@ theorem nirenbergTestFunction_seq_tendsto_eLpNorm
         eLpNorm_nirenbergTestFunction_le (d := Module.finrank ℝ E)
           k hh hη_cont (h_aesm_diff n) hM_η_nn hM_η_bd
       have h_dq_bound :=
-        eLpNorm_diffQuot_le_local k hh (h_aesm_diff n)
+        eLpNorm_diffQuot_le_local k hh (F := uSeq n - fun x => χ x * D.uChart x)
       have h_step1 :
           eLpNorm (nirenbergTestFunction (d := Module.finrank ℝ E) k h η
             (uSeq n - fun x => χ x * D.uChart x)) 2

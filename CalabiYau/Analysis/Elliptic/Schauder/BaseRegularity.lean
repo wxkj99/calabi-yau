@@ -630,7 +630,7 @@ private theorem identify_extracted_jets_on_inner_open_ball
     rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
     have htarget : (fun y : K => G₁ (y : E)) = fun y => curry₁ (g₁ y) := by
       funext y
-      simp only [G₁, dif_pos y.property]
+      simp only [G₁, dite_eq_left y.property]
       rfl
     change TendstoUniformly _ (fun y : K => G₁ (y : E)) atTop
     rw [htarget]
@@ -667,7 +667,7 @@ private theorem identify_extracted_jets_on_inner_open_ball
       Metric.isOpen_ball h₁loc hder₁ hvaluePoint hx
     have hxK : x ∈ K := Metric.ball_subset_closedBall hx
     have hhas' : fderiv ℝ u x = curry₁ (g₁ ⟨x, hxK⟩) := by
-      simpa only [G₁, dif_pos hxK] using hhas.fderiv
+      simpa only [G₁, dite_eq_left hxK] using hhas.fderiv
     have hformula : fderiv ℝ u x =
         continuousMultilinearCurryFin1 ℝ E ℝ (iteratedFDeriv ℝ 1 u x) := by
       ext v
@@ -694,7 +694,7 @@ private theorem identify_extracted_jets_on_inner_open_ball
     rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
     have htarget : (fun y : K => G₂ (y : E)) = fun y => curry₂ (g₂ y) := by
       funext y
-      simp only [G₂, dif_pos y.property]
+      simp only [G₂, dite_eq_left y.property]
       rfl
     change TendstoUniformly _ (fun y : K => G₂ (y : E)) atTop
     rw [htarget]
@@ -731,7 +731,7 @@ private theorem identify_extracted_jets_on_inner_open_ball
       Metric.isOpen_ball h₂loc hder₂ hfirstPoint hx
     have hxK : x ∈ K := Metric.ball_subset_closedBall hx
     have hhas' : fderiv ℝ (iteratedFDeriv ℝ 1 u) x = curry₂ (g₂ ⟨x, hxK⟩) := by
-      simpa only [G₂, dif_pos hxK] using hhas.fderiv
+      simpa only [G₂, dite_eq_left hxK] using hhas.fderiv
     have hformula : fderiv ℝ (iteratedFDeriv ℝ 1 u) x =
         curry₂ (iteratedFDeriv ℝ 2 u x) := by
       have h := congrFun (fderiv_iteratedFDeriv (𝕜 := ℝ) (f := u) (n := 1)) x

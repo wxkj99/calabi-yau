@@ -190,6 +190,8 @@ theorem riemannian_gradFun_energy_eq_two_mul_gradNormSq
     have hdiff : MDifferentiableAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) f x :=
       hf.mdifferentiableAt (by norm_num)
     simp [mfderiv, hdiff, writtenInExtChartAt, chartAt_self_eq]
+    ext v
+    rfl
   have hform : mdWedgeDBar n f x = ContinuousAlternatingMap.dWedgeDBar ℓ := by
     change ContinuousAlternatingMap.dWedgeDBar
       (fderiv ℝ (f ∘ (extChartAt 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) x).symm)

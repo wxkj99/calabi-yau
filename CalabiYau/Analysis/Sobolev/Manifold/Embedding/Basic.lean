@@ -95,7 +95,12 @@ theorem eLpNorm_chartPushed_p_le_wkpNorm_one
             (chartPushed (I := I) (M := M)
               (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β u)
             (chartTargetEuclid (I := I) (M := M) β) := by
-    exact ENNReal.le_tsum α
+    exact ENNReal.le_tsum (f := fun β : M =>
+      Sobolev.Euclidean.iteratedWeakSobolevNorm
+        (d := Module.finrank ℝ E) 1 p
+        (chartPushed (I := I) (M := M)
+          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β u)
+        (chartTargetEuclid (I := I) (M := M) β)) α
   exact h_per_α.trans h_le_tsum
 
 omit [IsManifold I ∞ M] in

@@ -138,8 +138,6 @@ private theorem exists_smoothCore_uncentered_residual_one
     have hconst : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
         (fun _ : M => ω₀.pathConstant F (t + δ) - ω₀.pathConstant F t) := contMDiff_const
     convert contMDiff_add_fun hdeltaF hconst using 1
-    ext x
-    simp [Pi.smul_apply, smul_eq_mul]
   have hres : ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞
       (uncenteredContinuityPathResidual ω₀ F t φ hsol v.smoothMap δ) := by
     change ContMDiff 𝓘(ℝ, EuclideanSpace ℂ (Fin n)) 𝓘(ℝ) ∞

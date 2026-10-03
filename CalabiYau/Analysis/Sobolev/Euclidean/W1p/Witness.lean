@@ -352,21 +352,13 @@ theorem MemW01p.add
             eLpNorm (fun x => φu n x - u x) 2 (volume.restrict Ω) +
               eLpNorm (fun x => φv n x - v x) 2 (volume.restrict Ω) := by
       intro n
-      have hφu_mem : MemLp (φu n) 2 (volume.restrict Ω) :=
-        ((hφu_smooth n).continuous.memLp_of_hasCompactSupport (hφu_compact n)).restrict Ω
-      have hφv_mem : MemLp (φv n) 2 (volume.restrict Ω) :=
-        ((hφv_smooth n).continuous.memLp_of_hasCompactSupport (hφv_compact n)).restrict Ω
-      have hdu_mem : MemLp (fun x => φu n x - u x) 2 (volume.restrict Ω) :=
-        hφu_mem.sub hwu.memLp
-      have hdv_mem : MemLp (fun x => φv n x - v x) 2 (volume.restrict Ω) :=
-        hφv_mem.sub hwv.memLp
       have hEq :
           (fun x => (φu n x + φv n x) - (u x + v x)) =
             (fun x => (φu n x - u x) + (φv n x - v x)) := by
         ext x
         ring
       rw [hEq]
-      exact eLpNorm_add_le hdu_mem.aestronglyMeasurable hdv_mem.aestronglyMeasurable (by norm_num)
+      exact eLpNorm_add_le (by norm_num)
     have hsum :
         Tendsto
           (fun n =>
@@ -393,24 +385,6 @@ theorem MemW01p.add
                 2 (volume.restrict Ω) := by
       intro n
       let ei : E := EuclideanSpace.single i (1 : ℝ)
-      have hderiv_u_smooth : ContDiff ℝ (⊤ : ℕ∞)
-          (fun x => (fderiv ℝ (φu n) x) ei) :=
-        ((hφu_smooth n).fderiv_right (m := (⊤ : ℕ∞)) (by norm_cast)).clm_apply contDiff_const
-      have hderiv_v_smooth : ContDiff ℝ (⊤ : ℕ∞)
-          (fun x => (fderiv ℝ (φv n) x) ei) :=
-        ((hφv_smooth n).fderiv_right (m := (⊤ : ℕ∞)) (by norm_cast)).clm_apply contDiff_const
-      have hderiv_u_mem : MemLp (fun x => (fderiv ℝ (φu n) x) ei) 2 (volume.restrict Ω) :=
-        (hderiv_u_smooth.continuous.memLp_of_hasCompactSupport
-          ((hφu_compact n).fderiv_apply (𝕜 := ℝ) ei)).restrict Ω
-      have hderiv_v_mem : MemLp (fun x => (fderiv ℝ (φv n) x) ei) 2 (volume.restrict Ω) :=
-        (hderiv_v_smooth.continuous.memLp_of_hasCompactSupport
-          ((hφv_compact n).fderiv_apply (𝕜 := ℝ) ei)).restrict Ω
-      have hdu_mem :
-          MemLp (fun x => (fderiv ℝ (φu n) x) ei - hwu.weakGrad x i) 2 (volume.restrict Ω) :=
-        hderiv_u_mem.sub (hwu.weakGrad_component_memLp i)
-      have hdv_mem :
-          MemLp (fun x => (fderiv ℝ (φv n) x) ei - hwv.weakGrad x i) 2 (volume.restrict Ω) :=
-        hderiv_v_mem.sub (hwv.weakGrad_component_memLp i)
       have hEq :
           (fun x =>
             (fderiv ℝ (fun y => φu n y + φv n y) x) ei - (hwu.add hwv).weakGrad x i) =
@@ -429,7 +403,7 @@ theorem MemW01p.add
         simp [ei, MemW1pWitness.add, hfd]
         ring
       rw [hEq]
-      exact eLpNorm_add_le hdu_mem.aestronglyMeasurable hdv_mem.aestronglyMeasurable (by norm_num)
+      exact eLpNorm_add_le (by norm_num)
     have hsum :
         Tendsto
           (fun n =>

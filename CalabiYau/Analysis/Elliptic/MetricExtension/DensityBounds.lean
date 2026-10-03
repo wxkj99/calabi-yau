@@ -124,17 +124,19 @@ lemma eLpNorm_densityOnEuclid_mul_sq_le
       eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ ≤
         (‖Mden‖ₑ : ℝ≥0∞) * eLpNorm f 2 μ := by
     calc eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ
-        ≤ eLpNorm (Mden • f) 2 μ := eLpNorm_mono_ae h_pt_le
+        ≤ eLpNorm (Mden • f) 2 μ := eLpNorm_mono_ae
+          (densityOnEuclid_mul_memLp hΩ'_closure_compact hΩ'_closure_in hf).aestronglyMeasurable
+          h_pt_le
       _ = (‖Mden‖ₑ : ℝ≥0∞) * eLpNorm f 2 μ := eLpNorm_const_smul Mden f 2 μ
   have h_eLpf_ne_top : eLpNorm f 2 μ ≠ (⊤ : ℝ≥0∞) := by
-    rw [hμ_def]; exact hf.2.ne
+    rw [hμ_def]; exact hf.eLpNorm_lt_top.ne
   have h_toReal_le :
       (eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ).toReal ≤
         Mden * (eLpNorm f 2 μ).toReal := by
     have h_mono := ENNReal.toReal_mono
       (by
         rw [hμ_def]
-        exact ENNReal.mul_ne_top ENNReal.coe_ne_top hf.2.ne) h_eLp_le
+        exact ENNReal.mul_ne_top ENNReal.coe_ne_top hf.eLpNorm_lt_top.ne) h_eLp_le
     rwa [ENNReal.toReal_mul, toReal_enorm, Real.norm_eq_abs,
       abs_of_nonneg hMden_nn] at h_mono
   have h_lhs_nn : 0 ≤

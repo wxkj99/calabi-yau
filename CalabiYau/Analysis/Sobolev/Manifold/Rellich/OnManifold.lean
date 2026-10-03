@@ -542,7 +542,12 @@ private lemma exists_chart_rellich_subseq_aux_M
           rw [h_iter, hEquiv_app α']
       rw [← h_sum_eq]
     refine h_grad_sum_le_wkpNorm.trans ?_
-    exact ENNReal.le_tsum α
+    exact ENNReal.le_tsum (f := fun β : M =>
+      Sobolev.Euclidean.iteratedWeakSobolevNorm
+        (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
+        (chartPushed (I := I) (M := M)
+          (CalabiYau.RiemannianVolume.chartAtlasPOU I M) β (u (ψ n)))
+        (chartTargetEuclid (I := I) (M := M) β)) α
   have h_neighborhood_open := chartNeighborhoodM_isOpen (I := I) (M := M) α
   have h_neighborhood_bdd := chartNeighborhoodM_isBounded (I := I) (M := M) α
   have hp_le : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
@@ -756,10 +761,10 @@ private lemma memLp_pou_mul_riemannianMeasure_aux
   have h_bnd := hC_bnd
     (pou_mul_measurable_aux (I := I) (M := M) α hu_meas)
     (tsupport_pou_mul_subset_tsupport_pou_aux (I := I) (M := M) α u)
-  refine ⟨(pou_mul_measurable_aux (I := I) (M := M) α hu_meas).aestronglyMeasurable, ?_⟩
+  apply memLp_iff.mpr
   refine lt_of_le_of_lt h_bnd ?_
   apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
-  exact h_raw_memLp.2
+  exact h_raw_memLp.eLpNorm_lt_top
 
 private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     (g : CalabiYau.SmoothRiemannianMetric I M)
@@ -893,12 +898,8 @@ private lemma eLpNorm_chartPushedRaw_diff_chartTarget_eq_chartNeighborhoodM
 private lemma eLpNorm_chartPushed_jk_NeighborhoodM_le_of_tendsto
     {p : ℝ} (hp_one : 1 < p)
     {u : ℕ → M → ℝ}
-    (hu_mem : ∀ n, MemWkpChart (I := I) (M := M) 1 (ENNReal.ofReal p) (u n))
     (α : M) {φ : ℕ → ℕ}
     {w_α : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
-    (hw_α_aestrong : AEStronglyMeasurable w_α
-      ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
-        (chartNeighborhoodM (I := I) (M := M) α)))
     (h_tendsto :
       Filter.Tendsto
         (fun k => eLpNorm
@@ -924,20 +925,6 @@ private lemma eLpNorm_chartPushed_jk_NeighborhoodM_le_of_tendsto
   rcases h_tendsto (ENNReal.ofReal (ε / 2)) (ENNReal.ofReal_pos.mpr (by linarith))
     with ⟨N, hN⟩
   refine ⟨N, fun j hj k hk => ?_⟩
-  have h_chart_jraw_aestrong : AEStronglyMeasurable (chartPushedRaw (I := I) (M := M) α
-      (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-        : C^∞⟮I, M; ℝ⟯) x * u (φ j) x))
-      ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
-        (chartNeighborhoodM (I := I) (M := M) α)) :=
-    (memW1p_chartPushedRaw_pou_mul_chartNeighborhoodM
-      (I := I) (M := M) (hu_mem (φ j)) α).1.1
-  have h_chart_kraw_aestrong : AEStronglyMeasurable (chartPushedRaw (I := I) (M := M) α
-      (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
-        : C^∞⟮I, M; ℝ⟯) x * u (φ k) x))
-      ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
-        (chartNeighborhoodM (I := I) (M := M) α)) :=
-    (memW1p_chartPushedRaw_pou_mul_chartNeighborhoodM
-      (I := I) (M := M) (hu_mem (φ k)) α).1.1
   have h_triangle :
       eLpNorm
         (fun y => chartPushedRaw (I := I) (M := M) α
@@ -970,8 +957,6 @@ private lemma eLpNorm_chartPushed_jk_NeighborhoodM_le_of_tendsto
       (g := fun y => w_α y - chartPushedRaw (I := I) (M := M) α
         (fun x : M => (CalabiYau.RiemannianVolume.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u (φ k) x) y)
-      (h_chart_jraw_aestrong.sub hw_α_aestrong)
-      (hw_α_aestrong.sub h_chart_kraw_aestrong)
       (by simpa using (ENNReal.ofReal_le_ofReal hp_one.le :
         ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p))
     rw [show
@@ -1034,9 +1019,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
     (hu_mem : ∀ n, MemWkpChart (I := I) (M := M) 1 (ENNReal.ofReal p) (u n))
     (α : M) {φ : ℕ → ℕ}
     {w_α : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
-    (hw_α_memLp : MemLp w_α (ENNReal.ofReal p)
-      ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
-        (chartNeighborhoodM (I := I) (M := M) α)))
     (h_tendsto :
       Filter.Tendsto
         (fun k => eLpNorm
@@ -1086,7 +1068,8 @@ private lemma exists_riemannianMeasure_limit_pou_mul
       set ε₀ : ℝ := ε / C
       have hε₀_pos : 0 < ε₀ := div_pos hε hC_pos
       rcases eLpNorm_chartPushed_jk_NeighborhoodM_le_of_tendsto
-        (I := I) (M := M) hp_one hu_mem α hw_α_memLp.1 h_tendsto ε₀ hε₀_pos with ⟨N, hN⟩
+        (I := I) (M := M) hp_one α
+        h_tendsto ε₀ hε₀_pos with ⟨N, hN⟩
       refine ⟨N, fun j hj k hk => ?_⟩
       have h_chart_jk_NeighborhoodM := hN j hj k hk
       have h_diff_eq_swap :
@@ -1225,7 +1208,7 @@ theorem rellich_kondrachov_chart_seq
     intro α hα
     rcases hP_S α hα with ⟨w_α, hw_α_memLp, h_tendsto⟩
     exact exists_riemannianMeasure_limit_pou_mul
-      (I := I) (M := M) g hp_one hu_meas hu_mem α hw_α_memLp h_tendsto
+      (I := I) (M := M) g hp_one hu_meas hu_mem α h_tendsto
   let v : ∀ α ∈ S, M → ℝ := fun α hα => (h_per_α α hα).choose
   have hv_memLp : ∀ α (hα : α ∈ S), MemLp (v α hα) (ENNReal.ofReal p)
       (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
@@ -1330,17 +1313,6 @@ theorem rellich_kondrachov_chart_seq
         (g := fun α => v α.1 α.2 x)
     rw [h_distrib, h_pou_x]
   rw [h_diff_eq]
-  have h_each_aestrong : ∀ α ∈ S.attach,
-      AEStronglyMeasurable
-        (fun x : M =>
-          ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α.1
-            : C^∞⟮I, M; ℝ⟯) x * u (φ j) x - v α.1 α.2 x))
-        (CalabiYau.RiemannianVolume.riemannianMeasure (I := I) g
-          (CalabiYau.RiemannianVolume.chartAtlasPOU I M)) := by
-    intro α _hα
-    have h_pou_meas := pou_mul_measurable_aux (I := I) (M := M) α.1 (hu_meas (φ j))
-    have h_v_meas := (hv_memLp α.1 α.2).1
-    exact h_pou_meas.aestronglyMeasurable.sub h_v_meas
   have hp_le : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     simpa using (ENNReal.ofReal_le_ofReal hp_one.le :
       ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p)
@@ -1354,7 +1326,7 @@ theorem rellich_kondrachov_chart_seq
     funext x
     rw [Finset.sum_apply]
   rw [h_pi_sum]
-  refine (eLpNorm_sum_le h_each_aestrong hp_le).trans ?_
+  refine (eLpNorm_sum_le hp_le).trans ?_
   have h_each_le : ∀ α ∈ S.attach,
       eLpNorm (fun x : M => ((CalabiYau.RiemannianVolume.chartAtlasPOU I M α.1
             : C^∞⟮I, M; ℝ⟯) x * u (φ j) x - v α.1 α.2 x)) (ENNReal.ofReal p)

@@ -57,6 +57,7 @@ private theorem continuousOn_complexHessian_of_contDiffOn_two
     fun_prop
   exact hcont.congr hformula
 
+open scoped ComplexOrder in
 private theorem continuous_mongeAmpere_of_isC2Potential
     (ω₀ : KahlerForm n M) {φ : M → ℝ} (hφ : ω₀.IsC2Potential φ) :
     Continuous (ω₀.mongeAmpere φ) := by
@@ -115,6 +116,7 @@ private theorem continuous_mongeAmpere_of_isC2Potential
       modelWithCornersSelf_coe_symm] using hlocal
   exact hcomp.congr_of_eventuallyEq heq
 
+open scoped ComplexOrder in
 /-- The determinant-density convergence estimate on one compact chart piece.  Its proof uses the
 uniform convergence of the second chart jets and continuity of the finite-dimensional relative
 determinant on the bounded chartwise range. -/

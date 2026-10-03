@@ -288,7 +288,7 @@ theorem locally_finite_schauder_data
   let lam : ℝ≥0 := if hn : 0 < n then Classical.choose (hquadData hn) else 1
   have hlampos : 0 < lam := by
     by_cases hn : 0 < n
-    · simp only [lam, dif_pos hn]
+    · simp only [lam, dite_eq_left hn]
       exact (Classical.choose_spec (hquadData hn)).1
     · have hn0 : n = 0 := by omega
       simp [lam, hn0]

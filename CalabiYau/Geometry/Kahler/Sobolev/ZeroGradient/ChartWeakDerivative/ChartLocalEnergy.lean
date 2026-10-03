@@ -43,7 +43,8 @@ private theorem chartLocal_map_toEuclidean_complexVolume (n : ℕ) :
       chartLocal_complexChartBasisVolume n • b.addHaar := by
     rw [MeasureTheory.Measure.addHaarMeasure_unique (MeasureTheory.volume) b.parallelepiped]
     rw [Module.Basis.addHaar, chartLocal_complexChartBasisVolume]
-  rw [hvol, MeasureTheory.Measure.map_smul]
+  rw [hvol, MeasureTheory.Measure.map_smul _
+    (toEuclidean (E := EuclideanSpace ℂ (Fin n))).continuous.measurable.aemeasurable]
   congr 1
   have hmap : Measure.map (toEuclidean (E := EuclideanSpace ℂ (Fin n))) b.addHaar =
       (b.map (toEuclidean (E := EuclideanSpace ℂ (Fin n))).toLinearEquiv).addHaar :=

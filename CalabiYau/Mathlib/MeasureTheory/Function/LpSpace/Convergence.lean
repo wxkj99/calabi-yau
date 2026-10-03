@@ -71,18 +71,16 @@ theorem memLp_of_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp : 1 ≤ p)
     {f : ℕ → α → E} {g : α → E}
     (hf_memLp : ∀ n, MemLp (f n) p μ)
-    (hg_aesm : AEStronglyMeasurable g μ)
     (hfg : Tendsto (fun n => eLpNorm (f n - g) p μ) atTop (nhds 0)) :
     MemLp g p μ := by
-  refine ⟨hg_aesm, ?_⟩
+  rw [memLp_iff]
   -- Find N with eLpNorm (f N - g) < 1
   obtain ⟨N, hN⟩ := (hfg.eventually (gt_mem_nhds (by norm_num : (0 : ℝ≥0∞) < 1))).exists
   -- g = f N - (f N - g), so eLpNorm g ≤ eLpNorm (f N) + eLpNorm (f N - g)
   calc eLpNorm g p μ
       = eLpNorm (f N - (f N - g)) p μ := by congr 1; ext x; simp
     _ ≤ eLpNorm (f N) p μ + eLpNorm (f N - g) p μ :=
-        eLpNorm_sub_le (hf_memLp N).aestronglyMeasurable
-          ((hf_memLp N).aestronglyMeasurable.sub hg_aesm) hp
+        eLpNorm_sub_le hp
     _ < ⊤ := ENNReal.add_lt_top.mpr
         ⟨(hf_memLp N).eLpNorm_lt_top, lt_of_lt_of_le hN (by norm_num)⟩
 
@@ -90,8 +88,6 @@ theorem memLp_of_tendsto_eLpNorm
 theorem ae_eq_of_tendsto_eLpNorm_sub
     {p : ℝ≥0∞} (hp : 1 ≤ p)
     {f : ℕ → α → E} {g₁ g₂ : α → E}
-    (hf_aesm : ∀ n, AEStronglyMeasurable (f n) μ)
-    (hg₁ : AEStronglyMeasurable g₁ μ) (hg₂ : AEStronglyMeasurable g₂ μ)
     (h1 : Tendsto (fun n => eLpNorm (f n - g₁) p μ) atTop (nhds 0))
     (h2 : Tendsto (fun n => eLpNorm (f n - g₂) p μ) atTop (nhds 0)) :
     g₁ =ᵐ[μ] g₂ := by
@@ -104,7 +100,7 @@ theorem ae_eq_of_tendsto_eLpNorm_sub
           = eLpNorm ((g₁ - f n) + (f n - g₂)) p μ := by
             congr 1; ext x; simp [sub_add_sub_cancel]
         _ ≤ eLpNorm (g₁ - f n) p μ + eLpNorm (f n - g₂) p μ :=
-            eLpNorm_add_le (hg₁.sub (hf_aesm n)) ((hf_aesm n).sub hg₂) hp
+            eLpNorm_add_le hp
         _ = eLpNorm (f n - g₁) p μ + eLpNorm (f n - g₂) p μ := by
             congr 1
             rw [show g₁ - f n = -(f n - g₁) from by
@@ -115,7 +111,7 @@ theorem ae_eq_of_tendsto_eLpNorm_sub
     have hsum_tendsto : Tendsto (fun n => eLpNorm (f n - g₁) p μ + eLpNorm (f n - g₂) p μ)
         atTop (nhds 0) := by simpa [add_zero] using h1.add h2
     exact ge_of_tendsto hsum_tendsto (Filter.Eventually.of_forall hbound)) bot_le
-  have hae_zero := (eLpNorm_eq_zero_iff (hg₁.sub hg₂)
+  have hae_zero := (eLpNorm_eq_zero_iff
     (ne_of_gt (lt_of_lt_of_le (by simp : (0 : ℝ≥0∞) < 1) hp))).mp hzero
   -- g₁ - g₂ =ᵐ 0 → g₁ =ᵐ g₂
   exact hae_zero.mono fun x hx => by simpa [sub_eq_zero] using hx
@@ -191,9 +187,7 @@ theorem scalar_cauchy_to_limit
       = eLpNorm ((f n - f (M K)) + (f_sub K - g_lim)) p μ := by
         congr 1; ext x; simp [f_sub, sub_add_sub_cancel]
     _ ≤ eLpNorm (f n - f (M K)) p μ + eLpNorm (f_sub K - g_lim) p μ :=
-        eLpNorm_add_le ((hf_memLp n).sub (hf_memLp (M K))).aestronglyMeasurable
-          ((hf_sub_memLp K).sub hg_lim_memLp).aestronglyMeasurable
-          hp1
+        eLpNorm_add_le hp1
     _ ≤ ε / 2 + ε / 2 := by
         gcongr
         · calc eLpNorm (f n - f (M K)) p μ
@@ -227,7 +221,9 @@ theorem eLpNorm_pi_le_sum_component
     eLpNorm F p μ ≤ ∑ i : Fin d, eLpNorm (fun x => F x i) p μ := by
   calc eLpNorm F p μ
       ≤ eLpNorm (fun x => ∑ i : Fin d, ‖F x i‖) p μ :=
-        eLpNorm_mono_real fun x => pi_norm_le_sum_norms (F x)
+        eLpNorm_mono_real
+          ((aemeasurable_pi_iff.mpr fun i => (hF_comp_aesm i).aemeasurable).aestronglyMeasurable)
+          fun x => pi_norm_le_sum_norms (F x)
     _ ≤ ∑ i : Fin d, eLpNorm (fun x => ‖F x i‖) p μ := by
         let g : Fin d → α → ℝ := fun i x => ‖F x i‖
         have hg_aesm : ∀ i : Fin d, AEStronglyMeasurable (g i) μ :=
@@ -244,11 +240,10 @@ theorem eLpNorm_pi_le_sum_component
           rw [Finset.sum_cons, Finset.sum_cons]
           calc eLpNorm (g a + ∑ i ∈ s, g i) p μ
               ≤ eLpNorm (g a) p μ + eLpNorm (∑ i ∈ s, g i) p μ :=
-                eLpNorm_add_le (hg_aesm a)
-                  (Finset.aestronglyMeasurable_sum s fun i _ => hg_aesm i) hp1
+                eLpNorm_add_le hp1
             _ ≤ eLpNorm (g a) p μ + ∑ i ∈ s, eLpNorm (g i) p μ := by gcongr
     _ = ∑ i : Fin d, eLpNorm (fun x => F x i) p μ := by
-        congr 1; ext i; exact eLpNorm_norm _
+        congr 1; ext i; exact eLpNorm_norm _ (hF_comp_aesm i)
 
 /-- Each component of a Pi-valued AEStronglyMeasurable function is AEStronglyMeasurable.
 For `Fin d → ℝ` (NOT `EuclideanSpace`), `continuous_apply` works directly. -/
@@ -268,15 +263,17 @@ theorem aestronglyMeasurable_pi_of_components
 For `Fin d → ℝ` with the sup norm, `‖f i‖ ≤ ‖f‖` is `norm_le_pi_norm`. -/
 theorem eLpNorm_pi_component_le
     {p : ℝ≥0∞} {F : α → (Fin d → ℝ)} (i : Fin d) :
-    eLpNorm (fun x => F x i) p μ ≤ eLpNorm F p μ :=
-  eLpNorm_mono fun x => norm_le_pi_norm (f := F x) i
+    eLpNorm (fun x => F x i) p μ ≤ eLpNorm F p μ := by
+  by_cases hF : AEStronglyMeasurable F μ
+  · exact eLpNorm_mono (aestronglyMeasurable_pi_component hF i)
+      fun x => norm_le_pi_norm (f := F x) i
+  · simp [eLpNorm_of_not_aestronglyMeasurable hF]
 
 /-- For `F : α → (Fin d → ℝ)` in Lp, each component is in Lp. -/
 theorem memLp_pi_component
     {p : ℝ≥0∞} {F : α → (Fin d → ℝ)} (hF : MemLp F p μ) (i : Fin d) :
     MemLp (fun x => F x i) p μ :=
-  ⟨aestronglyMeasurable_pi_component hF.aestronglyMeasurable i,
-   lt_of_le_of_lt (eLpNorm_pi_component_le i) hF.eLpNorm_lt_top⟩
+  memLp_iff.mpr (lt_of_le_of_lt (eLpNorm_pi_component_le i) hF.eLpNorm_lt_top)
 
 /-- Vector eLpNorm convergence → component eLpNorm convergence.
 Uses `eLpNorm_pi_component_le` via an explicit function equality to avoid
@@ -403,8 +400,7 @@ theorem exists_pi_limit_of_cauchy_eLpNorm
           congr 1; ext x; simp [sub_add_sub_cancel]
       _ ≤ eLpNorm (fun x => G n x i - G (M K) x i) p μ +
             eLpNorm (fun x => G (M K) x i - g_lim x) p μ :=
-          eLpNorm_add_le ((hcomp_memLp n i).sub (hcomp_memLp (M K) i)).aestronglyMeasurable
-            ((hcomp_memLp (M K) i).sub hg_lim_memLp).aestronglyMeasurable hp1
+          eLpNorm_add_le hp1
       _ ≤ ε / 2 + ε / 2 := by
           gcongr
           · -- First term: ≤ (2⁻¹)^(K+1) ≤ ε/2
@@ -432,10 +428,8 @@ theorem exists_pi_limit_of_cauchy_eLpNorm
       rw [h0]; exact tendsto_finsetSum Finset.univ (fun i _ => hg_i_tendsto i)
     exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hsum
       (fun _ => bot_le) hle
-  have hGext_aesm : AEStronglyMeasurable Gext μ :=
-    aestronglyMeasurable_pi_of_components fun i => (hg_i_memLp i).aestronglyMeasurable
   have hGext_memLp : MemLp Gext p μ :=
-    memLp_of_tendsto_eLpNorm hp1 hG_memLp hGext_aesm hG_tendsto
+    memLp_of_tendsto_eLpNorm hp1 hG_memLp hG_tendsto
   exact ⟨Gext, hGext_memLp,
     fun i => memLp_pi_component hGext_memLp i,
     hG_tendsto,

@@ -50,7 +50,7 @@ private theorem topCoeff_nonzero_of_value_nonzero
     chartTopCoefficient x η ((extChartAt 𝓘(ℝ, Fin d → ℝ) x) x) ≠ 0 := by
   classical
   unfold chartTopCoefficient
-  rw [if_pos (mem_extChartAt_target x)]
+  rw [ite_eq_left (mem_extChartAt_target x)]
   rw [continuousAlternatingMap_trivializationAt_apply]
   rw [show (extChartAt 𝓘(ℝ, Fin d → ℝ) x).symm
       ((extChartAt 𝓘(ℝ, Fin d → ℝ) x) x) = x by
@@ -107,7 +107,7 @@ private theorem chartTopCoefficient_continuousOn_ext
   refine hcont.congr ?_
   intro y hy
   unfold chartTopCoefficient
-  rw [if_pos hy]
+  rw [ite_eq_left hy]
 
 private theorem chartTopCoefficient_continuousOn_chart
     (η : DifferentialForm 𝓘(ℝ, Fin d → ℝ) M d) (x : M) :
